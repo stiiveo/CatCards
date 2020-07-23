@@ -37,7 +37,9 @@ struct DogDataManager {
         let jsonDecoder = JSONDecoder()
         do {
             let decodedData = try jsonDecoder.decode(DogData.self, from: data)
+            // extract url data from received JSON data
             let url = decodedData.message
+            // send url to the delegate of protocol DogDataManagerDelegate
             self.delegate?.dataDidFetched(url: url)
         } catch {
             debugPrint(error.localizedDescription)

@@ -18,8 +18,10 @@ class DogViewController: UIViewController, DogDataManagerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        // this View Controller is the delegate of the protocol DogDataManagerDelegate inside DogDataManager
         dogDataManager.delegate = self
+        
+        // user will see the first random pic without having to press refresh button
         startFetchImage()
     }
 
@@ -28,23 +30,29 @@ class DogViewController: UIViewController, DogDataManagerDelegate {
     }
     
     func startFetchImage() {
-        activityIndicator.startAnimating()
         dogDataManager.performRequest()
+        activityIndicator.startAnimating()
+        
+        // desable refresh button while image is being downloaded
         refreshBtn.isEnabled = false
         refreshBtn.tintColor = UIColor.systemGray
     }
     
     func stopFetchImage() {
         activityIndicator.stopAnimating()
+        
+        // re-enable refresh button
         refreshBtn.isEnabled = true
         refreshBtn.tintColor = UIColor.systemBlue
     }
     
+    // this method will be executed once JSON data in DataManager is parsed successfully
     func dataDidFetched(url: String) {
         if let dataUrl = URL(string: url) {
             do {
                 let imageData = try Data(contentsOf: dataUrl)
                 DispatchQueue.main.async {
+                    // present downloaded picture on the imageView
                     self.imageView.image = UIImage(data: imageData)
                     self.stopFetchImage()
                 }
