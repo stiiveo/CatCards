@@ -8,9 +8,14 @@
 
 import Foundation
 
+protocol CatDataManagerDelegate {
+    func dataDidFetch(url: String)
+}
+
 struct CatDataManager {
     
     let catUrl = "https://api.thecatapi.com/v1/images/search"
+    var delegate: CatDataManagerDelegate?
     
     func performRequest() {
         let session = URLSession(configuration: .default)
@@ -22,7 +27,6 @@ struct CatDataManager {
                 if let safeData = data {
                     let processedData = self.bracketsRemover(data: safeData)
                     self.parseJSON(data: processedData)
-                    
                 }
             }
         }
@@ -57,7 +61,7 @@ struct CatDataManager {
         let jsonDecoder = JSONDecoder()
         do {
             let decodedData = try jsonDecoder.decode(CatData.self, from: data)
-            print(decodedData.url)
+            delegate?.dataDidFetch(url: decodedData.url)
             
 //            print(decodedData)
 //            let catUrl = decodedData.data[0].url

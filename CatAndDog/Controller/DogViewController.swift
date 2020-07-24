@@ -47,7 +47,7 @@ class DogViewController: UIViewController, DogDataManagerDelegate {
     }
     
     // this method will be executed once JSON data in DataManager is parsed successfully
-    func dataDidFetched(url: String) {
+    func dataDidFetch(url: String) {
         if let dataUrl = URL(string: url) {
             do {
                 let imageData = try Data(contentsOf: dataUrl)

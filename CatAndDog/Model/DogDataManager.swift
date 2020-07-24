@@ -9,7 +9,7 @@
 import Foundation
 
 protocol DogDataManagerDelegate {
-    func dataDidFetched(url: String)
+    func dataDidFetch(url: String)
 }
 
 struct DogDataManager {
@@ -40,7 +40,7 @@ struct DogDataManager {
             // extract url data from received JSON data
             let url = decodedData.message
             // send url to the delegate of protocol DogDataManagerDelegate
-            self.delegate?.dataDidFetched(url: url)
+            self.delegate?.dataDidFetch(url: url)
         } catch {
             debugPrint(error.localizedDescription)
         }
