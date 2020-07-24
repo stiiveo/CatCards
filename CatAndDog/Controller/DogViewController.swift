@@ -11,7 +11,7 @@ import UIKit
 class DogViewController: UIViewController, DogDataManagerDelegate {
     
     @IBOutlet weak var imageView: UIImageView!
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var indicator: UIActivityIndicatorView!
     @IBOutlet weak var refreshBtn: UIButton!
     
     var dogDataManager = DogDataManager()
@@ -31,7 +31,7 @@ class DogViewController: UIViewController, DogDataManagerDelegate {
     
     func startFetchImage() {
         dogDataManager.performRequest()
-        activityIndicator.startAnimating()
+        indicator.startAnimating()
         
         // desable refresh button while image is being downloaded
         refreshBtn.isEnabled = false
@@ -39,7 +39,7 @@ class DogViewController: UIViewController, DogDataManagerDelegate {
     }
     
     func stopFetchImage() {
-        activityIndicator.stopAnimating()
+        indicator.stopAnimating()
         
         // re-enable refresh button
         refreshBtn.isEnabled = true

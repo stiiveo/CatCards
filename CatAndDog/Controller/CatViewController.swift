@@ -9,6 +9,10 @@
 import UIKit
 
 class CatViewController: UIViewController {
+    
+    @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var indicator: UIActivityIndicatorView!
+    @IBOutlet weak var refreshButton: UIButton!
 
     let catDataManager = CatDataManager()
     
