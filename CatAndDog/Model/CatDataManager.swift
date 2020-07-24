@@ -20,16 +20,37 @@ struct CatDataManager {
                 return
             } else {
                 if let safeData = data {
+                    let processedData = self.bracketsRemover(data: safeData)
+                    self.parseJSON(data: processedData)
                     
-                    // test
-                    if let dataToString = String(data: safeData, encoding: .utf8) {
-                        print(dataToString)
-                    }
-                    self.parseJSON(data: safeData)
                 }
             }
         }
         task.resume()
+    }
+    
+    private func bracketsRemover(data: Data) -> Data {
+        
+        // convert Data to String
+        let dataToString = String(data: data, encoding: .utf8)!
+        
+        // convert String to Array
+        var stringToArray = Array(dataToString)
+        
+        // remove the first and last element ('[' & ']') of the array
+        stringToArray.removeFirst()
+        stringToArray.removeLast()
+        
+        // convert Array to String
+        var arrayToString: String = ""
+        for character in stringToArray {
+            arrayToString.append(character)
+        }
+        
+        // convert String to Data
+        let stringToData = arrayToString.data(using: .utf8)!
+        
+        return stringToData
     }
     
     func parseJSON(data: Data) {
@@ -37,8 +58,12 @@ struct CatDataManager {
         do {
             let decodedData = try jsonDecoder.decode(CatData.self, from: data)
             print(decodedData.url)
-        } catch {
             
+//            print(decodedData)
+//            let catUrl = decodedData.data[0].url
+//            print(catUrl)
+        } catch {
+            debugPrint(error.localizedDescription)
         }
     }
     
