@@ -1,5 +1,5 @@
 //
-//  SecondViewController.swift
+//  DogViewController.swift
 //  CatAndDog
 //
 //  Created by Jason Ou Yang on 2020/7/21.
