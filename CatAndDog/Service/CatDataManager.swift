@@ -19,7 +19,8 @@ struct CatDataManager {
     
     func performRequest() {
         let session = URLSession(configuration: .default)
-        let task = session.dataTask(with: URL(string: catUrl)!) { (data, response, error) in
+        guard let url = URL(string: catUrl) else { return }
+        let task = session.dataTask(with: url) { (data, response, error) in
             if error != nil {
                 print(error.debugDescription)
                 return

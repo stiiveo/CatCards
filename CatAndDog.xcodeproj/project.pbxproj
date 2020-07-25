@@ -71,6 +71,7 @@
 				F674700624C9631F006A2905 /* Model */,
 				F674700724C96330006A2905 /* View */,
 				F674700824C9633E006A2905 /* Controller */,
+				F67E4DEA24CC7725006DDE96 /* Service */,
 				F6746FEF24C6DCF5006A2905 /* Assets.xcassets */,
 				F6746FF124C6DCF5006A2905 /* LaunchScreen.storyboard */,
 				F6746FF424C6DCF5006A2905 /* Info.plist */,
@@ -83,8 +84,6 @@
 			children = (
 				F674700024C6E8F3006A2905 /* CatData.swift */,
 				F674700224C96145006A2905 /* DogData.swift */,
-				F6746FFC24C6E02C006A2905 /* CatDataManager.swift */,
-				F674700B24C9673D006A2905 /* DogDataManager.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -104,6 +103,15 @@
 				F674700924C96599006A2905 /* DogViewController.swift */,
 			);
 			path = Controller;
+			sourceTree = "<group>";
+		};
+		F67E4DEA24CC7725006DDE96 /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				F6746FFC24C6E02C006A2905 /* CatDataManager.swift */,
+				F674700B24C9673D006A2905 /* DogDataManager.swift */,
+			);
+			path = Service;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

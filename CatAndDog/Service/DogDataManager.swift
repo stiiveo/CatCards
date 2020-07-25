@@ -18,9 +18,9 @@ struct DogDataManager {
     var delegate: DogDataManagerDelegate?
     
     func performRequest() {
-        let url = URL(string: dogUrl)
+        guard let url = URL(string: dogUrl) else { return }
         let session = URLSession(configuration: .default)
-        let task = session.dataTask(with: url!) { (data, response, error) in
+        let task = session.dataTask(with: url) { (data, response, error) in
             if error != nil {
                 debugPrint(error.debugDescription)
                 return
