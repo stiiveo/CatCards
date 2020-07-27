@@ -63,5 +63,9 @@ class DogViewController: UIViewController, DogDataManagerDelegate {
         }
     }
     
+    @IBAction func PanView(_ sender: UIPanGestureRecognizer) {
+        print("test")
+    }
+    
 }
 

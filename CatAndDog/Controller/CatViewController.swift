@@ -32,7 +32,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             refreshButton.isEnabled = false
             refreshButton.tintColor = UIColor.systemGray
             indicator.startAnimating()
-            catDataManager.performRequest(numberOfRequest: 5)
+            catDataManager.performRequest(numberOfRequest: 1)
         } else {
             catDataManager.performRequest(numberOfRequest: 1)
             
@@ -69,5 +69,17 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         }
     }
     
+    @IBAction func cardPanGesture(_ sender: UIPanGestureRecognizer) {
+        guard let card = sender.view else { return }
+        let point = sender.translation(in: view)
+        card.center = CGPoint(x: view.center.x + point.x, y: view.center.y + point.y)
+        
+        if sender.state == .ended {
+            UIView.animate(withDuration: 0.2) {
+                card.center = self.view.center
+            }
+            
+        }
+    }
 }
 

@@ -6,7 +6,6 @@
 //  Copyright © 2020 Jason Ou Yang. All rights reserved.
 //
 
-import Foundation
 import UIKit
 
 class CatImages {
