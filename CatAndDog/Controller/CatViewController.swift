@@ -25,19 +25,6 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // download 5 new images into imageArray
         startFetchImage(initialRequest: true)
     }
-
-    @IBAction func refreshBtnPressed(_ sender: UIButton) {
-        startFetchImage(initialRequest: false)
-        
-        // make sure there's new image in imageArray ready to be loaded
-        if catDataManager.catImages.imageArray.count > 1 {
-            arrayIndex += 1
-            imageView.image = catDataManager.catImages.imageArray[arrayIndex]
-            catDataManager.catImages.imageArray.removeFirst()
-            arrayIndex = 0
-        }
-        
-    }
     
     private func startFetchImage(initialRequest: Bool) {
         // first time loading image data
@@ -53,10 +40,24 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
     }
 
-    // update image and UI components
+    @IBAction func refreshBtnPressed(_ sender: UIButton) {
+        startFetchImage(initialRequest: false)
+        
+        // make sure there's new image in imageArray ready to be loaded
+        if catDataManager.catImages.imageArray.count > 1 {
+            arrayIndex += 1
+            imageView.image = catDataManager.catImages.imageArray[arrayIndex]
+            catDataManager.catImages.imageArray.removeFirst()
+            arrayIndex = 0
+        }
+        
+    }
+
     func dataDidFetch() {
+        // update image and UI components
         let imageArray = catDataManager.catImages.imageArray
         DispatchQueue.main.async {
+            
             // update image
             guard let firstDownloadedImage = imageArray.first else { print("Fail to get image"); return }
             self.imageView.image = firstDownloadedImage
