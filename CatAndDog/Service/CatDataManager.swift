@@ -19,21 +19,24 @@ struct CatDataManager {
     var delegate: CatDataManagerDelegate?
     let catImages = CatImages()
     
-    func performRequest() {
-        let session = URLSession(configuration: .default)
-        guard let url = URL(string: catUrl) else { print("Failed to convert catUrl to URL object"); return }
-        let task = session.dataTask(with: url) { (data, response, error) in
-            if error != nil {
-                print(error.debugDescription)
-                return
-            } else {
-                if let safeData = data {
-                    let processedData = self.removeBrecketsInJSON(data: safeData)
-                    self.parseJSON(data: processedData)
+    func performRequest(numberOfRequest: Int) {
+        for _ in 0..<numberOfRequest {
+            let session = URLSession(configuration: .default)
+            guard let url = URL(string: catUrl) else { print("Failed to convert catUrl to URL object"); return }
+            let task = session.dataTask(with: url) { (data, response, error) in
+                if error != nil {
+                    print(error.debugDescription)
+                    return
+                } else {
+                    if let safeData = data {
+                        let processedData = self.removeBrecketsInJSON(data: safeData)
+                        self.parseJSON(data: processedData)
+                    }
                 }
             }
+            task.resume()
         }
-        task.resume()
+        
     }
     
     private func removeBrecketsInJSON(data: Data) -> Data {
@@ -65,18 +68,13 @@ struct CatDataManager {
         do {
             let decodedData = try jsonDecoder.decode(CatData.self, from: data)
             downloadImage(url: decodedData.url)
-//            delegate?.dataDidFetch(url: decodedData.url)
-            
-//            print(decodedData)
-//            let catUrl = decodedData.data[0].url
-//            print(catUrl)
         } catch {
             debugPrint(error.localizedDescription)
         }
     }
     
     private func downloadImage(url: String) {
-        guard let url = URL(string: url) else { print("Failed to convert parseJSON's url to URL obj.") ;return }
+        guard let url = URL(string: url) else { print("Failed to convert parseJSON's url to URL obj."); return }
         do {
             let imageData = try Data(contentsOf: url)
             guard let image = UIImage(data: imageData) else { print("Failed to convert imageData into UIImage obj."); return }

@@ -15,23 +15,42 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     @IBOutlet weak var refreshButton: UIButton!
 
     var catDataManager = CatDataManager()
+    var arrayIndex = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         catDataManager.delegate = self
-        startFetchImage()
+        
+        // download 5 new images into imageArray
+        startFetchImage(initialRequest: true)
     }
 
     @IBAction func refreshBtnPressed(_ sender: UIButton) {
-        startFetchImage()
+        startFetchImage(initialRequest: false)
+        
+        // make sure there's new image in imageArray ready to be loaded
+        if catDataManager.catImages.imageArray.count > 1 {
+            arrayIndex += 1
+            imageView.image = catDataManager.catImages.imageArray[arrayIndex]
+            catDataManager.catImages.imageArray.removeFirst()
+            arrayIndex = 0
+        }
+        
     }
     
-    private func startFetchImage() {
-        refreshButton.isEnabled = false
-        refreshButton.tintColor = UIColor.systemGray
-        indicator.startAnimating()
-        catDataManager.performRequest()
+    private func startFetchImage(initialRequest: Bool) {
+        // first time loading image data
+        if initialRequest {
+            refreshButton.isEnabled = false
+            refreshButton.tintColor = UIColor.systemGray
+            indicator.startAnimating()
+            catDataManager.performRequest(numberOfRequest: 5)
+        } else {
+            catDataManager.performRequest(numberOfRequest: 1)
+            
+        }
+        
     }
 
     // update image and UI components
