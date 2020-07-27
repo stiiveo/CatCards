@@ -76,10 +76,10 @@ struct CatDataManager {
     }
     
     private func downloadImage(url: String) {
-        guard let url = URL(string: url) else { return }
+        guard let url = URL(string: url) else { print("Failed to convert parseJSON's url to URL obj.") ;return }
         do {
             let imageData = try Data(contentsOf: url)
-            guard let image = UIImage(data: imageData) else { return }
+            guard let image = UIImage(data: imageData) else { print("Failed to convert imageData into UIImage obj."); return }
             catImages.imageArray.append(image)
             
             if !catImages.imageArray.isEmpty {

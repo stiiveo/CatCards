@@ -33,12 +33,16 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         indicator.startAnimating()
         catDataManager.performRequest()
     }
-    
+
+    // update image and UI components
     func dataDidFetch() {
-        
+        let imageArray = catDataManager.catImages.imageArray
         DispatchQueue.main.async {
-            guard let firstDownloadedImage = self.catDataManager.catImages.imageArray.first else { print("Fail to get image"); return }
+            // update image
+            guard let firstDownloadedImage = imageArray.first else { print("Fail to get image"); return }
             self.imageView.image = firstDownloadedImage
+            
+            // update UI components
             self.indicator.stopAnimating()
             self.refreshButton.isEnabled = true
             self.refreshButton.tintColor = UIColor.systemBlue

@@ -33,7 +33,7 @@ class DogViewController: UIViewController, DogDataManagerDelegate {
         dogDataManager.performDogRequest()
         indicator.startAnimating()
         
-        // desable refresh button while image is being downloaded
+        // disable refresh button while image is being downloaded
         refreshBtn.isEnabled = false
         refreshBtn.tintColor = UIColor.systemGray
     }
