@@ -17,7 +17,7 @@ struct DogDataManager {
     let dogUrl = "https://dog.ceo/api/breeds/image/random"
     var delegate: DogDataManagerDelegate?
     
-    func performRequest() {
+    func performDogRequest() {
         guard let url = URL(string: dogUrl) else { return }
         let session = URLSession(configuration: .default)
         let task = session.dataTask(with: url) { (data, response, error) in

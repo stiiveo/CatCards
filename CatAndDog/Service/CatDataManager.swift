@@ -7,26 +7,28 @@
 //
 
 import Foundation
+import UIKit
 
 protocol CatDataManagerDelegate {
-    func dataDidFetch(url: String)
+    func dataDidFetch()
 }
 
 struct CatDataManager {
     
     let catUrl = "https://api.thecatapi.com/v1/images/search"
     var delegate: CatDataManagerDelegate?
+    let catImages = CatImages()
     
     func performRequest() {
         let session = URLSession(configuration: .default)
-        guard let url = URL(string: catUrl) else { return }
+        guard let url = URL(string: catUrl) else { print("Failed to convert catUrl to URL object"); return }
         let task = session.dataTask(with: url) { (data, response, error) in
             if error != nil {
                 print(error.debugDescription)
                 return
             } else {
                 if let safeData = data {
-                    let processedData = self.bracketsRemover(data: safeData)
+                    let processedData = self.removeBrecketsInJSON(data: safeData)
                     self.parseJSON(data: processedData)
                 }
             }
@@ -34,7 +36,7 @@ struct CatDataManager {
         task.resume()
     }
     
-    private func bracketsRemover(data: Data) -> Data {
+    private func removeBrecketsInJSON(data: Data) -> Data {
         
         // convert Data to String
         let dataToString = String(data: data, encoding: .utf8)!
@@ -62,7 +64,8 @@ struct CatDataManager {
         let jsonDecoder = JSONDecoder()
         do {
             let decodedData = try jsonDecoder.decode(CatData.self, from: data)
-            delegate?.dataDidFetch(url: decodedData.url)
+            downloadImage(url: decodedData.url)
+//            delegate?.dataDidFetch(url: decodedData.url)
             
 //            print(decodedData)
 //            let catUrl = decodedData.data[0].url
@@ -72,4 +75,19 @@ struct CatDataManager {
         }
     }
     
+    private func downloadImage(url: String) {
+        guard let url = URL(string: url) else { return }
+        do {
+            let imageData = try Data(contentsOf: url)
+            guard let image = UIImage(data: imageData) else { return }
+            catImages.imageArray.append(image)
+            
+            if !catImages.imageArray.isEmpty {
+                delegate?.dataDidFetch()
+            }
+            
+        } catch {
+            debugPrint(error.localizedDescription)
+        }
+    }
 }

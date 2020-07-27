@@ -34,22 +34,15 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         catDataManager.performRequest()
     }
     
-    func dataDidFetch(url: String) {
-        do {
-            let imageData = try Data(contentsOf: URL(string: url)!)
-            if let image = UIImage(data: imageData) {
-                DispatchQueue.main.async {
-                    self.imageView.image = image
-                    self.indicator.stopAnimating()
-                    self.refreshButton.isEnabled = true
-                    self.refreshButton.tintColor = UIColor.systemBlue
-                }
-                
-            }
-        } catch {
-            debugPrint(error.localizedDescription)
-        }
+    func dataDidFetch() {
         
+        DispatchQueue.main.async {
+            guard let firstDownloadedImage = self.catDataManager.catImages.imageArray.first else { print("Fail to get image"); return }
+            self.imageView.image = firstDownloadedImage
+            self.indicator.stopAnimating()
+            self.refreshButton.isEnabled = true
+            self.refreshButton.tintColor = UIColor.systemBlue
+        }
     }
     
 }

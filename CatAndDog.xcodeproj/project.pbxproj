@@ -18,6 +18,7 @@
 		F674700324C96145006A2905 /* DogData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F674700224C96145006A2905 /* DogData.swift */; };
 		F674700A24C96599006A2905 /* DogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F674700924C96599006A2905 /* DogViewController.swift */; };
 		F674700C24C9673D006A2905 /* DogDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F674700B24C9673D006A2905 /* DogDataManager.swift */; };
+		F67E4DEE24CE80A7006DDE96 /* CatImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67E4DED24CE80A7006DDE96 /* CatImages.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 		F674700224C96145006A2905 /* DogData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DogData.swift; sourceTree = "<group>"; };
 		F674700924C96599006A2905 /* DogViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DogViewController.swift; sourceTree = "<group>"; };
 		F674700B24C9673D006A2905 /* DogDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DogDataManager.swift; sourceTree = "<group>"; };
+		F67E4DED24CE80A7006DDE96 /* CatImages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatImages.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,9 +71,9 @@
 				F6746FE424C6DCF2006A2905 /* AppDelegate.swift */,
 				F6746FE624C6DCF2006A2905 /* SceneDelegate.swift */,
 				F674700624C9631F006A2905 /* Model */,
+				F67E4DEA24CC7725006DDE96 /* Service */,
 				F674700724C96330006A2905 /* View */,
 				F674700824C9633E006A2905 /* Controller */,
-				F67E4DEA24CC7725006DDE96 /* Service */,
 				F6746FEF24C6DCF5006A2905 /* Assets.xcassets */,
 				F6746FF124C6DCF5006A2905 /* LaunchScreen.storyboard */,
 				F6746FF424C6DCF5006A2905 /* Info.plist */,
@@ -84,6 +86,7 @@
 			children = (
 				F674700024C6E8F3006A2905 /* CatData.swift */,
 				F674700224C96145006A2905 /* DogData.swift */,
+				F67E4DED24CE80A7006DDE96 /* CatImages.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -193,6 +196,7 @@
 				F6746FE724C6DCF2006A2905 /* SceneDelegate.swift in Sources */,
 				F674700C24C9673D006A2905 /* DogDataManager.swift in Sources */,
 				F6746FFF24C6E245006A2905 /* CatViewController.swift in Sources */,
+				F67E4DEE24CE80A7006DDE96 /* CatImages.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -30,7 +30,7 @@ class DogViewController: UIViewController, DogDataManagerDelegate {
     }
     
     func startFetchImage() {
-        dogDataManager.performRequest()
+        dogDataManager.performDogRequest()
         indicator.startAnimating()
         
         // desable refresh button while image is being downloaded
