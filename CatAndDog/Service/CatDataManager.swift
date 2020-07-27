@@ -18,8 +18,10 @@ struct CatDataManager {
     var delegate: CatDataManagerDelegate?
     let catImages = CatImages()
     
-    func performRequest(numberOfRequest: Int) {
-        for _ in 0..<numberOfRequest {
+    func performRequest(imageDownloadNumber: Int) {
+        
+        for _ in 0..<imageDownloadNumber {
+            
             let session = URLSession(configuration: .default)
             guard let url = URL(string: catUrl) else { print("Failed to convert catUrl to URL object"); return }
             let task = session.dataTask(with: url) { (data, response, error) in

@@ -32,9 +32,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             refreshButton.isEnabled = false
             refreshButton.tintColor = UIColor.systemGray
             indicator.startAnimating()
-            catDataManager.performRequest(numberOfRequest: 1)
+            catDataManager.performRequest(imageDownloadNumber: 3)
         } else {
-            catDataManager.performRequest(numberOfRequest: 1)
+            catDataManager.performRequest(imageDownloadNumber: 1)
             
         }
         
@@ -74,10 +74,30 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         let point = sender.translation(in: view)
         card.center = CGPoint(x: view.center.x + point.x, y: view.center.y + point.y)
         
+        let xFromCenter = card.center.x - view.center.x
+        card.alpha = 1.5 - (abs(xFromCenter) / view.center.x)
+        
         if sender.state == .ended {
-            UIView.animate(withDuration: 0.2) {
-                card.center = self.view.center
+            if card.center.x < view.frame.width / 4 {
+                // card move to the left edge of the screen
+                UIView.animate(withDuration: 0.2) {
+                    card.center = CGPoint(x: card.center.x - 200, y: card.center.y + 50)
+                    card.alpha = 0
+                }
+            } else if card.center.x > view.frame.width * 3/4 {
+                // card move to the right edge of the screen
+                UIView.animate(withDuration: 0.2) {
+                    card.center = CGPoint(x: card.center.x + 200, y: card.center.y + 50)
+                    card.alpha = 0
+                }
+            } else {
+
+                UIView.animate(withDuration: 0.2) {
+                    card.center = self.view.center
+                    card.alpha = 1.0
+                }
             }
+            
             
         }
     }
