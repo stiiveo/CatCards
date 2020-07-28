@@ -71,30 +71,58 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     @IBAction func cardPanGesture(_ sender: UIPanGestureRecognizer) {
         guard let card = sender.view else { return }
+        
+        // point between the current pan and original location
         let point = sender.translation(in: view)
-        card.center = CGPoint(x: view.center.x + point.x, y: view.center.y + point.y)
-        
+        // distance between card's and view's x axis center point
         let xFromCenter = card.center.x - view.center.x
-        card.alpha = 1.5 - (abs(xFromCenter) / view.center.x)
+        let viewWidth = view.frame.width
+        // Angle 35º ≈ 0.61 radian
+        let cardRotationRadian = 0.61 * xFromCenter / (viewWidth / 2)
         
+        // card move to where the user's finger is
+        card.center = CGPoint(x: view.center.x + point.x, y: view.center.y + point.y)
+        // card's opacity increase when it approaches the side edge of the screen
+        card.alpha = 1.5 - (abs(xFromCenter) / view.center.x)
+        // card's rotation increase when it approaches the side edge of the screen
+        card.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
+        
+        // when user's finger left the screen
         if sender.state == .ended {
-            if card.center.x < view.frame.width / 4 {
-                // card move to the left edge of the screen
+            // if card is moved to the left edge of the screen
+            if card.center.x < viewWidth / 5 {
                 UIView.animate(withDuration: 0.2) {
-                    card.center = CGPoint(x: card.center.x - 200, y: card.center.y + 50)
-                    card.alpha = 0
+//                    card.center = CGPoint(x: card.center.x - 200, y: card.center.y)
+//                    card.alpha = 0
                 }
-            } else if card.center.x > view.frame.width * 3/4 {
-                // card move to the right edge of the screen
-                UIView.animate(withDuration: 0.2) {
-                    card.center = CGPoint(x: card.center.x + 200, y: card.center.y + 50)
-                    card.alpha = 0
-                }
-            } else {
-
+                
+                // test use
                 UIView.animate(withDuration: 0.2) {
                     card.center = self.view.center
                     card.alpha = 1.0
+                    card.transform = CGAffineTransform(rotationAngle: 0)
+                }
+                
+            // if card is moved to the right edge of the screen
+            } else if card.center.x > viewWidth * 4/5 {
+                UIView.animate(withDuration: 0.2) {
+//                    card.center = CGPoint(x: card.center.x + 200, y: card.center.y)
+//                    card.alpha = 0
+                }
+                
+                // test use
+                UIView.animate(withDuration: 0.2) {
+                    card.center = self.view.center
+                    card.alpha = 1.0
+                    card.transform = CGAffineTransform(rotationAngle: 0)
+                }
+                
+            } else {
+                // animate card back to origianl position, opacity and rotation state
+                UIView.animate(withDuration: 0.2) {
+                    card.center = self.view.center
+                    card.alpha = 1.0
+                    card.transform = CGAffineTransform(rotationAngle: 0)
                 }
             }
             
