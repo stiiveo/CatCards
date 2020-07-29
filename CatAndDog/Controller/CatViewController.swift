@@ -17,13 +17,43 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     var catDataManager = CatDataManager()
     var arrayIndex = 0
     
+    let myImageView = UIImageView()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         catDataManager.delegate = self
         
-        // download 5 new images into imageArray
+        // download designated number of new images into imageArray
         startFetchImage(initialRequest: true)
+        
+        // test adding new view programmatically
+        let myView = UIView()
+        self.view.addSubview(myView)
+        myView.addSubview(myImageView)
+        
+        let margins = view.layoutMarginsGuide
+        
+        // add constraints to myView
+        myView.translatesAutoresizingMaskIntoConstraints = false
+        
+        myView.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: 10).isActive = true
+        myView.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: -10).isActive = true
+        myView.centerYAnchor.constraint(equalTo: margins.centerYAnchor).isActive = true
+        myView.heightAnchor.constraint(equalTo: margins.heightAnchor, multiplier: 0.8).isActive = true
+        
+        myView.layer.cornerRadius = 20
+        myView.backgroundColor = UIColor.white
+        
+        // myImageView's constraints
+        myImageView.translatesAutoresizingMaskIntoConstraints = false
+        myImageView.topAnchor.constraint(equalTo: myView.topAnchor, constant: 10).isActive = true
+        myImageView.leadingAnchor.constraint(equalTo: myView.leadingAnchor, constant: 10).isActive = true
+        myImageView.trailingAnchor.constraint(equalTo: myView.trailingAnchor, constant: -10).isActive = true
+        myImageView.bottomAnchor.constraint(equalTo: myView.bottomAnchor, constant: -10).isActive = true
+        
+        // contentMode's value cannot be set to .scaleAspectFill, imageView's contraints will be ignored for unknown reason
+        myImageView.contentMode = .scaleAspectFit
     }
     
     private func startFetchImage(initialRequest: Bool) {
@@ -46,7 +76,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // make sure there's new image in imageArray ready to be loaded
         if catDataManager.catImages.imageArray.count > 1 {
             arrayIndex += 1
-            imageView.image = catDataManager.catImages.imageArray[arrayIndex]
+            myImageView.image = catDataManager.catImages.imageArray[arrayIndex]
             catDataManager.catImages.imageArray.removeFirst()
             arrayIndex = 0
         }
@@ -60,7 +90,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             
             // update image
             guard let firstDownloadedImage = imageArray.first else { print("Fail to get image"); return }
-            self.imageView.image = firstDownloadedImage
+            self.myImageView.image = firstDownloadedImage
             
             // update UI components
             self.indicator.stopAnimating()
@@ -122,7 +152,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 UIView.animate(withDuration: 0.2) {
                     card.center = self.view.center
                     card.alpha = 1.0
-                    card.transform = CGAffineTransform(rotationAngle: 0)
+                    card.transform = CGAffineTransform.identity
                 }
             }
             
