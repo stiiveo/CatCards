@@ -10,7 +10,6 @@ import UIKit
 
 class CatViewController: UIViewController, CatDataManagerDelegate {
     
-    @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var indicator: UIActivityIndicatorView!
     @IBOutlet weak var refreshButton: UIButton!
 
@@ -51,6 +50,10 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         firstCardView.addSubview(firstImageView)
         addCardViewConstraint()
         addImageViewConstraint()
+
+        // add UIPanGestureRecognizer to firstCardView
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.panGestureHandler))
+        firstCardView.addGestureRecognizer(panGesture)
     }
 
     // add constraints to someView
@@ -113,7 +116,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         }
     }
     
-    @IBAction func cardPanGesture(_ sender: UIPanGestureRecognizer) {
+    @objc func panGestureHandler(_ sender: UIPanGestureRecognizer) {
         guard let card = sender.view else { return }
         
         let viewWidth = view.frame.width
