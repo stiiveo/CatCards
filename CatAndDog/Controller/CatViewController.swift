@@ -17,7 +17,26 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     var catDataManager = CatDataManager()
     var arrayIndex = 0
     
-    let myImageView = UIImageView()
+    let firstCardView: UIView = {
+        let myView = UIView()
+        myView.translatesAutoresizingMaskIntoConstraints = false
+        myView.layer.cornerRadius = 20
+        myView.layer.borderWidth = 1
+        
+        return myView
+    }()
+    
+    let firstImageView: UIImageView = {
+        let myImageView = UIImageView()
+        myImageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        /** contentMode's value cannot be set to .scaleAspectFill
+            imageView's contraints will be ignored for unknown reason
+        */
+        myImageView.contentMode = .scaleAspectFit
+        return myImageView
+    }()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,33 +46,28 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // download designated number of new images into imageArray
         startFetchImage(initialRequest: true)
         
-        // test adding new view programmatically
-        let myView = UIView()
-        self.view.addSubview(myView)
-        myView.addSubview(myImageView)
-        
-        let margins = view.layoutMarginsGuide
-        
-        // add constraints to myView
-        myView.translatesAutoresizingMaskIntoConstraints = false
-        
-        myView.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: 10).isActive = true
-        myView.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: -10).isActive = true
-        myView.centerYAnchor.constraint(equalTo: margins.centerYAnchor).isActive = true
-        myView.heightAnchor.constraint(equalTo: margins.heightAnchor, multiplier: 0.8).isActive = true
-        
-        myView.layer.cornerRadius = 20
-        myView.backgroundColor = UIColor.white
-        
-        // myImageView's constraints
-        myImageView.translatesAutoresizingMaskIntoConstraints = false
-        myImageView.topAnchor.constraint(equalTo: myView.topAnchor, constant: 10).isActive = true
-        myImageView.leadingAnchor.constraint(equalTo: myView.leadingAnchor, constant: 10).isActive = true
-        myImageView.trailingAnchor.constraint(equalTo: myView.trailingAnchor, constant: -10).isActive = true
-        myImageView.bottomAnchor.constraint(equalTo: myView.bottomAnchor, constant: -10).isActive = true
-        
-        // contentMode's value cannot be set to .scaleAspectFill, imageView's contraints will be ignored for unknown reason
-        myImageView.contentMode = .scaleAspectFit
+        // add new card view and imageView
+        self.view.addSubview(firstCardView)
+        firstCardView.addSubview(firstImageView)
+        addCardViewConstraint()
+        addImageViewConstraint()
+    }
+
+    // add constraints to someView
+    func addCardViewConstraint() {
+        let margins = self.view.layoutMarginsGuide
+        firstCardView.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: 10).isActive = true
+        firstCardView.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: -10).isActive = true
+        firstCardView.centerYAnchor.constraint(equalTo: margins.centerYAnchor).isActive = true
+        firstCardView.heightAnchor.constraint(equalTo: margins.heightAnchor, multiplier: 0.8).isActive = true
+    }
+    
+    // add constraints to someImageView
+    func addImageViewConstraint() {
+        firstImageView.topAnchor.constraint(equalTo: firstCardView.topAnchor, constant: 10).isActive = true
+        firstImageView.leadingAnchor.constraint(equalTo: firstCardView.leadingAnchor, constant: 10).isActive = true
+        firstImageView.trailingAnchor.constraint(equalTo: firstCardView.trailingAnchor, constant: -10).isActive = true
+        firstImageView.bottomAnchor.constraint(equalTo: firstCardView.bottomAnchor, constant: -10).isActive = true
     }
     
     private func startFetchImage(initialRequest: Bool) {
@@ -76,7 +90,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // make sure there's new image in imageArray ready to be loaded
         if catDataManager.catImages.imageArray.count > 1 {
             arrayIndex += 1
-            myImageView.image = catDataManager.catImages.imageArray[arrayIndex]
+            firstImageView.image = catDataManager.catImages.imageArray[arrayIndex]
             catDataManager.catImages.imageArray.removeFirst()
             arrayIndex = 0
         }
@@ -90,7 +104,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             
             // update image
             guard let firstDownloadedImage = imageArray.first else { print("Fail to get image"); return }
-            self.myImageView.image = firstDownloadedImage
+            self.firstImageView.image = firstDownloadedImage
             
             // update UI components
             self.indicator.stopAnimating()
@@ -102,16 +116,20 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     @IBAction func cardPanGesture(_ sender: UIPanGestureRecognizer) {
         guard let card = sender.view else { return }
         
+        let viewWidth = view.frame.width
+        
         // point between the current pan and original location
-        let point = sender.translation(in: view)
+        let fingerMovement = sender.translation(in: view)
+        
         // distance between card's and view's x axis center point
         let xFromCenter = card.center.x - view.center.x
-        let viewWidth = view.frame.width
+        
         // Angle 35º ≈ 0.61 radian
-        let cardRotationRadian = 0.61 * xFromCenter / (viewWidth / 2)
+        let rotationAtMax: CGFloat = 0.61 // Angle 0.61 radian ≈ 35º
+        let cardRotationRadian = rotationAtMax * xFromCenter / (viewWidth / 2)
         
         // card move to where the user's finger is
-        card.center = CGPoint(x: view.center.x + point.x, y: view.center.y + point.y)
+        card.center = CGPoint(x: view.center.x + fingerMovement.x, y: view.center.y + fingerMovement.y)
         // card's opacity increase when it approaches the side edge of the screen
         card.alpha = 1.5 - (abs(xFromCenter) / view.center.x)
         // card's rotation increase when it approaches the side edge of the screen
