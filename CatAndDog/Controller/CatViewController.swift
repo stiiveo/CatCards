@@ -19,8 +19,8 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     let firstCardView: UIView = {
         let myView = UIView()
         myView.translatesAutoresizingMaskIntoConstraints = false
-        myView.layer.cornerRadius = 20
-        myView.layer.borderWidth = 1
+        myView.layer.cornerRadius = K.CardViewStyle.cornerRadius
+        myView.layer.borderWidth = K.CardViewStyle.borderWidth
         
         return myView
     }()
@@ -48,8 +48,8 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // add new card view and imageView
         self.view.addSubview(firstCardView)
         firstCardView.addSubview(firstImageView)
-        addCardViewConstraint()
-        addImageViewConstraint()
+        addCardViewConstraint(cardView: firstCardView)
+        addImageViewConstraint(imageView: firstImageView, contraintTo: firstCardView)
 
         // add UIPanGestureRecognizer to firstCardView
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.panGestureHandler))
@@ -57,20 +57,20 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     }
 
     // add constraints to cardView
-    func addCardViewConstraint() {
+    func addCardViewConstraint(cardView: UIView) {
         let margins = self.view.layoutMarginsGuide
-        firstCardView.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: 10).isActive = true
-        firstCardView.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: -10).isActive = true
-        firstCardView.centerYAnchor.constraint(equalTo: margins.centerYAnchor).isActive = true
-        firstCardView.heightAnchor.constraint(equalTo: margins.heightAnchor, multiplier: 0.8).isActive = true
+        cardView.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: K.CardViewConstraint.leading).isActive = true
+        cardView.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: K.CardViewConstraint.trailing).isActive = true
+        cardView.centerYAnchor.constraint(equalTo: margins.centerYAnchor).isActive = true
+        cardView.heightAnchor.constraint(equalTo: margins.heightAnchor, multiplier: K.CardViewConstraint.heightMultiplier).isActive = true
     }
     
     // add constraints to imageView
-    func addImageViewConstraint() {
-        firstImageView.topAnchor.constraint(equalTo: firstCardView.topAnchor, constant: 10).isActive = true
-        firstImageView.leadingAnchor.constraint(equalTo: firstCardView.leadingAnchor, constant: 10).isActive = true
-        firstImageView.trailingAnchor.constraint(equalTo: firstCardView.trailingAnchor, constant: -10).isActive = true
-        firstImageView.bottomAnchor.constraint(equalTo: firstCardView.bottomAnchor, constant: -10).isActive = true
+    func addImageViewConstraint(imageView: UIImageView, contraintTo cardView: UIView) {
+        imageView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: K.ImageViewConstraint.top).isActive = true
+        imageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: K.ImageViewConstraint.leading).isActive = true
+        imageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: K.ImageViewConstraint.trailing).isActive = true
+        imageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: K.ImageViewConstraint.bottom).isActive = true
     }
     
     private func startFetchImage(initialRequest: Bool) {
