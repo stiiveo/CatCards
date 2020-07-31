@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="49e-Tb-3d3">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="jpg-gr-ShF">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
@@ -7,11 +7,11 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Cat-->
-        <scene sceneID="hNz-n2-bh7">
+        <!--Cat View Controller-->
+        <scene sceneID="Fey-D6-ugN">
             <objects>
-                <viewController id="9pv-A4-QxB" customClass="CatViewController" customModule="CatAndDog" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="tsR-hK-woN">
+                <viewController id="jpg-gr-ShF" customClass="CatViewController" customModule="CatAndDog" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="cSQ-ii-ZYK">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -19,54 +19,35 @@
                                 <rect key="frame" x="188.5" y="429.5" width="37" height="37"/>
                             </activityIndicatorView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Vps-F0-GTJ">
-                                <rect key="frame" x="377" y="772.5" width="22" height="25.5"/>
+                                <rect key="frame" x="362" y="74" width="22" height="25.5"/>
                                 <state key="normal" image="arrow.clockwise" catalog="system">
                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
                                 </state>
                                 <connections>
-                                    <action selector="refreshBtnPressed:" destination="9pv-A4-QxB" eventType="touchUpInside" id="xrY-52-ROu"/>
+                                    <action selector="refreshBtnPressed:" destination="jpg-gr-ShF" eventType="touchUpInside" id="mlC-d0-Uhw"/>
                                 </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
-                            <constraint firstItem="PQr-Ze-W5v" firstAttribute="bottom" secondItem="Vps-F0-GTJ" secondAttribute="bottom" constant="15" id="GGU-fY-Yeo"/>
-                            <constraint firstItem="PQr-Ze-W5v" firstAttribute="trailing" secondItem="Vps-F0-GTJ" secondAttribute="trailing" constant="15" id="Tl7-rJ-xzy"/>
-                            <constraint firstItem="WUO-gy-wyq" firstAttribute="centerX" secondItem="tsR-hK-woN" secondAttribute="centerX" id="buy-kX-BOD"/>
-                            <constraint firstItem="WUO-gy-wyq" firstAttribute="centerY" secondItem="tsR-hK-woN" secondAttribute="centerY" id="cLP-BZ-Hrd"/>
+                            <constraint firstItem="WUO-gy-wyq" firstAttribute="centerX" secondItem="cSQ-ii-ZYK" secondAttribute="centerX" id="3ZU-RU-ANA"/>
+                            <constraint firstItem="E8D-Zx-PRV" firstAttribute="trailing" secondItem="Vps-F0-GTJ" secondAttribute="trailing" constant="30" id="PX5-xj-BL4"/>
+                            <constraint firstItem="WUO-gy-wyq" firstAttribute="centerY" secondItem="cSQ-ii-ZYK" secondAttribute="centerY" id="Yve-zt-o8f"/>
+                            <constraint firstItem="Vps-F0-GTJ" firstAttribute="top" secondItem="E8D-Zx-PRV" secondAttribute="top" constant="30" id="iRp-ZK-E9L"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="PQr-Ze-W5v"/>
+                        <viewLayoutGuide key="safeArea" id="E8D-Zx-PRV"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Cat" image="first" id="acW-dT-cKf"/>
                     <connections>
-                        <outlet property="indicator" destination="WUO-gy-wyq" id="VSO-gg-AQa"/>
-                        <outlet property="refreshButton" destination="Vps-F0-GTJ" id="ZRq-Xc-poN"/>
+                        <outlet property="indicator" destination="WUO-gy-wyq" id="VSc-iC-ETi"/>
+                        <outlet property="refreshButton" destination="Vps-F0-GTJ" id="8jx-xz-NLE"/>
                     </connections>
                 </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="W5J-7L-Pyd" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="wgG-Tt-dvs" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="749.27536231884062" y="-320.08928571428572"/>
-        </scene>
-        <!--Tab Bar Controller-->
-        <scene sceneID="yl2-sM-qoP">
-            <objects>
-                <tabBarController id="49e-Tb-3d3" sceneMemberID="viewController">
-                    <tabBar key="tabBar" contentMode="scaleToFill" id="W28-zg-YXA">
-                        <rect key="frame" x="0.0" y="975" width="768" height="49"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
-                    </tabBar>
-                    <connections>
-                        <segue destination="9pv-A4-QxB" kind="relationship" relationship="viewControllers" id="u7Y-xg-7CH"/>
-                    </connections>
-                </tabBarController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="HuB-VB-40B" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="0.0" y="0.0"/>
+            <point key="canvasLocation" x="1630" y="-456"/>
         </scene>
     </scenes>
     <resources>
         <image name="arrow.clockwise" catalog="system" width="115" height="128"/>
-        <image name="first" width="30" height="30"/>
     </resources>
 </document>
