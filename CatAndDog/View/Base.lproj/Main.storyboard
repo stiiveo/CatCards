@@ -18,36 +18,18 @@
                             <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="WUO-gy-wyq" userLabel="Activity Indicator">
                                 <rect key="frame" x="188.5" y="429.5" width="37" height="37"/>
                             </activityIndicatorView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Vps-F0-GTJ">
-                                <rect key="frame" x="362" y="74" width="22" height="25.5"/>
-                                <state key="normal" image="arrow.clockwise" catalog="system">
-                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
-                                </state>
-                                <connections>
-                                    <action selector="refreshBtnPressed:" destination="jpg-gr-ShF" eventType="touchUpInside" id="mlC-d0-Uhw"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="WUO-gy-wyq" firstAttribute="centerX" secondItem="cSQ-ii-ZYK" secondAttribute="centerX" id="3ZU-RU-ANA"/>
-                            <constraint firstItem="E8D-Zx-PRV" firstAttribute="trailing" secondItem="Vps-F0-GTJ" secondAttribute="trailing" constant="30" id="PX5-xj-BL4"/>
                             <constraint firstItem="WUO-gy-wyq" firstAttribute="centerY" secondItem="cSQ-ii-ZYK" secondAttribute="centerY" id="Yve-zt-o8f"/>
-                            <constraint firstItem="Vps-F0-GTJ" firstAttribute="top" secondItem="E8D-Zx-PRV" secondAttribute="top" constant="30" id="iRp-ZK-E9L"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="E8D-Zx-PRV"/>
                     </view>
-                    <connections>
-                        <outlet property="indicator" destination="WUO-gy-wyq" id="VSc-iC-ETi"/>
-                        <outlet property="refreshButton" destination="Vps-F0-GTJ" id="8jx-xz-NLE"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wgG-Tt-dvs" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1630" y="-456"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="arrow.clockwise" catalog="system" width="115" height="128"/>
-    </resources>
 </document>

@@ -11,7 +11,6 @@ import UIKit
 class CatViewController: UIViewController, CatDataManagerDelegate {
     
     @IBOutlet weak var indicator: UIActivityIndicatorView!
-    @IBOutlet weak var refreshButton: UIButton!
 
     var catDataManager = CatDataManager()
     var arrayIndex = 0
@@ -80,9 +79,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     private func startFetchImage(initialRequest: Bool) {
         // first time loading image data
         if initialRequest {
-            refreshButton.isEnabled = false
-            refreshButton.tintColor = UIColor.systemGray
-            indicator.startAnimating()
+//            indicator.startAnimating()
             catDataManager.performRequest(imageDownloadNumber: 3)
         } else {
             catDataManager.performRequest(imageDownloadNumber: 1)
@@ -91,7 +88,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
     }
 
-    @IBAction func refreshBtnPressed(_ sender: UIButton) {
+    private func updateCatImage() {
         startFetchImage(initialRequest: false)
         
         // make sure there's new image in imageArray ready to be loaded
@@ -114,9 +111,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             self.firstImageView.image = firstDownloadedImage
             
             // update UI components
-            self.indicator.stopAnimating()
-            self.refreshButton.isEnabled = true
-            self.refreshButton.tintColor = UIColor.systemBlue
+//            self.indicator.stopAnimating()
         }
     }
     
@@ -145,13 +140,16 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // when user's finger left the screen
         if sender.state == .ended {
             // if card is moved to the left edge of the screen
-            if card.center.x < viewWidth / 5 {
+            if card.center.x < viewWidth / 4 {
                 UIView.animate(withDuration: 0.2) {
 //                    card.center = CGPoint(x: card.center.x - 200, y: card.center.y)
 //                    card.alpha = 0
+                    
+                    // (TEST USE) update image
+                    self.updateCatImage()
                 }
                 
-                // test use
+                // (TEST USE)
                 UIView.animate(withDuration: 0.2) {
                     card.center = self.view.center
                     card.alpha = 1.0
@@ -159,13 +157,16 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 }
                 
             // if card is moved to the right edge of the screen
-            } else if card.center.x > viewWidth * 4/5 {
+            } else if card.center.x > viewWidth * 3/4 {
                 UIView.animate(withDuration: 0.2) {
 //                    card.center = CGPoint(x: card.center.x + 200, y: card.center.y)
 //                    card.alpha = 0
+                    
+                    // (TEST USE) update image
+                    self.updateCatImage()
                 }
                 
-                // test use
+                // (TEST USE)
                 UIView.animate(withDuration: 0.2) {
                     card.center = self.view.center
                     card.alpha = 1.0
