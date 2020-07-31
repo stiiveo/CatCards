@@ -56,7 +56,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         firstCardView.addGestureRecognizer(panGesture)
     }
 
-    // add constraints to someView
+    // add constraints to cardView
     func addCardViewConstraint() {
         let margins = self.view.layoutMarginsGuide
         firstCardView.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: 10).isActive = true
@@ -65,7 +65,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         firstCardView.heightAnchor.constraint(equalTo: margins.heightAnchor, multiplier: 0.8).isActive = true
     }
     
-    // add constraints to someImageView
+    // add constraints to imageView
     func addImageViewConstraint() {
         firstImageView.topAnchor.constraint(equalTo: firstCardView.topAnchor, constant: 10).isActive = true
         firstImageView.leadingAnchor.constraint(equalTo: firstCardView.leadingAnchor, constant: 10).isActive = true
@@ -120,21 +120,22 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         guard let card = sender.view else { return }
         
         let viewWidth = view.frame.width
+        let viewXAxisCenterPoint = view.center.x
         
         // point between the current pan and original location
         let fingerMovement = sender.translation(in: view)
         
         // distance between card's and view's x axis center point
-        let xFromCenter = card.center.x - view.center.x
+        let xAxisPanOffset = card.center.x - viewXAxisCenterPoint
         
         // Angle 35º ≈ 0.61 radian
-        let rotationAtMax: CGFloat = 0.61 // Angle 0.61 radian ≈ 35º
-        let cardRotationRadian = rotationAtMax * xFromCenter / (viewWidth / 2)
+        let rotationAtMax: CGFloat = 1.0 // Angle 1.0 radian = 180º
+        let cardRotationRadian = (rotationAtMax / 4) * (xAxisPanOffset / (viewWidth / 3))
         
         // card move to where the user's finger is
-        card.center = CGPoint(x: view.center.x + fingerMovement.x, y: view.center.y + fingerMovement.y)
+        card.center = CGPoint(x: viewXAxisCenterPoint + fingerMovement.x, y: view.center.y + fingerMovement.y)
         // card's opacity increase when it approaches the side edge of the screen
-        card.alpha = 1.5 - (abs(xFromCenter) / view.center.x)
+        card.alpha = 1.5 - (abs(xAxisPanOffset) / viewXAxisCenterPoint)
         // card's rotation increase when it approaches the side edge of the screen
         card.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
         
