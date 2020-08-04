@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="jpg-gr-ShF">
-    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
@@ -12,17 +12,35 @@
             <objects>
                 <viewController id="jpg-gr-ShF" customClass="CatViewController" customModule="CatAndDog" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cSQ-ii-ZYK">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="WUO-gy-wyq" userLabel="Activity Indicator">
-                                <rect key="frame" x="188.5" y="429.5" width="37" height="37"/>
+                                <rect key="frame" x="169" y="315" width="37" height="37"/>
                             </activityIndicatorView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZI0-C0-QUe">
+                                <rect key="frame" x="0.0" y="623" width="375" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="KGd-au-IEa"/>
+                                </constraints>
+                                <items>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="Q4d-Li-fMM"/>
+                                    <barButtonItem title="Share" image="square.and.arrow.up" catalog="system" id="qHs-X8-xcv">
+                                        <connections>
+                                            <action selector="shareButtonPressed:" destination="jpg-gr-ShF" id="BgI-cb-uF8"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="iXf-gw-ABa"/>
+                                </items>
+                            </toolbar>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="WUO-gy-wyq" firstAttribute="centerX" secondItem="cSQ-ii-ZYK" secondAttribute="centerX" id="3ZU-RU-ANA"/>
+                            <constraint firstAttribute="trailing" secondItem="ZI0-C0-QUe" secondAttribute="trailing" id="MXJ-g6-WQ1"/>
                             <constraint firstItem="WUO-gy-wyq" firstAttribute="centerY" secondItem="cSQ-ii-ZYK" secondAttribute="centerY" id="Yve-zt-o8f"/>
+                            <constraint firstItem="ZI0-C0-QUe" firstAttribute="leading" secondItem="E8D-Zx-PRV" secondAttribute="leading" id="ipo-P1-8yW"/>
+                            <constraint firstItem="E8D-Zx-PRV" firstAttribute="bottom" secondItem="ZI0-C0-QUe" secondAttribute="bottom" id="xtk-3V-5d6"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="E8D-Zx-PRV"/>
                     </view>
@@ -32,4 +50,7 @@
             <point key="canvasLocation" x="1630" y="-456"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="square.and.arrow.up" catalog="system" width="115" height="128"/>
+    </resources>
 </document>

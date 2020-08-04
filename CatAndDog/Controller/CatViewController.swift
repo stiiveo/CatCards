@@ -31,6 +31,12 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         cardView_1.addGestureRecognizer(panGesture)
     }
 
+    @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
+        guard let image = catDataManager.catImages.imageArray.first else { return }
+        let activityController = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+        present(activityController, animated: true)
+    }
+    
     // add constraints to cardView
     private func addCardViewConstraint(cardView: UIView) {
         let viewMargins = self.view.layoutMarginsGuide
