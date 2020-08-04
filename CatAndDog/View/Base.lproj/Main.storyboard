@@ -15,14 +15,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="WUO-gy-wyq" userLabel="Activity Indicator">
-                                <rect key="frame" x="169" y="315" width="37" height="37"/>
-                            </activityIndicatorView>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZI0-C0-QUe">
                                 <rect key="frame" x="0.0" y="623" width="375" height="44"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="KGd-au-IEa"/>
-                                </constraints>
                                 <items>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="Q4d-Li-fMM"/>
                                     <barButtonItem title="Share" image="square.and.arrow.up" catalog="system" id="qHs-X8-xcv">
@@ -36,14 +30,15 @@
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
-                            <constraint firstItem="WUO-gy-wyq" firstAttribute="centerX" secondItem="cSQ-ii-ZYK" secondAttribute="centerX" id="3ZU-RU-ANA"/>
-                            <constraint firstAttribute="trailing" secondItem="ZI0-C0-QUe" secondAttribute="trailing" id="MXJ-g6-WQ1"/>
-                            <constraint firstItem="WUO-gy-wyq" firstAttribute="centerY" secondItem="cSQ-ii-ZYK" secondAttribute="centerY" id="Yve-zt-o8f"/>
+                            <constraint firstItem="ZI0-C0-QUe" firstAttribute="trailing" secondItem="E8D-Zx-PRV" secondAttribute="trailing" id="g5N-sz-Ua3"/>
                             <constraint firstItem="ZI0-C0-QUe" firstAttribute="leading" secondItem="E8D-Zx-PRV" secondAttribute="leading" id="ipo-P1-8yW"/>
                             <constraint firstItem="E8D-Zx-PRV" firstAttribute="bottom" secondItem="ZI0-C0-QUe" secondAttribute="bottom" id="xtk-3V-5d6"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="E8D-Zx-PRV"/>
                     </view>
+                    <connections>
+                        <outlet property="toolBar" destination="ZI0-C0-QUe" id="1E1-XT-9aH"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wgG-Tt-dvs" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>

@@ -9,6 +9,9 @@
 import UIKit
 
 struct K {
+    struct ToolBar {
+        static let height: CGFloat = 44.0
+    }
     struct CardView {
         struct Style {
             static let cornerRadius: CGFloat = 20
@@ -30,5 +33,4 @@ struct K {
             static let cornerRadius: CGFloat = 20
         }
     }
-    
 }

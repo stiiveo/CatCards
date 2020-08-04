@@ -68,7 +68,7 @@ struct CatDataManager {
         return stringToData
     }
     
-    func parseJSON(data: Data) {
+    private func parseJSON(data: Data) {
         let jsonDecoder = JSONDecoder()
         do {
             let decodedData = try jsonDecoder.decode(CatData.self, from: data)
@@ -79,12 +79,13 @@ struct CatDataManager {
     }
     
     private func downloadImage(url: String) {
-        guard let url = URL(string: url) else { print("Failed to convert parseJSON's url to URL obj."); return }
+        guard let url = URL(string: url) else { print("Failed to convert JSON's url to URL obj."); return }
         do {
             let imageData = try Data(contentsOf: url)
             guard let image = UIImage(data: imageData) else { print("Failed to convert imageData into UIImage obj."); return }
             catImages.imageArray.append(image)
             
+            // inform the delegate the image has been loaded
             if !catImages.imageArray.isEmpty {
                 delegate?.dataDidFetch()
             }

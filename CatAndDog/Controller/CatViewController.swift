@@ -10,25 +10,31 @@ import UIKit
 
 class CatViewController: UIViewController, CatDataManagerDelegate {
     
-    @IBOutlet weak var indicator: UIActivityIndicatorView!
-
-    var catDataManager = CatDataManager()
-    var arrayIndex = 0
+    @IBOutlet weak var toolBar: UIToolbar!
     
-    let cardView_1 = UIView()
-    let firstImageView = UIImageView()
+    var catDataManager = CatDataManager()
+    
+    let cardView = UIView()
+    let imageView = UIImageView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         catDataManager.delegate = self
+        toolBar.heightAnchor.constraint(equalToConstant: K.ToolBar.height).isActive = true
         
         // download designated number of new images into imageArray
         startFetchImage(initialRequest: true)
         
-        // add UIPanGestureRecognizer to firstCardView
+        // add UIPanGestureRecognizer to cardView
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.panGestureHandler))
-        cardView_1.addGestureRecognizer(panGesture)
+        cardView.addGestureRecognizer(panGesture)
+
+        // add new card view and imageView
+        self.view.addSubview(self.cardView)
+        self.cardView.addSubview(self.imageView)
+        self.addCardViewConstraint(cardView: self.cardView)
+        self.addImageViewConstraint(imageView: self.imageView, contraintTo: self.cardView)
     }
 
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
@@ -43,8 +49,8 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
         cardView.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor, constant: K.CardView.Constraint.leading).isActive = true
         cardView.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor, constant: K.CardView.Constraint.trailing).isActive = true
-        cardView.centerYAnchor.constraint(equalTo: viewMargins.centerYAnchor).isActive = true
-        cardView.heightAnchor.constraint(lessThanOrEqualTo: cardView.widthAnchor, multiplier: K.CardView.Constraint.heightToWidthRatio).isActive = true
+        cardView.centerYAnchor.constraint(equalTo: viewMargins.centerYAnchor, constant: -K.ToolBar.height).isActive = true
+        cardView.heightAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: K.CardView.Constraint.heightToWidthRatio).isActive = true
         cardView.translatesAutoresizingMaskIntoConstraints = false
         // style
         cardView.layer.cornerRadius = K.CardView.Style.cornerRadius
@@ -68,7 +74,6 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     private func startFetchImage(initialRequest: Bool) {
         // first time loading image data
         if initialRequest {
-//            indicator.startAnimating()
             catDataManager.performRequest(imageDownloadNumber: 3)
         } else {
             catDataManager.performRequest(imageDownloadNumber: 1)
@@ -77,11 +82,12 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
 
     private func updateCatImage() {
         startFetchImage(initialRequest: false)
+        var arrayIndex = 0
         
         // make sure there's new image in imageArray ready to be loaded
         if catDataManager.catImages.imageArray.count > 1 {
             arrayIndex += 1
-            firstImageView.image = catDataManager.catImages.imageArray[arrayIndex]
+            imageView.image = catDataManager.catImages.imageArray[arrayIndex]
             catDataManager.catImages.imageArray.removeFirst()
             arrayIndex = 0
         }
@@ -91,41 +97,30 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // update image and UI components
         let imageArray = catDataManager.catImages.imageArray
         DispatchQueue.main.async {
-            
             // update image
-            guard let firstDownloadedImage = imageArray.first else { print("Fail to get image"); return }
-            self.firstImageView.image = firstDownloadedImage
-
-            // add new card view and imageView
-            self.view.addSubview(self.cardView_1)
-            self.cardView_1.addSubview(self.firstImageView)
-            self.addCardViewConstraint(cardView: self.cardView_1)
-            self.addImageViewConstraint(imageView: self.firstImageView, contraintTo: self.cardView_1)
-            
-            // update UI components
-//            self.indicator.stopAnimating()
+            guard let firstImage = imageArray.first else { print("Fail to get image"); return }
+            self.imageView.image = firstImage
         }
     }
     
     @objc func panGestureHandler(_ sender: UIPanGestureRecognizer) {
         guard let card = sender.view else { return }
         let viewWidth = view.frame.width
-        let viewXAxisCenterPoint = view.center.x
+        let cardDefaultPosition = CGPoint(x: self.view.center.x, y: self.view.center.y - K.ToolBar.height / 2)
         
         // point between the current pan and original location
         let fingerMovement = sender.translation(in: view)
         
-        // distance between card's and view's x axis center point
-        let xAxisPanOffset = card.center.x - viewXAxisCenterPoint
+        // amount of offset the card moved from its original position
+        let xAxisPanOffset = card.center.x - cardDefaultPosition.x
         
         // 1.0 Radian = 180º
         let rotationAtMax: CGFloat = 1.0
         let cardRotationRadian = (rotationAtMax / 4) * (xAxisPanOffset / (viewWidth / 3))
         
         // card move to where the user's finger is
-        card.center = CGPoint(x: viewXAxisCenterPoint + fingerMovement.x, y: view.center.y + fingerMovement.y)
-        // card's opacity increase when it approaches the side edge of the screen
-//        card.alpha = 1.5 - (abs(xAxisPanOffset) / viewXAxisCenterPoint)
+        card.center = CGPoint(x: cardDefaultPosition.x + fingerMovement.x, y: cardDefaultPosition.y + fingerMovement.y)
+        
         // card's rotation increase when it approaches the side edge of the screen
         card.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
         
@@ -135,7 +130,6 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             if card.center.x < viewWidth / 4 {
                 UIView.animate(withDuration: 0.2) {
 //                    card.center = CGPoint(x: card.center.x - 200, y: card.center.y)
-//                    card.alpha = 0
                     
                     // (TEST USE) update image
                     self.updateCatImage()
@@ -143,16 +137,14 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 
                 // (TEST USE)
                 UIView.animate(withDuration: 0.2) {
-                    card.center = self.view.center
-                    card.alpha = 1.0
-                    card.transform = CGAffineTransform(rotationAngle: 0)
+                    card.center = cardDefaultPosition
+                    card.transform = CGAffineTransform.identity
                 }
                 
             // if card is moved to the right edge of the screen
             } else if card.center.x > viewWidth * 3/4 {
                 UIView.animate(withDuration: 0.2) {
 //                    card.center = CGPoint(x: card.center.x + 200, y: card.center.y)
-//                    card.alpha = 0
                     
                     // (TEST USE) update image
                     self.updateCatImage()
@@ -160,15 +152,14 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 
                 // (TEST USE)
                 UIView.animate(withDuration: 0.2) {
-                    card.center = self.view.center
-                    card.alpha = 1.0
-                    card.transform = CGAffineTransform(rotationAngle: 0)
+                    card.center = cardDefaultPosition
+                    card.transform = CGAffineTransform.identity
                 }
                 
             } else {
                 // animate card back to origianl position, opacity and rotation state
                 UIView.animate(withDuration: 0.2) {
-                    card.center = self.view.center
+                    card.center = cardDefaultPosition
                     card.alpha = 1.0
                     card.transform = CGAffineTransform.identity
                 }
