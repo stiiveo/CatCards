@@ -15,26 +15,8 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     var catDataManager = CatDataManager()
     var arrayIndex = 0
     
-    let firstCardView: UIView = {
-        let myView = UIView()
-        myView.translatesAutoresizingMaskIntoConstraints = false
-        myView.layer.cornerRadius = K.CardViewStyle.cornerRadius
-        myView.layer.borderWidth = K.CardViewStyle.borderWidth
-        
-        return myView
-    }()
-    
-    let firstImageView: UIImageView = {
-        let myImageView = UIImageView()
-        myImageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        /** contentMode's value cannot be set to .scaleAspectFill
-            imageView's contraints will be ignored for unknown reason
-        */
-        myImageView.contentMode = .scaleAspectFit
-        return myImageView
-    }()
-    
+    let cardView_1 = UIView()
+    let firstImageView = UIImageView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,36 +26,35 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // download designated number of new images into imageArray
         startFetchImage(initialRequest: true)
         
-        // add new card view and imageView
-        self.view.addSubview(firstCardView)
-        firstCardView.addSubview(firstImageView)
-        
-        // add constraints to views added
-        addCardViewConstraint(cardView: firstCardView)
-        addImageViewConstraint(imageView: firstImageView, contraintTo: firstCardView)
-
         // add UIPanGestureRecognizer to firstCardView
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.panGestureHandler))
-        firstCardView.addGestureRecognizer(panGesture)
+        cardView_1.addGestureRecognizer(panGesture)
     }
 
     // add constraints to cardView
-    func addCardViewConstraint(cardView: UIView) {
+    private func addCardViewConstraint(cardView: UIView) {
         let viewMargins = self.view.layoutMarginsGuide
+        
         cardView.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor, constant: K.CardViewConstraint.leading).isActive = true
         cardView.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor, constant: K.CardViewConstraint.trailing).isActive = true
         cardView.centerYAnchor.constraint(equalTo: viewMargins.centerYAnchor).isActive = true
         cardView.heightAnchor.constraint(lessThanOrEqualTo: cardView.widthAnchor, multiplier: K.CardViewConstraint.heightToWidthRatio).isActive = true
-        
+        cardView.translatesAutoresizingMaskIntoConstraints = false
+        // style
+        cardView.layer.cornerRadius = K.CardViewStyle.cornerRadius
+        cardView.layer.borderWidth = K.CardViewStyle.borderWidth
         cardView.backgroundColor = K.CardViewStyle.backgroundColor
     }
     
     // add constraints to imageView
-    func addImageViewConstraint(imageView: UIImageView, contraintTo cardView: UIView) {
+    private func addImageViewConstraint(imageView: UIImageView, contraintTo cardView: UIView) {
         imageView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: K.ImageViewConstraint.top).isActive = true
         imageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: K.ImageViewConstraint.leading).isActive = true
         imageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: K.ImageViewConstraint.trailing).isActive = true
         imageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: K.ImageViewConstraint.bottom).isActive = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        // style
+        imageView.contentMode = .scaleAspectFit
     }
     
     private func startFetchImage(initialRequest: Bool) {
@@ -83,9 +64,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             catDataManager.performRequest(imageDownloadNumber: 3)
         } else {
             catDataManager.performRequest(imageDownloadNumber: 1)
-            
         }
-        
     }
 
     private func updateCatImage() {
@@ -98,10 +77,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             catDataManager.catImages.imageArray.removeFirst()
             arrayIndex = 0
         }
-        
     }
 
-    func dataDidFetch() {
+    internal func dataDidFetch() {
         // update image and UI components
         let imageArray = catDataManager.catImages.imageArray
         DispatchQueue.main.async {
@@ -109,6 +87,12 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             // update image
             guard let firstDownloadedImage = imageArray.first else { print("Fail to get image"); return }
             self.firstImageView.image = firstDownloadedImage
+
+            // add new card view and imageView
+            self.view.addSubview(self.cardView_1)
+            self.cardView_1.addSubview(self.firstImageView)
+            self.addCardViewConstraint(cardView: self.cardView_1)
+            self.addImageViewConstraint(imageView: self.firstImageView, contraintTo: self.cardView_1)
             
             // update UI components
 //            self.indicator.stopAnimating()
