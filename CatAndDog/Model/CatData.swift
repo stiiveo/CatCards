@@ -9,13 +9,5 @@
 import Foundation
 
 struct CatData: Decodable {
-    
     let url: String
-    
-//    let data: [Data]
-//
-//    struct Data: Decodable {
-//        let url: String
-//    }
-    
 }

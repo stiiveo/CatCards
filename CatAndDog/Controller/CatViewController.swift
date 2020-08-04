@@ -171,5 +171,25 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             
         }
     }
+    
+    func errorDidOccur() {
+        DispatchQueue.main.async {
+            let alert = UIAlertController(
+                title: "Cannot connect to the Internet",
+                message: "Signal from Cat Planet is too weak.\n Please check your antenna. 📡",
+                preferredStyle: .alert)
+            let settingsAction = UIAlertAction(title: "Settings", style: .default) { (_) -> Void in
+                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(settingsUrl, options: [:], completionHandler: nil)
+                }
+            }
+            let cancelAction = UIAlertAction(title: "OK", style: .cancel)
+            alert.addAction(settingsAction)
+            alert.addAction(cancelAction)
+            self.present(alert, animated: true, completion: nil)
+        }
+        
+        
+    }
 }
 

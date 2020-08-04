@@ -10,6 +10,7 @@ import UIKit
 
 protocol CatDataManagerDelegate {
     func dataDidFetch()
+    func errorDidOccur()
 }
 
 struct CatDataManager {
@@ -21,12 +22,15 @@ struct CatDataManager {
     func performRequest(imageDownloadNumber: Int) {
         
         for _ in 0..<imageDownloadNumber {
-            
             let session = URLSession(configuration: .default)
-            guard let url = URL(string: catUrl) else { print("Failed to convert catUrl to URL object"); return }
+            guard let url = URL(string: catUrl) else {
+                print("Failed to convert catUrl to URL object")
+                return
+            }
             let task = session.dataTask(with: url) { (data, response, error) in
                 if error != nil {
-                    print(error.debugDescription)
+                    self.delegate?.errorDidOccur()
+                    print("Error occured during data fetching process.")
                     return
                 } else {
                     if let safeData = data {
