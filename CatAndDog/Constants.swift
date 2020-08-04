@@ -17,7 +17,7 @@ struct K {
     struct CardViewConstraint {
         static let leading: CGFloat = 0.0
         static let trailing: CGFloat = -0.0
-        static let heightMultiplier: CGFloat = 0.8
+        static let heightToWidthRatio: CGFloat = 1.3
     }
     struct ImageViewConstraint {
         static let leading: CGFloat = 5.0

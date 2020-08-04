@@ -59,11 +59,11 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
 
     // add constraints to cardView
     func addCardViewConstraint(cardView: UIView) {
-        let margins = self.view.layoutMarginsGuide
-        cardView.leadingAnchor.constraint(equalTo: margins.leadingAnchor, constant: K.CardViewConstraint.leading).isActive = true
-        cardView.trailingAnchor.constraint(equalTo: margins.trailingAnchor, constant: K.CardViewConstraint.trailing).isActive = true
-        cardView.centerYAnchor.constraint(equalTo: margins.centerYAnchor).isActive = true
-        cardView.heightAnchor.constraint(equalTo: margins.heightAnchor, multiplier: K.CardViewConstraint.heightMultiplier).isActive = true
+        let viewMargins = self.view.layoutMarginsGuide
+        cardView.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor, constant: K.CardViewConstraint.leading).isActive = true
+        cardView.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor, constant: K.CardViewConstraint.trailing).isActive = true
+        cardView.centerYAnchor.constraint(equalTo: viewMargins.centerYAnchor).isActive = true
+        cardView.heightAnchor.constraint(lessThanOrEqualTo: cardView.widthAnchor, multiplier: K.CardViewConstraint.heightToWidthRatio).isActive = true
         
         cardView.backgroundColor = K.CardViewStyle.backgroundColor
     }
