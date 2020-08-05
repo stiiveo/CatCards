@@ -18,11 +18,14 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     let cardView2 = UIView()
     let imageView1 = UIImageView()
     let imageView2 = UIImageView()
+    var cardViewCenterPosition: CGPoint?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         catDataManager.delegate = self
+        
+        // define toolBar's height
         toolBar.heightAnchor.constraint(equalToConstant: K.ToolBar.height).isActive = true
         
         // download designated number of new images into imageArray
@@ -39,10 +42,14 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         addImageViewConstraint(imageView: imageView1, contraintTo: cardView1)
         addImageViewConstraint(imageView: imageView2, contraintTo: cardView2)
         
+        cardViewCenterPosition = cardView1.center
+        
         // add UIPanGestureRecognizer to cardView
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         cardView1.addGestureRecognizer(panGesture)
     }
+    
+    //MARK: - Share Action
     
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
         guard let image = catDataManager.catImages.imageArray.first else { return }
@@ -50,13 +57,15 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         present(activityController, animated: true)
     }
     
+    //MARK: - Constraints Implementation
+    
     // add constraints to cardView
     private func addCardViewConstraint(cardView: UIView) {
         let viewMargins = self.view.layoutMarginsGuide
         
         cardView.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor, constant: K.CardView.Constraint.leading).isActive = true
         cardView.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor, constant: K.CardView.Constraint.trailing).isActive = true
-        cardView.centerYAnchor.constraint(equalTo: viewMargins.centerYAnchor, constant: -K.ToolBar.height).isActive = true
+        cardView.centerYAnchor.constraint(equalTo: viewMargins.centerYAnchor).isActive = true
         cardView.heightAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: K.CardView.Constraint.heightToWidthRatio).isActive = true
         cardView.translatesAutoresizingMaskIntoConstraints = false
         // style
@@ -77,6 +86,8 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         imageView.layer.cornerRadius = 20
         imageView.clipsToBounds = true
     }
+    
+    //MARK: - Picture Fetching & Updating
     
     private func startFetchImage(initialRequest: Bool) {
         // first time loading image data
@@ -111,10 +122,12 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         }
     }
     
+    //MARK: - Card Animation & Rotation Section
+    
     @objc func panGestureHandler(_ sender: UIPanGestureRecognizer) {
         guard let card = sender.view else { return }
         let viewWidth = view.frame.width
-        let cardDefaultPosition = CGPoint(x: self.view.center.x, y: self.view.center.y - K.ToolBar.height / 2)
+        let cardDefaultPosition = CGPoint(x: self.view.center.x, y: self.view.center.y)
         let panGesture = sender
         
         // point between the current pan and original location
@@ -133,7 +146,12 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // card's rotation increase when it approaches the side edge of the screen
         card.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
         
-        // the second card view will be visible when first card is being dragged
+        /*
+         The second card is visible when first card is dragged
+         # if this method is not implemented,
+            the user can see the removed card returns
+            and inserts below the cardView
+         */
         if sender.state == .began {
             if card == cardView1 {
                 cardView2.isHidden = false
@@ -150,33 +168,8 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 UIView.animate(withDuration: 0.2) {
                     card.center = CGPoint(x: card.center.x - 800, y: card.center.y)
                 }
-//                self.updateCatImage()
-                /*
-                 the card is hidden, remove attach to gesture recognizer
-                 has rotation back to original degree
-                 and removed from super view
-                 */
-                card.isHidden = true
-                card.removeGestureRecognizer(panGesture)
-                card.transform = CGAffineTransform.identity
-                card.removeFromSuperview()
-                
-                /*
-                 cardView at lower layer get gesture recognizer
-                 the removed cardView is inserted beneath it
-                 and has its position and contraint set
-                */
-                if card == cardView1 {
-                    cardView2.addGestureRecognizer(panGesture)
-                    self.view.insertSubview(card, belowSubview: cardView2)
-                    card.center = cardDefaultPosition
-                    addCardViewConstraint(cardView: cardView1)
-                } else {
-                    cardView1.addGestureRecognizer(panGesture)
-                    self.view.insertSubview(card, belowSubview: cardView1)
-                    card.center = cardDefaultPosition
-                    addCardViewConstraint(cardView: cardView2)
-                }
+                self.updateCatImage()
+                animateCard(card, panGesture: panGesture)
             }
             // if card is moved to the right edge of the screen
             else if card.center.x > viewWidth * 3/4 {
@@ -186,6 +179,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                     // (TEST USE) update image
 //                    self.updateCatImage()
                 }
+                animateCard(card, panGesture: panGesture)
                 
             }
             else {
@@ -200,6 +194,38 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             
         }
     }
+    
+    private func animateCard(_ card: UIView, panGesture: UIPanGestureRecognizer) {
+        /*
+         the card is hidden, remove attach to gesture recognizer
+         has rotation back to original degree
+         and removed from super view
+         */
+        card.isHidden = true
+        card.removeGestureRecognizer(panGesture)
+        card.transform = CGAffineTransform.identity
+        card.removeFromSuperview()
+        
+        /*
+         cardView at lower layer get gesture recognizer
+         the removed cardView is inserted beneath it
+         and has its position and contraint set
+        */
+        guard let cardDefaultCenter = cardViewCenterPosition else { return }
+        if card == cardView1 {
+            cardView2.addGestureRecognizer(panGesture)
+            self.view.insertSubview(card, belowSubview: cardView2)
+            card.center = cardDefaultCenter
+            addCardViewConstraint(cardView: cardView1)
+        } else {
+            cardView1.addGestureRecognizer(panGesture)
+            self.view.insertSubview(card, belowSubview: cardView1)
+            card.center = cardDefaultCenter
+            addCardViewConstraint(cardView: cardView2)
+        }
+    }
+    
+    //MARK: - Error Handling Section
     
     func errorDidOccur() {
         DispatchQueue.main.async {
