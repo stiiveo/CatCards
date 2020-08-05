@@ -105,10 +105,10 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // update imageViews
         let imageArray = catDataManager.catImages.imageArray
         DispatchQueue.main.async {
-            guard let firstImage = imageArray.first else { print("Failed to get firstImage from imageArray"); return }
-            guard let secondImage = imageArray.first else { print("Failed to get secondImage from imageArray"); return }
-            self.imageView.image = firstImage
-            self.imageView2.image = secondImage
+            if imageArray.count > 2 {
+                self.imageView.image = imageArray[0]
+                self.imageView2.image = imageArray[1]
+            }
         }
     }
     
