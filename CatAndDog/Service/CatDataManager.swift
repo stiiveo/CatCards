@@ -86,7 +86,7 @@ struct CatDataManager {
             catImages.imageArray.append(image)
             
             // inform the delegate the image has been loaded
-            if !catImages.imageArray.isEmpty {
+            if catImages.imageArray.count > 2 {
                 delegate?.dataDidFetch()
             }
             

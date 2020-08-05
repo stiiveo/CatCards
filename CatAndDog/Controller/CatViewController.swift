@@ -15,7 +15,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     var catDataManager = CatDataManager()
     
     let cardView = UIView()
+    let cardView2 = UIView()
     let imageView = UIImageView()
+    let imageView2 = UIImageView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,16 +27,22 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
         // download designated number of new images into imageArray
         startFetchImage(initialRequest: true)
+
+        // create UIView, ImageView and constraints
+        view.insertSubview(cardView, at: 1) // view is displayed above views with lower index value
+        view.insertSubview(cardView2, at: 0)
+        cardView.addSubview(imageView)
+        cardView2.addSubview(imageView2)
+        
+        addCardViewConstraint(cardView: cardView)
+        addCardViewConstraint(cardView: cardView2)
+        addImageViewConstraint(imageView: imageView, contraintTo: cardView)
+        addImageViewConstraint(imageView: imageView2, contraintTo: cardView2)
         
         // add UIPanGestureRecognizer to cardView
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.panGestureHandler))
         cardView.addGestureRecognizer(panGesture)
-
-        // add new card view and imageView
-        self.view.addSubview(self.cardView)
-        self.cardView.addSubview(self.imageView)
-        self.addCardViewConstraint(cardView: self.cardView)
-        self.addImageViewConstraint(imageView: self.imageView, contraintTo: self.cardView)
+//        cardView2.addGestureRecognizer(panGesture)
     }
 
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
@@ -94,12 +102,13 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     }
 
     internal func dataDidFetch() {
-        // update image and UI components
+        // update imageViews
         let imageArray = catDataManager.catImages.imageArray
         DispatchQueue.main.async {
-            // update image
-            guard let firstImage = imageArray.first else { print("Fail to get image"); return }
+            guard let firstImage = imageArray.first else { print("Failed to get firstImage from imageArray"); return }
+            guard let secondImage = imageArray.first else { print("Failed to get secondImage from imageArray"); return }
             self.imageView.image = firstImage
+            self.imageView2.image = secondImage
         }
     }
     
