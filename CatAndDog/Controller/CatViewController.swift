@@ -94,9 +94,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     private func startFetchImage(initialRequest: Bool) {
         // first time loading image data
         if initialRequest {
-            catDataManager.performRequest(imageDownloadNumber: 6)
+            catDataManager.performRequest(imageDownloadNumber: K.Data.initialImageRequestNumber)
         } else {
-            catDataManager.performRequest(imageDownloadNumber: 1)
+            catDataManager.performRequest(imageDownloadNumber: K.Data.imageRequestNumber)
         }
     }
 

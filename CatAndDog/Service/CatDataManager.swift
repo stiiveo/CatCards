@@ -19,6 +19,7 @@ class CatDataManager {
     var delegate: CatDataManagerDelegate?
     let catImages = CatImages()
     var imageIndex: Int = 0
+    var imageDeleteIndex: Int = 0
     var isInitialImageSetUp: Bool = false
     
     func performRequest(imageDownloadNumber: Int) {
@@ -94,18 +95,28 @@ class CatDataManager {
     }
     
     private func attachIndexToImage(_ newImage: UIImage) {
+        // append new image into image array
         imageIndex += 1
         catImages.imageArray["Image\(imageIndex)"] = newImage
         
+        // deleted old images if numbers of imageArray exceed threshold
+        if catImages.imageArray.count > K.Data.maxAllowedImageNumber {
+            deleteImage()
+        }
+        
+        // this method only execute when 2 initial images are not loaded yet
         if isInitialImageSetUp == false {
             // if first 2 images are ready
             if catImages.imageArray["Image1"] != nil && catImages.imageArray["Image2"] != nil {
-                // inform the delegate the first 2 images are ready
+                // inform the delegate first 2 images are ready to be loaded
                 delegate?.dataDidFetch()
                 isInitialImageSetUp = true
             }
         }
-        
-        
+    }
+    
+    private func deleteImage() {
+        imageDeleteIndex += 1
+        catImages.imageArray["Image\(imageDeleteIndex)"] = nil
     }
 }

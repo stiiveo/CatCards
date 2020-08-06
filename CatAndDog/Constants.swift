@@ -9,6 +9,11 @@
 import UIKit
 
 struct K {
+    struct Data {
+        static let initialImageRequestNumber: Int = 6
+        static let imageRequestNumber: Int = 1
+        static let maxAllowedImageNumber: Int = 7
+    }
     struct ToolBar {
         static let height: CGFloat = 44.0
     }
