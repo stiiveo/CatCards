@@ -13,11 +13,13 @@ protocol CatDataManagerDelegate {
     func errorDidOccur()
 }
 
-struct CatDataManager {
+class CatDataManager {
     
     let catUrl = "https://api.thecatapi.com/v1/images/search"
     var delegate: CatDataManagerDelegate?
     let catImages = CatImages()
+    var imageIndex: Int = 0
+    var isInitialImageSetUp: Bool = false
     
     func performRequest(imageDownloadNumber: Int) {
         
@@ -83,15 +85,27 @@ struct CatDataManager {
         do {
             let imageData = try Data(contentsOf: url)
             guard let image = UIImage(data: imageData) else { print("Failed to convert imageData into UIImage obj."); return }
-            catImages.imageArray.append(image)
             
-            // inform the delegate the image has been loaded
-            if catImages.imageArray.count > 2 {
-                delegate?.dataDidFetch()
-            }
-            
+            // attach index number to each downloaded image
+            attachIndexToImage(image)
         } catch {
             debugPrint(error.localizedDescription)
         }
+    }
+    
+    private func attachIndexToImage(_ newImage: UIImage) {
+        imageIndex += 1
+        catImages.imageArray["Image\(imageIndex)"] = newImage
+        
+        if isInitialImageSetUp == false {
+            // if first 2 images are ready
+            if catImages.imageArray["Image1"] != nil && catImages.imageArray["Image2"] != nil {
+                // inform the delegate the first 2 images are ready
+                delegate?.dataDidFetch()
+                isInitialImageSetUp = true
+            }
+        }
+        
+        
     }
 }

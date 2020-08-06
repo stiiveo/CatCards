@@ -9,5 +9,5 @@
 import UIKit
 
 class CatImages {
-    var imageArray: [UIImage] = []
+    var imageArray = [String: UIImage]()
 }

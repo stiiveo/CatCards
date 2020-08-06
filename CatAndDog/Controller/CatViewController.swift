@@ -19,6 +19,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     let imageView1 = UIImageView()
     let imageView2 = UIImageView()
     var cardViewCenterPosition: CGPoint?
+    var imageIndex: Int = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -81,7 +82,8 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         imageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: K.ImageView.Constraint.trailing).isActive = true
         imageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: K.ImageView.Constraint.bottom).isActive = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        // style
+        
+        // add style
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 20
         imageView.clipsToBounds = true
@@ -92,33 +94,22 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     private func startFetchImage(initialRequest: Bool) {
         // first time loading image data
         if initialRequest {
-            catDataManager.performRequest(imageDownloadNumber: 3)
+            catDataManager.performRequest(imageDownloadNumber: 6)
         } else {
             catDataManager.performRequest(imageDownloadNumber: 1)
         }
     }
 
-    private func updateCatImage() {
-        startFetchImage(initialRequest: false)
-        var arrayIndex = 0
-        
-        // make sure there's new image in imageArray ready to be loaded
-        if catDataManager.catImages.imageArray.count > 1 {
-            arrayIndex += 1
-            imageView1.image = catDataManager.catImages.imageArray[arrayIndex]
-            catDataManager.catImages.imageArray.removeFirst()
-            arrayIndex = 0
-        }
-    }
-
+    // load first 2 images to the 2 cardViews
     internal func dataDidFetch() {
-        // update imageViews
         let imageArray = catDataManager.catImages.imageArray
-        DispatchQueue.main.async {
-            if imageArray.count > 2 {
-                self.imageView1.image = imageArray[0]
-                self.imageView2.image = imageArray[1]
+        // ensure there are more than 3 images ready to be viewed
+        if imageArray.count >= 2 {
+            DispatchQueue.main.async {
+                self.imageView1.image = imageArray["Image1"]
+                self.imageView2.image = imageArray["Image2"]
             }
+            self.imageIndex += 2
         }
     }
     
@@ -162,14 +153,13 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
         // when user's finger left the screen
         if sender.state == .ended {
-            
             // if card is moved to the left edge of the screen
             if card.center.x < viewWidth / 4 {
                 UIView.animate(withDuration: 0.2) {
                     card.center = CGPoint(x: card.center.x - 800, y: card.center.y)
                 }
-                self.updateCatImage()
                 animateCard(card, panGesture: panGesture)
+                
             }
             // if card is moved to the right edge of the screen
             else if card.center.x > viewWidth * 3/4 {
@@ -212,17 +202,50 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
          and has its position and contraint set
         */
         guard let cardDefaultCenter = cardViewCenterPosition else { return }
+        
         if card == cardView1 {
             cardView2.addGestureRecognizer(panGesture)
             self.view.insertSubview(card, belowSubview: cardView2)
             card.center = cardDefaultCenter
             addCardViewConstraint(cardView: cardView1)
+            updateImageView(card)
         } else {
             cardView1.addGestureRecognizer(panGesture)
             self.view.insertSubview(card, belowSubview: cardView1)
             card.center = cardDefaultCenter
             addCardViewConstraint(cardView: cardView2)
+            updateImageView(card)
         }
+        
+    }
+    
+    private func updateImageView(_ cardView: UIView) {
+        let imageArray = catDataManager.catImages.imageArray
+        
+//        if imageArray.count > 7 {
+////            catDataManager.catImages.imageArray.removeFirst()
+//        }
+        imageIndex += 1
+        
+        switch cardView {
+        case cardView1:
+            if let nextImage = imageArray["Image\(imageIndex)"] {
+                imageView1.image = nextImage
+            } else {
+                print("There is no new image for cardView1")
+            }
+            startFetchImage(initialRequest: false)
+        case cardView2:
+            if let nextImage = imageArray["Image\(imageIndex)"] {
+                imageView2.image = nextImage
+            } else {
+                print("There is no new image for cardView2")
+            }
+            startFetchImage(initialRequest: false)
+        default:
+            return
+        }
+        
     }
     
     //MARK: - Error Handling Section
