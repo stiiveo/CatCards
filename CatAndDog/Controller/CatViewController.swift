@@ -49,7 +49,8 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     //MARK: - Activity Indicator
     
-    let indicator = UIActivityIndicatorView()
+    let indicator1 = UIActivityIndicatorView()
+    let indicator2 = UIActivityIndicatorView()
     // indicator is placed right at the center of the cardView
     private func addIndicatorConstraint(indicator: UIActivityIndicatorView, constraintTo cardView: UIView) {
         let cardViewMargins = cardView.layoutMarginsGuide
@@ -130,16 +131,15 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // ensure there are more than 3 images ready to be viewed
         if imageArray.count >= 2 {
             DispatchQueue.main.async {
-                self.imageView1.image = imageArray["Image1"]
-                self.imageView2.image = imageArray["Image2"]
-                self.indicator.stopAnimating()
+                self.imageIndex += 1
+                self.imageView1.image = imageArray["Image\(self.imageIndex)"]
+                self.imageIndex += 1
+                self.imageView2.image = imageArray["Image\(self.imageIndex)"]
+                self.indicator1.stopAnimating()
 
                 // add UIPanGestureRecognizer to cardView
                 self.cardView1.addGestureRecognizer(panGesture)
-                print("test")
             }
-            self.imageIndex += 2
-
         }
     }
     
@@ -265,6 +265,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 imageView1.image = nextImage
             } else {
                 imageView1.image = nil
+                imageView1.addSubview(indicator1)
+                addIndicatorConstraint(indicator: indicator1, constraintTo: imageView1)
+                indicator1.startAnimating()
                 print("There is no new image for cardView1")
             }
         case cardView2:
@@ -272,6 +275,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 imageView2.image = nextImage
             } else {
                 imageView2.image = nil
+                imageView2.addSubview(indicator2)
+                addIndicatorConstraint(indicator: indicator2, constraintTo: imageView2)
+                indicator1.startAnimating()
                 print("There is no new image for cardView2")
             }
         default:
