@@ -21,6 +21,7 @@ class CatDataManager {
     var imageIndex: Int = 0
     var imageDeleteIndex: Int = 0
     var isInitialImageSetUp: Bool = false
+    var numberOfNewImages: Int = 0
     
     func performRequest(imageDownloadNumber: Int) {
         
@@ -86,6 +87,7 @@ class CatDataManager {
         do {
             let imageData = try Data(contentsOf: url)
             guard let image = UIImage(data: imageData) else { print("Failed to convert imageData into UIImage obj."); return }
+            numberOfNewImages += 1
             
             // attach index number to each downloaded image
             attachIndexToImage(image)

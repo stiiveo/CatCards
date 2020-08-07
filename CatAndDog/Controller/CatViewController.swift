@@ -19,7 +19,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     let imageView2 = UIImageView()
     var cardViewCenterPosition: CGPoint?
     var imageIndex: Int = 0
-    var currentCardView: Int = 1
+    var currentDisplayCardViewIndex: Int = 1
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,7 +65,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
         var imageToShare = UIImage()
-        switch currentCardView {
+        switch currentDisplayCardViewIndex {
         case 1:
             guard let image1 = imageView1.image else { return }
             imageToShare = image1
@@ -146,7 +146,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     //MARK: - Card Animation & Rotation Section
     
     @objc func panGestureHandler(_ sender: UIPanGestureRecognizer) {
-        guard let card = sender.view else { return }
+        guard let pannedCard = sender.view else { return }
         let viewWidth = view.frame.width
         let cardDefaultPosition = CGPoint(x: self.view.center.x, y: self.view.center.y)
         let panGesture = sender
@@ -155,17 +155,17 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         let fingerMovement = sender.translation(in: view)
         
         // amount of offset the card moved from its original position
-        let xAxisPanOffset = card.center.x - cardDefaultPosition.x
+        let xAxisPanOffset = pannedCard.center.x - cardDefaultPosition.x
         
         // 1.0 Radian = 180º
         let rotationAtMax: CGFloat = 1.0
         let cardRotationRadian = (rotationAtMax / 4) * (xAxisPanOffset / (viewWidth / 3))
         
         // card move to where the user's finger is
-        card.center = CGPoint(x: cardDefaultPosition.x + fingerMovement.x, y: cardDefaultPosition.y + fingerMovement.y)
+        pannedCard.center = CGPoint(x: cardDefaultPosition.x + fingerMovement.x, y: cardDefaultPosition.y + fingerMovement.y)
         
         // card's rotation increase when it approaches the side edge of the screen
-        card.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
+        pannedCard.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
         
         /*
          The second card is visible when first card is dragged
@@ -174,7 +174,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             and inserts below the cardView
          */
         if sender.state == .began {
-            if card == cardView1 {
+            if pannedCard == cardView1 {
                 cardView2.isHidden = false
             } else {
                 cardView1.isHidden = false
@@ -184,25 +184,25 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // when user's finger left the screen
         if sender.state == .ended {
             // if card is moved to the left edge of the screen
-            if card.center.x < viewWidth / 4 {
+            if pannedCard.center.x < viewWidth / 4 && catDataManager.numberOfNewImages > 0 {
                 UIView.animate(withDuration: 0.2) {
-                    card.center = CGPoint(x: card.center.x - 800, y: card.center.y)
+                    pannedCard.center = CGPoint(x: pannedCard.center.x - 800, y: pannedCard.center.y)
                 }
-                animateCard(card, panGesture: panGesture)
+                animateCard(pannedCard, panGesture: panGesture)
             }
             // if card is moved to the right edge of the screen
-            else if card.center.x > viewWidth * 3/4 {
+            else if pannedCard.center.x > viewWidth * 3/4 && catDataManager.numberOfNewImages > 0 {
                 UIView.animate(withDuration: 0.2) {
-                    card.center = CGPoint(x: card.center.x + 800, y: card.center.y)
+                    pannedCard.center = CGPoint(x: pannedCard.center.x + 800, y: pannedCard.center.y)
                 }
-                animateCard(card, panGesture: panGesture)
+                animateCard(pannedCard, panGesture: panGesture)
             }
             else {
                 // animate card back to origianl position, opacity and rotation state
                 UIView.animate(withDuration: 0.2) {
-                    card.center = cardDefaultPosition
-                    card.alpha = 1.0
-                    card.transform = CGAffineTransform.identity
+                    pannedCard.center = cardDefaultPosition
+                    pannedCard.alpha = 1.0
+                    pannedCard.transform = CGAffineTransform.identity
                 }
             }
         }
@@ -221,6 +221,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         card.removeGestureRecognizer(panGesture)
         card.transform = CGAffineTransform.identity
         card.removeFromSuperview()
+        catDataManager.numberOfNewImages -= 1
         
         /*
          1. cardView at lower layer has gesture recognizer attached
@@ -230,7 +231,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         if card == cardView1 {
             cardView2.addGestureRecognizer(panGesture)
             
-            currentCardView = 2
+            currentDisplayCardViewIndex = 2
             self.view.insertSubview(card, belowSubview: cardView2)
             card.center = cardDefaultCenter
             addCardViewConstraint(cardView: cardView1)
@@ -238,7 +239,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         } else if card == cardView2 {
             cardView1.addGestureRecognizer(panGesture)
             
-            currentCardView = 1
+            currentDisplayCardViewIndex = 1
             self.view.insertSubview(card, belowSubview: cardView1)
             card.center = cardDefaultCenter
             addCardViewConstraint(cardView: cardView2)
