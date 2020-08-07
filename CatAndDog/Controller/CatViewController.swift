@@ -51,15 +51,32 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     let indicator1 = UIActivityIndicatorView()
     let indicator2 = UIActivityIndicatorView()
+    
     // indicator is placed right at the center of the cardView
-    private func addIndicatorConstraint(indicator: UIActivityIndicatorView, constraintTo cardView: UIView) {
-        let cardViewMargins = cardView.layoutMarginsGuide
+    private func addIndicatorConstraint(indicator: UIActivityIndicatorView, constraintTo view: UIView) {
+        let cardViewMargins = view.layoutMarginsGuide
         indicator.centerXAnchor.constraint(equalTo: cardViewMargins.centerXAnchor).isActive = true
         indicator.centerYAnchor.constraint(equalTo: cardViewMargins.centerYAnchor).isActive = true
         indicator.translatesAutoresizingMaskIntoConstraints = false
         // style
         indicator.style = .large
         indicator.hidesWhenStopped = true
+    }
+    
+    private func addIndicator(to cardView: UIView) {
+        switch cardView {
+        case cardView1:
+            cardView1.addSubview(indicator1)
+            addIndicatorConstraint(indicator: indicator1, constraintTo: cardView1)
+            indicator1.startAnimating()
+        case cardView2:
+            cardView1.addSubview(indicator2)
+            addIndicatorConstraint(indicator: indicator2, constraintTo: cardView2)
+            indicator2.startAnimating()
+        default:
+            return
+        }
+        
     }
     
     //MARK: - Share Action
@@ -119,6 +136,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // first time requesting image data
         if initialRequest {
             catDataManager.performRequest(imageDownloadNumber: K.Data.initialImageRequestNumber)
+            addIndicator(to: cardView)
         } else {
             catDataManager.performRequest(imageDownloadNumber: K.Data.imageRequestNumber)
         }
@@ -136,6 +154,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 self.imageIndex += 1
                 self.imageView2.image = imageArray["Image\(self.imageIndex)"]
                 self.indicator1.stopAnimating()
+                self.indicator2.stopAnimating()
 
                 // add UIPanGestureRecognizer to cardView
                 self.cardView1.addGestureRecognizer(panGesture)
@@ -258,16 +277,13 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
         fetchNewImage(initialRequest: false, for: cardView)
         imageIndex += 1
-        
         switch cardView {
         case cardView1:
             if let nextImage = imageArray["Image\(imageIndex)"] {
                 imageView1.image = nextImage
             } else {
                 imageView1.image = nil
-                imageView1.addSubview(indicator1)
-                addIndicatorConstraint(indicator: indicator1, constraintTo: imageView1)
-                indicator1.startAnimating()
+                addIndicator(to: cardView)
                 print("There is no new image for cardView1")
             }
         case cardView2:
@@ -275,9 +291,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 imageView2.image = nextImage
             } else {
                 imageView2.image = nil
-                imageView2.addSubview(indicator2)
-                addIndicatorConstraint(indicator: indicator2, constraintTo: imageView2)
-                indicator1.startAnimating()
+                addIndicator(to: cardView)
                 print("There is no new image for cardView2")
             }
         default:

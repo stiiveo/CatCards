@@ -102,7 +102,7 @@ class CatDataManager {
         catImages.imageArray["Image\(imageIndex)"] = newImage
         
         // deleted old images if numbers of imageArray exceed threshold
-        if catImages.imageArray.count > K.Data.maxAllowedImageNumber {
+        if catImages.imageArray.count > K.Data.maxImageNumberStored {
             deleteImage()
         }
         
