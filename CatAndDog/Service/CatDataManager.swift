@@ -106,9 +106,8 @@ class CatDataManager {
         
         // this method only execute when 2 initial images are not loaded yet
         if isInitialImageSetUp == false {
-            // if first 2 images are ready
+            // inform the delegate first 2 images are ready to be loaded
             if catImages.imageArray["Image1"] != nil && catImages.imageArray["Image2"] != nil {
-                // inform the delegate first 2 images are ready to be loaded
                 delegate?.dataDidFetch()
                 isInitialImageSetUp = true
             }

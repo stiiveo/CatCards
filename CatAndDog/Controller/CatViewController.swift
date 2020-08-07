@@ -30,7 +30,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         toolBar.heightAnchor.constraint(equalToConstant: K.ToolBar.height).isActive = true
         
         // download designated number of new images into imageArray
-        startFetchImage(initialRequest: true)
+        fetchNewImage(initialRequest: true, for: cardView1)
 
         // create UIView, ImageView and constraints
         view.addSubview(cardView1)
@@ -45,9 +45,20 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
         cardViewCenterPosition = cardView1.center
         
-        // add UIPanGestureRecognizer to cardView
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
-        cardView1.addGestureRecognizer(panGesture)
+    }
+    
+    //MARK: - Activity Indicator
+    
+    let indicator = UIActivityIndicatorView()
+    // indicator is placed right at the center of the cardView
+    private func addIndicatorConstraint(indicator: UIActivityIndicatorView, constraintTo cardView: UIView) {
+        let cardViewMargins = cardView.layoutMarginsGuide
+        indicator.centerXAnchor.constraint(equalTo: cardViewMargins.centerXAnchor).isActive = true
+        indicator.centerYAnchor.constraint(equalTo: cardViewMargins.centerYAnchor).isActive = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        // style
+        indicator.style = .large
+        indicator.hidesWhenStopped = true
     }
     
     //MARK: - Share Action
@@ -103,8 +114,8 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     //MARK: - Picture Fetching & Updating
     
-    private func startFetchImage(initialRequest: Bool) {
-        // first time loading image data
+    private func fetchNewImage(initialRequest: Bool, for cardView: UIView) {
+        // first time requesting image data
         if initialRequest {
             catDataManager.performRequest(imageDownloadNumber: K.Data.initialImageRequestNumber)
         } else {
@@ -112,16 +123,23 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         }
     }
 
-    // load first 2 images to the 2 cardViews
+    // initial 2 images have been downloaded
     internal func dataDidFetch() {
         let imageArray = catDataManager.catImages.imageArray
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         // ensure there are more than 3 images ready to be viewed
         if imageArray.count >= 2 {
             DispatchQueue.main.async {
                 self.imageView1.image = imageArray["Image1"]
                 self.imageView2.image = imageArray["Image2"]
+                self.indicator.stopAnimating()
+
+                // add UIPanGestureRecognizer to cardView
+                self.cardView1.addGestureRecognizer(panGesture)
+                print("test")
             }
             self.imageIndex += 2
+
         }
     }
     
@@ -211,6 +229,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         */
         if card == cardView1 {
             cardView2.addGestureRecognizer(panGesture)
+            
             currentCardView = 2
             self.view.insertSubview(card, belowSubview: cardView2)
             card.center = cardDefaultCenter
@@ -218,6 +237,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             updateImageView(card)
         } else if card == cardView2 {
             cardView1.addGestureRecognizer(panGesture)
+            
             currentCardView = 1
             self.view.insertSubview(card, belowSubview: cardView1)
             card.center = cardDefaultCenter
@@ -229,25 +249,30 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
     }
     
+    //MARK: - Update Image of imageView
+    
+    // image will be updated after cardView is dismissed
     private func updateImageView(_ cardView: UIView) {
         let imageArray = catDataManager.catImages.imageArray
         
+        fetchNewImage(initialRequest: false, for: cardView)
         imageIndex += 1
+        
         switch cardView {
         case cardView1:
             if let nextImage = imageArray["Image\(imageIndex)"] {
                 imageView1.image = nextImage
             } else {
+                imageView1.image = nil
                 print("There is no new image for cardView1")
             }
-            startFetchImage(initialRequest: false)
         case cardView2:
             if let nextImage = imageArray["Image\(imageIndex)"] {
                 imageView2.image = nextImage
             } else {
+                imageView2.image = nil
                 print("There is no new image for cardView2")
             }
-            startFetchImage(initialRequest: false)
         default:
             return
         }
