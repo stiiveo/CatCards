@@ -53,10 +53,10 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     let indicator2 = UIActivityIndicatorView()
     
     // indicator is placed right at the center of the cardView
-    private func addIndicatorConstraint(indicator: UIActivityIndicatorView, constraintTo view: UIView) {
-        let cardViewMargins = view.layoutMarginsGuide
-        indicator.centerXAnchor.constraint(equalTo: cardViewMargins.centerXAnchor).isActive = true
-        indicator.centerYAnchor.constraint(equalTo: cardViewMargins.centerYAnchor).isActive = true
+    private func addIndicatorConstraint(indicator: UIActivityIndicatorView, constraintTo imageView: UIImageView) {
+        let imageViewMargins = imageView.layoutMarginsGuide
+        indicator.centerXAnchor.constraint(equalTo: imageViewMargins.centerXAnchor).isActive = true
+        indicator.centerYAnchor.constraint(equalTo: imageViewMargins.centerYAnchor).isActive = true
         indicator.translatesAutoresizingMaskIntoConstraints = false
         // style
         indicator.style = .large
