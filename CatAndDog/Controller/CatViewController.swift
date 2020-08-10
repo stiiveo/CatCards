@@ -66,12 +66,12 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     private func addIndicator(to cardView: UIView) {
         switch cardView {
         case cardView1:
-            cardView1.addSubview(indicator1)
-            addIndicatorConstraint(indicator: indicator1, constraintTo: cardView1)
+            imageView1.addSubview(indicator1)
+            addIndicatorConstraint(indicator: indicator1, constraintTo: imageView1)
             indicator1.startAnimating()
         case cardView2:
-            cardView1.addSubview(indicator2)
-            addIndicatorConstraint(indicator: indicator2, constraintTo: cardView2)
+            imageView2.addSubview(indicator2)
+            addIndicatorConstraint(indicator: indicator2, constraintTo: imageView2)
             indicator2.startAnimating()
         default:
             return
@@ -154,7 +154,6 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 self.imageIndex += 1
                 self.imageView2.image = imageArray["Image\(self.imageIndex)"]
                 self.indicator1.stopAnimating()
-                self.indicator2.stopAnimating()
 
                 // add UIPanGestureRecognizer to cardView
                 self.cardView1.addGestureRecognizer(panGesture)
@@ -203,14 +202,14 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // when user's finger left the screen
         if sender.state == .ended {
             // if card is moved to the left edge of the screen
-            if pannedCard.center.x < viewWidth / 4 && catDataManager.numberOfNewImages > 0 {
+            if pannedCard.center.x < viewWidth / 4 && catDataManager.catImages.imageArray["Image\(imageIndex - 1)"] != nil {
                 UIView.animate(withDuration: 0.2) {
                     pannedCard.center = CGPoint(x: pannedCard.center.x - 800, y: pannedCard.center.y)
                 }
                 animateCard(pannedCard, panGesture: panGesture)
             }
             // if card is moved to the right edge of the screen
-            else if pannedCard.center.x > viewWidth * 3/4 && catDataManager.numberOfNewImages > 0 {
+            else if pannedCard.center.x > viewWidth * 3/4 && catDataManager.catImages.imageArray["Image\(imageIndex - 1)"] != nil {
                 UIView.animate(withDuration: 0.2) {
                     pannedCard.center = CGPoint(x: pannedCard.center.x + 800, y: pannedCard.center.y)
                 }
@@ -277,6 +276,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
         fetchNewImage(initialRequest: false, for: cardView)
         imageIndex += 1
+        
         switch cardView {
         case cardView1:
             if let nextImage = imageArray["Image\(imageIndex)"] {
