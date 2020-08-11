@@ -279,25 +279,38 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
         switch cardView {
         case cardView1:
-            if let nextImage = imageArray["Image\(imageIndex)"] {
-                imageView1.image = nextImage
-            } else {
-                imageView1.image = nil
-                addIndicator(to: cardView)
-                print("There is no new image for cardView1")
+            checkImageAvailability { (available) in
+                if available {
+                    imageView1.image = imageArray["Image\(self.imageIndex)"]
+                    indicator1.stopAnimating()
+                } else {
+                    imageView1.image = nil
+                    addIndicator(to: cardView1)
+                    print("no new image for cardView1")
+                }
             }
         case cardView2:
-            if let nextImage = imageArray["Image\(imageIndex)"] {
-                imageView2.image = nextImage
-            } else {
-                imageView2.image = nil
-                addIndicator(to: cardView)
-                print("There is no new image for cardView2")
+            checkImageAvailability { (available) in
+                if available {
+                    imageView2.image = imageArray["Image\(imageIndex)"]
+                    indicator2.stopAnimating()
+                } else {
+                    imageView2.image = nil
+                    addIndicator(to: cardView2)
+                    print("no new image for cardView2")
+                }
             }
         default:
             return
         }
-        
+    }
+    
+    private func checkImageAvailability(completion: (Bool) -> ()) {
+        if catDataManager.catImages.imageArray["Image\(imageIndex)"] != nil {
+            completion(true)
+        } else {
+            completion(false)
+        }
     }
     
     //MARK: - Error Handling Section
