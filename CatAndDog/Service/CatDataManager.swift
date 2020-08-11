@@ -17,7 +17,6 @@ class CatDataManager {
     
     let catUrl = "https://api.thecatapi.com/v1/images/search"
     var delegate: CatDataManagerDelegate?
-    let catImages = CatImages()
     var imageIndex: Int = 0
     var imageDeleteIndex: Int = 0
     var isInitialImageSetUp: Bool = false
@@ -99,17 +98,17 @@ class CatDataManager {
     private func attachIndexToImage(_ newImage: UIImage) {
         // append new image into image array
         imageIndex += 1
-        catImages.imageArray["Image\(imageIndex)"] = newImage
+        CatImages.imageArray["Image\(imageIndex)"] = newImage
         
         // deleted old images if numbers of imageArray exceed threshold
-        if catImages.imageArray.count > K.Data.maxImageNumberStored {
+        if CatImages.imageArray.count > K.Data.maxImageNumberStored {
             deleteImage()
         }
         
         // this method only execute when 2 initial images are not loaded yet
         if isInitialImageSetUp == false {
             // inform the delegate first 2 images are ready to be loaded
-            if catImages.imageArray["Image1"] != nil && catImages.imageArray["Image2"] != nil {
+            if CatImages.imageArray["Image1"] != nil && CatImages.imageArray["Image2"] != nil {
                 delegate?.dataDidFetch()
                 isInitialImageSetUp = true
             }
@@ -118,6 +117,6 @@ class CatDataManager {
     
     private func deleteImage() {
         imageDeleteIndex += 1
-        catImages.imageArray["Image\(imageDeleteIndex)"] = nil
+        CatImages.imageArray["Image\(imageDeleteIndex)"] = nil
     }
 }

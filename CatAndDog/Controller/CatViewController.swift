@@ -79,6 +79,25 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
     }
     
+    //MARK: - Favorite Action
+    
+    @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
+        var imageToSave = UIImage()
+        switch currentDisplayCardViewIndex {
+        case 1:
+            guard let image1 = imageView1.image else { return }
+            imageToSave = image1
+        case 2:
+        guard let image2 = imageView2.image else { return }
+            imageToSave = image2
+        default:
+            print("No Image available to save")
+            return
+        }
+        CatImages.favorite.append(imageToSave)
+        print(CatImages.favorite)
+    }
+    
     //MARK: - Share Action
     
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
@@ -144,7 +163,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
 
     // initial 2 images have been downloaded
     internal func dataDidFetch() {
-        let imageArray = catDataManager.catImages.imageArray
+        let imageArray = CatImages.imageArray
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         // ensure there are more than 3 images ready to be viewed
         if imageArray.count >= 2 {
@@ -202,14 +221,14 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // when user's finger left the screen
         if sender.state == .ended {
             // if card is moved to the left edge of the screen
-            if pannedCard.center.x < viewWidth / 4 && catDataManager.catImages.imageArray["Image\(imageIndex - 1)"] != nil {
+            if pannedCard.center.x < viewWidth / 4 && CatImages.imageArray["Image\(imageIndex - 1)"] != nil {
                 UIView.animate(withDuration: 0.2) {
                     pannedCard.center = CGPoint(x: pannedCard.center.x - 800, y: pannedCard.center.y)
                 }
                 animateCard(pannedCard, panGesture: panGesture)
             }
             // if card is moved to the right edge of the screen
-            else if pannedCard.center.x > viewWidth * 3/4 && catDataManager.catImages.imageArray["Image\(imageIndex - 1)"] != nil {
+            else if pannedCard.center.x > viewWidth * 3/4 && CatImages.imageArray["Image\(imageIndex - 1)"] != nil {
                 UIView.animate(withDuration: 0.2) {
                     pannedCard.center = CGPoint(x: pannedCard.center.x + 800, y: pannedCard.center.y)
                 }
@@ -272,7 +291,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     // image will be updated after cardView is dismissed
     private func updateImageView(_ cardView: UIView) {
-        let imageArray = catDataManager.catImages.imageArray
+        let imageArray = CatImages.imageArray
         
         fetchNewImage(initialRequest: false, for: cardView)
         imageIndex += 1
@@ -306,7 +325,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     }
     
     private func checkImageAvailability(completion: (Bool) -> ()) {
-        if catDataManager.catImages.imageArray["Image\(imageIndex)"] != nil {
+        if CatImages.imageArray["Image\(imageIndex)"] != nil {
             completion(true)
         } else {
             completion(false)

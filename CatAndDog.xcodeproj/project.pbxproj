@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F639A17D24E29FB600FB6C0A /* CollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F639A17C24E29FB600FB6C0A /* CollectionViewController.swift */; };
+		F639A17F24E29FD000FB6C0A /* CollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F639A17E24E29FD000FB6C0A /* CollectionViewCell.swift */; };
 		F6746FE524C6DCF2006A2905 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6746FE424C6DCF2006A2905 /* AppDelegate.swift */; };
 		F6746FE724C6DCF2006A2905 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6746FE624C6DCF2006A2905 /* SceneDelegate.swift */; };
 		F6746FEE24C6DCF2006A2905 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F6746FEC24C6DCF2006A2905 /* Main.storyboard */; };
@@ -20,6 +22,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F639A17C24E29FB600FB6C0A /* CollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewController.swift; sourceTree = "<group>"; };
+		F639A17E24E29FD000FB6C0A /* CollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewCell.swift; sourceTree = "<group>"; };
 		F6746FE124C6DCF2006A2905 /* CatAndDog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CatAndDog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6746FE424C6DCF2006A2905 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F6746FE624C6DCF2006A2905 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -99,6 +103,8 @@
 			isa = PBXGroup;
 			children = (
 				F6746FFE24C6E245006A2905 /* CatViewController.swift */,
+				F639A17C24E29FB600FB6C0A /* CollectionViewController.swift */,
+				F639A17E24E29FD000FB6C0A /* CollectionViewCell.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -184,8 +190,10 @@
 			files = (
 				F6746FFD24C6E02C006A2905 /* CatDataManager.swift in Sources */,
 				F674700124C6E8F3006A2905 /* CatData.swift in Sources */,
+				F639A17F24E29FD000FB6C0A /* CollectionViewCell.swift in Sources */,
 				F6746FE524C6DCF2006A2905 /* AppDelegate.swift in Sources */,
 				F67E4E3224D3C571006DDE96 /* Constants.swift in Sources */,
+				F639A17D24E29FB600FB6C0A /* CollectionViewController.swift in Sources */,
 				F6746FE724C6DCF2006A2905 /* SceneDelegate.swift in Sources */,
 				F6746FFF24C6E245006A2905 /* CatViewController.swift in Sources */,
 				F67E4DEE24CE80A7006DDE96 /* CatImages.swift in Sources */,

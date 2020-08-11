@@ -9,5 +9,6 @@
 import UIKit
 
 class CatImages {
-    var imageArray = [String: UIImage]()
+    static var imageArray = [String: UIImage]()
+    static var favorite = [UIImage]()
 }
