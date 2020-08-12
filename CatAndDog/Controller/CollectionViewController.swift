@@ -8,13 +8,26 @@
 
 import UIKit
 
-private let reuseIdentifier = "Cell"
-
 class CollectionViewController: UICollectionViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        let screenWidth = UIScreen.main.bounds.width
+        let cellNumberPerRow: CGFloat = 3
+        let interCellSpacing: CGFloat = 3
+        let cellWidth = (screenWidth - (interCellSpacing * (cellNumberPerRow - 1))) / cellNumberPerRow
+        // floor the calculated width to remove any possible decimal number
+        let flooredCellWidth = floor(cellWidth)
+        
+        // set up width and spacing of each cell
+        let viewLayout = self.collectionViewLayout
+        let flowLayout = viewLayout as! UICollectionViewFlowLayout
+        // remove auto layout constraint
+        flowLayout.estimatedItemSize = .zero
+        flowLayout.itemSize = CGSize(width: flooredCellWidth, height: flooredCellWidth)
+        flowLayout.minimumLineSpacing = interCellSpacing
+        
     }
 
 
@@ -34,7 +47,7 @@ class CollectionViewController: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CollectionViewCell.cellIdentifier, for: indexPath) as! CollectionViewCell
     
-        // Configure the cell
+        // Configure each cell's imageView
         cell.imageView.image = CatImages.favorite[indexPath.item]
     
         return cell

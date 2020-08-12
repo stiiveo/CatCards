@@ -88,11 +88,6 @@
                                     <subviews>
                                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="qJR-ZH-yiF">
                                             <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
-                                            <constraints>
-                                                <constraint firstAttribute="height" constant="128" id="6An-NA-tqx"/>
-                                                <constraint firstAttribute="width" secondItem="qJR-ZH-yiF" secondAttribute="height" multiplier="1:1" id="a3L-Xm-vZh"/>
-                                                <constraint firstAttribute="width" constant="128" id="jwp-5u-OEL"/>
-                                            </constraints>
                                         </imageView>
                                     </subviews>
                                     <constraints>
@@ -103,8 +98,7 @@
                                     </constraints>
                                 </collectionViewCellContentView>
                                 <connections>
-                                    <outlet property="imageView" destination="qJR-ZH-yiF" id="B7W-dX-bOR"/>
-                                    <outlet property="widthConstraint" destination="jwp-5u-OEL" id="K1i-VC-suJ"/>
+                                    <outlet property="imageView" destination="qJR-ZH-yiF" id="IZa-tu-fVL"/>
                                 </connections>
                             </collectionViewCell>
                         </cells>
