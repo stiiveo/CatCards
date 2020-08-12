@@ -95,7 +95,6 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             return
         }
         CatImages.favorite.append(imageToSave)
-        print(CatImages.favorite)
     }
     
     //MARK: - Share Action

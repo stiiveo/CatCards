@@ -44,7 +44,7 @@
                         <viewLayoutGuide key="safeArea" id="E8D-Zx-PRV"/>
                     </view>
                     <navigationItem key="navigationItem" id="mlT-4e-zaz">
-                        <barButtonItem key="rightBarButtonItem" style="plain" id="H2a-3l-2hV">
+                        <barButtonItem key="rightBarButtonItem" id="H2a-3l-2hV">
                             <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="2mU-CG-BP0">
                                 <rect key="frame" x="276" y="5.5" width="83" height="33"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
