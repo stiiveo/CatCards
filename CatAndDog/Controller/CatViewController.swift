@@ -94,7 +94,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             print("No Image available to save")
             return
         }
-        CatImages.favorite.append(imageToSave)
+        CatData.favorite.append(imageToSave)
     }
     
     //MARK: - Share Action
@@ -161,7 +161,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     }
 
     internal func dataDidFetch() {
-        let imageArray = CatImages.imageArray
+        let imageArray = CatData.imageArray
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         
         // update the imageViews when 2 images have been downloaded
@@ -318,7 +318,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     // image will be updated after cardView is dismissed
     private func updateImageView(_ cardView: UIView) {
-        let imageArray = CatImages.imageArray
+        let imageArray = CatData.imageArray
         
         switch cardView {
         case cardView1:
@@ -350,7 +350,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     // make sure there's image available to be loaded
     private func checkImageAvailability(completion: (Bool) -> ()) {
-        if CatImages.imageArray["Image\(imageIndex + 1)"] != nil {
+        if CatData.imageArray["Image\(imageIndex + 1)"] != nil {
             completion(true)
         } else {
             completion(false)

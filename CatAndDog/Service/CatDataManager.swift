@@ -73,7 +73,7 @@ class CatDataManager {
     private func parseJSON(data: Data) {
         let jsonDecoder = JSONDecoder()
         do {
-            let decodedData = try jsonDecoder.decode(CatData.self, from: data)
+            let decodedData = try jsonDecoder.decode(CatImageUrl.self, from: data)
             downloadImage(url: decodedData.url)
         } catch {
             debugPrint(error.localizedDescription)
@@ -97,10 +97,10 @@ class CatDataManager {
     private func attachIndexToImage(_ newImage: UIImage) {
         // append new image into image array
         imageIndex += 1
-        CatImages.imageArray["Image\(imageIndex)"] = newImage
+        CatData.imageArray["Image\(imageIndex)"] = newImage
         
         // deleted old images if numbers of imageArray exceed threshold
-        if CatImages.imageArray.count > K.Data.maxImageNumberStored {
+        if CatData.imageArray.count > K.Data.maxImageNumberStored {
             deleteImage()
         }
         delegate?.dataDidFetch()
@@ -108,6 +108,6 @@ class CatDataManager {
     
     private func deleteImage() {
         imageDeleteIndex += 1
-        CatImages.imageArray["Image\(imageDeleteIndex)"] = nil
+        CatData.imageArray["Image\(imageDeleteIndex)"] = nil
     }
 }

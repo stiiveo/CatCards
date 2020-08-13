@@ -2,12 +2,13 @@
 //  CatData.swift
 //  CatAndDog
 //
-//  Created by Jason Ou Yang on 2020/7/21.
+//  Created by Jason Ou Yang on 2020/7/27.
 //  Copyright © 2020 Jason Ou Yang. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
-struct CatData: Decodable {
-    let url: String
+class CatData {
+    static var imageArray = [String: UIImage]()
+    static var favorite = [UIImage]()
 }
