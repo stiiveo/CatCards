@@ -20,6 +20,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     var cardViewCenterPosition: CGPoint?
     var imageIndex: Int = 0
     var currentDisplayCardViewIndex: Int = 1
+    var initialSetupComplete: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,7 +31,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         toolBar.heightAnchor.constraint(equalToConstant: K.ToolBar.height).isActive = true
         
         // download designated number of new images into imageArray
-        fetchNewImage(initialRequest: true, for: cardView1)
+        fetchNewImage(initialRequest: true)
 
         // create UIView, ImageView and constraints
         view.addSubview(cardView1)
@@ -44,7 +45,6 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         addImageViewConstraint(imageView: imageView2, contraintTo: cardView2)
         
         cardViewCenterPosition = cardView1.center
-        
     }
     
     //MARK: - Activity Indicator
@@ -150,31 +150,42 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     //MARK: - Picture Fetching & Updating
     
-    private func fetchNewImage(initialRequest: Bool, for cardView: UIView) {
+    private func fetchNewImage(initialRequest: Bool) {
         // first time requesting image data
         if initialRequest {
             catDataManager.performRequest(imageDownloadNumber: K.Data.initialImageRequestNumber)
-            addIndicator(to: cardView)
+            addIndicator(to: cardView1)
         } else {
             catDataManager.performRequest(imageDownloadNumber: K.Data.imageRequestNumber)
         }
     }
 
-    // initial 2 images have been downloaded
     internal func dataDidFetch() {
         let imageArray = CatImages.imageArray
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
-        // ensure there are more than 3 images ready to be viewed
-        if imageArray.count >= 2 {
-            DispatchQueue.main.async {
+        
+        // update the imageViews when 2 images have been downloaded
+        DispatchQueue.main.async {
+            if self.imageIndex < 2 && imageArray.count >= 2 {
                 self.imageIndex += 1
                 self.imageView1.image = imageArray["Image\(self.imageIndex)"]
                 self.imageIndex += 1
                 self.imageView2.image = imageArray["Image\(self.imageIndex)"]
                 self.indicator1.stopAnimating()
-
+                
                 // add UIPanGestureRecognizer to cardView
                 self.cardView1.addGestureRecognizer(panGesture)
+                
+                self.initialSetupComplete = true
+            }
+            else if self.initialSetupComplete == true {
+                // update both imageViews' image if it's not loaded yet
+                if self.imageView1.image == nil {
+                    self.updateImageView(self.cardView1)
+                }
+                else if self.imageView2.image == nil {
+                    self.updateImageView(self.cardView2)
+                }
             }
         }
     }
@@ -196,6 +207,17 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         // 1.0 Radian = 180º
         let rotationAtMax: CGFloat = 1.0
         let cardRotationRadian = (rotationAtMax / 4) * (xAxisPanOffset / (viewWidth / 3))
+        
+        // determine the current displayed imageView
+        var currentImageView = UIImageView()
+        switch currentDisplayCardViewIndex {
+        case 1:
+            currentImageView = imageView1
+        case 2:
+            currentImageView = imageView2
+        default:
+            return
+        }
         
         // card move to where the user's finger is
         pannedCard.center = CGPoint(x: cardDefaultPosition.x + fingerMovement.x, y: cardDefaultPosition.y + fingerMovement.y)
@@ -219,22 +241,24 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
         // when user's finger left the screen
         if sender.state == .ended {
-            // if card is moved to the left edge of the screen
-            if pannedCard.center.x < viewWidth / 4 && CatImages.imageArray["Image\(imageIndex - 1)"] != nil {
+            /*
+             Card can only be dismissed when it's dragged to the side of the screen
+             and the current image view's image is not unavailable
+             */
+            if pannedCard.center.x < viewWidth / 4 && currentImageView.image != nil {
                 UIView.animate(withDuration: 0.2) {
                     pannedCard.center = CGPoint(x: pannedCard.center.x - 800, y: pannedCard.center.y)
                 }
                 animateCard(pannedCard, panGesture: panGesture)
             }
-            // if card is moved to the right edge of the screen
-            else if pannedCard.center.x > viewWidth * 3/4 && CatImages.imageArray["Image\(imageIndex - 1)"] != nil {
+            else if pannedCard.center.x > viewWidth * 3/4 && currentImageView.image != nil {
                 UIView.animate(withDuration: 0.2) {
                     pannedCard.center = CGPoint(x: pannedCard.center.x + 800, y: pannedCard.center.y)
                 }
                 animateCard(pannedCard, panGesture: panGesture)
             }
+            // animate card back to origianl position, opacity and rotation state
             else {
-                // animate card back to origianl position, opacity and rotation state
                 UIView.animate(withDuration: 0.2) {
                     pannedCard.center = cardDefaultPosition
                     pannedCard.alpha = 1.0
@@ -262,7 +286,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         /*
          1. cardView at lower layer has gesture recognizer attached
          2. the removed cardView is inserted beneath it
-         3. and has its position and contraint set
+         3. the newly generated card's position and contraint is set
+         4. download new image into image array
+         5. update new card's imageView
         */
         if card == cardView1 {
             cardView2.addGestureRecognizer(panGesture)
@@ -271,6 +297,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             self.view.insertSubview(card, belowSubview: cardView2)
             card.center = cardDefaultCenter
             addCardViewConstraint(cardView: cardView1)
+            fetchNewImage(initialRequest: false)
             updateImageView(card)
         } else if card == cardView2 {
             cardView1.addGestureRecognizer(panGesture)
@@ -279,9 +306,10 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             self.view.insertSubview(card, belowSubview: cardView1)
             card.center = cardDefaultCenter
             addCardViewConstraint(cardView: cardView2)
+            fetchNewImage(initialRequest: false)
             updateImageView(card)
         } else {
-            print("The dragged away card is neither cardView1 or cardView2")
+            print("Error: The dismissed card is neither cardView1 nor cardView2")
         }
         
     }
@@ -292,30 +320,27 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     private func updateImageView(_ cardView: UIView) {
         let imageArray = CatImages.imageArray
         
-        fetchNewImage(initialRequest: false, for: cardView)
-        imageIndex += 1
-        
         switch cardView {
         case cardView1:
             checkImageAvailability { (available) in
                 if available {
+                    imageIndex += 1
                     imageView1.image = imageArray["Image\(self.imageIndex)"]
                     indicator1.stopAnimating()
                 } else {
                     imageView1.image = nil
                     addIndicator(to: cardView1)
-                    print("no new image for cardView1")
                 }
             }
         case cardView2:
             checkImageAvailability { (available) in
                 if available {
-                    imageView2.image = imageArray["Image\(imageIndex)"]
+                    imageIndex += 1
+                    imageView2.image = imageArray["Image\(self.imageIndex)"]
                     indicator2.stopAnimating()
                 } else {
                     imageView2.image = nil
                     addIndicator(to: cardView2)
-                    print("no new image for cardView2")
                 }
             }
         default:
@@ -323,8 +348,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         }
     }
     
+    // make sure there's image available to be loaded
     private func checkImageAvailability(completion: (Bool) -> ()) {
-        if CatImages.imageArray["Image\(imageIndex)"] != nil {
+        if CatImages.imageArray["Image\(imageIndex + 1)"] != nil {
             completion(true)
         } else {
             completion(false)

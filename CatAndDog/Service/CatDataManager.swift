@@ -19,7 +19,6 @@ class CatDataManager {
     var delegate: CatDataManagerDelegate?
     var imageIndex: Int = 0
     var imageDeleteIndex: Int = 0
-    var isInitialImageSetUp: Bool = false
     var numberOfNewImages: Int = 0
     
     func performRequest(imageDownloadNumber: Int) {
@@ -104,15 +103,7 @@ class CatDataManager {
         if CatImages.imageArray.count > K.Data.maxImageNumberStored {
             deleteImage()
         }
-        
-        // this method only execute when 2 initial images are not loaded yet
-        if isInitialImageSetUp == false {
-            // inform the delegate first 2 images are ready to be loaded
-            if CatImages.imageArray["Image1"] != nil && CatImages.imageArray["Image2"] != nil {
-                delegate?.dataDidFetch()
-                isInitialImageSetUp = true
-            }
-        }
+        delegate?.dataDidFetch()
     }
     
     private func deleteImage() {
