@@ -17,6 +17,8 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     let cardView2 = UIView()
     let imageView1 = UIImageView()
     let imageView2 = UIImageView()
+    var cardOneDataID = ""
+    var cardTwoDataID = ""
     var cardViewDefaultPosition: CGPoint?
     var dataIndex: Int = 0
     var currentCardView: Int = 1
@@ -82,19 +84,25 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     //MARK: - Favorite Action
     
     @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
-        var imageToSave = UIImage()
+        var data: FavoriteCat?
         switch currentCardView {
         case 1:
             guard let image1 = imageView1.image else { return }
-            imageToSave = image1
+            data = FavoriteCat(id: cardOneDataID, image: image1, date: Date())
+            print("cardOneDataID = \(cardOneDataID)")
         case 2:
         guard let image2 = imageView2.image else { return }
-            imageToSave = image2
+            data = FavoriteCat(id: cardTwoDataID, image: image2, date: Date())
+            print("cardTwoDataID = \(cardTwoDataID)")
         default:
-            print("No Image available to save")
+            print("Value of currentCardView is invalid.")
             return
         }
-//        FavoriteDataManager.favoriteArray.append(imageToSave)
+        guard let dataToSave = data else {
+            print("Data is invalid to be appended into favorite array.")
+            return
+        }
+        FavoriteDataManager.favoriteArray.append(dataToSave)
     }
     
     //MARK: - Share Action
@@ -168,7 +176,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             if let firstData = dataSet[1], let secondData = dataSet[2] {
                 DispatchQueue.main.async {
                     self.imageView1.image = firstData.image
+                    self.cardOneDataID = firstData.id
                     self.imageView2.image = secondData.image
+                    self.cardTwoDataID = secondData.id
                     self.indicator1.stopAnimating()
 
                     // add UIPanGestureRecognizer to cardView
@@ -190,7 +200,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     //MARK: - Card Animation & Rotation Section
     
-    /// Handling of cardView's panning effect which is responded according to user's input via finger dragging on the cardView itself
+    /// Handling the cardView's panning effect which is responded to user's input via finger dragging on the cardView itself.
     /// - Parameter sender: A concrete subclass of UIGestureRecognizer that looks for panning (dragging) gestures.
     @objc func panGestureHandler(_ sender: UIPanGestureRecognizer) {
         guard let cardView = sender.view else { return }
@@ -318,12 +328,15 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         let dataSet = catDataManager.serializedData
         if let newData = dataSet[dataIndex + 1] {
             let newImage = newData.image
+            let newID = newData.id
             if currentCardView == 2 {
                 imageView1.image = newImage
+                cardOneDataID = newID
                 indicator1.stopAnimating()
                 dataIndex += 1
             } else {
                 imageView2.image = newImage
+                cardTwoDataID = newID
                 indicator2.stopAnimating()
                 dataIndex += 1
             }

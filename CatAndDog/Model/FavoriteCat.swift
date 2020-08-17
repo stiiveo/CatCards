@@ -9,7 +9,7 @@
 import UIKit
 
 struct FavoriteCat {
-    let dateSaved: Date
-    let image: UIImage
     let id: String
+    let image: UIImage
+    let date: Date
 }
