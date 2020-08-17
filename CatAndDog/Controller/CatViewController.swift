@@ -23,6 +23,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     var dataIndex: Int = 0
     var currentCardView: Int = 1
     var isInitialImageLoaded: Bool = false
+    var isDataAvailable: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +34,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         toolBar.heightAnchor.constraint(equalToConstant: K.ToolBar.height).isActive = true
         
         // download designated number of new images into imageArray
-        fetchNewImage(initialRequest: true)
+        fetchNewData(initialRequest: true)
 
         // create UIView, ImageView and constraints
         view.addSubview(cardView1)
@@ -156,19 +157,20 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         imageView.clipsToBounds = true
     }
     
-    //MARK: - Picture Fetching & Updating
+    //MARK: - Data Fetching & Updating
     
-    private func fetchNewImage(initialRequest: Bool) {
+    private func fetchNewData(initialRequest: Bool) {
         // first time requesting image data
         if initialRequest {
-            catDataManager.performRequest(imageDownloadNumber: K.Data.initialImageRequestNumber)
+            catDataManager.performRequest(imageDownloadNumber: K.Data.initialDataRequestNumber)
             addIndicator(to: cardView1)
         } else {
-            catDataManager.performRequest(imageDownloadNumber: K.Data.imageRequestNumber)
+            catDataManager.performRequest(imageDownloadNumber: K.Data.dataRequestNumber)
         }
     }
 
     internal func dataDidFetch() {
+        print("DataIndex = \(catDataManager.dataIndex)")
         let dataSet = catDataManager.serializedData
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         // Display the first 2 images
@@ -183,6 +185,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                     // add UIPanGestureRecognizer to cardView
                     self.cardView1.addGestureRecognizer(panGesture)
                 }
+                isDataAvailable = true
             }
         } else if dataIndex == 1 {
             if let secondData = dataSet[self.dataIndex + 1] {
@@ -193,6 +196,10 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                     self.indicator2.stopAnimating()
                 }
             }
+        }
+        // Update data if previous process of updating data did not succeed
+        if isDataAvailable == false {
+                updateImageView()
         }
     }
     
@@ -303,16 +310,16 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             self.view.insertSubview(card, belowSubview: cardView2)
             card.center = cardDefaultCenter
             addCardViewConstraint(cardView: card)
-            updateImageView(card)
-            fetchNewImage(initialRequest: false)
+            updateImageView()
+            fetchNewData(initialRequest: false)
         } else if card == cardView2 {
             currentCardView = 1
             cardView1.addGestureRecognizer(panGesture)
             self.view.insertSubview(card, belowSubview: cardView1)
             card.center = cardDefaultCenter
             addCardViewConstraint(cardView: card)
-            updateImageView(card)
-            fetchNewImage(initialRequest: false)
+            updateImageView()
+            fetchNewData(initialRequest: false)
         } else {
             print("Error: The dismissed card is neither cardView1 nor cardView2")
         }
@@ -321,31 +328,45 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     //MARK: - Update Image of imageView
     
-    // Updata cardView's image which was at the bottom if new image is availble
-    private func updateImageView(_ cardView: UIView) {
+    // Update cardView which was at the bottom if new data is availble
+    private func updateImageView() {
+        print("CardDataIndex = \(self.dataIndex)")
         let dataSet = catDataManager.serializedData
+        
         if let newData = dataSet[dataIndex + 1] {
+            // newData does exist
             let newImage = newData.image
             let newID = newData.id
-            if currentCardView == 2 {
-                imageView1.image = newImage
+            if dataIndex % 2 == 0 {
+                DispatchQueue.main.async {
+                    self.imageView1.image = newImage
+                    self.indicator1.stopAnimating()
+                }
                 cardOneDataID = newID
-                indicator1.stopAnimating()
                 dataIndex += 1
             } else {
-                imageView2.image = newImage
+                DispatchQueue.main.async {
+                    self.imageView2.image = newImage
+                    self.indicator2.stopAnimating()
+                }
                 cardTwoDataID = newID
-                indicator2.stopAnimating()
                 dataIndex += 1
             }
+            isDataAvailable = true
         } else {
             // newData does not exist
-            if cardView == cardView1 {
-                imageView1.image = nil
-                addIndicator(to: cardView1)
+            isDataAvailable = false
+            
+            if dataIndex % 2 == 0 {
+                DispatchQueue.main.async {
+                    self.imageView1.image = nil
+                    self.addIndicator(to: self.cardView1)
+                }
             } else {
-                imageView2.image = nil
-                addIndicator(to: cardView2)
+                DispatchQueue.main.async {
+                    self.imageView2.image = nil
+                    self.addIndicator(to: self.cardView2)
+                }
             }
         }
     }

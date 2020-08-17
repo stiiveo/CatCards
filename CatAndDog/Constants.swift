@@ -10,8 +10,8 @@ import UIKit
 
 struct K {
     struct Data {
-        static let initialImageRequestNumber: Int = 6
-        static let imageRequestNumber: Int = 1
+        static let initialDataRequestNumber: Int = 6
+        static let dataRequestNumber: Int = 1
         static let maxDataNumberStored: Int = 7
         static let dataToExclude = ["N_54iB3Kl", "7XwqnDvi8", "cpj", "gWBdC-NJT", "VmQj-QgPi", "FID3LLZfr", "MTc2ODA1Mw", "NlctBeF8A", "0QFWQ4b_6", "gEvrbm9Z2"]
     }
