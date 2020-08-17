@@ -8,7 +8,8 @@
 
 import UIKit
 
-class CatData {
-    static var imageArray = [String: UIImage]()
-    static var favorite = [UIImage]()
+struct CatData {
+    let imageURL: URL
+    let id: String
+    let image: UIImage
 }

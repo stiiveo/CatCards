@@ -17,9 +17,8 @@ class CatDataManager {
     
     let catUrl = "https://api.thecatapi.com/v1/images/search"
     var delegate: CatDataManagerDelegate?
-    var imageIndex: Int = 0
-    var imageDeleteIndex: Int = 0
-    var numberOfNewImages: Int = 0
+    var serializedData: [Int: CatData] = [:]
+    var dataIndex: Int = 0
     
     func performRequest(imageDownloadNumber: Int) {
         
@@ -73,41 +72,41 @@ class CatDataManager {
     private func parseJSON(data: Data) {
         let jsonDecoder = JSONDecoder()
         do {
-            let decodedData = try jsonDecoder.decode(CatImageUrl.self, from: data)
-            downloadImage(url: decodedData.url)
+            let decodedData = try jsonDecoder.decode(JSONModel.self, from: data)
+            guard let imageURL = URL(string: decodedData.url) else {
+                print("Failed to convert url string to URL object.")
+                return
+            }
+            let newImage = downloadImage(url: imageURL)
+            let newID = decodedData.id
+            
+            // Construct new CatData object and append to catDataArray
+            dataIndex += 1
+            let newData = CatData(imageURL: imageURL, id: newID, image: newImage)
+            serializedData[dataIndex] = newData
+            
+            // Remove the oldest data if numbers of catDataArray exceed threshold
+            if serializedData.count > K.Data.maxDataNumberStored {
+                serializedData[dataIndex - K.Data.maxDataNumberStored] = nil
+            }
+            // Execute code in CatViewController
+            delegate?.dataDidFetch()
         } catch {
             debugPrint(error.localizedDescription)
         }
     }
     
-    private func downloadImage(url: String) {
-        guard let url = URL(string: url) else { print("Failed to convert JSON's url to URL obj."); return }
+    private func downloadImage(url: URL) -> UIImage {
         do {
             let imageData = try Data(contentsOf: url)
-            guard let image = UIImage(data: imageData) else { print("Failed to convert imageData into UIImage obj."); return }
-            numberOfNewImages += 1
-            
-            // attach index number to each downloaded image
-            attachIndexToImage(image)
+            guard let image = UIImage(data: imageData) else {
+                print("Failed to convert imageData into UIImage object.")
+                return UIImage(named: "default")!
+            }
+            return image
         } catch {
-            debugPrint(error.localizedDescription)
+            print("Error occured in the process of downloading and converting image data. Error: \(error)")
         }
-    }
-    
-    private func attachIndexToImage(_ newImage: UIImage) {
-        // append new image into image array
-        imageIndex += 1
-        CatData.imageArray["Image\(imageIndex)"] = newImage
-        
-        // deleted old images if numbers of imageArray exceed threshold
-        if CatData.imageArray.count > K.Data.maxImageNumberStored {
-            deleteImage()
-        }
-        delegate?.dataDidFetch()
-    }
-    
-    private func deleteImage() {
-        imageDeleteIndex += 1
-        CatData.imageArray["Image\(imageDeleteIndex)"] = nil
+        return UIImage(named: "default")!
     }
 }

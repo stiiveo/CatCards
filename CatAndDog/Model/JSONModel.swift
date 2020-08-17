@@ -8,6 +8,7 @@
 
 import Foundation
 
-struct CatImageUrl: Decodable {
+struct JSONModel: Decodable {
+    let id: String
     let url: String
 }

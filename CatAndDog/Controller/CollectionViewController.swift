@@ -41,14 +41,14 @@ class CollectionViewController: UICollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of items
-        return CatData.favorite.count
+        return FavoriteDataManager.favoriteArray.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CollectionViewCell.cellIdentifier, for: indexPath) as! CollectionViewCell
     
         // Configure each cell's imageView
-        cell.imageView.image = CatData.favorite[indexPath.item]
+        cell.imageView.image = FavoriteDataManager.favoriteArray[indexPath.item].image
     
         return cell
     }

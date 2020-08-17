@@ -17,10 +17,10 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     let cardView2 = UIView()
     let imageView1 = UIImageView()
     let imageView2 = UIImageView()
-    var cardViewCenterPosition: CGPoint?
-    var imageIndex: Int = 0
-    var currentDisplayCardViewIndex: Int = 1
-    var initialSetupComplete: Bool = false
+    var cardViewDefaultPosition: CGPoint?
+    var dataIndex: Int = 0
+    var currentCardView: Int = 1
+    var isInitialImageLoaded: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,7 +44,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         addImageViewConstraint(imageView: imageView1, contraintTo: cardView1)
         addImageViewConstraint(imageView: imageView2, contraintTo: cardView2)
         
-        cardViewCenterPosition = cardView1.center
+        cardViewDefaultPosition = cardView1.center
     }
     
     //MARK: - Activity Indicator
@@ -83,7 +83,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
         var imageToSave = UIImage()
-        switch currentDisplayCardViewIndex {
+        switch currentCardView {
         case 1:
             guard let image1 = imageView1.image else { return }
             imageToSave = image1
@@ -94,14 +94,14 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             print("No Image available to save")
             return
         }
-        CatData.favorite.append(imageToSave)
+//        FavoriteDataManager.favoriteArray.append(imageToSave)
     }
     
     //MARK: - Share Action
     
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
         var imageToShare = UIImage()
-        switch currentDisplayCardViewIndex {
+        switch currentCardView {
         case 1:
             guard let image1 = imageView1.image else { return }
             imageToShare = image1
@@ -161,39 +161,40 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     }
 
     internal func dataDidFetch() {
-        let imageArray = CatData.imageArray
+        let dataSet = catDataManager.serializedData
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
-        
-        // update the imageViews when 2 images have been downloaded
-        DispatchQueue.main.async {
-            if self.imageIndex < 2 && imageArray.count >= 2 {
-                self.imageIndex += 1
-                self.imageView1.image = imageArray["Image\(self.imageIndex)"]
-                self.imageIndex += 1
-                self.imageView2.image = imageArray["Image\(self.imageIndex)"]
-                self.indicator1.stopAnimating()
-                
-                // add UIPanGestureRecognizer to cardView
-                self.cardView1.addGestureRecognizer(panGesture)
-                
-                self.initialSetupComplete = true
-            }
-            else if self.initialSetupComplete == true {
-                // update both imageViews' image if it's not loaded yet
-                if self.imageView1.image == nil {
-                    self.updateImageView(self.cardView1)
+        // Display the first 2 images
+        if dataIndex < 2 {
+            if let firstData = dataSet[1], let secondData = dataSet[2] {
+                DispatchQueue.main.async {
+                    self.imageView1.image = firstData.image
+                    self.imageView2.image = secondData.image
+                    self.indicator1.stopAnimating()
+
+                    // add UIPanGestureRecognizer to cardView
+                    self.cardView1.addGestureRecognizer(panGesture)
                 }
-                else if self.imageView2.image == nil {
-                    self.updateImageView(self.cardView2)
-                }
+                self.dataIndex += 2
+//                self.isInitialImageLoaded = true
             }
+        } else {
+//            DispatchQueue.main.async {
+//                if self.indicator1.isAnimating == true {
+//                    self.updateImageView(self.cardView1)
+//                } else if self.indicator2.isAnimating == true {
+//                    self.updateImageView(self.cardView2)
+//                }
+//            }
         }
     }
     
     //MARK: - Card Animation & Rotation Section
     
+    /// Handling of cardView's panning effect which is responded according to user's input via finger dragging on the cardView itself
+    /// - Parameter sender: A concrete subclass of UIGestureRecognizer that looks for panning (dragging) gestures.
     @objc func panGestureHandler(_ sender: UIPanGestureRecognizer) {
-        guard let pannedCard = sender.view else { return }
+        guard let cardView = sender.view else { return }
+        
         let viewWidth = view.frame.width
         let cardDefaultPosition = CGPoint(x: self.view.center.x, y: self.view.center.y)
         let panGesture = sender
@@ -202,7 +203,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         let fingerMovement = sender.translation(in: view)
         
         // amount of offset the card moved from its original position
-        let xAxisPanOffset = pannedCard.center.x - cardDefaultPosition.x
+        let xAxisPanOffset = cardView.center.x - cardDefaultPosition.x
         
         // 1.0 Radian = 180º
         let rotationAtMax: CGFloat = 1.0
@@ -210,7 +211,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
         // determine the current displayed imageView
         var currentImageView = UIImageView()
-        switch currentDisplayCardViewIndex {
+        switch currentCardView {
         case 1:
             currentImageView = imageView1
         case 2:
@@ -220,10 +221,10 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         }
         
         // card move to where the user's finger is
-        pannedCard.center = CGPoint(x: cardDefaultPosition.x + fingerMovement.x, y: cardDefaultPosition.y + fingerMovement.y)
+        cardView.center = CGPoint(x: cardDefaultPosition.x + fingerMovement.x, y: cardDefaultPosition.y + fingerMovement.y)
         
         // card's rotation increase when it approaches the side edge of the screen
-        pannedCard.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
+        cardView.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
         
         /*
          The second card is visible when first card is dragged
@@ -232,7 +233,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             and inserts below the cardView
          */
         if sender.state == .began {
-            if pannedCard == cardView1 {
+            if cardView == cardView1 {
                 cardView2.isHidden = false
             } else {
                 cardView1.isHidden = false
@@ -245,69 +246,65 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
              Card can only be dismissed when it's dragged to the side of the screen
              and the current image view's image is not unavailable
              */
-            if pannedCard.center.x < viewWidth / 4 && currentImageView.image != nil {
+            if cardView.center.x < viewWidth / 4 && currentImageView.image != nil {
                 UIView.animate(withDuration: 0.2) {
-                    pannedCard.center = CGPoint(x: pannedCard.center.x - 800, y: pannedCard.center.y)
+                    cardView.center = CGPoint(x: cardView.center.x - 400, y: cardView.center.y)
                 }
-                animateCard(pannedCard, panGesture: panGesture)
+                animateCard(cardView, panGesture: panGesture)
             }
-            else if pannedCard.center.x > viewWidth * 3/4 && currentImageView.image != nil {
+            else if cardView.center.x > viewWidth * 3/4 && currentImageView.image != nil {
                 UIView.animate(withDuration: 0.2) {
-                    pannedCard.center = CGPoint(x: pannedCard.center.x + 800, y: pannedCard.center.y)
+                    cardView.center = CGPoint(x: cardView.center.x + 400, y: cardView.center.y)
                 }
-                animateCard(pannedCard, panGesture: panGesture)
+                animateCard(cardView, panGesture: panGesture)
             }
             // animate card back to origianl position, opacity and rotation state
             else {
                 UIView.animate(withDuration: 0.2) {
-                    pannedCard.center = cardDefaultPosition
-                    pannedCard.alpha = 1.0
-                    pannedCard.transform = CGAffineTransform.identity
+                    cardView.center = cardDefaultPosition
+                    cardView.transform = CGAffineTransform.identity
                 }
             }
         }
     }
     
     private func animateCard(_ card: UIView, panGesture: UIPanGestureRecognizer) {
-        guard let cardDefaultCenter = cardViewCenterPosition else { return }
+        guard let cardDefaultCenter = cardViewDefaultPosition else { return }
         
         /*
-         1. the card is hidden
-         2. remove attach to gesture recognizer
-         3. has rotation back to original degree
-         4. and removed from super view
+         1. The dismissed card is hidden
+         2. Remove attach to gesture recognizer
+         3. Has rotation back to original degree
+         4. Removed from super view
          */
         card.isHidden = true
         card.removeGestureRecognizer(panGesture)
         card.transform = CGAffineTransform.identity
         card.removeFromSuperview()
-        catDataManager.numberOfNewImages -= 1
         
         /*
-         1. cardView at lower layer has gesture recognizer attached
-         2. the removed cardView is inserted beneath it
-         3. the newly generated card's position and contraint is set
-         4. download new image into image array
-         5. update new card's imageView
+         1. CardView that was at the bottom has gesture recognizer attached
+         2. The dismissed cardView is inserted beneath old cardView
+         3. Set new cardView's position and contraint
+         4. Update new card's imageView
+         5. Download new image into image array
         */
         if card == cardView1 {
+            currentCardView = 2
             cardView2.addGestureRecognizer(panGesture)
-            
-            currentDisplayCardViewIndex = 2
             self.view.insertSubview(card, belowSubview: cardView2)
             card.center = cardDefaultCenter
-            addCardViewConstraint(cardView: cardView1)
-            fetchNewImage(initialRequest: false)
+            addCardViewConstraint(cardView: card)
             updateImageView(card)
+            fetchNewImage(initialRequest: false)
         } else if card == cardView2 {
+            currentCardView = 1
             cardView1.addGestureRecognizer(panGesture)
-            
-            currentDisplayCardViewIndex = 1
             self.view.insertSubview(card, belowSubview: cardView1)
             card.center = cardDefaultCenter
-            addCardViewConstraint(cardView: cardView2)
-            fetchNewImage(initialRequest: false)
+            addCardViewConstraint(cardView: card)
             updateImageView(card)
+            fetchNewImage(initialRequest: false)
         } else {
             print("Error: The dismissed card is neither cardView1 nor cardView2")
         }
@@ -316,44 +313,29 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     //MARK: - Update Image of imageView
     
-    // image will be updated after cardView is dismissed
+    // Updata cardView's image which was at the bottom if new image is availble
     private func updateImageView(_ cardView: UIView) {
-        let imageArray = CatData.imageArray
-        
-        switch cardView {
-        case cardView1:
-            checkImageAvailability { (available) in
-                if available {
-                    imageIndex += 1
-                    imageView1.image = imageArray["Image\(self.imageIndex)"]
-                    indicator1.stopAnimating()
-                } else {
-                    imageView1.image = nil
-                    addIndicator(to: cardView1)
-                }
+        let dataSet = catDataManager.serializedData
+        if let newData = dataSet[dataIndex + 1] {
+            let newImage = newData.image
+            if currentCardView == 2 {
+                imageView1.image = newImage
+                indicator1.stopAnimating()
+                dataIndex += 1
+            } else {
+                imageView2.image = newImage
+                indicator2.stopAnimating()
+                dataIndex += 1
             }
-        case cardView2:
-            checkImageAvailability { (available) in
-                if available {
-                    imageIndex += 1
-                    imageView2.image = imageArray["Image\(self.imageIndex)"]
-                    indicator2.stopAnimating()
-                } else {
-                    imageView2.image = nil
-                    addIndicator(to: cardView2)
-                }
-            }
-        default:
-            return
-        }
-    }
-    
-    // make sure there's image available to be loaded
-    private func checkImageAvailability(completion: (Bool) -> ()) {
-        if CatData.imageArray["Image\(imageIndex + 1)"] != nil {
-            completion(true)
         } else {
-            completion(false)
+            // newData does not exist
+            if cardView == cardView1 {
+                imageView1.image = nil
+                addIndicator(to: cardView1)
+            } else {
+                imageView2.image = nil
+                addIndicator(to: cardView2)
+            }
         }
     }
     
