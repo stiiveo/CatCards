@@ -172,29 +172,27 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         let dataSet = catDataManager.serializedData
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         // Display the first 2 images
-        if dataIndex < 2 {
-            if let firstData = dataSet[1], let secondData = dataSet[2] {
+        if dataIndex == 0 {
+            if let firstData = dataSet[self.dataIndex + 1] {
                 DispatchQueue.main.async {
                     self.imageView1.image = firstData.image
                     self.cardOneDataID = firstData.id
-                    self.imageView2.image = secondData.image
-                    self.cardTwoDataID = secondData.id
+                    self.dataIndex += 1
                     self.indicator1.stopAnimating()
-
+                    
                     // add UIPanGestureRecognizer to cardView
                     self.cardView1.addGestureRecognizer(panGesture)
                 }
-                self.dataIndex += 2
-//                self.isInitialImageLoaded = true
             }
-        } else {
-//            DispatchQueue.main.async {
-//                if self.indicator1.isAnimating == true {
-//                    self.updateImageView(self.cardView1)
-//                } else if self.indicator2.isAnimating == true {
-//                    self.updateImageView(self.cardView2)
-//                }
-//            }
+        } else if dataIndex == 1 {
+            if let secondData = dataSet[self.dataIndex + 1] {
+                DispatchQueue.main.async {
+                    self.imageView2.image = secondData.image
+                    self.cardTwoDataID = secondData.id
+                    self.dataIndex += 1
+                    self.indicator2.stopAnimating()
+                }
+            }
         }
     }
     
