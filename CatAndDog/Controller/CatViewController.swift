@@ -23,7 +23,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     var dataIndex: Int = 0
     var currentCardView: Int = 1
     var isInitialImageLoaded: Bool = false
-    var isDataAvailable: Bool = false
+    var isDataAvailable: Bool = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -90,11 +90,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         case 1:
             guard let image1 = imageView1.image else { return }
             data = FavoriteCat(id: cardOneDataID, image: image1, date: Date())
-            print("cardOneDataID = \(cardOneDataID)")
         case 2:
         guard let image2 = imageView2.image else { return }
             data = FavoriteCat(id: cardTwoDataID, image: image2, date: Date())
-            print("cardTwoDataID = \(cardTwoDataID)")
         default:
             print("Value of currentCardView is invalid.")
             return
@@ -170,9 +168,10 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     }
 
     internal func dataDidFetch() {
-        print("DataIndex = \(catDataManager.dataIndex)")
+        print("Data Array Count = \(catDataManager.dataIndex)")
         let dataSet = catDataManager.serializedData
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
+        
         // Display the first 2 images
         if dataIndex == 0 {
             if let firstData = dataSet[self.dataIndex + 1] {
@@ -185,7 +184,6 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                     // add UIPanGestureRecognizer to cardView
                     self.cardView1.addGestureRecognizer(panGesture)
                 }
-                isDataAvailable = true
             }
         } else if dataIndex == 1 {
             if let secondData = dataSet[self.dataIndex + 1] {
@@ -197,9 +195,10 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 }
             }
         }
-        // Update data if previous process of updating data did not succeed
+        
+        // Update data if previous session of updating image did not succeed
         if isDataAvailable == false {
-                updateImageView()
+            updateImageView()
         }
     }
     
@@ -334,10 +333,11 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         let dataSet = catDataManager.serializedData
         
         if let newData = dataSet[dataIndex + 1] {
-            // newData does exist
+            isDataAvailable = true
             let newImage = newData.image
             let newID = newData.id
-            if dataIndex % 2 == 0 {
+            // Check if new data will be allocated to imageView1
+            if (dataIndex + 1) % 2 == 1 {
                 DispatchQueue.main.async {
                     self.imageView1.image = newImage
                     self.indicator1.stopAnimating()
@@ -352,11 +352,11 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 cardTwoDataID = newID
                 dataIndex += 1
             }
-            isDataAvailable = true
-        } else {
-            // newData does not exist
+        }
+        // NewData does not exist
+        else {
             isDataAvailable = false
-            
+            // If new data for cardView 1 is unavailable
             if dataIndex % 2 == 0 {
                 DispatchQueue.main.async {
                     self.imageView1.image = nil
