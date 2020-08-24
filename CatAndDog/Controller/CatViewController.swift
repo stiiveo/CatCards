@@ -11,8 +11,10 @@ import UIKit
 class CatViewController: UIViewController, CatDataManagerDelegate {
     
     @IBOutlet weak var toolBar: UIToolbar!
+    @IBOutlet weak var favoriteBtn: UIBarButtonItem!
     
     var catDataManager = CatDataManager()
+    let favDataManager = FavoriteDataManager()
     let cardView1 = UIView()
     let cardView2 = UIView()
     let imageView1 = UIImageView()
@@ -48,6 +50,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         addImageViewConstraint(imageView: imageView2, contraintTo: cardView2)
         
         cardViewDefaultPosition = cardView1.center
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!)
     }
     
     //MARK: - Activity Indicator
@@ -85,23 +88,13 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     //MARK: - Favorite Action
     
     @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
-        var data: FavoriteCat?
-        switch currentCardView {
-        case 1:
-            guard let image1 = imageView1.image else { return }
-            data = FavoriteCat(id: cardOneDataID, image: image1, date: Date())
-        case 2:
-        guard let image2 = imageView2.image else { return }
-            data = FavoriteCat(id: cardTwoDataID, image: image2, date: Date())
-        default:
-            print("Value of currentCardView is invalid.")
-            return
+        if currentCardView == 1 {
+            guard let imageToSave = imageView1.image else { return }
+            favDataManager.saveData(image: imageToSave, dataID: cardOneDataID)
+        } else {
+            guard let imageToSave = imageView2.image else { return }
+            favDataManager.saveData(image: imageToSave, dataID: cardTwoDataID)
         }
-        guard let dataToSave = data else {
-            print("Data is invalid to be appended into favorite array.")
-            return
-        }
-        FavoriteDataManager.favoriteArray.append(dataToSave)
     }
     
     //MARK: - Share Action
@@ -180,6 +173,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                     self.cardOneDataID = firstData.id
                     self.dataIndex += 1
                     self.indicator1.stopAnimating()
+                    self.favoriteBtn.isEnabled = true
                     
                     // add UIPanGestureRecognizer to cardView
                     self.cardView1.addGestureRecognizer(panGesture)
@@ -192,6 +186,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                     self.cardTwoDataID = secondData.id
                     self.dataIndex += 1
                     self.indicator2.stopAnimating()
+                    self.favoriteBtn.isEnabled = true
                 }
             }
         }
@@ -341,6 +336,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 DispatchQueue.main.async {
                     self.imageView1.image = newImage
                     self.indicator1.stopAnimating()
+                    self.favoriteBtn.isEnabled = true
                 }
                 cardOneDataID = newID
                 dataIndex += 1
@@ -348,6 +344,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 DispatchQueue.main.async {
                     self.imageView2.image = newImage
                     self.indicator2.stopAnimating()
+                    self.favoriteBtn.isEnabled = true
                 }
                 cardTwoDataID = newID
                 dataIndex += 1
@@ -361,11 +358,13 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
                 DispatchQueue.main.async {
                     self.imageView1.image = nil
                     self.addIndicator(to: self.cardView1)
+                    self.favoriteBtn.isEnabled = false
                 }
             } else {
                 DispatchQueue.main.async {
                     self.imageView2.image = nil
                     self.addIndicator(to: self.cardView2)
+                    self.favoriteBtn.isEnabled = false
                 }
             }
         }

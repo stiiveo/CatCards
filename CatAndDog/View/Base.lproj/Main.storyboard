@@ -57,6 +57,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="favoriteBtn" destination="eix-IU-TsW" id="kOq-j5-OQe"/>
                         <outlet property="toolBar" destination="ZI0-C0-QUe" id="1E1-XT-9aH"/>
                     </connections>
                 </viewController>
