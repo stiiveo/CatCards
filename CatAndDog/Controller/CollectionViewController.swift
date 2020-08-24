@@ -9,6 +9,8 @@
 import UIKit
 
 class CollectionViewController: UICollectionViewController {
+    
+    let favDataManager = FavoriteDataManager()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,30 +30,28 @@ class CollectionViewController: UICollectionViewController {
         flowLayout.itemSize = CGSize(width: flooredCellWidth, height: flooredCellWidth)
         flowLayout.minimumLineSpacing = interCellSpacing
         
+        favDataManager.loadImages()
     }
 
 
     // MARK: UICollectionViewDataSource
 
-//    override func numberOfSections(in collectionView: UICollectionView) -> Int {
-//        // #warning Incomplete implementation, return the number of sections
-//        return 1
-//    }
-//
-//
-//    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-//        // #warning Incomplete implementation, return the number of items
-//        return FavoriteDataManager.favoriteArray.count
-//    }
-//
-//    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-//        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CollectionViewCell.cellIdentifier, for: indexPath) as! CollectionViewCell
-//
-//        // Configure each cell's imageView
-//        cell.imageView.image = FavoriteDataManager.favoriteArray[indexPath.item].image
-//
-//        return cell
-//    }
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return FavoriteDataManager.imageArray.count
+    }
+
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CollectionViewCell.cellIdentifier, for: indexPath) as! CollectionViewCell
+
+        // Configure each cell's imageView
+        cell.imageView.image = FavoriteDataManager.imageArray[indexPath.item]
+
+        return cell
+    }
 
     // MARK: UICollectionViewDelegate
 

@@ -7,16 +7,44 @@
 //
 
 import UIKit
+import CoreData
 
 class FavoriteDataManager {
     
-//    static var favoriteArray = [Favorite]()
+    var favoriteArray = [Favorite]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     let fileManager = FileManager.default
-    var dataID: String?
     let folderName = FileManager.SearchPathDirectory.documentDirectory
     let subFolderName = "Cat_Pictures"
+    static var imageArray = [UIImage]()
 
+    func loadImages() {
+        let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let imageFolderURL = url.appendingPathComponent(subFolderName, isDirectory: true)
+        do {
+            let imagesURLs = try fileManager.contentsOfDirectory(at: imageFolderURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            for imageURL in imagesURLs {
+                let imageData = try Data(contentsOf: imageURL)
+                if let image = UIImage(data: imageData) {
+                    FavoriteDataManager.imageArray.append(image)
+                    print(FavoriteDataManager.imageArray.count)
+                }
+            }
+        } catch {
+            print("Error getting URLs of the images in file system: \(error)")
+        }
+        
+    }
+    
+//    func loadData() {
+//        let request: NSFetchRequest<Favorite> = Favorite.fetchRequest()
+//        do {
+//            favoriteArray = try context.fetch(request)
+//        } catch {
+//            print("Error fetching Favorite entity from container: \(error)")
+//        }
+//    }
+    
     func saveData(image: UIImage, dataID: String) {
         let newData = Favorite(context: context)
         newData.id = dataID

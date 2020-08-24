@@ -50,6 +50,8 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         addImageViewConstraint(imageView: imageView2, contraintTo: cardView2)
         
         cardViewDefaultPosition = cardView1.center
+        
+        // TEST USE
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!)
     }
     
