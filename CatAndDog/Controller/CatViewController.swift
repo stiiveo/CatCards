@@ -19,13 +19,13 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     let cardView2 = UIView()
     let imageView1 = UIImageView()
     let imageView2 = UIImageView()
-    var cardOneDataID = ""
-    var cardTwoDataID = ""
     var cardViewDefaultPosition: CGPoint?
     var dataIndex: Int = 0
     var currentCardView: Int = 1
     var isInitialImageLoaded: Bool = false
     var isDataAvailable: Bool = true
+    var cardView1Data: CatData?
+    var cardView2Data: CatData?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,6 +50,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         addImageViewConstraint(imageView: imageView2, contraintTo: cardView2)
         
         cardViewDefaultPosition = cardView1.center
+        
+        // Load up data saved in user's device
+        favDataManager.loadImages()
         
         // TEST USE
         print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!)
@@ -91,11 +94,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
         if currentCardView == 1 {
-            guard let imageToSave = imageView1.image else { return }
-            favDataManager.saveData(image: imageToSave, dataID: cardOneDataID)
+            favDataManager.saveData(cardView1Data!)
         } else {
-            guard let imageToSave = imageView2.image else { return }
-            favDataManager.saveData(image: imageToSave, dataID: cardTwoDataID)
+            favDataManager.saveData(cardView2Data!)
         }
     }
     
@@ -162,17 +163,22 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         }
     }
 
+    // Update UI using new data
     internal func dataDidFetch() {
+        
+        // TEST USE
         print("Data Array Count = \(catDataManager.dataIndex)")
+        
         let dataSet = catDataManager.serializedData
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         
-        // Display the first 2 images
         if dataIndex == 0 {
             if let firstData = dataSet[self.dataIndex + 1] {
+                
+                cardView1Data = firstData
+                
                 DispatchQueue.main.async {
                     self.imageView1.image = firstData.image
-                    self.cardOneDataID = firstData.id
                     self.dataIndex += 1
                     self.indicator1.stopAnimating()
                     self.favoriteBtn.isEnabled = true
@@ -183,9 +189,11 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             }
         } else if dataIndex == 1 {
             if let secondData = dataSet[self.dataIndex + 1] {
+                
+                cardView2Data = secondData
+                
                 DispatchQueue.main.async {
                     self.imageView2.image = secondData.image
-                    self.cardTwoDataID = secondData.id
                     self.dataIndex += 1
                     self.indicator2.stopAnimating()
                     self.favoriteBtn.isEnabled = true
@@ -193,7 +201,7 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
             }
         }
         
-        // Update data if previous session of updating image did not succeed
+        // Update UI if new data was not available in the previous session
         if isDataAvailable == false {
             updateImageView()
         }
@@ -326,37 +334,40 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
     
     // Update cardView which was at the bottom if new data is availble
     private func updateImageView() {
-        print("CardDataIndex = \(self.dataIndex)")
-        let dataSet = catDataManager.serializedData
         
+        // TEST USE
+        print("CardDataIndex = \(self.dataIndex)")
+        
+        let dataSet = catDataManager.serializedData
         if let newData = dataSet[dataIndex + 1] {
             isDataAvailable = true
             let newImage = newData.image
-            let newID = newData.id
-            // Check if new data will be allocated to imageView1
+            
+            // Check which cardView the data is to be allocated
             if (dataIndex + 1) % 2 == 1 {
+                cardView1Data = newData
                 DispatchQueue.main.async {
                     self.imageView1.image = newImage
                     self.indicator1.stopAnimating()
                     self.favoriteBtn.isEnabled = true
                 }
-                cardOneDataID = newID
                 dataIndex += 1
             } else {
+                cardView2Data = newData
                 DispatchQueue.main.async {
                     self.imageView2.image = newImage
                     self.indicator2.stopAnimating()
                     self.favoriteBtn.isEnabled = true
                 }
-                cardTwoDataID = newID
                 dataIndex += 1
             }
         }
-        // NewData does not exist
+        // New data is not available
         else {
             isDataAvailable = false
-            // If new data for cardView 1 is unavailable
-            if dataIndex % 2 == 0 {
+            
+            // Check which cardView's data is unavailable
+            if (dataIndex + 1) % 2 == 1 {
                 DispatchQueue.main.async {
                     self.imageView1.image = nil
                     self.addIndicator(to: self.cardView1)

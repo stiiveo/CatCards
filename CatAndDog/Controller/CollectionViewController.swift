@@ -30,7 +30,6 @@ class CollectionViewController: UICollectionViewController {
         flowLayout.itemSize = CGSize(width: flooredCellWidth, height: flooredCellWidth)
         flowLayout.minimumLineSpacing = interCellSpacing
         
-        favDataManager.loadImages()
     }
 
 

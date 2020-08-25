@@ -27,7 +27,6 @@ class FavoriteDataManager {
                 let imageData = try Data(contentsOf: imageURL)
                 if let image = UIImage(data: imageData) {
                     FavoriteDataManager.imageArray.append(image)
-                    print(FavoriteDataManager.imageArray.count)
                 }
             }
         } catch {
@@ -45,20 +44,26 @@ class FavoriteDataManager {
 //        }
 //    }
     
-    func saveData(image: UIImage, dataID: String) {
+    func saveData(_ data: CatData) {
+        // Save new image to array used for collection view
+        FavoriteDataManager.imageArray.append(data.image)
+        
+        // Save data to local database
         let newData = Favorite(context: context)
-        newData.id = dataID
+        newData.id = data.id
         newData.date = Date()
         saveContext()
-        saveImage(image: image, id: dataID)
+        
+        // Save image to local file system with ID as the file name
+        saveImage(data.image, data.id)
     }
     
-    func saveImage(image: UIImage, id: String) {
+    func saveImage(_ image: UIImage, _ fileName: String) {
         guard let imageData = image.jpegData(compressionQuality: 0.5) else { return }
-        createFileToURL(withData: imageData, withName: "\(id).jpg")
+        createFileToURL(withData: imageData, withName: "\(fileName).jpg")
     }
     
-    // Method used to create new file in assigned URL
+    // Save image to 'cat_pictures' in application's document folder
     func createFileToURL(withData data: Data, withName fileName: String) {
         let url = try? fileManager.url(
             for: folderName,
@@ -76,7 +81,7 @@ class FavoriteDataManager {
         }
     }
     
-    // Method used to create new directory in application document directory
+    // Create new directory in application document directory
     func createDirectory(withFolderName dest: String) {
         let urls = fileManager.urls(for: folderName, in: .userDomainMask)
         if let documentURL = urls.last {
