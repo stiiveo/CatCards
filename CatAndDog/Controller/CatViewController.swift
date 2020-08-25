@@ -51,6 +51,9 @@ class CatViewController: UIViewController, CatDataManagerDelegate {
         
         cardViewDefaultPosition = cardView1.center
         
+        // Create folder for local image files store
+        favDataManager.createDirectory()
+        
         // Load up data saved in user's device
         favDataManager.loadImages()
         
