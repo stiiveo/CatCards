@@ -1,5 +1,5 @@
 //
-//  CollectionViewCell.swift
+//  CollectionCell.swift
 //  CatAndDog
 //
 //  Created by Jason Ou Yang on 2020/8/11.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class CollectionViewCell: UICollectionViewCell {
+class CollectionCell: UICollectionViewCell {
     
     static let cellIdentifier = "CatCollectionViewCell"
     

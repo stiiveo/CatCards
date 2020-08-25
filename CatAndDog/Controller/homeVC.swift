@@ -8,7 +8,7 @@
 
 import UIKit
 
-class homeVC: UIViewController, CatDataManagerDelegate {
+class homeVC: UIViewController, NetworkManagerDelegate {
     
     @IBOutlet weak var toolBar: UIToolbar!
     @IBOutlet weak var favoriteBtn: UIBarButtonItem!

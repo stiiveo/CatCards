@@ -1,5 +1,5 @@
 //
-//  CatDataManager.swift
+//  NetworkManager.swift
 //  CatAndDog
 //
 //  Created by Jason Ou Yang on 2020/7/21.
@@ -8,15 +8,15 @@
 
 import UIKit
 
-protocol CatDataManagerDelegate {
+protocol NetworkManagerDelegate {
     func dataDidFetch()
     func errorDidOccur()
 }
 
-class CatDataManager {
+class NetworkManager {
     
     let catUrl = "https://api.thecatapi.com/v1/images/search"
-    var delegate: CatDataManagerDelegate?
+    var delegate: NetworkManagerDelegate?
     var serializedData: [Int: CatData] = [:]
     var dataIndex: Int = 0
     

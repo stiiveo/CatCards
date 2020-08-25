@@ -1,5 +1,5 @@
 //
-//  CollectionViewController.swift
+//  CollectionVC.swift
 //  CatAndDog
 //
 //  Created by Jason Ou Yang on 2020/8/11.
@@ -8,9 +8,9 @@
 
 import UIKit
 
-class CollectionViewController: UICollectionViewController {
+class CollectionVC: UICollectionViewController {
     
-    let favDataManager = FavoriteDataManager()
+    let favDataManager = DatabaseManager()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,14 +40,14 @@ class CollectionViewController: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return FavoriteDataManager.imageArray.count
+        return DatabaseManager.imageArray.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CollectionViewCell.cellIdentifier, for: indexPath) as! CollectionViewCell
 
         // Configure each cell's imageView
-        cell.imageView.image = FavoriteDataManager.imageArray[indexPath.item]
+        cell.imageView.image = DatabaseManager.imageArray[indexPath.item]
 
         return cell
     }
