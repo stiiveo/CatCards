@@ -104,11 +104,20 @@ class homeVC: UIViewController, NetworkManagerDelegate {
         guard let safeNewData = newData else { return }
         let isDataSaved = databaseManager.isDataSaved(data: safeNewData)
         
-        // Save data if it's absent in database, delete data if it's present in database
+        // Save data if it's absent in database, otherwise delete data in database
         if isDataSaved == false {
             databaseManager.saveData(safeNewData)
+            DispatchQueue.main.async {
+                self.favoriteBtn.image = UIImage(systemName: K.ButtonImage.filledHeart)
+            }
         } else if isDataSaved == true {
             // delete file in database
+            print("Initiate Deletion Process")
+            databaseManager.deleteData(safeNewData)
+            
+            DispatchQueue.main.async {
+                self.favoriteBtn.image = UIImage(systemName: K.ButtonImage.heart)
+            }
         }
     }
     

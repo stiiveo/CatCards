@@ -9,6 +9,10 @@
 import UIKit
 
 struct K {
+    struct ButtonImage {
+        static let heart = "heart"
+        static let filledHeart = "heart.fill"
+    }
     struct Data {
         static let initialDataRequestNumber: Int = 6
         static let dataRequestNumber: Int = 1

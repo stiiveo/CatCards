@@ -11,21 +11,38 @@ import CoreData
 
 class DatabaseManager {
     
-    var favoriteArray = [Favorite]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     let fileManager = FileManager.default
     let folderName = FileManager.SearchPathDirectory.documentDirectory
     let subFolderName = "Cat_Pictures"
+    var favoriteArray = [Favorite]()
     static var imageArray = [UIImage]()
 
-    func isDataSaved(data: CatData) -> Bool {
+    // Delete specific data in database and file system
+    internal func deleteData(_ data: CatData) {
+        // delete data in database
+        do {
+            let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "id MATCHES %@", data.id) // Fetch data with the matched ID value
+            let fetchResult = try context.fetch(fetchRequest)
+            for object in fetchResult {
+                context.delete(object) // Delete every object from the fetched result
+            }
+            saveContext()
+            print("Object Deleted From Persistent Container")
+        } catch {
+            print("Error fetching result from container: \(error)")
+        }
+    }
+    
+    internal func isDataSaved(data: CatData) -> Bool {
         let url = subFolderURL()
         let newDataId = data.id
         let newFileURL = url.appendingPathComponent("\(newDataId).jpg")
         return fileManager.fileExists(atPath: newFileURL.path)
     }
     
-    func loadImages() {
+    internal func loadImages() {
         let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let imageFolderURL = url.appendingPathComponent(subFolderName, isDirectory: true)
         
@@ -42,7 +59,7 @@ class DatabaseManager {
         }
     }
     
-    func listOfFileNames() -> [String] {
+    private func listOfFileNames() -> [String] {
         let request: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         
         // Sort properties by the attribute 'date' in ascending order
@@ -64,7 +81,8 @@ class DatabaseManager {
         return []
     }
     
-    func saveData(_ data: CatData) {
+    internal func saveData(_ data: CatData) {
+        
         // Save new image to array used for collection view
         DatabaseManager.imageArray.append(data.image)
         
@@ -74,17 +92,20 @@ class DatabaseManager {
         newData.date = Date()
         saveContext()
         
+        // Update favorite list
+        favoriteArray.append(newData)
+        
         // Save image to local file system with ID as the file name
         saveImage(data.image, data.id)
     }
     
-    func saveImage(_ image: UIImage, _ fileName: String) {
+    private func saveImage(_ image: UIImage, _ fileName: String) {
         guard let imageData = image.jpegData(compressionQuality: 0.5) else { return }
         createFileToURL(withData: imageData, withName: "\(fileName).jpg")
     }
     
     // Save image to 'cat_pictures' in application's document folder
-    func createFileToURL(withData data: Data, withName fileName: String) {
+    private func createFileToURL(withData data: Data, withName fileName: String) {
         let url = try? fileManager.url(
             for: folderName,
             in: .userDomainMask,
@@ -101,7 +122,7 @@ class DatabaseManager {
     }
     
     // Create new directory in application document directory
-    func createDirectory() {
+    internal func createDirectory() {
         let folderURL = subFolderURL()
         guard !fileManager.fileExists(atPath: folderURL.path) else { return } // Determine if the folder already exists
         do {
@@ -111,13 +132,13 @@ class DatabaseManager {
         }
     }
     
-    func subFolderURL() -> URL {
+    private func subFolderURL() -> URL {
         let documentURL = fileManager.urls(for: folderName, in: .userDomainMask).first!
         let subFolderURL = documentURL.appendingPathComponent(subFolderName, isDirectory: true)
         return subFolderURL
     }
     
-    func saveContext() {
+    private func saveContext() {
         do {
             try self.context.save()
         } catch {
