@@ -20,10 +20,11 @@ class DatabaseManager {
 
     // Delete specific data in database and file system
     internal func deleteData(_ data: CatData) {
-        // delete data in database
+        
+        // delete data from database
+        let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id MATCHES %@", data.id) // Fetch data with the matched ID value
         do {
-            let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "id MATCHES %@", data.id) // Fetch data with the matched ID value
             let fetchResult = try context.fetch(fetchRequest)
             for object in fetchResult {
                 context.delete(object) // Delete every object from the fetched result
@@ -33,6 +34,21 @@ class DatabaseManager {
         } catch {
             print("Error fetching result from container: \(error)")
         }
+        
+        // delete image file from file system
+        let fileToDelete = "\(data.id).jpg"
+        let fileURL = subFolderURL().appendingPathComponent(fileToDelete)
+        if fileManager.fileExists(atPath: fileURL.path) {
+            do {
+                try fileManager.removeItem(at: fileURL)
+            } catch {
+                print("Error removing item from file system: \(error)")
+            }
+        }
+        
+        // refresh image array
+        DatabaseManager.imageArray = []
+        loadImages()
     }
     
     internal func isDataSaved(data: CatData) -> Bool {
@@ -45,7 +61,6 @@ class DatabaseManager {
     internal func loadImages() {
         let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let imageFolderURL = url.appendingPathComponent(subFolderName, isDirectory: true)
-        
         let fileList = listOfFileNames() // Get list of image files from local database
         for file in fileList {
             let fileURL = imageFolderURL.appendingPathComponent("\(file).jpg") // Create URL for each image file
@@ -60,17 +75,17 @@ class DatabaseManager {
     }
     
     private func listOfFileNames() -> [String] {
-        let request: NSFetchRequest<Favorite> = Favorite.fetchRequest()
+        let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         
         // Sort properties by the attribute 'date' in ascending order
         let sort = NSSortDescriptor(key: "date", ascending: true)
-        request.sortDescriptors = [sort]
+        fetchRequest.sortDescriptors = [sort]
         
         var fileNameList = [String]()
         do {
-            favoriteArray = try context.fetch(request)
-            for data in favoriteArray {
-                if let id = data.id {
+            favoriteArray = try context.fetch(fetchRequest)
+            for item in favoriteArray {
+                if let id = item.id {
                     fileNameList.append(id)
                 }
             }
