@@ -18,6 +18,8 @@ class DatabaseManager {
     var favoriteArray = [Favorite]()
     static var imageArray = [UIImage]()
 
+    //MARK: - Data Deletion
+    
     // Delete specific data in database and file system
     internal func deleteData(_ data: CatData) {
         
@@ -51,12 +53,7 @@ class DatabaseManager {
         loadImages()
     }
     
-    internal func isDataSaved(data: CatData) -> Bool {
-        let url = subFolderURL()
-        let newDataId = data.id
-        let newFileURL = url.appendingPathComponent("\(newDataId).jpg")
-        return fileManager.fileExists(atPath: newFileURL.path)
-    }
+    //MARK: - Data Loading
     
     internal func loadImages() {
         let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -74,27 +71,7 @@ class DatabaseManager {
         }
     }
     
-    private func listOfFileNames() -> [String] {
-        let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
-        
-        // Sort properties by the attribute 'date' in ascending order
-        let sort = NSSortDescriptor(key: "date", ascending: true)
-        fetchRequest.sortDescriptors = [sort]
-        
-        var fileNameList = [String]()
-        do {
-            favoriteArray = try context.fetch(fetchRequest)
-            for item in favoriteArray {
-                if let id = item.id {
-                    fileNameList.append(id)
-                }
-            }
-            return fileNameList
-        } catch {
-            print("Error fetching Favorite entity from container: \(error)")
-        }
-        return []
-    }
+    //MARK: - Data Saving
     
     internal func saveData(_ data: CatData) {
         
@@ -118,6 +95,8 @@ class DatabaseManager {
         guard let imageData = image.jpegData(compressionQuality: 0.5) else { return }
         createFileToURL(withData: imageData, withName: "\(fileName).jpg")
     }
+    
+    //MARK: - Creation of Directory / sub-Directory
     
     // Save image to 'cat_pictures' in application's document folder
     private func createFileToURL(withData data: Data, withName fileName: String) {
@@ -151,6 +130,37 @@ class DatabaseManager {
         let documentURL = fileManager.urls(for: folderName, in: .userDomainMask).first!
         let subFolderURL = documentURL.appendingPathComponent(subFolderName, isDirectory: true)
         return subFolderURL
+    }
+    
+    //MARK: - Support
+    
+    internal func isDataSaved(data: CatData) -> Bool {
+        let url = subFolderURL()
+        let newDataId = data.id
+        let newFileURL = url.appendingPathComponent("\(newDataId).jpg")
+        return fileManager.fileExists(atPath: newFileURL.path)
+    }
+    
+    private func listOfFileNames() -> [String] {
+        let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
+        
+        // Sort properties by the attribute 'date' in ascending order
+        let sort = NSSortDescriptor(key: "date", ascending: true)
+        fetchRequest.sortDescriptors = [sort]
+        
+        var fileNameList = [String]()
+        do {
+            favoriteArray = try context.fetch(fetchRequest)
+            for item in favoriteArray {
+                if let id = item.id {
+                    fileNameList.append(id)
+                }
+            }
+            return fileNameList
+        } catch {
+            print("Error fetching Favorite entity from container: \(error)")
+        }
+        return []
     }
     
     private func saveContext() {
