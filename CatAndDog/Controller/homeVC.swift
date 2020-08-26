@@ -19,11 +19,13 @@ class homeVC: UIViewController, NetworkManagerDelegate {
     let cardView2 = UIView()
     let imageView1 = UIImageView()
     let imageView2 = UIImageView()
-    var cardViewDefaultPosition: CGPoint?
+    var cardViewDefaultPosition = CGPoint()
     var dataIndex: Int = 0
     var currentCardView: Int = 1
     var isInitialImageLoaded: Bool = false
-    var isDataAvailable: Bool = true
+    var isNewDataAvailable: Bool = true
+    var isCard1DataAvailable: Bool = false
+    var isCard2DataAvailable: Bool = false
     var cardView1Data: CatData?
     var cardView2Data: CatData?
     
@@ -48,6 +50,8 @@ class homeVC: UIViewController, NetworkManagerDelegate {
         
         databaseManager.createDirectory() // Create folder for local image files store
         databaseManager.loadImages() // Load up data saved in user's device
+        
+        favoriteBtn.isEnabled = false // favorite button's default status
     }
     
     //MARK: - Activity Indicator
@@ -85,10 +89,26 @@ class homeVC: UIViewController, NetworkManagerDelegate {
     //MARK: - Favorite Action
     
     @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
+        var newData: CatData?
         if currentCardView == 1 {
-            databaseManager.saveData(cardView1Data!)
+            guard cardView1Data != nil else { return }
+            newData = cardView1Data!
+        }
+        else if currentCardView == 2 {
+            guard cardView2Data != nil else { return }
+            newData = cardView2Data!
         } else {
-            databaseManager.saveData(cardView2Data!)
+            print("Invalid value of currentCardView")
+        }
+        
+        guard let safeNewData = newData else { return }
+        let isDataSaved = databaseManager.isDataSaved(data: safeNewData)
+        
+        // Save data if it's absent in database, delete data if it's present in database
+        if isDataSaved == false {
+            databaseManager.saveData(safeNewData)
+        } else if isDataSaved == true {
+            // delete file in database
         }
     }
     
@@ -168,12 +188,20 @@ class homeVC: UIViewController, NetworkManagerDelegate {
             if let firstData = dataSet[self.dataIndex + 1] {
                 
                 cardView1Data = firstData
+                isCard1DataAvailable = true
+                let isDataSaved = databaseManager.isDataSaved(data: firstData) // determine whether data is available in database
                 
                 DispatchQueue.main.async {
                     self.imageView1.image = firstData.image
                     self.dataIndex += 1
                     self.indicator1.stopAnimating()
-                    self.favoriteBtn.isEnabled = true
+                    
+                    // Set up favorite button status
+                    self.favoriteBtn.isEnabled = self.isCard1DataAvailable ? true : false // button is enabled if data is available
+                    // set button's image as filled-heart if data is in database
+                    if isDataSaved == true {
+                        self.favoriteBtn.image = UIImage(systemName: "heart.fill")
+                    }
                     
                     // add UIPanGestureRecognizer to cardView
                     self.cardView1.addGestureRecognizer(panGesture)
@@ -182,19 +210,19 @@ class homeVC: UIViewController, NetworkManagerDelegate {
         } else if dataIndex == 1 {
             if let secondData = dataSet[self.dataIndex + 1] {
                 
+                isCard2DataAvailable = true
                 cardView2Data = secondData
                 
                 DispatchQueue.main.async {
                     self.imageView2.image = secondData.image
                     self.dataIndex += 1
                     self.indicator2.stopAnimating()
-                    self.favoriteBtn.isEnabled = true
                 }
             }
         }
         
         // Update UI if new data was not available in the previous session
-        if isDataAvailable == false {
+        if isNewDataAvailable == false {
             updateImageView()
         }
     }
@@ -280,7 +308,6 @@ class homeVC: UIViewController, NetworkManagerDelegate {
     }
     
     private func animateCard(_ card: UIView, panGesture: UIPanGestureRecognizer) {
-        guard let cardDefaultCenter = cardViewDefaultPosition else { return }
         
         /*
          1. The dismissed card is hidden
@@ -303,23 +330,40 @@ class homeVC: UIViewController, NetworkManagerDelegate {
         if card == cardView1 {
             currentCardView = 2
             cardView2.addGestureRecognizer(panGesture)
+            
+            // Favorite button is enabled if data is available
+            favoriteBtn.isEnabled = isCard2DataAvailable ? true : false
+            if let card2Data = cardView2Data {
+                let isDataSaved = databaseManager.isDataSaved(data: card2Data) // determine whether data is already in database
+                favoriteBtn.image = isDataSaved ? UIImage(systemName: "heart.fill") : UIImage(systemName: "heart")
+            }
+            
             self.view.insertSubview(card, belowSubview: cardView2)
-            card.center = cardDefaultCenter
+            card.center = cardViewDefaultPosition
             addCardViewConstraint(cardView: card)
+            
             updateImageView()
             fetchNewData(initialRequest: false)
         } else if card == cardView2 {
             currentCardView = 1
             cardView1.addGestureRecognizer(panGesture)
+            
+            // Favorite button is enabled if data is available
+            favoriteBtn.isEnabled = isCard1DataAvailable ? true : false
+            if let card1Data = cardView1Data {
+                let isDataSaved = databaseManager.isDataSaved(data: card1Data) // determine whether data is already in database
+                favoriteBtn.image = isDataSaved ? UIImage(systemName: "heart.fill") : UIImage(systemName: "heart")
+            }
+            
             self.view.insertSubview(card, belowSubview: cardView1)
-            card.center = cardDefaultCenter
+            card.center = cardViewDefaultPosition
             addCardViewConstraint(cardView: card)
+            
             updateImageView()
             fetchNewData(initialRequest: false)
         } else {
             print("Error: The dismissed card is neither cardView1 nor cardView2")
         }
-        
     }
     
     //MARK: - Update Image of imageView
@@ -332,45 +376,47 @@ class homeVC: UIViewController, NetworkManagerDelegate {
         
         let dataSet = networkManager.serializedData
         if let newData = dataSet[dataIndex + 1] {
-            isDataAvailable = true
+            isNewDataAvailable = true
             let newImage = newData.image
             
             // Check which cardView the data is to be allocated
             if (dataIndex + 1) % 2 == 1 {
                 cardView1Data = newData
+                isCard1DataAvailable = true
                 DispatchQueue.main.async {
                     self.imageView1.image = newImage
                     self.indicator1.stopAnimating()
-                    self.favoriteBtn.isEnabled = true
                 }
                 dataIndex += 1
             } else {
+                isCard2DataAvailable = true
                 cardView2Data = newData
                 DispatchQueue.main.async {
                     self.imageView2.image = newImage
                     self.indicator2.stopAnimating()
-                    self.favoriteBtn.isEnabled = true
                 }
                 dataIndex += 1
             }
         }
         // New data is not available
         else {
-            isDataAvailable = false
+            isNewDataAvailable = false
             
-            // Check which cardView's data is unavailable
-            if (dataIndex + 1) % 2 == 1 {
+            if (dataIndex + 1) % 2 == 1 { // new data for cardView 1 is unavailable
                 DispatchQueue.main.async {
                     self.imageView1.image = nil
                     self.addIndicator(to: self.cardView1)
-                    self.favoriteBtn.isEnabled = false
                 }
-            } else {
+                isCard1DataAvailable = false
+                cardView1Data = nil
+            }
+            else { // new data for cardView 2 is unavailable
                 DispatchQueue.main.async {
                     self.imageView2.image = nil
                     self.addIndicator(to: self.cardView2)
-                    self.favoriteBtn.isEnabled = false
                 }
+                isCard2DataAvailable = false
+                cardView2Data = nil
             }
         }
     }

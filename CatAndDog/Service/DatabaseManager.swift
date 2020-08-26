@@ -18,6 +18,13 @@ class DatabaseManager {
     let subFolderName = "Cat_Pictures"
     static var imageArray = [UIImage]()
 
+    func isDataSaved(data: CatData) -> Bool {
+        let url = subFolderURL()
+        let newDataId = data.id
+        let newFileURL = url.appendingPathComponent("\(newDataId).jpg")
+        return fileManager.fileExists(atPath: newFileURL.path)
+    }
+    
     func loadImages() {
         let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let imageFolderURL = url.appendingPathComponent(subFolderName, isDirectory: true)
@@ -95,16 +102,19 @@ class DatabaseManager {
     
     // Create new directory in application document directory
     func createDirectory() {
-        let urls = fileManager.urls(for: folderName, in: .userDomainMask)
-        guard let documentURL = urls.first else { return }
-        let folderURL = documentURL.appendingPathComponent(subFolderName, isDirectory: true)
-        
+        let folderURL = subFolderURL()
         guard !fileManager.fileExists(atPath: folderURL.path) else { return } // Determine if the folder already exists
         do {
             try fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true, attributes: nil)
         } catch {
             print("Error creating new directory: \(error)")
         }
+    }
+    
+    func subFolderURL() -> URL {
+        let documentURL = fileManager.urls(for: folderName, in: .userDomainMask).first!
+        let subFolderURL = documentURL.appendingPathComponent(subFolderName, isDirectory: true)
+        return subFolderURL
     }
     
     func saveContext() {

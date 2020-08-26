@@ -46,12 +46,8 @@ class NetworkManager {
     }
     
     private func removeBrecketsInJSON(data: Data) -> Data {
-        
-        // convert Data to String
-        let dataToString = String(data: data, encoding: .utf8)!
-        
-        // convert String to Array
-        var stringToArray = Array(dataToString)
+        let dataToString = String(data: data, encoding: .utf8)! // convert Data to String
+        var stringToArray = Array(dataToString) // convert String to Array
         
         // remove the first and last element ('[' & ']') of the array
         stringToArray.removeFirst()
@@ -62,10 +58,7 @@ class NetworkManager {
         for character in stringToArray {
             arrayToString.append(character)
         }
-        
-        // convert String to Data
-        let stringToData = arrayToString.data(using: .utf8)!
-        
+        let stringToData = arrayToString.data(using: .utf8)! // convert String to Data
         return stringToData
     }
     
