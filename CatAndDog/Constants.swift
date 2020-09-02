@@ -10,8 +10,8 @@ import UIKit
 
 struct K {
     struct ButtonImage {
-        static let heart = "heart"
-        static let filledHeart = "heart.fill"
+        static let heart = UIImage(systemName: "heart")
+        static let filledHeart = UIImage(systemName: "heart.fill")
     }
     struct Data {
         static let initialDataRequestNumber: Int = 6
