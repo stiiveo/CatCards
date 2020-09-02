@@ -380,30 +380,31 @@ class homeVC: UIViewController, NetworkManagerDelegate {
     private func updateImageView() {
         
         // TEST USE
-        print("CardDataIndex = \(self.dataIndex)")
+        print("Data Index = \(self.dataIndex)")
         
         let dataSet = networkManager.serializedData
-        if let newData = dataSet[dataIndex + 1] {
+        if let newData = dataSet[dataIndex + 1] { // determine whether new data is available
+            
             isNewDataAvailable = true
             let newImage = newData.image
             
-            // Check which cardView the data is to be allocated
+            // Check to which cardView the data is to be allocated
             if (dataIndex + 1) % 2 != 0 { // new data is for cardView 1
-                cardView1Data = newData
-                isCard1DataAvailable = true
                 DispatchQueue.main.async {
                     self.imageView1.image = newImage
                     self.indicator1.stopAnimating()
                 }
                 dataIndex += 1
-            } else {
-                isCard2DataAvailable = true
-                cardView2Data = newData
+                cardView1Data = newData
+                isCard1DataAvailable = true
+            } else { // new data is for cardView 2
                 DispatchQueue.main.async {
                     self.imageView2.image = newImage
                     self.indicator2.stopAnimating()
                 }
                 dataIndex += 1
+                isCard2DataAvailable = true
+                cardView2Data = newData
             }
         }
         // new data is not available
