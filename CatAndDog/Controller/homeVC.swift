@@ -112,7 +112,6 @@ class homeVC: UIViewController, NetworkManagerDelegate {
             }
         } else if isDataSaved == true {
             // delete file in database
-            print("Initiate Deletion Process")
             databaseManager.deleteData(safeNewData)
             
             DispatchQueue.main.async {
@@ -205,11 +204,11 @@ class homeVC: UIViewController, NetworkManagerDelegate {
                     self.dataIndex += 1
                     self.indicator1.stopAnimating()
                     
-                    // Set up favorite button status
+                    // set up favorite button status
                     self.favoriteBtn.isEnabled = self.isCard1DataAvailable ? true : false // button is enabled if data is available
-                    // set button's image as filled-heart if data is in database
+                    // set button's image as a filled-heart if new data is available
                     if isDataSaved == true {
-                        self.favoriteBtn.image = UIImage(systemName: "heart.fill")
+                        self.favoriteBtn.image = UIImage(systemName: K.ButtonImage.filledHeart)
                     }
                     
                     // add UIPanGestureRecognizer to cardView
@@ -344,7 +343,7 @@ class homeVC: UIViewController, NetworkManagerDelegate {
             favoriteBtn.isEnabled = isCard2DataAvailable ? true : false
             if let card2Data = cardView2Data {
                 let isDataSaved = databaseManager.isDataSaved(data: card2Data) // determine whether data is already in database
-                favoriteBtn.image = isDataSaved ? UIImage(systemName: "heart.fill") : UIImage(systemName: "heart")
+                favoriteBtn.image = isDataSaved ? UIImage(systemName: K.ButtonImage.filledHeart) : UIImage(systemName: K.ButtonImage.heart)
             }
             
             self.view.insertSubview(card, belowSubview: cardView2)
@@ -361,7 +360,7 @@ class homeVC: UIViewController, NetworkManagerDelegate {
             favoriteBtn.isEnabled = isCard1DataAvailable ? true : false
             if let card1Data = cardView1Data {
                 let isDataSaved = databaseManager.isDataSaved(data: card1Data) // determine whether data is already in database
-                favoriteBtn.image = isDataSaved ? UIImage(systemName: "heart.fill") : UIImage(systemName: "heart")
+                favoriteBtn.image = isDataSaved ? UIImage(systemName: K.ButtonImage.filledHeart) : UIImage(systemName: K.ButtonImage.heart)
             }
             
             self.view.insertSubview(card, belowSubview: cardView1)

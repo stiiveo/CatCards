@@ -32,7 +32,6 @@ class DatabaseManager {
                 context.delete(object) // Delete every object from the fetched result
             }
             saveContext()
-            print("Object Deleted From Persistent Container")
         } catch {
             print("Error fetching result from container: \(error)")
         }
