@@ -70,12 +70,12 @@ class NetworkManager {
                 print("Failed to convert url string to URL object.")
                 return
             }
-            let newImage = downloadImage(url: imageURL)
+            let newImage = imageFromURL(url: imageURL)
             let newID = decodedData.id
             
             // Construct new CatData object and append to catDataArray
-            dataIndex += 1
             let newData = CatData(imageURL: imageURL, id: newID, image: newImage)
+            dataIndex += 1
             serializedData[dataIndex] = newData
             
             // Remove the oldest data if numbers of catDataArray exceed threshold
@@ -89,7 +89,7 @@ class NetworkManager {
         }
     }
     
-    private func downloadImage(url: URL) -> UIImage {
+    private func imageFromURL(url: URL) -> UIImage {
         do {
             let imageData = try Data(contentsOf: url)
             guard let image = UIImage(data: imageData) else {

@@ -186,9 +186,6 @@ class homeVC: UIViewController, NetworkManagerDelegate {
     // Update UI using new data
     internal func dataDidFetch() {
         
-        // TEST USE
-        print("Data Array Count = \(networkManager.dataIndex)")
-        
         let dataSet = networkManager.serializedData
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         
@@ -379,13 +376,9 @@ class homeVC: UIViewController, NetworkManagerDelegate {
     // Prepare the next cardView to be shown
     private func updateImageView() {
         
-        // TEST USE
-        print("Data Index = \(self.dataIndex)")
-        
         let dataSet = networkManager.serializedData
         if let newData = dataSet[dataIndex + 1] { // determine whether new data is available
             
-            isNewDataAvailable = true
             let newImage = newData.image
             
             // Check to which cardView the data is to be allocated
@@ -406,9 +399,38 @@ class homeVC: UIViewController, NetworkManagerDelegate {
                 isCard2DataAvailable = true
                 cardView2Data = newData
             }
+            
+            // value of isNewDataAvailable = true if next cardView's data is available, vice versa
+            if currentCardView == 1 {
+                if cardView2Data != nil {
+                    isNewDataAvailable = true
+                }
+            } else if currentCardView == 2 {
+                if cardView1Data != nil {
+                    isNewDataAvailable = true
+                }
+            }
         }
         // new data is not available
         else {
+            
+            // data for both cardViews are not available
+            if isNewDataAvailable == false {
+                if currentCardView == 1 {
+                    DispatchQueue.main.async {
+                        self.imageView2.image = nil
+                        self.addIndicator(to: self.cardView2)
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.imageView1.image = nil
+                        self.addIndicator(to: self.cardView1)
+                    }
+                }
+                cardView1Data = nil
+                cardView2Data = nil
+            }
+            
             isNewDataAvailable = false
             
             if (dataIndex + 1) % 2 != 0 { // new data for cardView 1 is not available
