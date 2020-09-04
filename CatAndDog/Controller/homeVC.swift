@@ -23,7 +23,7 @@ class homeVC: UIViewController, NetworkManagerDelegate {
     var dataIndex: Int = 0
     var currentCardView: Int = 1
     var isInitialImageLoaded: Bool = false
-    var isNewDataAvailable: Bool = true
+    var isNewDataAvailable: Bool = false
     var isCard1DataAvailable: Bool = false
     var isCard2DataAvailable: Bool = false
     var cardView1Data: CatData?
@@ -189,8 +189,10 @@ class homeVC: UIViewController, NetworkManagerDelegate {
         let dataSet = networkManager.serializedData
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         
+        // update first cardView with first fetched data
         if dataIndex == 0 {
             if let firstData = dataSet[dataIndex + 1] {
+                isNewDataAvailable = true
                 
                 cardView1Data = firstData
                 isCard1DataAvailable = true
@@ -226,9 +228,9 @@ class homeVC: UIViewController, NetworkManagerDelegate {
             }
         }
         
-        // Update UI if new data was not available in the previous session
+        // Update UI if new data was not available in the previous UI updating session
         if isNewDataAvailable == false {
-            updateImageView()
+            updateCardView()
         }
     }
     
@@ -347,7 +349,7 @@ class homeVC: UIViewController, NetworkManagerDelegate {
             card.center = cardViewDefaultPosition
             addCardViewConstraint(cardView: card)
             
-            updateImageView()
+            updateCardView()
             fetchNewData(initialRequest: false)
         } else if card == cardView2 { // dismissed cardView is cardView2
             currentCardView = 1
@@ -364,7 +366,7 @@ class homeVC: UIViewController, NetworkManagerDelegate {
             card.center = cardViewDefaultPosition
             addCardViewConstraint(cardView: card)
             
-            updateImageView()
+            updateCardView()
             fetchNewData(initialRequest: false)
         } else {
             print("Error: The dismissed card is neither cardView1 nor cardView2")
@@ -374,7 +376,7 @@ class homeVC: UIViewController, NetworkManagerDelegate {
     //MARK: - Update Image of imageView
     
     // Prepare the next cardView to be shown
-    private func updateImageView() {
+    private func updateCardView() {
         
         let dataSet = networkManager.serializedData
         if let newData = dataSet[dataIndex + 1] { // determine whether new data is available
@@ -382,7 +384,7 @@ class homeVC: UIViewController, NetworkManagerDelegate {
             let newImage = newData.image
             
             // Check to which cardView the data is to be allocated
-            if (dataIndex + 1) % 2 != 0 { // new data is for cardView 1
+            if (dataIndex + 1) % 2 == 1 { // new data is for cardView 1
                 DispatchQueue.main.async {
                     self.imageView1.image = newImage
                     self.indicator1.stopAnimating()
@@ -400,7 +402,7 @@ class homeVC: UIViewController, NetworkManagerDelegate {
                 cardView2Data = newData
             }
             
-            // value of isNewDataAvailable = true if next cardView's data is available, vice versa
+            // set isNewDataAvailable true if next cardView's data is available, vice versa
             if currentCardView == 1 {
                 if cardView2Data != nil {
                     isNewDataAvailable = true
@@ -411,10 +413,9 @@ class homeVC: UIViewController, NetworkManagerDelegate {
                 }
             }
         }
-        // new data is not available
+        // New data is not available
         else {
-            
-            // data for both cardViews are not available
+            // set both cardViews' UI to loading status if no data is available for both cardViews
             if isNewDataAvailable == false {
                 if currentCardView == 1 {
                     DispatchQueue.main.async {
@@ -431,9 +432,10 @@ class homeVC: UIViewController, NetworkManagerDelegate {
                 cardView2Data = nil
             }
             
-            isNewDataAvailable = false
+            isNewDataAvailable = false // trigger method updateCardView to be executed when new data is fetched successfully
             
-            if (dataIndex + 1) % 2 != 0 { // new data for cardView 1 is not available
+            // new data for cardView 1 is not available
+            if (dataIndex + 1) % 2 == 1 {
                 DispatchQueue.main.async {
                     self.imageView1.image = nil
                     self.addIndicator(to: self.cardView1)
@@ -441,7 +443,8 @@ class homeVC: UIViewController, NetworkManagerDelegate {
                 isCard1DataAvailable = false
                 cardView1Data = nil
             }
-            else { // new data for cardView 2 is unavailable
+            // new data for cardView 2 is not available
+            else {
                 DispatchQueue.main.async {
                     self.imageView2.image = nil
                     self.addIndicator(to: self.cardView2)

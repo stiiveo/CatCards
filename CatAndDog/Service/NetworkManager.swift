@@ -25,13 +25,13 @@ class NetworkManager {
         for _ in 0..<imageDownloadNumber {
             let session = URLSession(configuration: .default)
             guard let url = URL(string: catUrl) else {
-                print("Failed to convert catUrl to URL object")
+                print("Error creating URL object from API's HTTP address")
                 return
             }
             let task = session.dataTask(with: url) { (data, response, error) in
                 if error != nil {
                     self.delegate?.errorDidOccur()
-                    print("Error occured during data fetching process.")
+                    print("Error fetching data with url.")
                     return
                 } else {
                     if let safeData = data {
@@ -67,7 +67,7 @@ class NetworkManager {
         do {
             let decodedData = try jsonDecoder.decode(JSONModel.self, from: data)
             guard let imageURL = URL(string: decodedData.url) else {
-                print("Failed to convert url string to URL object.")
+                print("Error creating URL object from fetched url.")
                 return
             }
             let newImage = imageFromURL(url: imageURL)
@@ -93,12 +93,12 @@ class NetworkManager {
         do {
             let imageData = try Data(contentsOf: url)
             guard let image = UIImage(data: imageData) else {
-                print("Failed to convert imageData into UIImage object.")
+                print("Error converting imageData into UIImage object.")
                 return UIImage(named: "default")!
             }
             return image
         } catch {
-            print("Error occured in the process of downloading and converting image data. Error: \(error)")
+            print("Error creating image data from url: \(error)")
         }
         return UIImage(named: "default")!
     }
