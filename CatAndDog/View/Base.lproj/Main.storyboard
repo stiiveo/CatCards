@@ -68,7 +68,7 @@
             </objects>
             <point key="canvasLocation" x="2568.8000000000002" y="-456.52173913043481"/>
         </scene>
-        <!--CollectionVC-->
+        <!--Favorites-->
         <scene sceneID="GWV-aL-vGk">
             <objects>
                 <collectionViewController id="nfh-xn-jhC" customClass="CollectionVC" customModule="CatAndDog" customModuleProvider="target" sceneMemberID="viewController">
@@ -111,7 +111,7 @@
                             <outlet property="delegate" destination="nfh-xn-jhC" id="mOe-bk-7mo"/>
                         </connections>
                     </collectionView>
-                    <navigationItem key="navigationItem" id="d9n-lb-NFf"/>
+                    <navigationItem key="navigationItem" title="Favorites" id="d9n-lb-NFf"/>
                     <connections>
                         <segue destination="qlD-G6-Afc" kind="show" identifier="collectionToSingle" id="pEZ-p6-Ugc"/>
                     </connections>
@@ -143,7 +143,7 @@
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="J8H-dB-oM3"/>
                                     <barButtonItem title="Favorite" id="fw0-Ko-RhS">
-                                        <imageReference key="image" image="heart" catalog="system" symbolScale="large"/>
+                                        <imageReference key="image" image="heart.fill" catalog="system" symbolScale="large"/>
                                         <connections>
                                             <action selector="favoriteButtonPressed:" destination="qlD-G6-Afc" id="bGY-fK-lXC"/>
                                         </connections>
@@ -187,7 +187,9 @@
                             <constraint firstItem="1Ze-wL-vlY" firstAttribute="top" secondItem="PSN-rc-vX0" secondAttribute="top" id="zfI-F2-04S"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="afj-fq-RhJ"/>
+                    <navigationItem key="navigationItem" id="afj-fq-RhJ">
+                        <barButtonItem key="backBarButtonItem" title="Favorites" id="Wgb-Bn-qm8"/>
+                    </navigationItem>
                     <connections>
                         <outlet property="scrollView" destination="1Ze-wL-vlY" id="3Jb-52-g00"/>
                         <outlet property="stackView" destination="eiQ-d0-gPU" id="iCu-Re-zCs"/>
@@ -219,6 +221,7 @@
     <resources>
         <image name="default" width="330" height="530"/>
         <image name="heart" catalog="system" width="128" height="109"/>
+        <image name="heart.fill" catalog="system" width="128" height="109"/>
         <image name="square.and.arrow.up" catalog="system" width="115" height="128"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
