@@ -94,6 +94,7 @@ class SingleImageVC: UIViewController {
     }
     
     @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
+        
     }
     
     private func attachPanGestureRecognizer(recognizer: UIPanGestureRecognizer, to index: Int) {
@@ -110,9 +111,12 @@ class SingleImageVC: UIViewController {
     private func getPanGestureRecognizer() -> UIPanGestureRecognizer {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
         pan.delegate = self
-//        pan.minimumNumberOfTouches = 2
-//        pan.maximumNumberOfTouches = 2
         panGesture = pan
+        
+        // Only 2-finger panning action can be recognized
+        pan.minimumNumberOfTouches = 2
+        pan.maximumNumberOfTouches = 2
+        
         return pan
     }
     
