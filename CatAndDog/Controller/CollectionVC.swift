@@ -17,7 +17,7 @@ class CollectionVC: UICollectionViewController {
 
         let screenWidth = UIScreen.main.bounds.width
         let cellNumberPerRow: CGFloat = 3.0
-        let interCellSpacing: CGFloat = 3.0
+        let interCellSpacing: CGFloat = 1.5
         let cellWidth = (screenWidth - (interCellSpacing * (cellNumberPerRow - 1))) / cellNumberPerRow
         // floor the calculated width to remove any possible decimal number
         let flooredCellWidth = floor(cellWidth)
