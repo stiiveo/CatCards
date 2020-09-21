@@ -137,10 +137,16 @@
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="OAm-lD-nxL"/>
                                     <barButtonItem title="Share" id="JHf-4E-Ked">
                                         <imageReference key="image" image="square.and.arrow.up" catalog="system" symbolScale="large"/>
+                                        <connections>
+                                            <action selector="shareButtonPressed:" destination="qlD-G6-Afc" id="dHQ-5v-xSP"/>
+                                        </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="J8H-dB-oM3"/>
                                     <barButtonItem title="Favorite" id="fw0-Ko-RhS">
                                         <imageReference key="image" image="heart" catalog="system" symbolScale="large"/>
+                                        <connections>
+                                            <action selector="favoriteButtonPressed:" destination="qlD-G6-Afc" id="bGY-fK-lXC"/>
+                                        </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="r2L-hZ-4Rl"/>
                                 </items>

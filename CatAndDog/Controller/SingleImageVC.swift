@@ -85,6 +85,17 @@ class SingleImageVC: UIViewController {
         panGesture = twoFingerPan
     }
     
+    @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
+        let imageToShare = DatabaseManager.imageArray[currentPage]
+        
+        // present activity controller
+        let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
+        present(activityController, animated: true)
+    }
+    
+    @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
+    }
+    
     private func attachPanGestureRecognizer(recognizer: UIPanGestureRecognizer, to index: Int) {
         stackView.arrangedSubviews[index].addGestureRecognizer(recognizer)
         panGesture = recognizer
@@ -96,15 +107,11 @@ class SingleImageVC: UIViewController {
         pinchGesture = recognizer
     }
     
-    private func removePinchGestureRecognizer(viewIndex: Int, pinchGR: UIPinchGestureRecognizer) {
-            
-    }
-    
     private func getPanGestureRecognizer() -> UIPanGestureRecognizer {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
         pan.delegate = self
-        pan.minimumNumberOfTouches = 2
-        pan.maximumNumberOfTouches = 2
+//        pan.minimumNumberOfTouches = 2
+//        pan.maximumNumberOfTouches = 2
         panGesture = pan
         return pan
     }
@@ -133,14 +140,14 @@ class SingleImageVC: UIViewController {
                 }
                 
                 UIView.animate(withDuration: 0.2) {
-                    self.scrollView.backgroundColor = .black
+//                    self.scrollView.backgroundColor = .black
                 }
             default:
                 // If the gesture has cancelled/terminated/failed or everything else that's not performing
                 // Smoothly restore the transform to the "original"
                 UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseInOut, animations: {
                     view.transform = .identity
-                    self.scrollView.backgroundColor = .white
+//                    self.scrollView.backgroundColor = .white
                 })
             }
         }
