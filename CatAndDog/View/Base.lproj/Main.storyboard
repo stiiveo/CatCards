@@ -103,7 +103,6 @@
                                 </collectionViewCellContentView>
                                 <connections>
                                     <outlet property="imageView" destination="qJR-ZH-yiF" id="IZa-tu-fVL"/>
-                                    <segue destination="qlD-G6-Afc" kind="show" identifier="collectionToSingle" id="pDC-kO-fdh"/>
                                 </connections>
                             </collectionViewCell>
                         </cells>
@@ -113,6 +112,9 @@
                         </connections>
                     </collectionView>
                     <navigationItem key="navigationItem" id="d9n-lb-NFf"/>
+                    <connections>
+                        <segue destination="qlD-G6-Afc" kind="show" identifier="collectionToSingle" id="pEZ-p6-Ugc"/>
+                    </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ieF-lG-ljO" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>

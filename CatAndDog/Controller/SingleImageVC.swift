@@ -13,7 +13,7 @@ class SingleImageVC: UIViewController {
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var stackView: UIStackView!
     
-    var selectedViewIndex: Int?
+    var imageToShowIndex: Int?
     var currentPage: Int {
         Int(round(scrollView.contentOffset.x / scrollView.frame.width))
     }
@@ -27,31 +27,27 @@ class SingleImageVC: UIViewController {
         super.viewDidLoad()
         scrollView.delegate = self
         
+        removeTemplateImageView()
+        addImagesToStackView()
+        
         // Make scrollView to scroll to the image the user selected at the previous view controller
         DispatchQueue.main.async {
-            guard let pageNumber = self.selectedViewIndex else { return }
+            guard let pageNumber = self.imageToShowIndex else { return }
             self.scrollView.contentOffset = CGPoint(x: CGFloat(pageNumber) * self.scrollView.frame.width, y: 0)
         }
         
         // Stop scrollView from reacting to two-finger panning events
         disableTwoFingerScroll()
         
-        // Enable each imageView's user interaction
-        for imageView in stackView.arrangedSubviews {
-            imageView.isUserInteractionEnabled = true
-        }
-        
         // Attach pinch and pan gesture recognizer to the selected view
         let pinchGR = getPinchGestureRecognizer()
         let panGR = getPanGestureRecognizer()
-        if let index = selectedViewIndex {
+        if let index = imageToShowIndex {
             attachPinchGestureRecognizer(recognizer: pinchGR, to: index)
             attachPanGestureRecognizer(recognizer: panGR, to: index)
         }
         
         /// TEST AREA
-        removeTemplateImageView()
-        addImagesToStackView()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -73,6 +69,11 @@ class SingleImageVC: UIViewController {
             stackView.addArrangedSubview(newImageView)
             newImageView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor).isActive = true
             newImageView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor).isActive = true
+        }
+        
+        // Enable each imageView's user interaction
+        for imageView in stackView.arrangedSubviews {
+            imageView.isUserInteractionEnabled = true
         }
     }
     
@@ -182,11 +183,6 @@ class SingleImageVC: UIViewController {
                 })
             }
         }
-    }
-    
-    @IBAction func test(_ sender: UIButton) {
-        print("stackView[0] center: \(stackView.arrangedSubviews[0].center)")
-        print("stackView[0] anchor: \(anchorPosition!)")
     }
     
 }
