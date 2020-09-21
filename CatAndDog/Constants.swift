@@ -9,6 +9,9 @@
 import UIKit
 
 struct K {
+    struct SegueIdentifier {
+        static let collectionToSingle = "collectionToSingle"
+    }
     struct ButtonImage {
         static let heart = UIImage(systemName: "heart")
         static let filledHeart = UIImage(systemName: "heart.fill")

@@ -103,7 +103,7 @@
                                 </collectionViewCellContentView>
                                 <connections>
                                     <outlet property="imageView" destination="qJR-ZH-yiF" id="IZa-tu-fVL"/>
-                                    <segue destination="qlD-G6-Afc" kind="show" id="pDC-kO-fdh"/>
+                                    <segue destination="qlD-G6-Afc" kind="show" identifier="collectionToSingle" id="pDC-kO-fdh"/>
                                 </connections>
                             </collectionViewCell>
                         </cells>
@@ -118,10 +118,10 @@
             </objects>
             <point key="canvasLocation" x="3430" y="-457"/>
         </scene>
-        <!--View Controller-->
+        <!--Single ImageVC-->
         <scene sceneID="lxw-3u-W9X">
             <objects>
-                <viewController id="qlD-G6-Afc" sceneMemberID="viewController">
+                <viewController id="qlD-G6-Afc" customClass="SingleImageVC" customModule="CatAndDog" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="qn6-hw-Gab">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -185,6 +185,10 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="afj-fq-RhJ"/>
+                    <connections>
+                        <outlet property="scrollView" destination="1Ze-wL-vlY" id="3Jb-52-g00"/>
+                        <outlet property="stackView" destination="eiQ-d0-gPU" id="iCu-Re-zCs"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="OOC-I2-fFc" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
