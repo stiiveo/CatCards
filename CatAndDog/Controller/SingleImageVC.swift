@@ -93,7 +93,7 @@ class SingleImageVC: UIViewController {
         present(activityController, animated: true)
     }
     
-    @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
+    @IBAction func deleteButtonPressed(_ sender: UIBarButtonItem) {
         
     }
     
