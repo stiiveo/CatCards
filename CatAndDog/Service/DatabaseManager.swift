@@ -37,8 +37,8 @@ class DatabaseManager {
         }
         
         // delete image file from file system
-        let fileToDelete = "\(data.id).jpg"
-        let fileURL = subFolderURL().appendingPathComponent(fileToDelete)
+        let fileName = "\(data.id).jpg"
+        let fileURL = subFolderURL().appendingPathComponent(fileName)
         if fileManager.fileExists(atPath: fileURL.path) {
             do {
                 try fileManager.removeItem(at: fileURL)

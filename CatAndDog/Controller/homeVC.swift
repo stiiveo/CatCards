@@ -159,11 +159,17 @@ class homeVC: UIViewController, NetworkManagerDelegate {
     
     // add constraints to imageView
     private func addImageViewConstraint(imageView: UIImageView, contraintTo cardView: UIView) {
-        imageView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: K.ImageView.Constraint.top).isActive = true
-        imageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: K.ImageView.Constraint.leading).isActive = true
-        imageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: K.ImageView.Constraint.trailing).isActive = true
-        imageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: K.ImageView.Constraint.bottom).isActive = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            imageView.topAnchor.constraint(equalTo: cardView.topAnchor,
+                                           constant: K.ImageView.Constraint.top),
+            imageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor,
+                                               constant: K.ImageView.Constraint.leading),
+            imageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor,
+                                                constant: K.ImageView.Constraint.trailing),
+            imageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor,
+                                              constant: K.ImageView.Constraint.bottom)
+        ])
         
         // add style
         imageView.contentMode = .scaleAspectFit
