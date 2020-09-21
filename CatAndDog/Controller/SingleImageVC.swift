@@ -94,7 +94,16 @@ class SingleImageVC: UIViewController {
     }
     
     @IBAction func deleteButtonPressed(_ sender: UIBarButtonItem) {
-        
+        let alert = UIAlertController(title: "Warning! This action can not be reverted", message: nil, preferredStyle: .actionSheet)
+        let deleteAction = UIAlertAction(title: "Delete Image", style: .destructive) { (action) in
+            return
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action) in
+            return
+        }
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+        present(alert, animated: true, completion: nil)
     }
     
     private func attachPanGestureRecognizer(recognizer: UIPanGestureRecognizer, to index: Int) {
