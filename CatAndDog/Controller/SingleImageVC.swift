@@ -50,12 +50,30 @@ class SingleImageVC: UIViewController {
         }
         
         /// TEST AREA
-        print("TEST2")
+        removeTemplateImageView()
+        addImagesToStackView()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         // Save the center position of the stackView's first arranged subview after the view is loaded
         self.anchorPosition = stackView.arrangedSubviews[0].center
+    }
+    
+    private func removeTemplateImageView() {
+        let templateImageView = stackView.arrangedSubviews[0]
+        stackView.removeArrangedSubview(templateImageView)
+        templateImageView.removeFromSuperview()
+    }
+    
+    private func addImagesToStackView() {
+        for image in DatabaseManager.imageArray {
+            let newImageView = UIImageView()
+            newImageView.contentMode = .scaleAspectFit
+            newImageView.image = image
+            stackView.addArrangedSubview(newImageView)
+            newImageView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor).isActive = true
+            newImageView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor).isActive = true
+        }
     }
     
     private func disableTwoFingerScroll() {

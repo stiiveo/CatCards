@@ -147,24 +147,19 @@
                                 <rect key="frame" x="0.0" y="88" width="414" height="730"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="eiQ-d0-gPU">
-                                        <rect key="frame" x="0.0" y="0.0" width="828" height="730"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="414" height="730"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="default" translatesAutoresizingMaskIntoConstraints="NO" id="Tno-z9-hkl">
                                                 <rect key="frame" x="0.0" y="0.0" width="414" height="730"/>
-                                            </imageView>
-                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="default" translatesAutoresizingMaskIntoConstraints="NO" id="AfB-zO-7ap">
-                                                <rect key="frame" x="414" y="0.0" width="414" height="730"/>
                                             </imageView>
                                         </subviews>
                                     </stackView>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="eiQ-d0-gPU" firstAttribute="leading" secondItem="Zs3-8E-Dxx" secondAttribute="leading" id="45R-ga-mkX"/>
-                                    <constraint firstItem="AfB-zO-7ap" firstAttribute="height" secondItem="S4A-Fj-ePw" secondAttribute="height" id="68b-9U-duN"/>
                                     <constraint firstItem="Tno-z9-hkl" firstAttribute="height" secondItem="S4A-Fj-ePw" secondAttribute="height" id="Eg1-Lt-OoJ"/>
                                     <constraint firstItem="eiQ-d0-gPU" firstAttribute="trailing" secondItem="Zs3-8E-Dxx" secondAttribute="trailing" id="H1M-TY-CR2"/>
                                     <constraint firstItem="eiQ-d0-gPU" firstAttribute="top" secondItem="Zs3-8E-Dxx" secondAttribute="top" id="HPY-s2-mNy"/>
-                                    <constraint firstItem="AfB-zO-7ap" firstAttribute="width" secondItem="S4A-Fj-ePw" secondAttribute="width" id="npN-Y3-UfC"/>
                                     <constraint firstItem="Tno-z9-hkl" firstAttribute="width" secondItem="S4A-Fj-ePw" secondAttribute="width" id="uTk-Pj-d6j"/>
                                     <constraint firstItem="eiQ-d0-gPU" firstAttribute="bottom" secondItem="Zs3-8E-Dxx" secondAttribute="bottom" id="xdW-cQ-xwB"/>
                                 </constraints>
