@@ -11,10 +11,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--HomeVC-->
+        <!--Main View Controller-->
         <scene sceneID="Fey-D6-ugN">
             <objects>
-                <viewController id="jpg-gr-ShF" customClass="homeVC" customModule="CatAndDog" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="jpg-gr-ShF" customClass="MainViewController" customModule="CatAndDog" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cSQ-ii-ZYK">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -219,7 +219,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="default" width="330" height="530"/>
+        <image name="default" width="165" height="265"/>
         <image name="heart" catalog="system" width="128" height="109"/>
         <image name="square.and.arrow.up" catalog="system" width="115" height="128"/>
         <image name="trash" catalog="system" width="121" height="128"/>

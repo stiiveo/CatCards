@@ -82,7 +82,7 @@ class NetworkManager {
             if serializedData.count > K.Data.maxDataNumberStored {
                 serializedData[dataIndex - K.Data.maxDataNumberStored] = nil
             }
-            // Execute code at homeVC
+            // Execute code at MainViewController
             delegate?.dataDidFetch()
         } catch {
             debugPrint(error.localizedDescription)

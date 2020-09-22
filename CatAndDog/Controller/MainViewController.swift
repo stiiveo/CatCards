@@ -1,5 +1,5 @@
 //
-//  homeVC.swift
+//  MainViewController.swift
 //  CatAndDog
 //
 //  Created by Jason Ou Yang on 2020/7/21.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class homeVC: UIViewController, NetworkManagerDelegate {
+class MainViewController: UIViewController, NetworkManagerDelegate {
     
     @IBOutlet weak var toolBar: UIToolbar!
     @IBOutlet weak var favoriteBtn: UIBarButtonItem!
