@@ -28,6 +28,21 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     var isCard2DataAvailable: Bool = false
     var cardView1Data: CatData?
     var cardView2Data: CatData?
+    var currentData: CatData? {
+        if currentCardView == 1 {
+            if let dataOne = cardView1Data {
+                return dataOne
+            }
+        }
+        else if currentCardView == 2 {
+            if let dataTwo = cardView2Data {
+                return dataTwo
+            }
+        } else {
+            print("Invalid value of currentCardView")
+        }
+        return nil
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,6 +67,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         databaseManager.loadImages() // Load up data saved in user's device
         
         favoriteBtn.isEnabled = false // favorite button's default status
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        // Refresh favorite button's image
+        if let currentUsedData = currentData {
+            let isDataSaved = databaseManager.isDataSaved(data: currentUsedData)
+            DispatchQueue.main.async {
+                self.favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
+            }
+        }
     }
     
     //MARK: - Activity Indicator
@@ -89,33 +114,22 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     //MARK: - Favorite Action
     
     @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
-        var newData: CatData?
-        if currentCardView == 1 {
-            guard cardView1Data != nil else { return }
-            newData = cardView1Data!
-        }
-        else if currentCardView == 2 {
-            guard cardView2Data != nil else { return }
-            newData = cardView2Data!
-        } else {
-            print("Invalid value of currentCardView")
-        }
-        
-        guard let safeNewData = newData else { return }
-        let isDataSaved = databaseManager.isDataSaved(data: safeNewData)
-        
-        // Save data if it's absent in database, otherwise delete data in database
-        if isDataSaved == false {
-            databaseManager.saveData(safeNewData)
-            DispatchQueue.main.async {
-                self.favoriteBtn.image = K.ButtonImage.filledHeart
-            }
-        } else if isDataSaved == true {
-            // delete file in database
-            databaseManager.deleteData(id: safeNewData.id)
+        if let currentUsedData = currentData {
+            let isDataSaved = databaseManager.isDataSaved(data: currentUsedData)
             
-            DispatchQueue.main.async {
-                self.favoriteBtn.image = K.ButtonImage.heart
+            // Save data if it's absent in database, otherwise delete data in database
+            if isDataSaved == false {
+                databaseManager.saveData(currentUsedData)
+                DispatchQueue.main.async {
+                    self.favoriteBtn.image = K.ButtonImage.filledHeart
+                }
+            } else if isDataSaved == true {
+                // delete file in database
+                databaseManager.deleteData(id: currentUsedData.id)
+                
+                DispatchQueue.main.async {
+                    self.favoriteBtn.image = K.ButtonImage.heart
+                }
             }
         }
     }
