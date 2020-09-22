@@ -16,16 +16,20 @@ class CollectionVC: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        /// Set up cell's size and spacing
+        
         let screenWidth = UIScreen.main.bounds.width
         let cellNumberPerRow: CGFloat = 3.0
         let interCellSpacing: CGFloat = 2.0
         let cellWidth = (screenWidth - (interCellSpacing * (cellNumberPerRow - 1))) / cellNumberPerRow
-        // floor the calculated width to remove any possible decimal number
+        
+        // floor the calculated width to remove any decimal number
         let flooredCellWidth = floor(cellWidth)
         
         // set up width and spacing of each cell
         let viewLayout = self.collectionViewLayout
         let flowLayout = viewLayout as! UICollectionViewFlowLayout
+        
         // remove auto layout constraint
         flowLayout.estimatedItemSize = .zero
         flowLayout.itemSize = CGSize(width: flooredCellWidth, height: flooredCellWidth)

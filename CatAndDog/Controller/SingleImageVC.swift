@@ -19,6 +19,7 @@ class SingleImageVC: UIViewController {
     }
     var previousPage: Int?
     var anchorPosition: CGPoint?
+    let databaseManager = DatabaseManager()
     
     weak var panGesture: UIPanGestureRecognizer?
     weak var pinchGesture: UIPinchGestureRecognizer?
@@ -27,7 +28,7 @@ class SingleImageVC: UIViewController {
         super.viewDidLoad()
         scrollView.delegate = self
         
-        removeTemplateImageView()
+        removeImageView(at: 0) // Remove the template imageView
         addImagesToStackView()
         
         // Make scrollView to scroll to the image the user selected at the previous view controller
@@ -55,10 +56,10 @@ class SingleImageVC: UIViewController {
         self.anchorPosition = stackView.arrangedSubviews[0].center
     }
     
-    private func removeTemplateImageView() {
-        let templateImageView = stackView.arrangedSubviews[0]
-        stackView.removeArrangedSubview(templateImageView)
-        templateImageView.removeFromSuperview()
+    private func removeImageView(at index: Int) {
+        let viewToDelete = stackView.arrangedSubviews[index]
+        stackView.removeArrangedSubview(viewToDelete)
+        viewToDelete.removeFromSuperview()
     }
     
     private func addImagesToStackView() {
@@ -90,20 +91,66 @@ class SingleImageVC: UIViewController {
         
         // present activity controller
         let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
-        present(activityController, animated: true)
+        self.present(activityController, animated: true)
     }
     
     @IBAction func deleteButtonPressed(_ sender: UIBarButtonItem) {
-        let alert = UIAlertController(title: "Warning! This action can not be reverted", message: nil, preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: "This action can not be reverted.", message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: "Delete Image", style: .destructive) { (action) in
-            return
+            
+            let favoriteIDs = self.databaseManager.listOfFileNames()
+            let dataID = favoriteIDs[self.currentPage]
+            
+            // Delete data in file system and database and refresh the imageArray
+            self.databaseManager.deleteData(id: dataID)
+            
+            // Animate the scroll view
+            self.scrollAndRemoveImageView()
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action) in
             return
         }
         alert.addAction(deleteAction)
         alert.addAction(cancelAction)
-        present(alert, animated: true, completion: nil)
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    /// Stack view will be scrolled to the next page if the deleted view is not the last one in the stack view
+    private func scrollAndRemoveImageView() {
+        let originalPage = currentPage
+        var pageToScroll: Int?
+        let subviewCount = stackView.arrangedSubviews.count
+        if subviewCount > 1 {
+            if currentPage != subviewCount - 1 { // Scroll to right if current page is NOT the last one in the stackview
+                pageToScroll = currentPage + 1
+            } else { // Scroll to left if current page is the last one in the stackview
+                pageToScroll = currentPage - 1
+            }
+        } else if subviewCount == 1 { // Only one subview is in the stackview
+            // Return to collection view
+            _ = navigationController?.popViewController(animated: true)
+        }
+        
+        // Animate scrolling and remove the subview
+        DispatchQueue.main.async {
+            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+                if let pageIndex = pageToScroll {
+                    self.scrollView.contentOffset = CGPoint(x: CGFloat(pageIndex) * self.scrollView.frame.width, y: 0)
+                }
+            } completion: { (success) in
+                if success {
+                    // Remove imageview from the stackview
+                    self.removeImageView(at: originalPage)
+                    
+                    // Reset scrollView's offset to the original position if stackview was scrolled to the next page
+                    if pageToScroll == originalPage + 1 {
+                        self.scrollView.contentOffset = CGPoint(x: CGFloat(originalPage) * self.scrollView.frame.width, y: 0)
+                    }
+                    
+                    // Update collection view
+                }
+            }
+        }
     }
     
     private func attachPanGestureRecognizer(recognizer: UIPanGestureRecognizer, to index: Int) {

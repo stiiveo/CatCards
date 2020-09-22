@@ -21,11 +21,11 @@ class DatabaseManager {
     //MARK: - Data Deletion
     
     // Delete specific data in database and file system
-    internal func deleteData(_ data: CatData) {
+    internal func deleteData(id: String) {
         
         // delete data from database
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id MATCHES %@", data.id) // Fetch data with the matched ID value
+        fetchRequest.predicate = NSPredicate(format: "id MATCHES %@", id) // Fetch data with the matched ID value
         do {
             let fetchResult = try context.fetch(fetchRequest)
             for object in fetchResult {
@@ -37,7 +37,7 @@ class DatabaseManager {
         }
         
         // delete image file from file system
-        let fileName = "\(data.id).jpg"
+        let fileName = "\(id).jpg"
         let fileURL = subFolderURL().appendingPathComponent(fileName)
         if fileManager.fileExists(atPath: fileURL.path) {
             do {
@@ -140,7 +140,7 @@ class DatabaseManager {
         return fileManager.fileExists(atPath: newFileURL.path)
     }
     
-    private func listOfFileNames() -> [String] {
+    internal func listOfFileNames() -> [String] {
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         
         // Sort properties by the attribute 'date' in ascending order

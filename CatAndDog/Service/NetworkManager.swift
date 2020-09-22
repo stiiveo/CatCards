@@ -78,11 +78,11 @@ class NetworkManager {
             dataIndex += 1
             serializedData[dataIndex] = newData
             
-            // Remove the oldest data if numbers of catDataArray exceed threshold
+            // Remove the first saved data in the array if numbers of data exceed threshold
             if serializedData.count > K.Data.maxDataNumberStored {
                 serializedData[dataIndex - K.Data.maxDataNumberStored] = nil
             }
-            // Execute code in CatViewController
+            // Execute code at homeVC
             delegate?.dataDidFetch()
         } catch {
             debugPrint(error.localizedDescription)

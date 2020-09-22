@@ -112,7 +112,7 @@ class homeVC: UIViewController, NetworkManagerDelegate {
             }
         } else if isDataSaved == true {
             // delete file in database
-            databaseManager.deleteData(safeNewData)
+            databaseManager.deleteData(id: safeNewData.id)
             
             DispatchQueue.main.async {
                 self.favoriteBtn.image = K.ButtonImage.heart
