@@ -128,7 +128,7 @@ class SingleImageVC: UIViewController {
             }
         } else if subviewCount == 1 { // Only one subview is in the stackview
             // Return to collection view
-            _ = navigationController?.popViewController(animated: true)
+            self.navigationController?.popViewController(animated: true)
         }
         
         // Animate scrolling and remove the subview
@@ -146,8 +146,6 @@ class SingleImageVC: UIViewController {
                     if pageToScroll == originalPage + 1 {
                         self.scrollView.contentOffset = CGPoint(x: CGFloat(originalPage) * self.scrollView.frame.width, y: 0)
                     }
-                    
-                    // Update collection view
                 }
             }
         }

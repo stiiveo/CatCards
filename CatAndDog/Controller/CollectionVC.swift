@@ -37,6 +37,12 @@ class CollectionVC: UICollectionViewController {
         
     }
     
+    // Refresh the collection view every time the view is about to be shown to the user
+    override func viewWillAppear(_ animated: Bool) {
+        self.collectionView.reloadData()
+    }
+    
+    // Send the selected cell index to the SingleImageVC
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destination = segue.destination as? SingleImageVC {
             destination.imageToShowIndex = selectedCellIndex
