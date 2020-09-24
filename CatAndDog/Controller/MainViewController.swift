@@ -164,7 +164,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     // add constraints to cardView
     private func addCardViewConstraint(cardView: UIView) {
-        
         cardView.translatesAutoresizingMaskIntoConstraints = false
         
         let viewMargins = self.view.layoutMarginsGuide
@@ -184,6 +183,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     // add constraints to imageView
     private func addImageViewConstraint(imageView: UIImageView, contraintTo cardView: UIView) {
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             imageView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: K.ImageView.Constraint.top),
             imageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: K.ImageView.Constraint.leading),
@@ -234,8 +234,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     if isDataSaved == true {
                         self.favoriteBtn.image = K.ButtonImage.filledHeart
                     }
-                    
-                    // add UIPanGestureRecognizer to cardView
+                    // add UIPanGestureRecognizer to cardView1
                     self.cardView1.addGestureRecognizer(panGesture)
                 }
                 dataIndex += 1
@@ -249,6 +248,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 DispatchQueue.main.async {
                     self.imageView2.image = secondData.image
                     self.indicator2.stopAnimating()
+                    
+                    // Add pan gesture recognizer to cardView2 and disable it
+                    self.cardView2.addGestureRecognizer(panGesture)
+                    if let cardView2GR = self.cardView2.gestureRecognizers?.first {
+                        cardView2GR.isEnabled = false
+                    }
                 }
                 dataIndex += 1
             }
@@ -268,7 +273,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         guard let cardView = sender.view else { return }
         
         let viewWidth = view.frame.width
-        let panGesture = sender
         
         // Point of the finger in the view's coordinate system
         let fingerMovement = sender.translation(in: view)
@@ -297,39 +301,21 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // card's rotation increase when it approaches the side edge of the screen
         cardView.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
         
-        /*
-         The second card is visible when first card is dragged
-         # if this method is not implemented,
-            the user can see the removed card returns
-            and inserts below the cardView
-         */
-        if sender.state == .began {
-            if cardView == cardView1 {
-                cardView2.isHidden = false
-            } else {
-                cardView1.isHidden = false
-            }
-        }
-        
         // when user's finger left the screen
         if sender.state == .ended {
             /*
              Card can only be dismissed when it's dragged to the side of the screen
-             and the current image view's image is not unavailable
+             and the current image view's image is available
              */
-            if cardView.center.x < viewWidth / 4 && currentImageView.image != nil {
-                UIView.animate(withDuration: 0.2) {
-                    cardView.center = CGPoint(x: cardView.center.x - 400, y: cardView.center.y)
-                }
-                animateCard(cardView, panGesture: panGesture)
+            let releasePoint = CGPoint(x: cardView.frame.midX, y: cardView.frame.midY)
+            
+            if cardView.center.x < viewWidth / 4 && currentImageView.image != nil { // card was at the left side of the screen
+                animateCard(cardView, releasedPoint: releasePoint)
             }
-            else if cardView.center.x > viewWidth * 3/4 && currentImageView.image != nil {
-                UIView.animate(withDuration: 0.2) {
-                    cardView.center = CGPoint(x: cardView.center.x + 400, y: cardView.center.y)
-                }
-                animateCard(cardView, panGesture: panGesture)
+            else if cardView.center.x > viewWidth * 3/4 && currentImageView.image != nil { // card was at the right side of the screen
+                animateCard(cardView, releasedPoint: releasePoint)
             }
-            // animate card back to origianl position, opacity and rotation state
+            // Reset card's position and rotation state
             else {
                 UIView.animate(withDuration: 0.2) {
                     cardView.center = self.cardViewAnchor
@@ -339,29 +325,66 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func animateCard(_ card: UIView, panGesture: UIPanGestureRecognizer) {
+    private func animateCard(_ card: UIView, releasedPoint: CGPoint) {
+        // Determine the quarant of the release point
+        var quadrant: Int?
+        let releasePointX = releasedPoint.x
+        let releasePointY = releasedPoint.y
+        let anchorX = cardViewAnchor.x
+        let anchorY = cardViewAnchor.y
         
-        /*
-         1. The dismissed card is hidden
-         2. Remove attach to gesture recognizer
-         3. Has rotation back to original degree
-         4. Removed from super view
-         */
-        card.isHidden = true
-        card.removeGestureRecognizer(panGesture)
-        card.transform = CGAffineTransform.identity
-        card.removeFromSuperview()
+        if releasePointX > anchorX && releasePointY <= anchorY {
+            quadrant = 1
+        } else if releasePointX < anchorX && releasePointY <= anchorY {
+            quadrant = 2
+        } else if releasePointX < anchorX && releasePointY > anchorY {
+            quadrant = 3
+        } else if releasePointX > anchorX && releasePointY > anchorY {
+            quadrant = 4
+        }
         
+        // Move the card to the edge of either side of the screen depending on where the card was released at
+        UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseOut) {
+            guard quadrant != nil else { return }
+            switch quadrant! {
+            case 1:
+                card.center = CGPoint(x: card.center.x + 300, y: card.center.y - 300)
+            case 2:
+                card.center = CGPoint(x: card.center.x - 300, y: card.center.y - 300)
+            case 3:
+                card.center = CGPoint(x: card.center.x - 300, y: card.center.y + 150)
+            case 4:
+                card.center = CGPoint(x: card.center.x + 300, y: card.center.y + 150)
+            default:
+                print("Quadrant of the finger release point is invalid.")
+            }
+            
+        } completion: { (true) in
+            if true {
+                if let cardGR = card.gestureRecognizers?.first {
+                    cardGR.isEnabled = false
+                }
+                card.removeFromSuperview()
+                card.transform = CGAffineTransform.identity
+                self.rotateCard(dismissedView: card)
+            }
+        }
+    }
+        
+    func rotateCard(dismissedView: UIView) {
         /*
-         1. CardView that was at the bottom has gesture recognizer attached
-         2. The dismissed cardView is inserted beneath old cardView
-         3. Set new cardView's position and contraint
-         4. Update new card's imageView
-         5. Download new image into image array
+         1. Update favorite button's status
+         2. Place the dismissed card beneath the current cardView
+         3. Set up dismissed card's position and contraint
+         4. Update imageView's image
+         5. Fetch new data
+         6. Enable gesture recognizer
         */
-        if card == cardView1 { // dismissed cardView is cardView1
+        if dismissedView == cardView1 { // dismissed cardView is cardView1
             currentCardView = 2
-            cardView2.addGestureRecognizer(panGesture)
+            if let cardGR = cardView2.gestureRecognizers?.first {
+                cardGR.isEnabled = true
+            }
             
             // Favorite button is enabled if data is available
             favoriteBtn.isEnabled = isCard2DataAvailable ? true : false
@@ -370,15 +393,18 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
             }
             
-            self.view.insertSubview(card, belowSubview: cardView2)
-            card.center = cardViewAnchor
-            addCardViewConstraint(cardView: card)
+            // Put the dismissed card behind the current card
+            self.view.insertSubview(dismissedView, belowSubview: cardView2)
+            dismissedView.center = cardViewAnchor
+            addCardViewConstraint(cardView: dismissedView)
             
             updateCardView()
             fetchNewData(initialRequest: false)
-        } else if card == cardView2 { // dismissed cardView is cardView2
+        } else if dismissedView == cardView2 { // dismissed cardView is cardView2
             currentCardView = 1
-            cardView1.addGestureRecognizer(panGesture)
+            if let cardGR = cardView1.gestureRecognizers?.first {
+                cardGR.isEnabled = true
+            }
             
             // Favorite button is enabled if data is available
             favoriteBtn.isEnabled = isCard1DataAvailable ? true : false
@@ -387,9 +413,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
             }
             
-            self.view.insertSubview(card, belowSubview: cardView1)
-            card.center = cardViewAnchor
-            addCardViewConstraint(cardView: card)
+            // Put the dismissed card behind the current card
+            self.view.insertSubview(dismissedView, belowSubview: cardView1)
+            dismissedView.center = cardViewAnchor
+            addCardViewConstraint(cardView: dismissedView)
             
             updateCardView()
             fetchNewData(initialRequest: false)

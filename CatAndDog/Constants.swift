@@ -35,7 +35,7 @@ struct K {
             static let leading: CGFloat = 0.0
             static let trailing: CGFloat = -0.0
             static let yAnchorOffset: CGFloat = -20
-            static let heightToWidthRatio: CGFloat = 1.3
+            static let heightToWidthRatio: CGFloat = 4 / 3
         }
     }
     struct ImageView {

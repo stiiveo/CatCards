@@ -200,16 +200,11 @@ class SingleImageVC: UIViewController {
                     view.transform = transform
                     gesture.scale = 1
                 }
-                
-                UIView.animate(withDuration: 0.2) {
-//                    self.scrollView.backgroundColor = .black
-                }
             default:
                 // If the gesture has cancelled/terminated/failed or everything else that's not performing
                 // Smoothly restore the transform to the "original"
-                UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseInOut, animations: {
+                UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut, animations: {
                     view.transform = .identity
-//                    self.scrollView.backgroundColor = .white
                 })
             }
         }
