@@ -127,13 +127,17 @@ class SingleImageVC: UIViewController {
                 pageToScroll = currentPage - 1
             }
         } else if subviewCount == 1 { // Only one subview is in the stackview
-            // Return to collection view
+            // Go back to collection view
             self.navigationController?.popViewController(animated: true)
         }
         
         // Animate scrolling and remove the subview
         DispatchQueue.main.async {
-            UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut) {
+            UIView.animate(withDuration: 0.4, delay: 0, options: .curveEaseInOut) {
+                // Set the current view's alpha to 0
+                self.stackView.arrangedSubviews[self.currentPage].alpha = 0
+                
+                // Scroll to the left/right imageView
                 if let pageIndex = pageToScroll {
                     self.scrollView.contentOffset = CGPoint(x: CGFloat(pageIndex) * self.scrollView.frame.width, y: 0)
                 }
@@ -142,7 +146,7 @@ class SingleImageVC: UIViewController {
                     // Remove imageview from the stackview
                     self.removeImageView(at: originalPage)
                     
-                    // Reset scrollView's offset to the original position if stackview was scrolled to the next page
+                    // Reset scroll view's content offset to the previous position if the removed image view was at the left side of the scroll view
                     if pageToScroll == originalPage + 1 {
                         self.scrollView.contentOffset = CGPoint(x: CGFloat(originalPage) * self.scrollView.frame.width, y: 0)
                     }

@@ -34,15 +34,16 @@ struct K {
         struct Constraint {
             static let leading: CGFloat = 0.0
             static let trailing: CGFloat = -0.0
+            static let yAnchorOffset: CGFloat = -20
             static let heightToWidthRatio: CGFloat = 1.3
         }
     }
     struct ImageView {
         struct Constraint {
-            static let leading: CGFloat = 5.0
-            static let trailing: CGFloat = -5.0
-            static let top: CGFloat = 5.0
-            static let bottom: CGFloat = -5.0
+            static let leading: CGFloat = 0.0
+            static let trailing: CGFloat = -0.0
+            static let top: CGFloat = 0.0
+            static let bottom: CGFloat = -0.0
             static let cornerRadius: CGFloat = 20
         }
     }

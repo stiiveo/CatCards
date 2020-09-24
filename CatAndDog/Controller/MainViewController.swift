@@ -19,7 +19,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     let cardView2 = UIView()
     let imageView1 = UIImageView()
     let imageView2 = UIImageView()
-    var cardViewDefaultPosition = CGPoint()
+    var cardViewAnchor = CGPoint()
     var dataIndex: Int = 0
     var currentCardView: Int = 1
     var isInitialImageLoaded: Bool = false
@@ -50,7 +50,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         toolBar.heightAnchor.constraint(equalToConstant: K.ToolBar.height).isActive = true // define toolBar's height
         fetchNewData(initialRequest: true) // initiate data downloading
 
-        // Create UIView, ImageView and constraints
+        // Add cardView, ImageView and implement neccesary contraints
         view.addSubview(cardView1)
         view.insertSubview(cardView2, belowSubview: cardView1)
         cardView1.addSubview(imageView1)
@@ -61,12 +61,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         addImageViewConstraint(imageView: imageView1, contraintTo: cardView1)
         addImageViewConstraint(imageView: imageView2, contraintTo: cardView2)
         
-        cardViewDefaultPosition = cardView1.center
-        
         databaseManager.createDirectory() // Create folder for local image files store
         databaseManager.loadImages() // Load up data saved in user's device
         
         favoriteBtn.isEnabled = false // favorite button's default status
+        
+        // TEST AREA
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -77,6 +78,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 self.favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
             }
         }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        // Save the center position of the created card view
+        cardViewAnchor = cardView1.center
     }
     
     //MARK: - Activity Indicator
@@ -158,14 +164,18 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     // add constraints to cardView
     private func addCardViewConstraint(cardView: UIView) {
-        let viewMargins = self.view.layoutMarginsGuide
         
-        cardView.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor, constant: K.CardView.Constraint.leading).isActive = true
-        cardView.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor, constant: K.CardView.Constraint.trailing).isActive = true
-        cardView.centerYAnchor.constraint(equalTo: viewMargins.centerYAnchor).isActive = true
-        cardView.heightAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: K.CardView.Constraint.heightToWidthRatio).isActive = true
         cardView.translatesAutoresizingMaskIntoConstraints = false
-        // style
+        
+        let viewMargins = self.view.layoutMarginsGuide
+        NSLayoutConstraint.activate([
+            cardView.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor, constant: K.CardView.Constraint.leading),
+            cardView.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor, constant: K.CardView.Constraint.trailing),
+            cardView.centerYAnchor.constraint(equalTo: viewMargins.centerYAnchor, constant: K.CardView.Constraint.yAnchorOffset),
+            cardView.heightAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: K.CardView.Constraint.heightToWidthRatio)
+        ])
+        
+        // Style
         cardView.layer.cornerRadius = K.CardView.Style.cornerRadius
         cardView.layer.borderWidth = K.CardView.Style.borderWidth
         cardView.backgroundColor = K.CardView.Style.backgroundColor
@@ -175,17 +185,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private func addImageViewConstraint(imageView: UIImageView, contraintTo cardView: UIView) {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: cardView.topAnchor,
-                                           constant: K.ImageView.Constraint.top),
-            imageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor,
-                                               constant: K.ImageView.Constraint.leading),
-            imageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor,
-                                                constant: K.ImageView.Constraint.trailing),
-            imageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor,
-                                              constant: K.ImageView.Constraint.bottom)
+            imageView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: K.ImageView.Constraint.top),
+            imageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: K.ImageView.Constraint.leading),
+            imageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: K.ImageView.Constraint.trailing),
+            imageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: K.ImageView.Constraint.bottom)
         ])
         
-        // add style
+        // Style
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 20
         imageView.clipsToBounds = true
@@ -262,14 +268,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         guard let cardView = sender.view else { return }
         
         let viewWidth = view.frame.width
-        let cardDefaultPosition = CGPoint(x: self.view.center.x, y: self.view.center.y)
         let panGesture = sender
         
-        // point between the current pan and original location
+        // Point of the finger in the view's coordinate system
         let fingerMovement = sender.translation(in: view)
         
-        // amount of offset the card moved from its original position
-        let xAxisPanOffset = cardView.center.x - cardDefaultPosition.x
+        // Amount of x-axis offset the card moved from its original position
+        let xAxisPanOffset = cardView.center.x - cardViewAnchor.x
         
         // 1.0 Radian = 180º
         let rotationAtMax: CGFloat = 1.0
@@ -287,7 +292,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
         
         // card move to where the user's finger is
-        cardView.center = CGPoint(x: cardDefaultPosition.x + fingerMovement.x, y: cardDefaultPosition.y + fingerMovement.y)
+        cardView.center = CGPoint(x: cardViewAnchor.x + fingerMovement.x, y: cardViewAnchor.y + fingerMovement.y)
         
         // card's rotation increase when it approaches the side edge of the screen
         cardView.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
@@ -327,7 +332,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // animate card back to origianl position, opacity and rotation state
             else {
                 UIView.animate(withDuration: 0.2) {
-                    cardView.center = cardDefaultPosition
+                    cardView.center = self.cardViewAnchor
                     cardView.transform = CGAffineTransform.identity
                 }
             }
@@ -366,7 +371,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             }
             
             self.view.insertSubview(card, belowSubview: cardView2)
-            card.center = cardViewDefaultPosition
+            card.center = cardViewAnchor
             addCardViewConstraint(cardView: card)
             
             updateCardView()
@@ -383,7 +388,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             }
             
             self.view.insertSubview(card, belowSubview: cardView1)
-            card.center = cardViewDefaultPosition
+            card.center = cardViewAnchor
             addCardViewConstraint(cardView: card)
             
             updateCardView()
