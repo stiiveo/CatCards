@@ -29,7 +29,7 @@ struct K {
         struct Style {
             static let cornerRadius: CGFloat = 20
             static let borderWidth: CGFloat = 1.0
-            static let backgroundColor: UIColor = UIColor.systemGray6
+            static let backgroundColor: UIColor = UIColor(named: "cardBackgroundColor")!
         }
         struct Constraint {
             static let leading: CGFloat = 0.0
