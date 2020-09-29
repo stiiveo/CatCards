@@ -52,6 +52,7 @@ class SingleImageVC: UIViewController {
     }
     
     override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(false)
         // Save the center position of the stackView's first arranged subview after the view is loaded
         self.anchorPosition = stackView.arrangedSubviews[0].center
     }
