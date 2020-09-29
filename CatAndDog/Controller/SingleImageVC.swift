@@ -29,6 +29,7 @@ class SingleImageVC: UIViewController {
         scrollView.delegate = self
         
         removeImageView(at: 0) // Remove the template imageView
+        setUpToolbar()
         addImagesToStackView()
         
         // Make scrollView to scroll to the image the user selected at the previous view controller
@@ -52,9 +53,24 @@ class SingleImageVC: UIViewController {
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(false)
+        super.viewDidAppear(animated)
         // Save the center position of the stackView's first arranged subview after the view is loaded
         self.anchorPosition = stackView.arrangedSubviews[0].center
+    }
+    
+    private func setUpToolbar() {
+        self.navigationController?.isToolbarHidden = false
+        var items = [UIBarButtonItem]()
+        let shareItem = UIBarButtonItem(image: K.ButtonImage.share, style: .plain, target: self, action: #selector(shareButtonPressed))
+        let deleteItem = UIBarButtonItem(image: K.ButtonImage.trash, style: .plain, target: self, action: #selector(deleteButtonPressed))
+        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        items = [flexibleSpace, shareItem, flexibleSpace, deleteItem, flexibleSpace] // Distribution of items in toolbar
+        
+        // Style
+        shareItem.tintColor = K.Color.toolbarItem
+        deleteItem.tintColor = K.Color.toolbarItem
+        
+        toolbarItems = items
     }
     
     private func removeImageView(at index: Int) {
@@ -89,7 +105,7 @@ class SingleImageVC: UIViewController {
         panGesture = twoFingerPan
     }
     
-    @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
+    @objc func shareButtonPressed() {
         let imageToShare = DatabaseManager.imageArray[currentPage]
         
         // present activity controller
@@ -97,7 +113,7 @@ class SingleImageVC: UIViewController {
         self.present(activityController, animated: true)
     }
     
-    @IBAction func deleteButtonPressed(_ sender: UIBarButtonItem) {
+    @objc func deleteButtonPressed() {
         let alert = UIAlertController(title: "This action can not be reverted.", message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: "Delete Image", style: .destructive) { (action) in
             
@@ -202,12 +218,19 @@ class SingleImageVC: UIViewController {
                         .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
                     view.transform = transform
                     gesture.scale = 1
+                    
+                    // Hide navigational bar and toolbar
+                    self.navigationController?.setNavigationBarHidden(true, animated: true)
+                    self.navigationController?.setToolbarHidden(true, animated: true)
                 }
             default:
                 // If the gesture has cancelled/terminated/failed or everything else that's not performing
                 // Smoothly restore the transform to the "original"
                 UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut, animations: {
                     view.transform = .identity
+                    // Show navigational bar and toolbar
+                    self.navigationController?.setNavigationBarHidden(false, animated: true)
+                    self.navigationController?.setToolbarHidden(false, animated: true)
                 })
             }
         }

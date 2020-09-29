@@ -39,7 +39,7 @@ class CollectionVC: UICollectionViewController {
     
     // Refresh the collection view every time the view is about to be shown to the user
     override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(false)
+        super.viewWillAppear(animated)
         self.collectionView.reloadData()
     }
     

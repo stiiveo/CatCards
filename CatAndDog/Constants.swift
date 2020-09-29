@@ -9,12 +9,17 @@
 import UIKit
 
 struct K {
+    struct Color {
+        static let toolbarItem = UIColor(named: "buttonColor")
+    }
     struct SegueIdentifier {
         static let collectionToSingle = "collectionToSingle"
     }
     struct ButtonImage {
         static let heart = UIImage(systemName: "heart")
         static let filledHeart = UIImage(systemName: "heart.fill")
+        static let trash = UIImage(systemName: "trash")
+        static let share = UIImage(systemName: "square.and.arrow.up")
     }
     struct Data {
         static let initialDataRequestNumber: Int = 6

@@ -71,7 +71,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(false)
+        super.viewWillAppear(animated)
         // Refresh favorite button's image
         if let currentUsedData = currentData {
             let isDataSaved = databaseManager.isDataSaved(data: currentUsedData)
@@ -82,7 +82,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(false)
+        super.viewDidAppear(animated)
         // Save the center position of the created card view
         cardViewAnchor = cardView1.center
     }
