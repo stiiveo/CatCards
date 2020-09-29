@@ -177,6 +177,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Style
         cardView.layer.cornerRadius = K.CardView.Style.cornerRadius
         cardView.layer.borderWidth = K.CardView.Style.borderWidth
+        cardView.layer.borderColor = K.CardView.Style.borderColor
         cardView.backgroundColor = K.CardView.Style.backgroundColor
     }
     
@@ -309,10 +310,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
              */
             let releasePoint = CGPoint(x: cardView.frame.midX, y: cardView.frame.midY)
             
-            if cardView.center.x < viewWidth / 4 && currentImageView.image != nil { // card was at the left side of the screen
+            if cardView.center.x < viewWidth / 3 && currentImageView.image != nil { // card was at the left side of the screen
                 animateCard(cardView, releasedPoint: releasePoint)
             }
-            else if cardView.center.x > viewWidth * 3/4 && currentImageView.image != nil { // card was at the right side of the screen
+            else if cardView.center.x > viewWidth * 2/3 && currentImageView.image != nil { // card was at the right side of the screen
                 animateCard(cardView, releasedPoint: releasePoint)
             }
             // Reset card's position and rotation state
@@ -450,8 +451,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.indicator2.stopAnimating()
                 }
                 dataIndex += 1
-                isCard2DataAvailable = true
                 cardView2Data = newData
+                isCard2DataAvailable = true
             }
             
             // set isNewDataAvailable true if next cardView's data is available, vice versa
@@ -509,7 +510,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Error Handling Section
     
-    // error occured in the data fetching process
+    // Present error message to the user if any error occurs in the data fetching process
     func errorDidOccur() {
         DispatchQueue.main.async {
             let alert = UIAlertController(

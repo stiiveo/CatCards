@@ -63,7 +63,9 @@ class SingleImageVC: UIViewController {
     }
     
     private func addImagesToStackView() {
-        for image in DatabaseManager.imageArray {
+        let images = DatabaseManager.imageArray
+        let reversedArray: [UIImage] = Array(images.reversed()) // Images are sorted by the time it was saved in reversed
+        for image in reversedArray {
             let newImageView = UIImageView()
             newImageView.contentMode = .scaleAspectFit
             newImageView.image = image
@@ -223,10 +225,8 @@ class SingleImageVC: UIViewController {
         if let view = gesture.view {
             switch gesture.state {
             case .changed:
-                // The view can only be panned around when it's zoomed in
+                // The view can only be panned around when it's zoomed
                 if view.frame.width > view.bounds.width {
-                    
-                    
                     // Get the touch position
                     let translation = gesture.translation(in: currentView)
                     

@@ -62,9 +62,10 @@ class CollectionVC: UICollectionViewController {
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CollectionCell.cellIdentifier, for: indexPath) as! CollectionCell
 
-        // Configure each cell's imageView
-        cell.imageView.image = DatabaseManager.imageArray[indexPath.item]
-
+        // Configure each cell's imageView in reversed order
+        let images = DatabaseManager.imageArray
+        let reversedArray: [UIImage] = Array(images.reversed())
+        cell.imageView.image = reversedArray[indexPath.item]
         return cell
     }
 

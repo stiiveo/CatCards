@@ -20,7 +20,9 @@ struct K {
         static let initialDataRequestNumber: Int = 6
         static let dataRequestNumber: Int = 1
         static let maxDataNumberStored: Int = 7
-        static let dataToExclude = ["N_54iB3Kl", "7XwqnDvi8", "cpj", "gWBdC-NJT", "VmQj-QgPi", "FID3LLZfr", "MTc2ODA1Mw", "NlctBeF8A", "0QFWQ4b_6", "gEvrbm9Z2"]
+//        static let dataToExclude = [
+//            "N_54iB3Kl", "7XwqnDvi8", "cpj", "gWBdC-NJT", "VmQj-QgPi", "FID3LLZfr", "MTc2ODA1Mw", "NlctBeF8A", "0QFWQ4b_6", "gEvrbm9Z2"
+//        ]
     }
     struct ToolBar {
         static let height: CGFloat = 44.0
@@ -29,7 +31,8 @@ struct K {
         struct Style {
             static let cornerRadius: CGFloat = 20
             static let borderWidth: CGFloat = 1.0
-            static let backgroundColor: UIColor = UIColor(named: "cardBackgroundColor")!
+            static let borderColor = UIColor(named: "buttonColor")!.cgColor
+            static let backgroundColor = UIColor(named: "cardBackgroundColor")
         }
         struct Constraint {
             static let leading: CGFloat = 0.0
