@@ -12,6 +12,7 @@ class CollectionVC: UICollectionViewController {
     
     let favDataManager = DatabaseManager()
     var selectedCellIndex: Int?
+    var reversedImageArray = [UIImage]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,18 +36,21 @@ class CollectionVC: UICollectionViewController {
         flowLayout.itemSize = CGSize(width: flooredCellWidth, height: flooredCellWidth)
         flowLayout.minimumLineSpacing = interCellSpacing
         
+        // TEST AREA
     }
     
     // Refresh the collection view every time the view is about to be shown to the user
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.collectionView.reloadData()
+        self.navigationController?.isToolbarHidden = true
     }
     
     // Send the selected cell index to the SingleImageVC
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destination = segue.destination as? SingleImageVC {
             destination.imageToShowIndex = selectedCellIndex
+            destination.imageArray = reversedImageArray
         }
     }
 
@@ -64,9 +68,11 @@ class CollectionVC: UICollectionViewController {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CollectionCell.cellIdentifier, for: indexPath) as! CollectionCell
 
         // Configure each cell's imageView in reversed order
-        let images = DatabaseManager.imageArray
-        let reversedArray: [UIImage] = Array(images.reversed())
+        let savedImages = DatabaseManager.imageArray
+        let reversedArray: [UIImage] = Array(savedImages.reversed())
         cell.imageView.image = reversedArray[indexPath.item]
+        reversedImageArray = reversedArray // Used for single view controller
+        
         return cell
     }
 

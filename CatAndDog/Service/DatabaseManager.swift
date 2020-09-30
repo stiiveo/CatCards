@@ -23,7 +23,7 @@ class DatabaseManager {
     // Delete specific data in database and file system
     internal func deleteData(id: String) {
         
-        // delete data from database
+        // Delete data from database
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id MATCHES %@", id) // Fetch data with the matched ID value
         do {
@@ -36,7 +36,7 @@ class DatabaseManager {
             print("Error fetching result from container: \(error)")
         }
         
-        // delete image file from file system
+        // Delete image file from file system
         let fileName = "\(id).jpg"
         let fileURL = subFolderURL().appendingPathComponent(fileName)
         if fileManager.fileExists(atPath: fileURL.path) {
@@ -47,7 +47,7 @@ class DatabaseManager {
             }
         }
         
-        // refresh image array
+        // Refresh image array
         DatabaseManager.imageArray = []
         loadImages()
     }
@@ -74,7 +74,7 @@ class DatabaseManager {
     
     internal func saveData(_ data: CatData) {
         
-        // Save new image to array used for collection view
+        // Save new image to array used by collection view
         DatabaseManager.imageArray.append(data.image)
         
         // Save data to local database

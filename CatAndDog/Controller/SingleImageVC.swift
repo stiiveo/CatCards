@@ -20,6 +20,7 @@ class SingleImageVC: UIViewController {
     var previousPage: Int?
     var anchorPosition: CGPoint?
     let databaseManager = DatabaseManager()
+    var imageArray = [UIImage]()
     
     weak var panGesture: UIPanGestureRecognizer?
     weak var pinchGesture: UIPinchGestureRecognizer?
@@ -80,9 +81,7 @@ class SingleImageVC: UIViewController {
     }
     
     private func addImagesToStackView() {
-        let images = DatabaseManager.imageArray
-        let reversedArray: [UIImage] = Array(images.reversed()) // Images are sorted by the time it was saved in reversed
-        for image in reversedArray {
+        for image in imageArray {
             let newImageView = UIImageView()
             newImageView.contentMode = .scaleAspectFit
             newImageView.image = image
@@ -106,7 +105,7 @@ class SingleImageVC: UIViewController {
     }
     
     @objc func shareButtonPressed() {
-        let imageToShare = DatabaseManager.imageArray[currentPage]
+        let imageToShare = imageArray[currentPage]
         
         // present activity controller
         let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
@@ -117,11 +116,12 @@ class SingleImageVC: UIViewController {
         let alert = UIAlertController(title: "This action can not be reverted.", message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: "Delete Image", style: .destructive) { (action) in
             
-            let favoriteIDs = self.databaseManager.listOfFileNames()
-            let dataID = favoriteIDs[self.currentPage]
+            let savedImageIDs = self.databaseManager.listOfFileNames()
+            let reversedIDIndex = (self.imageArray.count - 1) - self.currentPage // Find the data index from the reversed image array
+            let dataToDeleteID = savedImageIDs[reversedIDIndex]
             
             // Delete data in file system and database and refresh the imageArray
-            self.databaseManager.deleteData(id: dataID)
+            self.databaseManager.deleteData(id: dataToDeleteID)
             
             // Animate the scroll view
             self.scrollAndRemoveImageView()
