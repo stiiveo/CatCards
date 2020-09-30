@@ -167,13 +167,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     // add constraints to cardView
     private func addCardViewConstraint(cardView: UIView) {
         cardView.translatesAutoresizingMaskIntoConstraints = false
-        
         let viewMargins = self.view.layoutMarginsGuide
+        let toolbarMargins = self.toolBar.layoutMarginsGuide
         NSLayoutConstraint.activate([
             cardView.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor, constant: K.CardView.Constraint.leading),
             cardView.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor, constant: K.CardView.Constraint.trailing),
-            cardView.centerYAnchor.constraint(equalTo: viewMargins.centerYAnchor, constant: K.CardView.Constraint.yAnchorOffset),
-            cardView.heightAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: K.CardView.Constraint.heightToWidthRatio)
+            cardView.topAnchor.constraint(equalTo: viewMargins.topAnchor, constant: K.CardView.Constraint.top),
+            cardView.bottomAnchor.constraint(equalTo: toolbarMargins.topAnchor, constant: K.CardView.Constraint.bottom)
         ])
         
         // Style
@@ -349,15 +349,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Move the card to the edge of either side of the screen depending on where the card was released at
         UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseOut) {
             guard quadrant != nil else { return }
+            let offsetAmount = UIScreen.main.bounds.width
             switch quadrant! {
             case 1:
-                card.center = CGPoint(x: card.center.x + 300, y: card.center.y - 300)
+                card.center = CGPoint(x: card.center.x + offsetAmount, y: card.center.y - offsetAmount)
             case 2:
-                card.center = CGPoint(x: card.center.x - 300, y: card.center.y - 300)
+                card.center = CGPoint(x: card.center.x - offsetAmount, y: card.center.y - offsetAmount)
             case 3:
-                card.center = CGPoint(x: card.center.x - 300, y: card.center.y + 150)
+                card.center = CGPoint(x: card.center.x - offsetAmount, y: card.center.y + offsetAmount)
             case 4:
-                card.center = CGPoint(x: card.center.x + 300, y: card.center.y + 150)
+                card.center = CGPoint(x: card.center.x + offsetAmount, y: card.center.y + offsetAmount)
             default:
                 print("Quadrant of the finger release point is invalid.")
             }

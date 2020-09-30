@@ -40,10 +40,10 @@ struct K {
             static let backgroundColor = UIColor(named: "cardBackgroundColor")
         }
         struct Constraint {
-            static let leading: CGFloat = 0.0
-            static let trailing: CGFloat = -0.0
-            static let yAnchorOffset: CGFloat = -20
-            static let heightToWidthRatio: CGFloat = 4 / 3
+            static let leading: CGFloat = 5.0
+            static let trailing: CGFloat = -5.0
+            static let top: CGFloat = 40
+            static let bottom: CGFloat = -40
         }
     }
     struct ImageView {
