@@ -12,6 +12,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     @IBOutlet weak var toolBar: UIToolbar!
     @IBOutlet weak var favoriteBtn: UIBarButtonItem!
+    @IBOutlet weak var shareBtn: UIBarButtonItem!
     
     var networkManager = NetworkManager()
     let databaseManager = DatabaseManager()
@@ -64,7 +65,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         databaseManager.createDirectory() // Create folder for local image files store
         databaseManager.loadImages() // Load up data saved in user's device
         
-        favoriteBtn.isEnabled = false // favorite button's default status
+        // Disable toolbar buttons until first image is loaded
+        favoriteBtn.isEnabled = false
+        shareBtn.isEnabled = false
         
         // TEST AREA
         
@@ -222,22 +225,25 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if dataIndex == 0 {
             if let firstData = dataSet[dataIndex + 1] {
                 isNewDataAvailable = true
-                
                 cardView1Data = firstData
                 isCard1DataAvailable = true
-                let isDataSaved = databaseManager.isDataSaved(data: firstData) // determine whether data is available in database
+                
+                // Determine if downloaded data already exist in database
+                let isDataSaved = databaseManager.isDataSaved(data: firstData)
                 
                 DispatchQueue.main.async {
                     self.imageView1.image = firstData.image
                     self.indicator1.stopAnimating()
                     
-                    // set up favorite button status
+                    // Enable toolbar buttons
                     self.favoriteBtn.isEnabled = true // enable favorite button
-                    // set button's image as a filled-heart if data is already saved in database
+                    self.shareBtn.isEnabled = true
+                    
+                    // Set button's image as a filled heart indicating data is already in database
                     if isDataSaved == true {
                         self.favoriteBtn.image = K.ButtonImage.filledHeart
                     }
-                    // add UIPanGestureRecognizer to cardView1
+                    // Add UIPanGestureRecognizer to cardView1
                     self.cardView1.addGestureRecognizer(panGesture)
                 }
                 dataIndex += 1
