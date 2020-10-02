@@ -35,15 +35,13 @@ struct K {
     struct CardView {
         struct Style {
             static let cornerRadius: CGFloat = 20
-            static let borderWidth: CGFloat = 1.0
-            static let borderColor = UIColor(named: "buttonColor")!.cgColor
             static let backgroundColor = UIColor(named: "cardBackgroundColor")
         }
         struct Constraint {
-            static let leading: CGFloat = 5.0
-            static let trailing: CGFloat = -5.0
-            static let top: CGFloat = 40
-            static let bottom: CGFloat = -40
+            static let leading: CGFloat = -10.0
+            static let trailing: CGFloat = 10.0
+            static let top: CGFloat = 10
+            static let bottom: CGFloat = -20
         }
     }
     struct ImageView {

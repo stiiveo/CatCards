@@ -167,7 +167,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Constraints Implementation
     
-    // add constraints to cardView
+    // Add constraints to cardView
     private func addCardViewConstraint(cardView: UIView) {
         cardView.translatesAutoresizingMaskIntoConstraints = false
         let viewMargins = self.view.layoutMarginsGuide
@@ -180,13 +180,19 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         ])
         
         // Style
-        cardView.layer.cornerRadius = K.CardView.Style.cornerRadius
-        cardView.layer.borderWidth = K.CardView.Style.borderWidth
-        cardView.layer.borderColor = K.CardView.Style.borderColor
         cardView.backgroundColor = K.CardView.Style.backgroundColor
+        cardView.layer.cornerRadius = K.CardView.Style.cornerRadius
+        
+        // Shadow
+        cardView.layer.shadowColor = UIColor.black.cgColor
+        cardView.layer.shadowOpacity = 0.2
+        cardView.layer.shadowOffset = .zero
+        cardView.layer.shadowRadius = 5
+        cardView.layer.shouldRasterize = true
+        cardView.layer.rasterizationScale = UIScreen.main.scale
     }
     
-    // add constraints to imageView
+    // Add constraints to imageView
     private func addImageViewConstraint(imageView: UIImageView, contraintTo cardView: UIView) {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -318,10 +324,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
              */
             let releasePoint = CGPoint(x: cardView.frame.midX, y: cardView.frame.midY)
             
-            if cardView.center.x < viewWidth / 3 && currentImageView.image != nil { // card was at the left side of the screen
+            if cardView.center.x < viewWidth / 4 && currentImageView.image != nil { // card was at the left side of the screen
                 animateCard(cardView, releasedPoint: releasePoint)
             }
-            else if cardView.center.x > viewWidth * 2/3 && currentImageView.image != nil { // card was at the right side of the screen
+            else if cardView.center.x > viewWidth * 3/4 && currentImageView.image != nil { // card was at the right side of the screen
                 animateCard(cardView, releasedPoint: releasePoint)
             }
             // Reset card's position and rotation state
