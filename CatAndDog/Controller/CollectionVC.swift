@@ -13,25 +13,32 @@ class CollectionVC: UICollectionViewController {
     let favDataManager = DatabaseManager()
     var selectedCellIndex: Int?
     var reversedImageArray = [UIImage]()
+    let screenWidth = UIScreen.main.bounds.width
+    
+    // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
+    var cellNumberPerRow: CGFloat {
+        if screenWidth >= 414 {
+            return 4.0
+        } else {
+            return 3.0
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         /// Set up cell's size and spacing
         
-        let screenWidth = UIScreen.main.bounds.width
-        let cellNumberPerRow: CGFloat = 3.0
         let interCellSpacing: CGFloat = 2.0
         let cellWidth = (screenWidth - (interCellSpacing * (cellNumberPerRow - 1))) / cellNumberPerRow
         
-        // floor the calculated width to remove any decimal number
+        // Floor the calculated width to remove any decimal number
         let flooredCellWidth = floor(cellWidth)
         
-        // set up width and spacing of each cell
+        // Set up width and spacing of each cell
         let viewLayout = self.collectionViewLayout
         let flowLayout = viewLayout as! UICollectionViewFlowLayout
         
-        // remove auto layout constraint
+        // Remove auto layout constraint
         flowLayout.estimatedItemSize = .zero
         flowLayout.itemSize = CGSize(width: flooredCellWidth, height: flooredCellWidth)
         flowLayout.minimumLineSpacing = interCellSpacing
@@ -82,6 +89,5 @@ class CollectionVC: UICollectionViewController {
         selectedCellIndex = indexPath.row
         performSegue(withIdentifier: K.SegueIdentifier.collectionToSingle, sender: self)
     }
-    
 
 }
