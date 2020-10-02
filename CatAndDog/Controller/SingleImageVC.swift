@@ -279,11 +279,17 @@ extension SingleImageVC: UIScrollViewDelegate {
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         previousPage = currentPage
+        
+        // Disable pinch and pan gesture recognizer if scrolling has begun
+        if let currentGRs = stackView.arrangedSubviews[currentPage].gestureRecognizers {
+            for anyGestureRecognizer in currentGRs {
+                anyGestureRecognizer.isEnabled = false
+            }
+        }
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        if currentPage != previousPage {
-            
+        if currentPage != previousPage { // Page number is changed
             // remove gesture recognizer attached to the previous imageView
             if let oldIndex = previousPage, let pinchGR = pinchGesture, let panGR = panGesture {
                 stackView.arrangedSubviews[oldIndex].removeGestureRecognizer(pinchGR)
@@ -295,6 +301,12 @@ extension SingleImageVC: UIScrollViewDelegate {
             let pan = getPanGestureRecognizer()
             attachPinchGestureRecognizer(recognizer: pinch, to: currentPage)
             attachPanGestureRecognizer(recognizer: pan, to: currentPage)
+        } else {
+            if let currentGRs = stackView.arrangedSubviews[currentPage].gestureRecognizers {
+                for anyGestureRecognizer in currentGRs {
+                    anyGestureRecognizer.isEnabled = true
+                }
+            }
         }
     }
     
