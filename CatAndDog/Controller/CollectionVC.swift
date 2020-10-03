@@ -10,7 +10,6 @@ import UIKit
 
 class CollectionVC: UICollectionViewController {
     
-    let favDataManager = DatabaseManager()
     var selectedCellIndex: Int?
     var reversedImageArray = [UIImage]()
     let screenWidth = UIScreen.main.bounds.width
@@ -44,6 +43,7 @@ class CollectionVC: UICollectionViewController {
         flowLayout.minimumLineSpacing = interCellSpacing
         
         // TEST AREA
+        
     }
     
     // Refresh the collection view every time the view is about to be shown to the user
@@ -51,6 +51,13 @@ class CollectionVC: UICollectionViewController {
         super.viewWillAppear(animated)
         self.collectionView.reloadData()
         self.navigationController?.isToolbarHidden = true
+        
+        if DatabaseManager.imageArray.count == 0 {
+            let label = getDefaultLabel()
+            collectionView.backgroundView = label
+        } else {
+            collectionView.backgroundView = nil
+        }
     }
     
     // Send the selected cell index to the SingleImageVC
@@ -61,6 +68,21 @@ class CollectionVC: UICollectionViewController {
         }
     }
 
+    private func getDefaultLabel() -> UILabel {
+        let noDataLabel = UILabel(frame: CGRect(x: 0,
+                                                y: 0,
+                                                width: collectionView.bounds.size.width,
+                                                height: collectionView.bounds.size.height)
+        )
+        noDataLabel.text = "   Your Favorite Cat Images Are Right Here   "
+        noDataLabel.font = .boldSystemFont(ofSize: 18)
+        noDataLabel.adjustsFontSizeToFitWidth = true
+        noDataLabel.minimumScaleFactor = 0.7
+        noDataLabel.textColor = UIColor.systemGray
+        noDataLabel.textAlignment = .center
+        return noDataLabel
+    }
+    
     // MARK: UICollectionViewDataSource
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
