@@ -208,21 +208,18 @@ class SingleImageVC: UIViewController {
         if let view = gesture.view {
             switch gesture.state {
             case .changed:
-                // Limit how much the view can be zoomed out
-                if view.frame.width > view.bounds.width / 1.5 {
-                    // coordinate of the pinch center where the view's center is (0, 0)
-                    let pinchCenter = CGPoint(x: gesture.location(in: view).x - view.bounds.midX,
-                                              y: gesture.location(in: view).y - view.bounds.midY)
-                    let transform = view.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
-                        .scaledBy(x: gesture.scale, y: gesture.scale)
-                        .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
-                    view.transform = transform
-                    gesture.scale = 1
-                    
-                    // Hide navigational bar and toolbar
-                    self.navigationController?.setNavigationBarHidden(true, animated: true)
-                    self.navigationController?.setToolbarHidden(true, animated: true)
-                }
+                // Coordinate of the pinch center where the view's center is (0, 0)
+                let pinchCenter = CGPoint(x: gesture.location(in: view).x - view.bounds.midX,
+                                          y: gesture.location(in: view).y - view.bounds.midY)
+                let transform = view.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
+                    .scaledBy(x: gesture.scale, y: gesture.scale)
+                    .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
+                view.transform = transform
+                gesture.scale = 1
+                
+                // Hide navigational bar and toolbar
+                self.navigationController?.setNavigationBarHidden(true, animated: true)
+                self.navigationController?.setToolbarHidden(true, animated: true)
             default:
                 // If the gesture has cancelled/terminated/failed or everything else that's not performing
                 // Smoothly restore the transform to the "original"
