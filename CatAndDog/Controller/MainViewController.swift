@@ -287,7 +287,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @objc func panGestureHandler(_ sender: UIPanGestureRecognizer) {
         guard let cardView = sender.view else { return }
         
-        let viewWidth = view.frame.width
+        let halfViewWidth = view.frame.width / 2
         
         // Point of the finger in the view's coordinate system
         let fingerMovement = sender.translation(in: view)
@@ -297,26 +297,40 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // 1.0 Radian = 180º
         let rotationAtMax: CGFloat = 1.0
-        let cardRotationRadian = (rotationAtMax / 4) * (xAxisPanOffset / (viewWidth / 3))
+        let cardRotationRadian = (rotationAtMax / 3) * (xAxisPanOffset / halfViewWidth)
         
-        // determine the current displayed imageView
-        var currentImageView = UIImageView()
-        switch currentCardView {
-        case 1:
-            currentImageView = imageView1
-        case 2:
-            currentImageView = imageView2
-        default:
-            return
+        // Determine the current displayed imageView
+        var currentImageView: UIImageView {
+            if currentCardView == 1 {
+                return imageView1
+            } else {
+                return imageView2
+            }
         }
         
-        // card move to where the user's finger is
+        // Card move to where the user's finger is
         cardView.center = CGPoint(x: cardViewAnchor.x + fingerMovement.x, y: cardViewAnchor.y + fingerMovement.y)
         
-        // card's rotation increase when it approaches the side edge of the screen
+        // Card's rotation increase when it approaches the side edge of the screen
         cardView.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
         
-        // when user's finger left the screen
+        // Revert the card view behind to its original size as the current view is moved away from its original position
+        var xOffset: CGFloat {
+            if abs(xAxisPanOffset) < halfViewWidth {
+                return abs(xAxisPanOffset) / halfViewWidth
+            } else {
+                return 1
+            }
+        }
+        
+        // Change the size of the card view behind
+        if currentCardView == 1 {
+            cardView2.transform = CGAffineTransform(scaleX: 0.9 + (xOffset / 10), y: 0.9 + (xOffset / 10))
+        } else {
+            cardView1.transform = CGAffineTransform(scaleX: 0.9 + (xOffset / 10), y: 0.9 + (xOffset / 10))
+        }
+        
+        // When user's finger left the screen
         if sender.state == .ended {
             /*
              Card can only be dismissed when it's dragged to the side of the screen
@@ -324,10 +338,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
              */
             let releasePoint = CGPoint(x: cardView.frame.midX, y: cardView.frame.midY)
             
-            if cardView.center.x < viewWidth / 4 && currentImageView.image != nil { // card was at the left side of the screen
+            if cardView.center.x < halfViewWidth / 2 && currentImageView.image != nil { // card was at the left side of the screen
                 animateCard(cardView, releasedPoint: releasePoint)
             }
-            else if cardView.center.x > viewWidth * 3/4 && currentImageView.image != nil { // card was at the right side of the screen
+            else if cardView.center.x > halfViewWidth * 3/2 && currentImageView.image != nil { // card was at the right side of the screen
                 animateCard(cardView, releasedPoint: releasePoint)
             }
             // Reset card's position and rotation state
@@ -335,6 +349,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 UIView.animate(withDuration: 0.2) {
                     cardView.center = self.cardViewAnchor
                     cardView.transform = CGAffineTransform.identity
+                    
+                    // Revert the size of the card view behind
+                    if self.currentCardView == 1 {
+                        self.cardView2.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+                    } else {
+                        self.cardView1.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+                    }
                 }
             }
         }
@@ -414,6 +435,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             dismissedView.center = cardViewAnchor
             addCardViewConstraint(cardView: dismissedView)
             
+            // Shrink the size of the newly added card view
+            dismissedView.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            
             updateCardView()
             fetchNewData(initialRequest: false)
         } else if dismissedView == cardView2 { // dismissed cardView is cardView2
@@ -425,7 +449,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // Favorite button is enabled if data is available
             favoriteBtn.isEnabled = isCard1DataAvailable ? true : false
             if let card1Data = cardView1Data {
-                let isDataSaved = databaseManager.isDataSaved(data: card1Data) // determine whether data is already in database
+                let isDataSaved = databaseManager.isDataSaved(data: card1Data) // Determine whether data is already in database
                 favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
             }
             
@@ -433,6 +457,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             self.view.insertSubview(dismissedView, belowSubview: cardView1)
             dismissedView.center = cardViewAnchor
             addCardViewConstraint(cardView: dismissedView)
+            
+            // Shrink the size of the newly added card view
+            dismissedView.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
             
             updateCardView()
             fetchNewData(initialRequest: false)
