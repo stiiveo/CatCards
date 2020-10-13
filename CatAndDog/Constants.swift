@@ -33,6 +33,9 @@ struct K {
         static let height: CGFloat = 44.0
     }
     struct CardView {
+        struct Size {
+            static let transform: CGFloat = 0.9
+        }
         struct Style {
             static let cornerRadius: CGFloat = 20
             static let backgroundColor = UIColor(named: "cardBackgroundColor")

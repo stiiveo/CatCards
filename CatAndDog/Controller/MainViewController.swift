@@ -59,6 +59,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         addCardViewConstraint(cardView: cardView1)
         addCardViewConstraint(cardView: cardView2)
+        cardView2.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
         addImageViewConstraint(imageView: imageView1, contraintTo: cardView1)
         addImageViewConstraint(imageView: imageView2, contraintTo: cardView2)
         
@@ -223,7 +224,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
 
     // Update UI using new data
     internal func dataDidFetch() {
-        
         let dataSet = networkManager.serializedData
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         
@@ -273,7 +273,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 dataIndex += 1
             }
         }
-        
         // Update UI if new data was not available in the previous UI updating session
         if isNewDataAvailable == false {
             updateCardView()
@@ -293,11 +292,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let fingerMovement = sender.translation(in: view)
         
         // Amount of x-axis offset the card moved from its original position
-        let xAxisPanOffset = cardView.center.x - cardViewAnchor.x
+        let xAxisOffset = cardView.center.x - cardViewAnchor.x
         
         // 1.0 Radian = 180º
         let rotationAtMax: CGFloat = 1.0
-        let cardRotationRadian = (rotationAtMax / 3) * (xAxisPanOffset / halfViewWidth)
+        let cardRotationRadian = (rotationAtMax / 3) * (xAxisOffset / halfViewWidth)
         
         // Determine the current displayed imageView
         var currentImageView: UIImageView {
@@ -316,18 +315,25 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Revert the card view behind to its original size as the current view is moved away from its original position
         var xOffset: CGFloat {
-            if abs(xAxisPanOffset) < halfViewWidth {
-                return abs(xAxisPanOffset) / halfViewWidth
+            if abs(xAxisOffset) <= halfViewWidth {
+                return abs(xAxisOffset) / halfViewWidth
             } else {
                 return 1
             }
         }
         
         // Change the size of the card view behind
+        let transform = K.CardView.Size.transform
         if currentCardView == 1 {
-            cardView2.transform = CGAffineTransform(scaleX: 0.9 + (xOffset / 10), y: 0.9 + (xOffset / 10))
+            cardView2.transform = CGAffineTransform(
+                scaleX: transform + (xOffset * (1 - transform)),
+                y: transform + (xOffset * (1 - transform))
+            )
         } else {
-            cardView1.transform = CGAffineTransform(scaleX: 0.9 + (xOffset / 10), y: 0.9 + (xOffset / 10))
+            cardView1.transform = CGAffineTransform(
+                scaleX: transform + (xOffset * (1 - transform)),
+                y: transform + (xOffset * (1 - transform))
+            )
         }
         
         // When user's finger left the screen
@@ -352,9 +358,15 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     
                     // Revert the size of the card view behind
                     if self.currentCardView == 1 {
-                        self.cardView2.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+                        self.cardView2.transform = CGAffineTransform(
+                            scaleX: K.CardView.Size.transform,
+                            y: K.CardView.Size.transform
+                        )
                     } else {
-                        self.cardView1.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+                        self.cardView1.transform = CGAffineTransform(
+                            scaleX: K.CardView.Size.transform,
+                            y: K.CardView.Size.transform
+                        )
                     }
                 }
             }
