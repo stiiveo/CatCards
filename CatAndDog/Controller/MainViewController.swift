@@ -374,21 +374,28 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     private func animateCard(_ card: UIView, releasedPoint: CGPoint) {
+        enum Quadrant {
+            case first
+            case second
+            case third
+            case forth
+            case none
+        }
         // Determine the quarant of the release point
-        var quadrant: Int?
+        var quadrant: Quadrant?
         let releasePointX = releasedPoint.x
         let releasePointY = releasedPoint.y
         let anchorX = cardViewAnchor.x
         let anchorY = cardViewAnchor.y
         
-        if releasePointX > anchorX && releasePointY <= anchorY {
-            quadrant = 1
-        } else if releasePointX < anchorX && releasePointY <= anchorY {
-            quadrant = 2
-        } else if releasePointX < anchorX && releasePointY > anchorY {
-            quadrant = 3
-        } else if releasePointX > anchorX && releasePointY > anchorY {
-            quadrant = 4
+        if releasePointX > anchorX && releasePointY < anchorY {
+            quadrant = .first
+        } else if releasePointX <= anchorX && releasePointY < anchorY {
+            quadrant = .second
+        } else if releasePointX <= anchorX && releasePointY >= anchorY {
+            quadrant = .third
+        } else if releasePointX > anchorX && releasePointY >= anchorY {
+            quadrant = .forth
         }
         
         // Move the card to the edge of either side of the screen depending on where the card was released at
@@ -396,18 +403,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             guard quadrant != nil else { return }
             let offsetAmount = UIScreen.main.bounds.width
             switch quadrant! {
-            case 1:
+            case .first:
                 card.center = CGPoint(x: card.center.x + offsetAmount, y: card.center.y - offsetAmount)
-            case 2:
+            case .second:
                 card.center = CGPoint(x: card.center.x - offsetAmount, y: card.center.y - offsetAmount)
-            case 3:
+            case .third:
                 card.center = CGPoint(x: card.center.x - offsetAmount, y: card.center.y + offsetAmount)
-            case 4:
+            case .forth:
                 card.center = CGPoint(x: card.center.x + offsetAmount, y: card.center.y + offsetAmount)
-            default:
-                print("Quadrant of the finger release point is invalid.")
+            case .none:
+                card.center = CGPoint(x: card.center.x + offsetAmount, y: card.center.y + offsetAmount)
             }
-            
         } completion: { (true) in
             if true {
                 if let cardGR = card.gestureRecognizers?.first {
