@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="jeA-7F-Qie">
-    <device id="retina4_7" orientation="portrait" appearance="dark"/>
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
@@ -31,7 +31,11 @@
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="QQP-aX-ZeI"/>
-                                    <barButtonItem title="Share" image="arrow.counterclockwise" catalog="system" id="c3g-fk-JM1"/>
+                                    <barButtonItem title="Undo" image="arrow.counterclockwise" catalog="system" id="c3g-fk-JM1">
+                                        <connections>
+                                            <action selector="undoButtonPressed:" destination="jpg-gr-ShF" id="oID-tI-Scb"/>
+                                        </connections>
+                                    </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="JEc-Lt-FiM"/>
                                     <barButtonItem title="Favorite" image="heart" catalog="system" id="eix-IU-TsW">
                                         <connections>
@@ -67,6 +71,7 @@
                         <outlet property="favoriteBtn" destination="eix-IU-TsW" id="kOq-j5-OQe"/>
                         <outlet property="shareBtn" destination="qHs-X8-xcv" id="LC9-zj-rUj"/>
                         <outlet property="toolBar" destination="ZI0-C0-QUe" id="1E1-XT-9aH"/>
+                        <outlet property="undoBtn" destination="c3g-fk-JM1" id="5Cm-E7-yo9"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wgG-Tt-dvs" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

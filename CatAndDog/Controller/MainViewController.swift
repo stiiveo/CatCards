@@ -8,42 +8,55 @@
 
 import UIKit
 
+enum CurrentView {
+    case first
+    case second
+    case undo
+}
+
+enum CardBehind {
+    case firstCard
+    case secondCard
+}
+
 class MainViewController: UIViewController, NetworkManagerDelegate {
     
     @IBOutlet weak var toolBar: UIToolbar!
     @IBOutlet weak var favoriteBtn: UIBarButtonItem!
     @IBOutlet weak var shareBtn: UIBarButtonItem!
+    @IBOutlet weak var undoBtn: UIBarButtonItem!
     
     var networkManager = NetworkManager()
     let databaseManager = DatabaseManager()
-    let cardView1 = UIView()
-    let cardView2 = UIView()
+    let firstCard = UIView()
+    let secondCard = UIView()
     let imageView1 = UIImageView()
     let imageView2 = UIImageView()
     var cardViewAnchor = CGPoint()
     var dataIndex: Int = 0
-    var currentCardView: Int = 1
     var isInitialImageLoaded: Bool = false
     var isNewDataAvailable: Bool = false
     var isCard1DataAvailable: Bool = false
     var isCard2DataAvailable: Bool = false
-    var cardView1Data: CatData?
-    var cardView2Data: CatData?
+    var firstCardData: CatData?
+    var secondCardData: CatData?
+    var dismissedData: CatData?
+    var currentCard: CurrentView = .first
     var currentData: CatData? {
-        if currentCardView == 1 {
-            if let dataOne = cardView1Data {
-                return dataOne
-            }
+        switch currentCard {
+        case .first:
+            guard firstCardData != nil else { return nil }
+            return firstCardData!
+        case .second:
+            guard secondCardData != nil else { return nil }
+            return secondCardData!
+        case .undo:
+            guard dismissedData != nil else { return nil }
+            return dismissedData!
         }
-        else if currentCardView == 2 {
-            if let dataTwo = cardView2Data {
-                return dataTwo
-            }
-        } else {
-            print("Invalid value of currentCardView")
-        }
-        return nil
     }
+    var cardBeforeUndo: CardBehind?
+    var dismissedCardPosition = CGPoint()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,17 +64,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         toolBar.heightAnchor.constraint(equalToConstant: K.ToolBar.height).isActive = true // define toolBar's height
         fetchNewData(initialRequest: true) // initiate data downloading
 
-        // Add cardView, ImageView and implement neccesary contraints
-        view.addSubview(cardView1)
-        view.insertSubview(cardView2, belowSubview: cardView1)
-        cardView1.addSubview(imageView1)
-        cardView2.addSubview(imageView2)
+        // Add cardView, ImageView and implement neccesary constraints
+        view.addSubview(firstCard)
+        view.insertSubview(secondCard, belowSubview: firstCard)
+        firstCard.addSubview(imageView1)
+        secondCard.addSubview(imageView2)
         
-        addCardViewConstraint(cardView: cardView1)
-        addCardViewConstraint(cardView: cardView2)
-        cardView2.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
-        addImageViewConstraint(imageView: imageView1, contraintTo: cardView1)
-        addImageViewConstraint(imageView: imageView2, contraintTo: cardView2)
+        addCardViewConstraint(cardView: firstCard)
+        addCardViewConstraint(cardView: secondCard)
+        secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
+        addImageViewConstraint(imageView: imageView1, constrainTo: firstCard)
+        addImageViewConstraint(imageView: imageView2, constrainTo: secondCard)
         
         databaseManager.createDirectory() // Create folder for local image files store
         databaseManager.loadImages() // Load up data saved in user's device
@@ -88,7 +101,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // Save the center position of the created card view
-        cardViewAnchor = cardView1.center
+        cardViewAnchor = firstCard.center
     }
     
     //MARK: - Activity Indicator
@@ -109,11 +122,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     private func addIndicator(to cardView: UIView) {
         switch cardView {
-        case cardView1:
+        case firstCard:
             imageView1.addSubview(indicator1)
             addIndicatorConstraint(indicator: indicator1, constraintTo: imageView1)
             indicator1.startAnimating()
-        case cardView2:
+        case secondCard:
             imageView2.addSubview(indicator2)
             addIndicatorConstraint(indicator: indicator2, constraintTo: imageView2)
             indicator2.startAnimating()
@@ -121,6 +134,59 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             return
         }
         
+    }
+    
+    //MARK: - Undo Action
+    
+    @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
+        undoBtn.isEnabled = false
+        
+        // Disable current card's gesture recognizer and save its UIView
+        switch currentCard {
+        case .first:
+            if let firstCardGR = firstCard.gestureRecognizers?.first {
+                firstCardGR.isEnabled = false
+            }
+            cardBeforeUndo = .firstCard
+        case .second:
+            if let secondCardGR = secondCard.gestureRecognizers?.first {
+                secondCardGR.isEnabled = false
+            }
+            cardBeforeUndo = .secondCard
+        case .undo:
+            print("Error: Undo button should have not been enabled")
+        }
+        
+        let undoCard = UIView()
+        let undoImageView = UIImageView()
+        view.addSubview(undoCard)
+        undoCard.addSubview(undoImageView)
+        addCardViewConstraint(cardView: undoCard)
+        addImageViewConstraint(imageView: undoImageView, constrainTo: undoCard)
+        
+        // position and rotation
+        undoCard.center = CGPoint(x: 1000, y: -1000)
+        undoCard.transform = CGAffineTransform(rotationAngle: 0.5)
+        
+        UIView.animate(withDuration: 0.5) {
+            undoCard.center = self.cardViewAnchor
+            undoCard.transform = .identity
+            switch self.currentCard {
+            case .first:
+                self.firstCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            case .second:
+                self.secondCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            case .undo:
+                print("Error: Undo button should have not been enabled")
+            }
+        } completion: { (true) in
+            if true {
+                let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.panGestureHandler))
+                undoCard.addGestureRecognizer(panGesture)
+                self.currentCard = .undo
+            }
+        }
+
     }
     
     //MARK: - Favorite Action
@@ -149,21 +215,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     //MARK: - Share Action
     
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
-        var imageToShare = UIImage()
-        switch currentCardView {
-        case 1:
-            guard let image1 = imageView1.image else { return }
-            imageToShare = image1
-        case 2:
-        guard let image2 = imageView2.image else { return }
-            imageToShare = image2
-        default:
-            print("No Image available to share")
-            return
+        if let imageToShare = currentData?.image {
+            let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
+            present(activityController, animated: true)
         }
-        // present activity controller
-        let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
-        present(activityController, animated: true)
     }
     
     //MARK: - Constraints Implementation
@@ -194,7 +249,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     // Add constraints to imageView
-    private func addImageViewConstraint(imageView: UIImageView, contraintTo cardView: UIView) {
+    private func addImageViewConstraint(imageView: UIImageView, constrainTo cardView: UIView) {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
@@ -216,7 +271,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // first time requesting image data
         if initialRequest {
             networkManager.performRequest(imageDownloadNumber: K.Data.initialDataRequestNumber)
-            addIndicator(to: cardView1)
+            addIndicator(to: firstCard)
         } else {
             networkManager.performRequest(imageDownloadNumber: K.Data.dataRequestNumber)
         }
@@ -231,8 +286,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if dataIndex == 0 {
             if let firstData = dataSet[dataIndex + 1] {
                 isNewDataAvailable = true
-                cardView1Data = firstData
                 isCard1DataAvailable = true
+                firstCardData = firstData
                 
                 // Determine if downloaded data already exist in database
                 let isDataSaved = databaseManager.isDataSaved(data: firstData)
@@ -249,8 +304,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     if isDataSaved == true {
                         self.favoriteBtn.image = K.ButtonImage.filledHeart
                     }
-                    // Add UIPanGestureRecognizer to cardView1
-                    self.cardView1.addGestureRecognizer(panGesture)
+                    // Add UIPanGestureRecognizer to the first card
+                    self.firstCard.addGestureRecognizer(panGesture)
                 }
                 dataIndex += 1
             }
@@ -258,16 +313,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             if let secondData = dataSet[dataIndex + 1] {
                 
                 isCard2DataAvailable = true
-                cardView2Data = secondData
+                secondCardData = secondData
                 
                 DispatchQueue.main.async {
                     self.imageView2.image = secondData.image
                     self.indicator2.stopAnimating()
                     
-                    // Add pan gesture recognizer to cardView2 and disable it
-                    self.cardView2.addGestureRecognizer(panGesture)
-                    if let cardView2GR = self.cardView2.gestureRecognizers?.first {
-                        cardView2GR.isEnabled = false
+                    // Add pan gesture recognizer to second card and disable it
+                    self.secondCard.addGestureRecognizer(panGesture)
+                    if let secondCardGR = self.secondCard.gestureRecognizers?.first {
+                        secondCardGR.isEnabled = false
                     }
                 }
                 dataIndex += 1
@@ -284,7 +339,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     /// Handling the cardView's panning effect which is responded to user's input via finger dragging on the cardView itself.
     /// - Parameter sender: A concrete subclass of UIGestureRecognizer that looks for panning (dragging) gestures.
     @objc func panGestureHandler(_ sender: UIPanGestureRecognizer) {
-        guard let cardView = sender.view else { return }
+        guard let card = sender.view else { return }
         
         let halfViewWidth = view.frame.width / 2
         
@@ -292,26 +347,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let fingerMovement = sender.translation(in: view)
         
         // Amount of x-axis offset the card moved from its original position
-        let xAxisOffset = cardView.center.x - cardViewAnchor.x
+        let xAxisOffset = card.center.x - cardViewAnchor.x
         
         // 1.0 Radian = 180º
         let rotationAtMax: CGFloat = 1.0
         let cardRotationRadian = (rotationAtMax / 3) * (xAxisOffset / halfViewWidth)
         
-        // Determine the current displayed imageView
-        var currentImageView: UIImageView {
-            if currentCardView == 1 {
-                return imageView1
-            } else {
-                return imageView2
-            }
-        }
-        
         // Card move to where the user's finger is
-        cardView.center = CGPoint(x: cardViewAnchor.x + fingerMovement.x, y: cardViewAnchor.y + fingerMovement.y)
+        card.center = CGPoint(x: cardViewAnchor.x + fingerMovement.x, y: cardViewAnchor.y + fingerMovement.y)
         
         // Card's rotation increase when it approaches the side edge of the screen
-        cardView.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
+        card.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
         
         // Revert the card view behind to its original size as the current view is moved away from its original position
         var xOffset: CGFloat {
@@ -324,16 +370,32 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Change the size of the card view behind
         let transform = K.CardView.Size.transform
-        if currentCardView == 1 {
-            cardView2.transform = CGAffineTransform(
+        
+        switch currentCard {
+        case .first:
+            secondCard.transform = CGAffineTransform(
                 scaleX: transform + (xOffset * (1 - transform)),
                 y: transform + (xOffset * (1 - transform))
             )
-        } else {
-            cardView1.transform = CGAffineTransform(
+        case .second:
+            firstCard.transform = CGAffineTransform(
                 scaleX: transform + (xOffset * (1 - transform)),
                 y: transform + (xOffset * (1 - transform))
             )
+        case .undo:
+            guard cardBeforeUndo != nil else { return }
+            switch cardBeforeUndo! {
+            case .firstCard:
+                firstCard.transform = CGAffineTransform(
+                    scaleX: transform + (xOffset * (1 - transform)),
+                    y: transform + (xOffset * (1 - transform))
+                )
+            case .secondCard:
+                secondCard.transform = CGAffineTransform(
+                    scaleX: transform + (xOffset * (1 - transform)),
+                    y: transform + (xOffset * (1 - transform))
+                )
+            }
         }
         
         // When user's finger left the screen
@@ -342,31 +404,48 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
              Card can only be dismissed when it's dragged to the side of the screen
              and the current image view's image is available
              */
-            let releasePoint = CGPoint(x: cardView.frame.midX, y: cardView.frame.midY)
+            let releasePoint = CGPoint(x: card.frame.midX, y: card.frame.midY)
             
-            if cardView.center.x < halfViewWidth / 2 && currentImageView.image != nil { // card was at the left side of the screen
-                animateCard(cardView, releasedPoint: releasePoint)
+            if card.center.x < halfViewWidth / 2 && currentData != nil { // card was at the left side of the screen
+                dismissedData = currentData!
+                animateCard(card, releasedPoint: releasePoint)
             }
-            else if cardView.center.x > halfViewWidth * 3/2 && currentImageView.image != nil { // card was at the right side of the screen
-                animateCard(cardView, releasedPoint: releasePoint)
+            else if card.center.x > halfViewWidth * 3/2 && currentData != nil { // card was at the right side of the screen
+                dismissedData = currentData!
+                animateCard(card, releasedPoint: releasePoint)
             }
             // Reset card's position and rotation state
             else {
                 UIView.animate(withDuration: 0.2) {
-                    cardView.center = self.cardViewAnchor
-                    cardView.transform = CGAffineTransform.identity
+                    card.center = self.cardViewAnchor
+                    card.transform = CGAffineTransform.identity
                     
                     // Revert the size of the card view behind
-                    if self.currentCardView == 1 {
-                        self.cardView2.transform = CGAffineTransform(
+                    switch self.currentCard {
+                    case .first:
+                        self.secondCard.transform = CGAffineTransform(
                             scaleX: K.CardView.Size.transform,
                             y: K.CardView.Size.transform
                         )
-                    } else {
-                        self.cardView1.transform = CGAffineTransform(
+                    case .second:
+                        self.firstCard.transform = CGAffineTransform(
                             scaleX: K.CardView.Size.transform,
                             y: K.CardView.Size.transform
                         )
+                    case .undo:
+                        guard self.cardBeforeUndo != nil else { return }
+                        switch self.cardBeforeUndo! {
+                        case .firstCard:
+                            self.firstCard.transform = CGAffineTransform(
+                                scaleX: K.CardView.Size.transform,
+                                y: K.CardView.Size.transform
+                            )
+                        case .secondCard:
+                            self.secondCard.transform = CGAffineTransform(
+                                scaleX: K.CardView.Size.transform,
+                                y: K.CardView.Size.transform
+                            )
+                        }
                     }
                 }
             }
@@ -416,12 +495,30 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             }
         } completion: { (true) in
             if true {
+                self.dismissedCardPosition = card.center
+                
+                // Disable gesture recognizer
                 if let cardGR = card.gestureRecognizers?.first {
                     cardGR.isEnabled = false
                 }
                 card.removeFromSuperview()
-                card.transform = CGAffineTransform.identity
-                self.rotateCard(dismissedView: card)
+                
+                if self.currentCard != .undo {
+                    card.transform = CGAffineTransform.identity
+                    self.rotateCard(dismissedView: card)
+                } else {
+                    // Enable the card's GR below the dismissed undo card
+                    guard self.cardBeforeUndo != nil else { return }
+                    switch self.cardBeforeUndo! {
+                    case .firstCard:
+                        self.firstCard.gestureRecognizers?.first?.isEnabled = true
+                        self.currentCard = .first
+                    case .secondCard:
+                        self.secondCard.gestureRecognizers?.first?.isEnabled = true
+                        self.currentCard = .second
+                    }
+                }
+                
             }
         }
     }
@@ -430,26 +527,26 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         /*
          1. Update favorite button's status
          2. Place the dismissed card beneath the current cardView
-         3. Set up dismissed card's position and contraint
+         3. Set up dismissed card's position and constraint
          4. Update imageView's image
          5. Fetch new data
          6. Enable gesture recognizer
         */
-        if dismissedView == cardView1 { // dismissed cardView is cardView1
-            currentCardView = 2
-            if let cardGR = cardView2.gestureRecognizers?.first {
+        if dismissedView == firstCard { // dismissed card is firstCard
+            currentCard = .second
+            if let cardGR = secondCard.gestureRecognizers?.first {
                 cardGR.isEnabled = true
             }
             
             // Favorite button is enabled if data is available
             favoriteBtn.isEnabled = isCard2DataAvailable ? true : false
-            if let card2Data = cardView2Data {
+            if let card2Data = secondCardData {
                 let isDataSaved = databaseManager.isDataSaved(data: card2Data) // determine whether data is already in database
                 favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
             }
             
             // Put the dismissed card behind the current card
-            self.view.insertSubview(dismissedView, belowSubview: cardView2)
+            self.view.insertSubview(dismissedView, belowSubview: secondCard)
             dismissedView.center = cardViewAnchor
             addCardViewConstraint(cardView: dismissedView)
             
@@ -458,21 +555,21 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             updateCardView()
             fetchNewData(initialRequest: false)
-        } else if dismissedView == cardView2 { // dismissed cardView is cardView2
-            currentCardView = 1
-            if let cardGR = cardView1.gestureRecognizers?.first {
+        } else if dismissedView == secondCard { // dismissed card is secondCard
+            currentCard = .first
+            if let cardGR = firstCard.gestureRecognizers?.first {
                 cardGR.isEnabled = true
             }
             
             // Favorite button is enabled if data is available
             favoriteBtn.isEnabled = isCard1DataAvailable ? true : false
-            if let card1Data = cardView1Data {
+            if let card1Data = firstCardData {
                 let isDataSaved = databaseManager.isDataSaved(data: card1Data) // Determine whether data is already in database
                 favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
             }
             
             // Put the dismissed card behind the current card
-            self.view.insertSubview(dismissedView, belowSubview: cardView1)
+            self.view.insertSubview(dismissedView, belowSubview: firstCard)
             dismissedView.center = cardViewAnchor
             addCardViewConstraint(cardView: dismissedView)
             
@@ -482,7 +579,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             updateCardView()
             fetchNewData(initialRequest: false)
         } else {
-            print("Error: The dismissed card is neither cardView1 nor cardView2")
+            print("Error: The dismissed card is neither firstCard nor secondCard")
         }
     }
     
@@ -503,7 +600,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.indicator1.stopAnimating()
                 }
                 dataIndex += 1
-                cardView1Data = newData
+                firstCardData = newData
                 isCard1DataAvailable = true
             } else { // new data is for cardView 2
                 DispatchQueue.main.async {
@@ -511,17 +608,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.indicator2.stopAnimating()
                 }
                 dataIndex += 1
-                cardView2Data = newData
+                secondCardData = newData
                 isCard2DataAvailable = true
             }
             
             // set isNewDataAvailable true if next cardView's data is available, vice versa
-            if currentCardView == 1 {
-                if cardView2Data != nil {
+            if currentCard == .first {
+                if secondCardData != nil {
                     isNewDataAvailable = true
                 }
-            } else if currentCardView == 2 {
-                if cardView1Data != nil {
+            } else if currentCard == .second {
+                if firstCardData != nil {
                     isNewDataAvailable = true
                 }
             }
@@ -530,19 +627,19 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         else {
             // set both cardViews' UI to loading status if no data is available for both cardViews
             if isNewDataAvailable == false {
-                if currentCardView == 1 {
+                if currentCard == .first {
                     DispatchQueue.main.async {
                         self.imageView2.image = nil
-                        self.addIndicator(to: self.cardView2)
+                        self.addIndicator(to: self.secondCard)
                     }
-                } else {
+                } else if currentCard == .second {
                     DispatchQueue.main.async {
                         self.imageView1.image = nil
-                        self.addIndicator(to: self.cardView1)
+                        self.addIndicator(to: self.firstCard)
                     }
                 }
-                cardView1Data = nil
-                cardView2Data = nil
+                firstCardData = nil
+                secondCardData = nil
             }
             
             isNewDataAvailable = false // trigger method updateCardView to be executed when new data is fetched successfully
@@ -551,19 +648,19 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             if (dataIndex + 1) % 2 == 1 {
                 DispatchQueue.main.async {
                     self.imageView1.image = nil
-                    self.addIndicator(to: self.cardView1)
+                    self.addIndicator(to: self.firstCard)
                 }
                 isCard1DataAvailable = false
-                cardView1Data = nil
+                firstCardData = nil
             }
             // new data for cardView 2 is not available
             else {
                 DispatchQueue.main.async {
                     self.imageView2.image = nil
-                    self.addIndicator(to: self.cardView2)
+                    self.addIndicator(to: self.secondCard)
                 }
                 isCard2DataAvailable = false
-                cardView2Data = nil
+                secondCardData = nil
             }
         }
     }
