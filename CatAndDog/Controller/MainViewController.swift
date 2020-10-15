@@ -55,7 +55,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             return dismissedData!
         }
     }
-    var cardBeforeUndo: CardBehind?
+    var cardBelowUndoCard: CardBehind?
     var dismissedCardPosition = CGPoint()
     
     override func viewDidLoad() {
@@ -79,11 +79,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         databaseManager.createDirectory() // Create folder for local image files store
         databaseManager.loadImages() // Load up data saved in user's device
         
-        // Disable toolbar buttons until first image is loaded
+        // Disable toolbar buttons before data is downloaded
         favoriteBtn.isEnabled = false
         shareBtn.isEnabled = false
         
         // TEST AREA
+        undoBtn.isEnabled = false
         
     }
     
@@ -147,12 +148,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             if let firstCardGR = firstCard.gestureRecognizers?.first {
                 firstCardGR.isEnabled = false
             }
-            cardBeforeUndo = .firstCard
+            cardBelowUndoCard = .firstCard
         case .second:
             if let secondCardGR = secondCard.gestureRecognizers?.first {
                 secondCardGR.isEnabled = false
             }
-            cardBeforeUndo = .secondCard
+            cardBelowUndoCard = .secondCard
         case .undo:
             print("Error: Undo button should have not been enabled")
         }
@@ -368,7 +369,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             }
         }
         
-        // Change the size of the card view behind
+        // Change the size of the card behind
         let transform = K.CardView.Size.transform
         
         switch currentCard {
@@ -383,8 +384,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 y: transform + (xOffset * (1 - transform))
             )
         case .undo:
-            guard cardBeforeUndo != nil else { return }
-            switch cardBeforeUndo! {
+            guard cardBelowUndoCard != nil else { return }
+            switch cardBelowUndoCard! {
             case .firstCard:
                 firstCard.transform = CGAffineTransform(
                     scaleX: transform + (xOffset * (1 - transform)),
@@ -433,8 +434,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                             y: K.CardView.Size.transform
                         )
                     case .undo:
-                        guard self.cardBeforeUndo != nil else { return }
-                        switch self.cardBeforeUndo! {
+                        guard self.cardBelowUndoCard != nil else { return }
+                        switch self.cardBelowUndoCard! {
                         case .firstCard:
                             self.firstCard.transform = CGAffineTransform(
                                 scaleX: K.CardView.Size.transform,
@@ -506,10 +507,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 if self.currentCard != .undo {
                     card.transform = CGAffineTransform.identity
                     self.rotateCard(dismissedView: card)
-                } else {
-                    // Enable the card's GR below the dismissed undo card
-                    guard self.cardBeforeUndo != nil else { return }
-                    switch self.cardBeforeUndo! {
+                } else if self.currentCard == .undo {
+                    
+                    // Enable the card's GR after undo card is dismissed
+                    guard self.cardBelowUndoCard != nil else { return }
+                    switch self.cardBelowUndoCard! {
                     case .firstCard:
                         self.firstCard.gestureRecognizers?.first?.isEnabled = true
                         self.currentCard = .first
@@ -518,7 +520,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                         self.currentCard = .second
                     }
                 }
-                
+                // Re-enable undo button
+                self.undoBtn.isEnabled = true
             }
         }
     }
