@@ -8,6 +8,11 @@
 
 import UIKit
 
+enum Card {
+    case firstCard
+    case secondCard
+}
+
 enum CurrentView {
     case first
     case second
@@ -77,15 +82,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         addImageViewConstraint(imageView: imageView1, constrainTo: firstCard)
         addImageViewConstraint(imageView: imageView2, constrainTo: secondCard)
         
-        databaseManager.createDirectory() // Create folder for local image files store
-        databaseManager.loadImages() // Load up data saved in user's device
+        // Create local image folder in file system or load data from it
+        databaseManager.createDirectory()
+        databaseManager.loadImages()
         
-        // Disable toolbar buttons before data is downloaded
+        undoBtn.isEnabled = false
+        
+        // Disable favorite and share button before data is downloaded
         favoriteBtn.isEnabled = false
         shareBtn.isEnabled = false
         
         // TEST AREA
-        undoBtn.isEnabled = false
         
     }
     
@@ -646,42 +653,45 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
         // New data is not available
         else {
-            // set both cardViews' UI to loading status if no data is available for both cardViews
+            // Animate indicator on both cards if no data is available for both card
             if isNewDataAvailable == false {
                 if currentCard == .first {
-                    DispatchQueue.main.async {
-                        self.imageView2.image = nil
-                        self.addIndicator(to: self.secondCard)
-                    }
+                    showIndicator(to: .secondCard)
                 } else if currentCard == .second {
-                    DispatchQueue.main.async {
-                        self.imageView1.image = nil
-                        self.addIndicator(to: self.firstCard)
-                    }
+                    showIndicator(to: .firstCard)
                 }
                 firstCardData = nil
                 secondCardData = nil
             }
+            // Trigger method updateCardView to be executed when new data is fetched successfully
+            isNewDataAvailable = false
             
-            isNewDataAvailable = false // trigger method updateCardView to be executed when new data is fetched successfully
-            
-            // new data for cardView 1 is not available
+            // New data for first card is not available
             if (dataIndex + 1) % 2 == 1 {
-                DispatchQueue.main.async {
-                    self.imageView1.image = nil
-                    self.addIndicator(to: self.firstCard)
-                }
+                showIndicator(to: .firstCard)
                 isCard1DataAvailable = false
                 firstCardData = nil
             }
-            // new data for cardView 2 is not available
+            // New data for second card is not available
             else {
-                DispatchQueue.main.async {
-                    self.imageView2.image = nil
-                    self.addIndicator(to: self.secondCard)
-                }
+                showIndicator(to: .secondCard)
                 isCard2DataAvailable = false
                 secondCardData = nil
+            }
+        }
+    }
+    
+    private func showIndicator(to card: Card) {
+        switch card {
+        case .firstCard:
+            DispatchQueue.main.async {
+                self.imageView1.image = nil
+                self.addIndicator(to: self.firstCard)
+            }
+        case .secondCard:
+            DispatchQueue.main.async {
+                self.imageView2.image = nil
+                self.addIndicator(to: self.secondCard)
             }
         }
     }
