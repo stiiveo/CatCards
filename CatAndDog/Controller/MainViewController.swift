@@ -56,7 +56,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     var cardBelowUndoCard: CardBehind?
-    var dismissedCardPosition = CGPoint()
+    var dismissedCardPosition: CGPoint?
+    var dismissedCardTransform: CGAffineTransform?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -166,8 +167,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         addImageViewConstraint(imageView: undoImageView, constrainTo: undoCard)
         
         // position and rotation
-        undoCard.center = CGPoint(x: 1000, y: -1000)
-        undoCard.transform = CGAffineTransform(rotationAngle: 0.5)
+        if let originalPosition = dismissedCardPosition, let originalTransform = dismissedCardTransform {
+            undoCard.center = originalPosition
+            undoCard.transform = originalTransform
+        }
+        
         
         UIView.animate(withDuration: 0.5) {
             undoCard.center = self.cardViewAnchor
@@ -497,6 +501,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         } completion: { (true) in
             if true {
                 self.dismissedCardPosition = card.center
+                self.dismissedCardTransform = card.transform
                 
                 // Disable gesture recognizer
                 if let cardGR = card.gestureRecognizers?.first {
