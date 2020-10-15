@@ -40,7 +40,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     var isCard2DataAvailable: Bool = false
     var firstCardData: CatData?
     var secondCardData: CatData?
-    var dismissedData: CatData?
     var currentCard: CurrentView = .first
     var currentData: CatData? {
         switch currentCard {
@@ -51,11 +50,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             guard secondCardData != nil else { return nil }
             return secondCardData!
         case .undo:
-            guard dismissedData != nil else { return nil }
-            return dismissedData!
+            guard dismissedCardData != nil else { return nil }
+            return dismissedCardData!
         }
     }
     var cardBelowUndoCard: CardBehind?
+    var dismissedCardData: CatData?
     var dismissedCardPosition: CGPoint?
     var dismissedCardTransform: CGAffineTransform?
     
@@ -92,8 +92,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         // Refresh favorite button's image
-        if let currentUsedData = currentData {
-            let isDataSaved = databaseManager.isDataSaved(data: currentUsedData)
+        if let data = currentData {
+            let isDataSaved = databaseManager.isDataSaved(data: data)
             DispatchQueue.main.async {
                 self.favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
             }
@@ -159,6 +159,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             print("Error: Undo button should have not been enabled")
         }
         
+        // Create new card
         let undoCard = UIView()
         let undoImageView = UIImageView()
         view.addSubview(undoCard)
@@ -166,12 +167,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         addCardViewConstraint(cardView: undoCard)
         addImageViewConstraint(imageView: undoImageView, constrainTo: undoCard)
         
-        // position and rotation
+        // Set position and rotation
         if let originalPosition = dismissedCardPosition, let originalTransform = dismissedCardTransform {
             undoCard.center = originalPosition
             undoCard.transform = originalTransform
         }
         
+        // Set up image view
+        if let data = dismissedCardData {
+            undoImageView.image = data.image
+        }
         
         UIView.animate(withDuration: 0.5) {
             undoCard.center = self.cardViewAnchor
@@ -189,6 +194,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.panGestureHandler))
                 undoCard.addGestureRecognizer(panGesture)
                 self.currentCard = .undo
+                
+                // Update favorite button image
+                if let data = self.currentData {
+                    let isDataSaved = self.databaseManager.isDataSaved(data: data)
+                    DispatchQueue.main.async {
+                        self.favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
+                    }
+                }
             }
         }
 
@@ -302,7 +315,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.indicator1.stopAnimating()
                     
                     // Enable toolbar buttons
-                    self.favoriteBtn.isEnabled = true // enable favorite button
+                    self.favoriteBtn.isEnabled = true
                     self.shareBtn.isEnabled = true
                     
                     // Set button's image as a filled heart indicating data is already in database
@@ -412,11 +425,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             let releasePoint = CGPoint(x: card.frame.midX, y: card.frame.midY)
             
             if card.center.x < halfViewWidth / 2 && currentData != nil { // card was at the left side of the screen
-                dismissedData = currentData!
+                dismissedCardData = currentData!
                 animateCard(card, releasedPoint: releasePoint)
             }
             else if card.center.x > halfViewWidth * 3/2 && currentData != nil { // card was at the right side of the screen
-                dismissedData = currentData!
+                dismissedCardData = currentData!
                 animateCard(card, releasedPoint: releasePoint)
             }
             // Reset card's position and rotation state
