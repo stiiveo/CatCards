@@ -565,8 +565,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // Enable gesture recognizer
             secondCard.gestureRecognizers?.first?.isEnabled = true
             
-            // Update fav btn status
+            // Update favorite and share button status
             favoriteBtn.isEnabled = isCard2DataAvailable ? true : false
+            shareBtn.isEnabled = isCard2DataAvailable ? true : false
             if let data = secondCardData {
                 updateFavBtnImage(basedOn: data)
             }
@@ -585,8 +586,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             currentCard = .first
             firstCard.gestureRecognizers?.first?.isEnabled = true
             
-            // Update fav btn status
+            // Update favorite and share button status
             favoriteBtn.isEnabled = isCard1DataAvailable ? true : false
+            shareBtn.isEnabled = isCard1DataAvailable ? true : false
             if let data = firstCardData {
                 updateFavBtnImage(basedOn: data)
             }
