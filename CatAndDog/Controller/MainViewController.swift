@@ -100,10 +100,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         super.viewWillAppear(animated)
         // Refresh favorite button's image
         if let data = currentData {
-            let isDataSaved = databaseManager.isDataSaved(data: data)
-            DispatchQueue.main.async {
-                self.favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
-            }
+            updateFavBtnImage(basedOn: data)
         }
     }
     
@@ -205,10 +202,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 
                 // Update favorite button image
                 if let data = self.currentData {
-                    let isDataSaved = self.databaseManager.isDataSaved(data: data)
-                    DispatchQueue.main.async {
-                        self.favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
-                    }
+                    self.updateFavBtnImage(basedOn: data)
                 }
             }
         }
@@ -224,14 +218,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             switch isDataSaved {
             case false:
                 databaseManager.saveData(data)
-                DispatchQueue.main.async {
-                    self.favoriteBtn.image = K.ButtonImage.filledHeart
-                }
+                self.favoriteBtn.image = K.ButtonImage.filledHeart
             case true:
                 databaseManager.deleteData(id: data.id)
-                DispatchQueue.main.async {
-                    self.favoriteBtn.image = K.ButtonImage.heart
-                }
+                self.favoriteBtn.image = K.ButtonImage.heart
             }
         }
     }
@@ -313,9 +303,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 isCard1DataAvailable = true
                 firstCardData = firstData
                 
-                // Determine if downloaded data already exist in database
-                let isDataSaved = databaseManager.isDataSaved(data: firstData)
-                
                 DispatchQueue.main.async {
                     self.imageView1.image = firstData.image
                     self.indicator1.stopAnimating()
@@ -324,8 +311,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.favoriteBtn.isEnabled = true
                     self.shareBtn.isEnabled = true
                     
-                    // Set up fav button image based on the existence of the data in database
-                    self.favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
+                    // Update fav btn image
+                    self.updateFavBtnImage(basedOn: firstData)
                     
                     // Add UIPanGestureRecognizer to the first card
                     self.firstCard.addGestureRecognizer(panGesture)
@@ -541,14 +528,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                         self.currentCard = .first
                         // Update fav button image
                         if let data = self.firstCardData {
-                            self.updateFavBtnImage(data: data)
+                            self.updateFavBtnImage(basedOn: data)
                         }
                     case .secondCard:
                         self.secondCard.gestureRecognizers?.first?.isEnabled = true
                         self.currentCard = .second
                         // Update fav button image
                         if let data = self.secondCardData {
-                            self.updateFavBtnImage(data: data)
+                            self.updateFavBtnImage(basedOn: data)
                         }
                     }
                 }
@@ -558,8 +545,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
         
-    private func updateFavBtnImage(data: CatData) {
-        let isDataSaved = databaseManager.isDataSaved(data: data)
+    private func updateFavBtnImage(basedOn: CatData) {
+        let isDataSaved = databaseManager.isDataSaved(data: basedOn)
         favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
     }
     
@@ -581,7 +568,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // Update fav btn status
             favoriteBtn.isEnabled = isCard2DataAvailable ? true : false
             if let data = secondCardData {
-                updateFavBtnImage(data: data)
+                updateFavBtnImage(basedOn: data)
             }
             
             // Put the dismissed card behind the current card
@@ -601,7 +588,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // Update fav btn status
             favoriteBtn.isEnabled = isCard1DataAvailable ? true : false
             if let data = firstCardData {
-                updateFavBtnImage(data: data)
+                updateFavBtnImage(basedOn: data)
             }
             
             // Put the dismissed card behind the current card
