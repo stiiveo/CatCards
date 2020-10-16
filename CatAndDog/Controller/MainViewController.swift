@@ -198,6 +198,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             }
         } completion: { (true) in
             if true {
+                // Add gesture recognizer to undo card
                 let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.panGestureHandler))
                 undoCard.addGestureRecognizer(panGesture)
                 self.currentCard = .undo
@@ -217,19 +218,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     //MARK: - Favorite Action
     
     @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
-        if let currentUsedData = currentData {
-            let isDataSaved = databaseManager.isDataSaved(data: currentUsedData)
-            
-            // Save data if it's absent in database, otherwise delete data in database
-            if isDataSaved == false {
-                databaseManager.saveData(currentUsedData)
+        if let data = currentData {
+            // Save data if it's absent in database, otherwise delete it in database
+            let isDataSaved = databaseManager.isDataSaved(data: data)
+            switch isDataSaved {
+            case false:
+                databaseManager.saveData(data)
                 DispatchQueue.main.async {
                     self.favoriteBtn.image = K.ButtonImage.filledHeart
                 }
-            } else if isDataSaved == true {
-                // delete file in database
-                databaseManager.deleteData(id: currentUsedData.id)
-                
+            case true:
+                databaseManager.deleteData(id: data.id)
                 DispatchQueue.main.async {
                     self.favoriteBtn.image = K.ButtonImage.heart
                 }
@@ -302,7 +301,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
 
-    // Update UI using new data
+    // Update UI when new data is downloaded succesfully
     internal func dataDidFetch() {
         let dataSet = networkManager.serializedData
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
@@ -325,10 +324,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.favoriteBtn.isEnabled = true
                     self.shareBtn.isEnabled = true
                     
-                    // Set button's image as a filled heart indicating data is already in database
-                    if isDataSaved == true {
-                        self.favoriteBtn.image = K.ButtonImage.filledHeart
-                    }
+                    // Set up fav button image based on the existence of the data in database
+                    self.favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
+                    
                     // Add UIPanGestureRecognizer to the first card
                     self.firstCard.addGestureRecognizer(panGesture)
                 }
@@ -336,7 +334,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             }
         } else if dataIndex == 1 {
             if let secondData = dataSet[dataIndex + 1] {
-                
                 isCard2DataAvailable = true
                 secondCardData = secondData
                 
@@ -346,14 +343,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     
                     // Add pan gesture recognizer to second card and disable it
                     self.secondCard.addGestureRecognizer(panGesture)
-                    if let secondCardGR = self.secondCard.gestureRecognizers?.first {
-                        secondCardGR.isEnabled = false
-                    }
+                    self.secondCard.gestureRecognizers?.first?.isEnabled = false
                 }
                 dataIndex += 1
             }
         }
-        // Update UI if new data was not available in the previous UI updating session
+        
+        // Update UI if new data was not downloaded yet in the previous data request
         if isNewDataAvailable == false {
             updateCardView()
         }
@@ -433,11 +429,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             if card.center.x < halfViewWidth / 2 && currentData != nil { // card was at the left side of the screen
                 dismissedCardData = currentData!
-                animateCard(card, releasedPoint: releasePoint)
+                dismissCard(card, from: releasePoint)
             }
             else if card.center.x > halfViewWidth * 3/2 && currentData != nil { // card was at the right side of the screen
                 dismissedCardData = currentData!
-                animateCard(card, releasedPoint: releasePoint)
+                dismissCard(card, from: releasePoint)
             }
             // Reset card's position and rotation state
             else {
@@ -477,7 +473,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func animateCard(_ card: UIView, releasedPoint: CGPoint) {
+    private func dismissCard(_ card: UIView, from releasedPoint: CGPoint) {
         enum Quadrant {
             case first
             case second
@@ -529,20 +525,31 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 }
                 card.removeFromSuperview()
                 
-                if self.currentCard != .undo {
+                switch self.currentCard {
+                case .first:
                     card.transform = CGAffineTransform.identity
-                    self.rotateCard(dismissedView: card)
-                } else if self.currentCard == .undo {
-                    
-                    // Enable the card's GR after undo card is dismissed
+                    self.rotateCard(card: .firstCard)
+                case .second:
+                    card.transform = CGAffineTransform.identity
+                    self.rotateCard(card: .secondCard)
+                case .undo:
+                    // Enable the card's GR after it was dismissed
                     guard self.cardBelowUndoCard != nil else { return }
                     switch self.cardBelowUndoCard! {
                     case .firstCard:
                         self.firstCard.gestureRecognizers?.first?.isEnabled = true
                         self.currentCard = .first
+                        // Update fav button image
+                        if let data = self.firstCardData {
+                            self.updateFavBtnImage(data: data)
+                        }
                     case .secondCard:
                         self.secondCard.gestureRecognizers?.first?.isEnabled = true
                         self.currentCard = .second
+                        // Update fav button image
+                        if let data = self.secondCardData {
+                            self.updateFavBtnImage(data: data)
+                        }
                     }
                 }
                 // Re-enable undo button
@@ -551,7 +558,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
         
-    func rotateCard(dismissedView: UIView) {
+    private func updateFavBtnImage(data: CatData) {
+        let isDataSaved = databaseManager.isDataSaved(data: data)
+        favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
+    }
+    
+    private func rotateCard(card: Card) {
         /*
          1. Update favorite button's status
          2. Place the dismissed card beneath the current cardView
@@ -560,54 +572,48 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
          5. Fetch new data
          6. Enable gesture recognizer
         */
-        if dismissedView == firstCard { // dismissed card is firstCard
+        switch card {
+        case .firstCard:
             currentCard = .second
-            if let cardGR = secondCard.gestureRecognizers?.first {
-                cardGR.isEnabled = true
-            }
+            // Enable gesture recognizer
+            secondCard.gestureRecognizers?.first?.isEnabled = true
             
-            // Favorite button is enabled if data is available
+            // Update fav btn status
             favoriteBtn.isEnabled = isCard2DataAvailable ? true : false
-            if let card2Data = secondCardData {
-                let isDataSaved = databaseManager.isDataSaved(data: card2Data) // determine whether data is already in database
-                favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
+            if let data = secondCardData {
+                updateFavBtnImage(data: data)
             }
             
             // Put the dismissed card behind the current card
-            self.view.insertSubview(dismissedView, belowSubview: secondCard)
-            dismissedView.center = cardViewAnchor
-            addCardViewConstraint(cardView: dismissedView)
+            self.view.insertSubview(firstCard, belowSubview: secondCard)
+            firstCard.center = cardViewAnchor
+            addCardViewConstraint(cardView: firstCard)
             
             // Shrink the size of the newly added card view
-            dismissedView.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            firstCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
             
             updateCardView()
             fetchNewData(initialRequest: false)
-        } else if dismissedView == secondCard { // dismissed card is secondCard
+        case .secondCard:
             currentCard = .first
-            if let cardGR = firstCard.gestureRecognizers?.first {
-                cardGR.isEnabled = true
-            }
+            firstCard.gestureRecognizers?.first?.isEnabled = true
             
-            // Favorite button is enabled if data is available
+            // Update fav btn status
             favoriteBtn.isEnabled = isCard1DataAvailable ? true : false
-            if let card1Data = firstCardData {
-                let isDataSaved = databaseManager.isDataSaved(data: card1Data) // Determine whether data is already in database
-                favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
+            if let data = firstCardData {
+                updateFavBtnImage(data: data)
             }
             
             // Put the dismissed card behind the current card
-            self.view.insertSubview(dismissedView, belowSubview: firstCard)
-            dismissedView.center = cardViewAnchor
-            addCardViewConstraint(cardView: dismissedView)
+            self.view.insertSubview(secondCard, belowSubview: firstCard)
+            secondCard.center = cardViewAnchor
+            addCardViewConstraint(cardView: secondCard)
             
             // Shrink the size of the newly added card view
-            dismissedView.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            secondCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
             
             updateCardView()
             fetchNewData(initialRequest: false)
-        } else {
-            print("Error: The dismissed card is neither firstCard nor secondCard")
         }
     }
     
