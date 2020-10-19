@@ -488,18 +488,20 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Move the card to the edge of either side of the screen depending on where the card was released at
         UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseOut) {
             guard quadrant != nil else { return }
-            let offsetAmount = UIScreen.main.bounds.width
+            let anchor = self.cardViewAnchor
+            let xAxisOffset = UIScreen.main.bounds.width
+            let yAxisOffset = UIScreen.main.bounds.height
             switch quadrant! {
             case .first:
-                card.center = CGPoint(x: card.center.x + offsetAmount, y: card.center.y - offsetAmount)
+                card.center = CGPoint(x: anchor.x + xAxisOffset, y: anchor.y - yAxisOffset)
             case .second:
-                card.center = CGPoint(x: card.center.x - offsetAmount, y: card.center.y - offsetAmount)
+                card.center = CGPoint(x: anchor.x - xAxisOffset, y: anchor.y - yAxisOffset)
             case .third:
-                card.center = CGPoint(x: card.center.x - offsetAmount, y: card.center.y + offsetAmount)
+                card.center = CGPoint(x: anchor.x - xAxisOffset, y: anchor.y + yAxisOffset)
             case .forth:
-                card.center = CGPoint(x: card.center.x + offsetAmount, y: card.center.y + offsetAmount)
+                card.center = CGPoint(x: anchor.x + xAxisOffset, y: anchor.y + yAxisOffset)
             case .none:
-                card.center = CGPoint(x: card.center.x + offsetAmount, y: card.center.y + offsetAmount)
+                card.center = CGPoint(x: anchor.x + xAxisOffset, y: anchor.y + yAxisOffset)
             }
         } completion: { (true) in
             if true {
