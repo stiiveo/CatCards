@@ -27,7 +27,7 @@ class CollectionVC: UICollectionViewController {
         super.viewDidLoad()
         /// Set up cell's size and spacing
         
-        let interCellSpacing: CGFloat = 2.0
+        let interCellSpacing: CGFloat = 1.5
         let cellWidth = (screenWidth - (interCellSpacing * (cellNumberPerRow - 1))) / cellNumberPerRow
         
         // Floor the calculated width to remove any decimal number

@@ -250,7 +250,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         ])
         
         // Style
-        cardView.backgroundColor = K.CardView.Style.backgroundColor
+        cardView.backgroundColor = UIColor.secondarySystemBackground
         cardView.layer.cornerRadius = K.CardView.Style.cornerRadius
         
         // Shadow

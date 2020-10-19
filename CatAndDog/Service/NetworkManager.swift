@@ -21,7 +21,6 @@ class NetworkManager {
     var dataIndex: Int = 0
     
     func performRequest(imageDownloadNumber: Int) {
-        
         for _ in 0..<imageDownloadNumber {
             let session = URLSession(configuration: .default)
             guard let url = URL(string: catUrl) else {
@@ -42,7 +41,6 @@ class NetworkManager {
             }
             task.resume()
         }
-        
     }
     
     private func removeBrecketsInJSON(data: Data) -> Data {
