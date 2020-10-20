@@ -19,11 +19,6 @@ enum CurrentView {
     case undo
 }
 
-enum CardBehind {
-    case firstCard
-    case secondCard
-}
-
 class MainViewController: UIViewController, NetworkManagerDelegate {
     
     @IBOutlet weak var toolBar: UIToolbar!
@@ -39,27 +34,21 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private let imageView2 = UIImageView()
     private var cardViewAnchor = CGPoint()
     private var dataIndex: Int = 0
-    private var isInitialImageLoaded: Bool = false
-    private var dataForNextCardIsReady: Bool = false
-    private var isCard1DataAvailable: Bool = false
-    private var isCard2DataAvailable: Bool = false
+    private var isLoading: Bool = true
     private var firstCardData: CatData?
     private var secondCardData: CatData?
     private var currentCard: CurrentView = .first
     private var currentData: CatData? {
         switch currentCard {
         case .first:
-            guard firstCardData != nil else { return nil }
-            return firstCardData!
+            return firstCardData
         case .second:
-            guard secondCardData != nil else { return nil }
-            return secondCardData!
+            return secondCardData
         case .undo:
-            guard dismissedCardData != nil else { return nil }
-            return dismissedCardData!
+            return dismissedCardData
         }
     }
-    private var cardBelowUndoCard: CardBehind?
+    private var cardBelowUndoCard: Card?
     private var dismissedCardData: CatData?
     private var dismissedCardPosition: CGPoint?
     private var dismissedCardTransform: CGAffineTransform?
@@ -322,12 +311,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let secondCardGR = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         
         // update first cardView with first fetched data
-        if dataIndex == 0 {
+        switch dataIndex {
+        case 0:
             if let firstData = dataSet[dataIndex + 1] {
-                dataForNextCardIsReady = true
-                isCard1DataAvailable = true
-                firstCardData = firstData
-                
                 DispatchQueue.main.async {
                     self.imageView1.image = firstData.image
                     self.indicator1.stopAnimating()
@@ -345,23 +331,22 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.secondCard.gestureRecognizers?.first?.isEnabled = false
                 }
                 dataIndex += 1
+                firstCardData = firstData
             }
-        } else if dataIndex == 1 {
+        case 1:
             if let secondData = dataSet[dataIndex + 1] {
-                isCard2DataAvailable = true
-                secondCardData = secondData
-                
                 DispatchQueue.main.async {
                     self.imageView2.image = secondData.image
                     self.indicator2.stopAnimating()
                 }
                 dataIndex += 1
+                secondCardData = secondData
+                isLoading = false
             }
-        }
-        
-        // Update UI if new data was not downloaded yet in the previous data request
-        if !dataForNextCardIsReady {
-            updateCardView()
+        default:
+            if isLoading {
+                updateCardView()
+            }
         }
     }
     
@@ -614,41 +599,33 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let dataSet = networkManager.serializedData
         let dataAllocation = (dataIndex + 1) % 2
         
-        // Determine whether new data is available
+        // New data is available to be loaded
         if let newData = dataSet[dataIndex + 1] {
-            
-            // Check to which cardView the data is to be allocated
             switch dataAllocation {
             case 1: // Data is for first card
                 DispatchQueue.main.async {
-                    self.imageView1.image = newData.image
                     self.indicator1.stopAnimating()
+                    self.imageView1.image = newData.image
                 }
                 dataIndex += 1
                 firstCardData = newData
-                isCard1DataAvailable = true
             case 0: // Data is for second card
                 DispatchQueue.main.async {
-                    self.imageView2.image = newData.image
                     self.indicator2.stopAnimating()
+                    self.imageView2.image = newData.image
                 }
                 dataIndex += 1
                 secondCardData = newData
-                isCard2DataAvailable = true
             default:
                 print("Value of 'dataAllocation' is invalid.")
             }
             
-            // Set isNewDataAvailable true if next cardView's data is available, vice versa
+            // Determine if the other card was still loading for new data
             switch currentCard {
             case .first:
-                if secondCardData != nil {
-                    dataForNextCardIsReady = true
-                }
+                isLoading = (secondCardData == nil) ? true : false
             case .second:
-                if firstCardData != nil {
-                    dataForNextCardIsReady = true
-                }
+                isLoading = (firstCardData == nil) ? true : false
             case .undo:
                 return
             }
@@ -656,7 +633,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // New data is not downloaded yet
         else {
             // Display loading indicators on both cards
-            if !dataForNextCardIsReady {
+            if isLoading {
                 switch currentCard {
                 case .first:
                     showIndicator(to: .secondCard)
@@ -669,16 +646,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 }
             }
             // Trigger method updateCardView to be executed when new data is fetched successfully
-            dataForNextCardIsReady = false
+            isLoading = true
             
             switch dataAllocation {
             case 1: // New data for first card is not available
                 showIndicator(to: .firstCard)
-                isCard1DataAvailable = false
                 firstCardData = nil
             case 0: // New data for second card is not available
                 showIndicator(to: .secondCard)
-                isCard2DataAvailable = false
                 secondCardData = nil
             default:
                 print("Value of 'dataAllocation' is invalid.")
@@ -687,6 +662,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         DispatchQueue.main.async {
             self.refreshButtonState()
         }
+        print(isLoading)
     }
     
     //MARK: - Error Handling Section
