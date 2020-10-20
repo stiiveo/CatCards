@@ -75,11 +75,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         databaseManager.createDirectory()
         databaseManager.loadImages()
         
-        undoBtn.isEnabled = false
-        
         // Disable favorite and share button before data is downloaded
         favoriteBtn.isEnabled = false
         shareBtn.isEnabled = false
+        
+        // Undo button is disabled until one card is dismissed by user
+        undoBtn.isEnabled = false
         
         // TEST AREA
         
@@ -314,15 +315,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         switch dataIndex {
         case 0:
             if let firstData = dataSet[dataIndex + 1] {
+                dataIndex += 1
+                firstCardData = firstData
                 DispatchQueue.main.async {
-                    self.imageView1.image = firstData.image
                     self.indicator1.stopAnimating()
+                    self.imageView1.image = firstData.image
                     
-                    // Enable toolbar buttons
-                    self.favoriteBtn.isEnabled = true
-                    self.shareBtn.isEnabled = true
-                    
-                    // Update fav btn image
+                    // Refresh toolbar buttons' state
                     self.refreshButtonState()
                     
                     // Add gesture recognizer to both cards
@@ -330,14 +329,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.secondCard.addGestureRecognizer(secondCardGR)
                     self.secondCard.gestureRecognizers?.first?.isEnabled = false
                 }
-                dataIndex += 1
-                firstCardData = firstData
             }
         case 1:
             if let secondData = dataSet[dataIndex + 1] {
                 DispatchQueue.main.async {
-                    self.imageView2.image = secondData.image
                     self.indicator2.stopAnimating()
+                    self.imageView2.image = secondData.image
                 }
                 dataIndex += 1
                 secondCardData = secondData
@@ -662,7 +659,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         DispatchQueue.main.async {
             self.refreshButtonState()
         }
-        print(isLoading)
     }
     
     //MARK: - Error Handling Section
