@@ -294,7 +294,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     // Update UI when new data is downloaded succesfully
     internal func dataDidFetch() {
         let dataSet = networkManager.serializedData
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
+        let firstCardGR = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
+        let secondCardGR = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         
         // update first cardView with first fetched data
         if dataIndex == 0 {
@@ -314,8 +315,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     // Update fav btn image
                     self.updateFavBtnImage(basedOn: firstData)
                     
-                    // Add UIPanGestureRecognizer to the first card
-                    self.firstCard.addGestureRecognizer(panGesture)
+                    // Add gesture recognizer to both cards
+                    self.firstCard.addGestureRecognizer(firstCardGR)
+                    self.secondCard.addGestureRecognizer(secondCardGR)
+                    self.secondCard.gestureRecognizers?.first?.isEnabled = false
                 }
                 dataIndex += 1
             }
@@ -327,10 +330,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 DispatchQueue.main.async {
                     self.imageView2.image = secondData.image
                     self.indicator2.stopAnimating()
-                    
-                    // Add pan gesture recognizer to second card and disable it
-                    self.secondCard.addGestureRecognizer(panGesture)
-                    self.secondCard.gestureRecognizers?.first?.isEnabled = false
                 }
                 dataIndex += 1
             }
