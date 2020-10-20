@@ -31,22 +31,22 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @IBOutlet weak var shareBtn: UIBarButtonItem!
     @IBOutlet weak var undoBtn: UIBarButtonItem!
     
-    var networkManager = NetworkManager()
-    let databaseManager = DatabaseManager()
-    let firstCard = UIView()
-    let secondCard = UIView()
-    let imageView1 = UIImageView()
-    let imageView2 = UIImageView()
-    var cardViewAnchor = CGPoint()
-    var dataIndex: Int = 0
-    var isInitialImageLoaded: Bool = false
-    var dataForNextCardIsReady: Bool = false
-    var isCard1DataAvailable: Bool = false
-    var isCard2DataAvailable: Bool = false
-    var firstCardData: CatData?
-    var secondCardData: CatData?
-    var currentCard: CurrentView = .first
-    var currentData: CatData? {
+    private var networkManager = NetworkManager()
+    private let databaseManager = DatabaseManager()
+    private let firstCard = UIView()
+    private let secondCard = UIView()
+    private let imageView1 = UIImageView()
+    private let imageView2 = UIImageView()
+    private var cardViewAnchor = CGPoint()
+    private var dataIndex: Int = 0
+    private var isInitialImageLoaded: Bool = false
+    private var dataForNextCardIsReady: Bool = false
+    private var isCard1DataAvailable: Bool = false
+    private var isCard2DataAvailable: Bool = false
+    private var firstCardData: CatData?
+    private var secondCardData: CatData?
+    private var currentCard: CurrentView = .first
+    private var currentData: CatData? {
         switch currentCard {
         case .first:
             guard firstCardData != nil else { return nil }
@@ -59,10 +59,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             return dismissedCardData!
         }
     }
-    var cardBelowUndoCard: CardBehind?
-    var dismissedCardData: CatData?
-    var dismissedCardPosition: CGPoint?
-    var dismissedCardTransform: CGAffineTransform?
+    private var cardBelowUndoCard: CardBehind?
+    private var dismissedCardData: CatData?
+    private var dismissedCardPosition: CGPoint?
+    private var dismissedCardTransform: CGAffineTransform?
     
     override func viewDidLoad() {
         super.viewDidLoad()
