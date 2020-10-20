@@ -99,9 +99,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         // Refresh favorite button's image
-        if let data = currentData {
-            updateFavBtnImage(basedOn: data)
-        }
+        refreshButtonState()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -142,7 +140,35 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
     }
     
-    //MARK: - Undo Action
+    private func showIndicator(to card: Card) {
+        switch card {
+        case .firstCard:
+            DispatchQueue.main.async {
+                self.imageView1.image = nil
+                self.addIndicator(to: self.firstCard)
+            }
+        case .secondCard:
+            DispatchQueue.main.async {
+                self.imageView2.image = nil
+                self.addIndicator(to: self.secondCard)
+            }
+        }
+    }
+    
+    //MARK: - Toolbar Button Method and State Control
+    
+    private func refreshButtonState() {
+        var isDataLoaded: Bool { return currentData != nil }
+        favoriteBtn.isEnabled = isDataLoaded ? true : false
+        shareBtn.isEnabled = isDataLoaded ? true : false
+        if favoriteBtn.isEnabled == true {
+            if let data = currentData {
+                let isDataSaved = databaseManager.isDataSaved(data: data)
+                favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
+            }
+        }
+        
+    }
     
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
         undoBtn.isEnabled = false
@@ -201,9 +227,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 self.currentCard = .undo
                 
                 // Update favorite button image
-                if let data = self.currentData {
-                    self.updateFavBtnImage(basedOn: data)
-                }
+                self.refreshButtonState()
             }
         }
 
@@ -313,7 +337,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.shareBtn.isEnabled = true
                     
                     // Update fav btn image
-                    self.updateFavBtnImage(basedOn: firstData)
+                    self.refreshButtonState()
                     
                     // Add gesture recognizer to both cards
                     self.firstCard.addGestureRecognizer(firstCardGR)
@@ -527,28 +551,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     case .firstCard:
                         self.firstCard.gestureRecognizers?.first?.isEnabled = true
                         self.currentCard = .first
-                        // Update fav button image
-                        if let data = self.firstCardData {
-                            self.updateFavBtnImage(basedOn: data)
-                        }
+                        self.refreshButtonState()
                     case .secondCard:
                         self.secondCard.gestureRecognizers?.first?.isEnabled = true
                         self.currentCard = .second
-                        // Update fav button image
-                        if let data = self.secondCardData {
-                            self.updateFavBtnImage(basedOn: data)
-                        }
+                        self.refreshButtonState()
                     }
                 }
                 // Re-enable undo button
                 self.undoBtn.isEnabled = true
             }
         }
-    }
-        
-    private func updateFavBtnImage(basedOn: CatData) {
-        let isDataSaved = databaseManager.isDataSaved(data: basedOn)
-        favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
     }
     
     private func rotateCard(card: Card) {
@@ -566,13 +579,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // Enable gesture recognizer
             secondCard.gestureRecognizers?.first?.isEnabled = true
             
-            // Update favorite and share button status
-            favoriteBtn.isEnabled = isCard2DataAvailable ? true : false
-            shareBtn.isEnabled = isCard2DataAvailable ? true : false
-            if let data = secondCardData {
-                updateFavBtnImage(basedOn: data)
-            }
-            
             // Put the dismissed card behind the current card
             self.view.insertSubview(firstCard, belowSubview: secondCard)
             firstCard.center = cardViewAnchor
@@ -586,13 +592,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         case .secondCard:
             currentCard = .first
             firstCard.gestureRecognizers?.first?.isEnabled = true
-            
-            // Update favorite and share button status
-            favoriteBtn.isEnabled = isCard1DataAvailable ? true : false
-            shareBtn.isEnabled = isCard1DataAvailable ? true : false
-            if let data = firstCardData {
-                updateFavBtnImage(basedOn: data)
-            }
             
             // Put the dismissed card behind the current card
             self.view.insertSubview(secondCard, belowSubview: firstCard)
@@ -685,20 +684,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 print("Value of 'dataAllocation' is invalid.")
             }
         }
-    }
-    
-    private func showIndicator(to card: Card) {
-        switch card {
-        case .firstCard:
-            DispatchQueue.main.async {
-                self.imageView1.image = nil
-                self.addIndicator(to: self.firstCard)
-            }
-        case .secondCard:
-            DispatchQueue.main.async {
-                self.imageView2.image = nil
-                self.addIndicator(to: self.secondCard)
-            }
+        DispatchQueue.main.async {
+            self.refreshButtonState()
         }
     }
     
