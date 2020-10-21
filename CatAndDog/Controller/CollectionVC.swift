@@ -63,7 +63,7 @@ class CollectionVC: UICollectionViewController {
     // Send the selected cell index to the SingleImageVC
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destination = segue.destination as? SingleImageVC {
-            destination.imageToShowIndex = selectedCellIndex
+            destination.selectedIndex = selectedCellIndex
             destination.imageArray = reversedImageArray
         }
     }

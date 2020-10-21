@@ -8,12 +8,13 @@
 
 import UIKit
 
-class SingleImageVC: UIViewController {
+class SingleImageVC: UIViewController, UIScrollViewDelegate {
 
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var stackView: UIStackView!
     
-    var imageToShowIndex: Int?
+    var selectedIndex: Int?
+    var imageScrollView: ImageScrollView!
     var currentPage: Int {
         Int(round(scrollView.contentOffset.x / scrollView.frame.width))
     }
@@ -22,14 +23,12 @@ class SingleImageVC: UIViewController {
     let databaseManager = DatabaseManager()
     var imageArray = [UIImage]()
     
-    weak var panGesture: UIPanGestureRecognizer?
-    weak var pinchGesture: UIPinchGestureRecognizer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setUpToolbar()
-        scrollView.delegate = self
+        self.scrollView.delegate = self
         
         // Prevent scrollView from responding to two-finger panning events
         disableTwoFingerScroll()
@@ -39,14 +38,6 @@ class SingleImageVC: UIViewController {
         
         // Scroll to user selected image at the collection view controller
         scrollToSelectedView()
-        
-        // Attach pinch and pan gesture recognizer to the selected view
-        let pinchGR = getPinchGestureRecognizer()
-        let panGR = getPanGestureRecognizer()
-        if let index = imageToShowIndex {
-            attachPinchGestureRecognizer(recognizer: pinchGR, to: index)
-            attachPanGestureRecognizer(recognizer: panGR, to: index)
-        }
         
         /// TEST AREA
     }
@@ -82,23 +73,17 @@ class SingleImageVC: UIViewController {
     
     private func addImagesToStackView() {
         for image in imageArray {
-            let newImageView = UIImageView()
-            newImageView.contentMode = .scaleAspectFit
-            newImageView.image = image
-            stackView.addArrangedSubview(newImageView)
-            newImageView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor).isActive = true
-            newImageView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor).isActive = true
-        }
-        
-        // Enable each imageView's user interaction
-        for imageView in stackView.arrangedSubviews {
-            imageView.isUserInteractionEnabled = true
+            self.imageScrollView = ImageScrollView(frame: view.bounds)
+            self.imageScrollView.set(image: image)
+            stackView.addArrangedSubview(self.imageScrollView)
+            self.imageScrollView.widthAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.widthAnchor).isActive = true
+            self.imageScrollView.heightAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.heightAnchor).isActive = true
         }
     }
     
     private func scrollToSelectedView() {
         DispatchQueue.main.async {
-            guard let pageNumber = self.imageToShowIndex else { return }
+            guard let pageNumber = self.selectedIndex else { return }
             self.scrollView.contentOffset = CGPoint(x: CGFloat(pageNumber) * self.scrollView.frame.width, y: 0)
         }
     }
@@ -107,8 +92,7 @@ class SingleImageVC: UIViewController {
         let twoFingerPan = UIPanGestureRecognizer()
         twoFingerPan.minimumNumberOfTouches = 2
         twoFingerPan.maximumNumberOfTouches = 2
-        scrollView.addGestureRecognizer(twoFingerPan)
-        panGesture = twoFingerPan
+        self.scrollView.addGestureRecognizer(twoFingerPan)
     }
     
     //MARK: - Toolbar Button Methods
@@ -183,150 +167,4 @@ class SingleImageVC: UIViewController {
         }
     }
     
-    //MARK: - Gesture Recognizer Methods
-    
-    private func attachPanGestureRecognizer(recognizer: UIPanGestureRecognizer, to index: Int) {
-        stackView.arrangedSubviews[index].addGestureRecognizer(recognizer)
-        panGesture = recognizer
-    }
-    
-    private func attachPinchGestureRecognizer(recognizer: UIPinchGestureRecognizer, to index: Int) {
-        stackView.arrangedSubviews[index].addGestureRecognizer(recognizer)
-        // save the references of the gesture recognizers
-        pinchGesture = recognizer
-    }
-    
-    private func getPanGestureRecognizer() -> UIPanGestureRecognizer {
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
-        pan.delegate = self
-        panGesture = pan
-        
-        // Only 2-finger panning action can be recognized
-        pan.minimumNumberOfTouches = 2
-        pan.maximumNumberOfTouches = 2
-        
-        return pan
-    }
-    
-    private func getPinchGestureRecognizer() -> UIPinchGestureRecognizer {
-        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(handleZoom))
-        pinch.delegate = self
-        pinchGesture = pinch
-        return pinch
-    }
-    
-    @objc func handleZoom(_ gesture: UIPinchGestureRecognizer) {
-        if let view = gesture.view {
-            switch gesture.state {
-            case .changed:
-                // Coordinate of the pinch center where the view's center is (0, 0)
-                let pinchCenter = CGPoint(x: gesture.location(in: view).x - view.bounds.midX,
-                                          y: gesture.location(in: view).y - view.bounds.midY)
-                let transform = view.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
-                    .scaledBy(x: gesture.scale, y: gesture.scale)
-                    .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
-                view.transform = transform
-                gesture.scale = 1
-                
-                // Hide navigational bar and toolbar
-                self.navigationController?.setNavigationBarHidden(true, animated: true)
-                self.navigationController?.setToolbarHidden(true, animated: true)
-            default:
-                // If the gesture has cancelled/terminated/failed or everything else that's not performing
-                // Smoothly restore the transform to the "original"
-                UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut, animations: {
-                    view.transform = .identity
-                    // Show navigational bar and toolbar
-                    self.navigationController?.setNavigationBarHidden(false, animated: true)
-                    self.navigationController?.setToolbarHidden(false, animated: true)
-                })
-            }
-        }
-    }
-    
-    @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
-        // Current displayed imageView
-        let currentView = stackView.arrangedSubviews[currentPage] as! UIImageView
-
-        // Compute the anchor position of the current imageView
-        guard let anchor = self.anchorPosition else { return }
-        let currentViewAnchor = CGPoint(
-            x: anchor.x + self.scrollView.frameLayoutGuide.layoutFrame.width * CGFloat(self.currentPage),
-            y: anchor.y)
-        
-        if let view = gesture.view {
-            switch gesture.state {
-            case .changed:
-                // The view can only be panned around when it's zoomed
-                if view.frame.width > view.bounds.width {
-                    // Get the touch position
-                    let translation = gesture.translation(in: currentView)
-                    
-                    // Edit the center of the target by adding the gesture position
-                    let zoomRatio = view.frame.width / view.bounds.width
-                    view.center = CGPoint(
-                        x: currentView.center.x + translation.x * zoomRatio,
-                        y: currentView.center.y + translation.y * zoomRatio
-                    )
-                    gesture.setTranslation(.zero, in: currentView)
-                }
-                
-            default:
-                // If the gesture has cancelled/terminated/failed or everything else that's not performing
-                // Smoothly restore the transform to the original state
-                UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseInOut, animations: {
-                    view.center = currentViewAnchor
-                })
-            }
-        }
-    }
-    
 }
-
-//MARK: - Scroll View Delegate
-
-extension SingleImageVC: UIScrollViewDelegate {
-    
-    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        previousPage = currentPage
-        
-        // Disable pinch and pan gesture recognizer if scrolling has begun
-        if let currentGRs = stackView.arrangedSubviews[currentPage].gestureRecognizers {
-            for anyGestureRecognizer in currentGRs {
-                anyGestureRecognizer.isEnabled = false
-            }
-        }
-    }
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        if currentPage != previousPage { // Page number is changed
-            // remove gesture recognizer attached to the previous imageView
-            if let oldIndex = previousPage, let pinchGR = pinchGesture, let panGR = panGesture {
-                stackView.arrangedSubviews[oldIndex].removeGestureRecognizer(pinchGR)
-                stackView.arrangedSubviews[oldIndex].removeGestureRecognizer(panGR)
-            }
-            
-            // add new gesture recognizers to the current imageView
-            let pinch = getPinchGestureRecognizer()
-            let pan = getPanGestureRecognizer()
-            attachPinchGestureRecognizer(recognizer: pinch, to: currentPage)
-            attachPanGestureRecognizer(recognizer: pan, to: currentPage)
-        } else {
-            if let currentGRs = stackView.arrangedSubviews[currentPage].gestureRecognizers {
-                for anyGestureRecognizer in currentGRs {
-                    anyGestureRecognizer.isEnabled = true
-                }
-            }
-        }
-    }
-    
-}
-
-//MARK: - Gesture Recognizer Delegate
-
-extension SingleImageVC: UIGestureRecognizerDelegate {
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
-    }
-}
-
