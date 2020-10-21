@@ -52,6 +52,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var dismissedCardData: CatData?
     private var dismissedCardPosition: CGPoint?
     private var dismissedCardTransform: CGAffineTransform?
+    private lazy var panGesture: UIPanGestureRecognizer = {
+        return UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -166,14 +169,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Disable current card's gesture recognizer and save its UIView
         switch currentCard {
         case .first:
-            if let firstCardGR = firstCard.gestureRecognizers?.first {
-                firstCardGR.isEnabled = false
-            }
+            self.firstCard.removeGestureRecognizer(self.panGesture)
             cardBelowUndoCard = .firstCard
         case .second:
-            if let secondCardGR = secondCard.gestureRecognizers?.first {
-                secondCardGR.isEnabled = false
-            }
+            self.secondCard.removeGestureRecognizer(self.panGesture)
             cardBelowUndoCard = .secondCard
         case .undo:
             print("Error: Undo button should have not been enabled")
@@ -212,8 +211,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         } completion: { (true) in
             if true {
                 // Add gesture recognizer to undo card
-                let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.panGestureHandler))
-                undoCard.addGestureRecognizer(panGesture)
+                undoCard.addGestureRecognizer(self.panGesture)
                 self.currentCard = .undo
                 
                 // Update favorite button image
@@ -308,10 +306,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     // Update UI when new data is downloaded succesfully
     internal func dataDidFetch() {
         let dataSet = networkManager.serializedData
-        let firstCardGR = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
-        let secondCardGR = UIPanGestureRecognizer(target: self, action: #selector(panGestureHandler))
         
-        // update first cardView with first fetched data
+        // Update image, buttons and attach gesture recognizers
         switch dataIndex {
         case 0:
             if let firstData = dataSet[dataIndex + 1] {
@@ -324,10 +320,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     // Refresh toolbar buttons' state
                     self.refreshButtonState()
                     
-                    // Add gesture recognizer to both cards
-                    self.firstCard.addGestureRecognizer(firstCardGR)
-                    self.secondCard.addGestureRecognizer(secondCardGR)
-                    self.secondCard.gestureRecognizers?.first?.isEnabled = false
+                    // Add gesture recognizer to first card
+                    self.firstCard.addGestureRecognizer(self.panGesture)
                 }
             }
         case 1:
@@ -513,10 +507,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 self.dismissedCardPosition = card.center
                 self.dismissedCardTransform = card.transform
                 
-                // Disable gesture recognizer
-                if let cardGR = card.gestureRecognizers?.first {
-                    cardGR.isEnabled = false
-                }
+                // Remove dismissed card's gesture recognizer
+                card.removeGestureRecognizer(self.panGesture)
                 card.removeFromSuperview()
                 
                 switch self.currentCard {
@@ -531,11 +523,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     guard self.cardBelowUndoCard != nil else { return }
                     switch self.cardBelowUndoCard! {
                     case .firstCard:
-                        self.firstCard.gestureRecognizers?.first?.isEnabled = true
+                        self.firstCard.addGestureRecognizer(self.panGesture)
                         self.currentCard = .first
                         self.refreshButtonState()
                     case .secondCard:
-                        self.secondCard.gestureRecognizers?.first?.isEnabled = true
+                        self.secondCard.addGestureRecognizer(self.panGesture)
                         self.currentCard = .second
                         self.refreshButtonState()
                     }
@@ -559,7 +551,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         case .firstCard:
             currentCard = .second
             // Enable gesture recognizer
-            secondCard.gestureRecognizers?.first?.isEnabled = true
+            secondCard.addGestureRecognizer(self.panGesture)
             
             // Put the dismissed card behind the current card
             self.view.insertSubview(firstCard, belowSubview: secondCard)
@@ -573,7 +565,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             fetchNewData(initialRequest: false)
         case .secondCard:
             currentCard = .first
-            firstCard.gestureRecognizers?.first?.isEnabled = true
+            firstCard.addGestureRecognizer(self.panGesture)
             
             // Put the dismissed card behind the current card
             self.view.insertSubview(secondCard, belowSubview: firstCard)
