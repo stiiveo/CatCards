@@ -27,20 +27,18 @@ class SingleImageVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setUpToolbar()
         scrollView.delegate = self
         
+        // Prevent scrollView from responding to two-finger panning events
+        disableTwoFingerScroll()
+        
         removeImageView(at: 0) // Remove the template imageView
-        setUpToolbar()
         addImagesToStackView()
         
-        // Make scrollView to scroll to the image the user selected at the previous view controller
-        DispatchQueue.main.async {
-            guard let pageNumber = self.imageToShowIndex else { return }
-            self.scrollView.contentOffset = CGPoint(x: CGFloat(pageNumber) * self.scrollView.frame.width, y: 0)
-        }
-        
-        // Stop scrollView from reacting to two-finger panning events
-        disableTwoFingerScroll()
+        // Scroll to user selected image at the collection view controller
+        scrollToSelectedView()
         
         // Attach pinch and pan gesture recognizer to the selected view
         let pinchGR = getPinchGestureRecognizer()
@@ -58,6 +56,8 @@ class SingleImageVC: UIViewController {
         // Save the center position of the stackView's first arranged subview after the view is loaded
         self.anchorPosition = stackView.arrangedSubviews[0].center
     }
+    
+    //MARK: - Stack View & Toolbar Preparation
     
     private func setUpToolbar() {
         self.navigationController?.isToolbarHidden = false
@@ -96,6 +96,13 @@ class SingleImageVC: UIViewController {
         }
     }
     
+    private func scrollToSelectedView() {
+        DispatchQueue.main.async {
+            guard let pageNumber = self.imageToShowIndex else { return }
+            self.scrollView.contentOffset = CGPoint(x: CGFloat(pageNumber) * self.scrollView.frame.width, y: 0)
+        }
+    }
+    
     private func disableTwoFingerScroll() {
         let twoFingerPan = UIPanGestureRecognizer()
         twoFingerPan.minimumNumberOfTouches = 2
@@ -103,6 +110,8 @@ class SingleImageVC: UIViewController {
         scrollView.addGestureRecognizer(twoFingerPan)
         panGesture = twoFingerPan
     }
+    
+    //MARK: - Toolbar Button Methods
     
     @objc func shareButtonPressed() {
         let imageToShare = imageArray[currentPage]
@@ -173,6 +182,8 @@ class SingleImageVC: UIViewController {
             }
         }
     }
+    
+    //MARK: - Gesture Recognizer Methods
     
     private func attachPanGestureRecognizer(recognizer: UIPanGestureRecognizer, to index: Int) {
         stackView.arrangedSubviews[index].addGestureRecognizer(recognizer)
@@ -272,6 +283,8 @@ class SingleImageVC: UIViewController {
     
 }
 
+//MARK: - Scroll View Delegate
+
 extension SingleImageVC: UIScrollViewDelegate {
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
@@ -308,6 +321,8 @@ extension SingleImageVC: UIScrollViewDelegate {
     }
     
 }
+
+//MARK: - Gesture Recognizer Delegate
 
 extension SingleImageVC: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
