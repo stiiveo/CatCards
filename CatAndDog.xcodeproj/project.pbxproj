@@ -102,6 +102,7 @@
 		F674700724C96330006A2905 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				F6C9281F2540678B00BAB89E /* ImageScrollView.swift */,
 				F6746FEC24C6DCF2006A2905 /* Main.storyboard */,
 				F6746FF124C6DCF5006A2905 /* LaunchScreen.storyboard */,
 			);
@@ -115,7 +116,6 @@
 				F639A17C24E29FB600FB6C0A /* CollectionVC.swift */,
 				F639A17E24E29FD000FB6C0A /* CollectionCell.swift */,
 				F64FFF0C2518A10900E80DE2 /* SingleImageVC.swift */,
-				F6C9281F2540678B00BAB89E /* ImageScrollView.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
