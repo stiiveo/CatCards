@@ -48,6 +48,19 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         self.anchorPosition = stackView.arrangedSubviews[0].center
     }
     
+    //MARK: - Image Zooming Scale Control
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        self.previousPage = self.currentPage
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        guard self.previousPage != nil else { return }
+        if self.currentPage != self.previousPage {
+            let previousImage = self.stackView.arrangedSubviews[self.previousPage!] as! ImageScrollView
+            previousImage.zoomScale = previousImage.minimumZoomScale
+        }
+    }
+    
     //MARK: - Stack View & Toolbar Preparation
     
     private func setUpToolbar() {
