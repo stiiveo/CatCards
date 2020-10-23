@@ -59,26 +59,15 @@ class ImageScrollView: UIScrollView {
     }
     
     func setCurrentMaxAndMinZoomScale() {
-        let boundsSize = self.bounds.size
-        let imageSize = imageZoomView.bounds.size
+        let scrollViewSize = self.bounds.size
+        let imageViewSize = imageZoomView.bounds.size
         
-        let xScale = boundsSize.width / imageSize.width
-        let yScale = boundsSize.height / imageSize.height
+        let xScale = scrollViewSize.width / imageViewSize.width
+        let yScale = scrollViewSize.height / imageViewSize.height
         let minScale = min(xScale, yScale)
         
-        var maxScale: CGFloat = 1.0
-        if minScale < 0.1 {
-            maxScale = 0.3
-        }
-        if minScale >= 0.1 && minScale < 0.5 {
-            maxScale = 0.7
-        }
-        if minScale >= 0.5 {
-            maxScale = max(1.0, minScale)
-        }
-        
         self.minimumZoomScale = minScale
-        self.maximumZoomScale = maxScale
+        self.maximumZoomScale = 2.0
     }
     
     func centerImage() {
@@ -110,14 +99,23 @@ class ImageScrollView: UIScrollView {
     func zoom(point: CGPoint, animated: Bool) {
         let currentScale = self.zoomScale
         let minScale = self.minimumZoomScale
-        let maxScale = self.maximumZoomScale
+        var toScale: CGFloat?
         
-        if (minScale == maxScale && minScale > 1) {
-            return
+        let scrollViewSize = self.bounds.size
+        let imageViewSize = imageZoomView.bounds.size
+        
+        // Define zooming behavior
+        let scrollViewRatio = scrollViewSize.width / scrollViewSize.height
+        let imageViewRatio = imageViewSize.width / imageViewSize.height
+        
+        if abs(scrollViewRatio - imageViewRatio) >= 0.25 {
+            // Scale image to precisely fill the entire scroll view
+            toScale = max(scrollViewSize.width / imageViewSize.width, scrollViewSize.height / imageViewSize.height)
+        } else {
+            toScale = self.minimumZoomScale + 1.0
         }
-        
-        let toScale = maxScale
-        let finalScale = (currentScale == minScale) ? toScale : minScale
+         
+        let finalScale = (currentScale == minScale) ? toScale! : minScale // Scale image if it's not scaled by the user yet
         let zoomRect = self.zoomRect(scale: finalScale, center: point)
         self.zoom(to: zoomRect, animated: animated)
     }
