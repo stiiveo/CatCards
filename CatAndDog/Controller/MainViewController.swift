@@ -214,6 +214,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             if true {
                 // Add gesture recognizer to undo card
                 undoCard.addGestureRecognizer(self.cardPan)
+                undoCard.addGestureRecognizer(self.cardPreviewZoom)
                 self.currentCard = .undo
                 
                 // Update favorite button image
@@ -667,14 +668,19 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if let view = sender.view {
             switch sender.state {
             case .changed:
-                // Coordinate of the pinch center where the view's center is (0, 0)
-                let pinchCenter = CGPoint(x: sender.location(in: view).x - view.bounds.midX,
-                                          y: sender.location(in: view).y - view.bounds.midY)
-                let transform = view.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
-                    .scaledBy(x: sender.scale, y: sender.scale)
-                    .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
-                view.transform = transform
-                sender.scale = 1
+                // Limit the minimum scale the card can be shrinked down
+                let cardBoundsWidth = view.bounds.size.width
+                let cardFrameWidth = view.frame.width
+                if cardFrameWidth > cardBoundsWidth * 0.8 {
+                    // Coordinate of the pinch center where the view's center is (0, 0)
+                    let pinchCenter = CGPoint(x: sender.location(in: view).x - view.bounds.midX,
+                                              y: sender.location(in: view).y - view.bounds.midY)
+                    let transform = view.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
+                        .scaledBy(x: sender.scale, y: sender.scale)
+                        .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
+                    view.transform = transform
+                    sender.scale = 1
+                }
             default:
                 // If the gesture has cancelled/terminated/failed or everything else that's not performing
                 // Smoothly restore the transform to the "original"
