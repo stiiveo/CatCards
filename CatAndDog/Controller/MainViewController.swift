@@ -19,6 +19,11 @@ enum CurrentView {
     case undo
 }
 
+enum Side {
+    case left
+    case right
+}
+
 class MainViewController: UIViewController, NetworkManagerDelegate {
     
     @IBOutlet weak var toolBar: UIToolbar!
@@ -419,11 +424,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             if card.center.x < halfViewWidth / 2 && currentData != nil { // card was at the left side of the screen
                 dismissedCardData = currentData!
-                dismissCard(card, from: releasePoint)
+                dismissCard(card, to: .left, from: releasePoint)
             }
             else if card.center.x > halfViewWidth * 3/2 && currentData != nil { // card was at the right side of the screen
                 dismissedCardData = currentData!
-                dismissCard(card, from: releasePoint)
+                dismissCard(card, to: .right, from: releasePoint)
             }
             // Reset card's position and rotation state
             else {
@@ -463,49 +468,55 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func dismissCard(_ card: UIView, from releasedPoint: CGPoint) {
-        enum Quadrant {
-            case first
-            case second
-            case third
-            case forth
-            case none
-        }
-        // Determine the quarant of the release point
-        var quadrant: Quadrant?
-        let releasePointX = releasedPoint.x
-        let releasePointY = releasedPoint.y
-        let anchorX = cardViewAnchor.x
-        let anchorY = cardViewAnchor.y
+    private func dismissCard(_ card: UIView, to side: Side, from releasePoint: CGPoint) {
         
-        if releasePointX > anchorX && releasePointY < anchorY {
-            quadrant = .first
-        } else if releasePointX <= anchorX && releasePointY < anchorY {
-            quadrant = .second
-        } else if releasePointX <= anchorX && releasePointY >= anchorY {
-            quadrant = .third
-        } else if releasePointX > anchorX && releasePointY >= anchorY {
-            quadrant = .forth
+        enum Zone {
+            case upper
+            case middle
+            case lower
+        }
+        
+        // Determine the zone of the release point
+        var zone: Zone?
+        let screenHeight = UIScreen.main.bounds.height
+        let releasePointY = releasePoint.y
+        
+        if releasePointY < screenHeight / 3 {
+            zone = .upper
+        } else if (releasePointY >= screenHeight / 3) && (releasePointY < screenHeight * 2/3) {
+            zone = .middle
+        } else if releasePointY >= (screenHeight * 2/3) {
+            zone = .lower
         }
         
         // Move the card to the edge of either side of the screen depending on where the card was released at
         UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseOut) {
-            guard quadrant != nil else { return }
-            let anchor = self.cardViewAnchor
-            let xAxisOffset = UIScreen.main.bounds.width
-//            let yAxisOffset = UIScreen.main.bounds.height
-            switch quadrant! {
-            case .first:
-                card.center = CGPoint(x: anchor.x + xAxisOffset, y: anchor.y - xAxisOffset)
-            case .second:
-                card.center = CGPoint(x: anchor.x - xAxisOffset, y: anchor.y - xAxisOffset)
-            case .third:
-                card.center = CGPoint(x: anchor.x - xAxisOffset, y: anchor.y + xAxisOffset)
-            case .forth:
-                card.center = CGPoint(x: anchor.x + xAxisOffset, y: anchor.y + xAxisOffset)
-            case .none:
-                card.center = CGPoint(x: anchor.x + xAxisOffset, y: anchor.y + xAxisOffset)
+            guard zone != nil else { return }
+            let screenWidth = UIScreen.main.bounds.width
+            var destination: CGPoint?
+            switch side {
+            case .left:
+                switch zone! {
+                case .upper:
+                    destination = CGPoint(x: releasePoint.x - screenWidth, y: releasePoint.y - screenWidth)
+                case .middle:
+                    destination = CGPoint(x: releasePoint.x - screenWidth, y: releasePoint.y)
+                case .lower:
+                    destination = CGPoint(x: releasePoint.x - screenWidth, y: releasePoint.y + screenWidth)
+                }
+            case .right:
+                switch zone! {
+                case .upper:
+                    destination = CGPoint(x: releasePoint.x + screenWidth, y: releasePoint.y - screenWidth)
+                case .middle:
+                    destination = CGPoint(x: releasePoint.x + screenWidth, y: releasePoint.y)
+                case .lower:
+                    destination = CGPoint(x: releasePoint.x + screenWidth, y: releasePoint.y + screenWidth)
+                }
             }
+            guard destination != nil else { return }
+            card.center = destination!
+            
         } completion: { (true) in
             if true {
                 self.dismissedCardPosition = card.center
