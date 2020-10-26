@@ -65,17 +65,21 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     
     private func setUpToolbar() {
         self.navigationController?.isToolbarHidden = false
+        self.navigationController?.toolbar.clipsToBounds = true
+        self.navigationController?.toolbar.isTranslucent = false
+        
         var items = [UIBarButtonItem]()
         let shareItem = UIBarButtonItem(image: K.ButtonImage.share, style: .plain, target: self, action: #selector(shareButtonPressed))
         let deleteItem = UIBarButtonItem(image: K.ButtonImage.trash, style: .plain, target: self, action: #selector(deleteButtonPressed))
         let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        items = [flexibleSpace, shareItem, flexibleSpace, deleteItem, flexibleSpace] // Distribution of items in toolbar
+        let fixedSpace = UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil)
+        fixedSpace.width = 50
+        items = [fixedSpace, shareItem, flexibleSpace, deleteItem, fixedSpace] // Distribution of items in toolbar
+        self.toolbarItems = items
         
         // Style
-        shareItem.tintColor = K.Color.toolbarItem
-        deleteItem.tintColor = K.Color.toolbarItem
-        
-        toolbarItems = items
+        self.navigationController?.toolbar.barTintColor = K.Color.backgroundColor
+        self.navigationController?.toolbar.tintColor = K.Color.toolbarItem
     }
     
     private func removeImageView(at index: Int) {

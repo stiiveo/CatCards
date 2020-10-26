@@ -4,8 +4,8 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17126"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
-        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="collection view cell content view" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -24,30 +24,30 @@
                                     <constraint firstAttribute="height" constant="44" id="7qg-j3-968"/>
                                 </constraints>
                                 <items>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="Q4d-Li-fMM"/>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="eX6-Tv-xPR"/>
                                     <barButtonItem title="Share" image="square.and.arrow.up" catalog="system" id="qHs-X8-xcv">
                                         <connections>
                                             <action selector="shareButtonPressed:" destination="jpg-gr-ShF" id="BgI-cb-uF8"/>
                                         </connections>
                                     </barButtonItem>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="QQP-aX-ZeI"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="fXc-Jq-dVN"/>
                                     <barButtonItem title="Undo" image="arrow.counterclockwise" catalog="system" id="c3g-fk-JM1">
                                         <connections>
                                             <action selector="undoButtonPressed:" destination="jpg-gr-ShF" id="oID-tI-Scb"/>
                                         </connections>
                                     </barButtonItem>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="JEc-Lt-FiM"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="L2G-v4-WQZ"/>
                                     <barButtonItem title="Favorite" image="heart" catalog="system" id="eix-IU-TsW">
                                         <connections>
                                             <action selector="favoriteButtonPressed:" destination="jpg-gr-ShF" id="BKN-yk-8P5"/>
                                         </connections>
                                     </barButtonItem>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="iXf-gw-ABa"/>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="lks-lI-KVw"/>
                                 </items>
                             </toolbar>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="E8D-Zx-PRV"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="ZI0-C0-QUe" firstAttribute="trailing" secondItem="E8D-Zx-PRV" secondAttribute="trailing" id="g5N-sz-Ua3"/>
                             <constraint firstItem="ZI0-C0-QUe" firstAttribute="leading" secondItem="E8D-Zx-PRV" secondAttribute="leading" id="ipo-P1-8yW"/>
@@ -85,7 +85,7 @@
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="s03-pl-d20">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="q4y-nE-Wkn">
                             <size key="itemSize" width="128" height="128"/>
                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -163,7 +163,7 @@
                             </scrollView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="PSN-rc-vX0"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="1Ze-wL-vlY" firstAttribute="leading" secondItem="PSN-rc-vX0" secondAttribute="leading" id="5cz-og-Tc6"/>
                             <constraint firstItem="PSN-rc-vX0" firstAttribute="bottom" secondItem="1Ze-wL-vlY" secondAttribute="bottom" id="Hsu-ge-dHl"/>
@@ -208,11 +208,11 @@
         <image name="default" width="165" height="265"/>
         <image name="heart" catalog="system" width="128" height="109"/>
         <image name="square.and.arrow.up" catalog="system" width="115" height="128"/>
-        <namedColor name="buttonColor">
-            <color red="0.27450980392156865" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        <namedColor name="backgroundColor">
+            <color red="1" green="0.94509803921568625" blue="0.90196078431372551" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
-        <systemColor name="systemBackgroundColor">
-            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
+        <namedColor name="buttonColor">
+            <color red="0.15686274509803921" green="0.21176470588235294" blue="0.094117647058823528" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
     </resources>
 </document>

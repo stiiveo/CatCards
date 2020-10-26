@@ -100,12 +100,29 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         super.viewWillAppear(animated)
         // Refresh favorite button's image
         refreshButtonState()
+        
+        // Hide navigation bar's border line
+        self.navigationController?.navigationBar.isTranslucent = false
+        self.navigationController?.navigationBar.barTintColor = K.Color.backgroundColor
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        
+        // Hide toolbar's hairline
+        self.toolBar.clipsToBounds = true
+        self.toolBar.barTintColor = K.Color.backgroundColor
+        self.toolBar.isTranslucent = false
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // Save the center position of the created card view
         cardViewAnchor = firstCard.center
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // Un-hidden nav bar's hairline
+        self.navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
     }
     
     //MARK: - Activity Indicator
@@ -270,7 +287,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         ])
         
         // Style
-        cardView.backgroundColor = UIColor.secondarySystemBackground
+        cardView.backgroundColor = K.CardView.Style.backgroundColor
         cardView.layer.cornerRadius = K.CardView.Style.cornerRadius
         
         // Shadow

@@ -50,6 +50,7 @@ class CollectionVC: UICollectionViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.collectionView.reloadData()
+        self.navigationController?.navigationBar.barTintColor = K.Color.backgroundColor
         self.navigationController?.isToolbarHidden = true
         
         if DatabaseManager.imageArray.count == 0 {
