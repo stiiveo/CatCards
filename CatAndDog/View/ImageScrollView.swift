@@ -11,7 +11,6 @@ import UIKit
 class ImageScrollView: UIScrollView {
 
     var imageZoomView: UIImageView!
-    
     lazy var zoomingTap: UITapGestureRecognizer = {
         let zoomingTap = UITapGestureRecognizer(target: self, action: #selector(handleZoomingTap))
         zoomingTap.numberOfTapsRequired = 2
@@ -32,7 +31,6 @@ class ImageScrollView: UIScrollView {
     }
     
     func set(image: UIImage) {
-        
         imageZoomView?.removeFromSuperview()
         imageZoomView = nil
         

@@ -23,7 +23,6 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     let databaseManager = DatabaseManager()
     var imageArray = [UIImage]()
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         

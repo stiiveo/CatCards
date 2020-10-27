@@ -623,27 +623,26 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private func updateCardView() {
         
         let dataSet = networkManager.serializedData
-        let dataAllocation = (dataIndex + 1) % 2
+        var dataAllocation: Card = .firstCard
+        dataAllocation = ((self.dataIndex + 1) % 2 == 1) ? .firstCard : .secondCard
         
         // New data is available to be loaded
         if let newData = dataSet[dataIndex + 1] {
             switch dataAllocation {
-            case 1: // Data is for first card
+            case .firstCard: // Data is for first card
                 DispatchQueue.main.async {
                     self.indicator1.stopAnimating()
                     self.imageView1.image = newData.image
                 }
                 dataIndex += 1
                 firstCardData = newData
-            case 0: // Data is for second card
+            case .secondCard: // Data is for second card
                 DispatchQueue.main.async {
                     self.indicator2.stopAnimating()
                     self.imageView2.image = newData.image
                 }
                 dataIndex += 1
                 secondCardData = newData
-            default:
-                print("Value of 'dataAllocation' is invalid.")
             }
             
             // Determine if the other card was still loading for new data
@@ -675,14 +674,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             isLoading = true
             
             switch dataAllocation {
-            case 1: // New data for first card is not available
+            case .firstCard: // New data for first card is not available
                 showIndicator(to: .firstCard)
                 firstCardData = nil
-            case 0: // New data for second card is not available
+            case .secondCard: // New data for second card is not available
                 showIndicator(to: .secondCard)
                 secondCardData = nil
-            default:
-                print("Value of 'dataAllocation' is invalid.")
             }
         }
         DispatchQueue.main.async {

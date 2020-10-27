@@ -55,7 +55,7 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="mlT-4e-zaz">
-                        <barButtonItem key="rightBarButtonItem" image="tray.and.arrow.down" catalog="system" style="plain" id="sSu-jw-cTH">
+                        <barButtonItem key="rightBarButtonItem" image="tray.and.arrow.down" catalog="system" id="sSu-jw-cTH">
                             <connections>
                                 <segue destination="nfh-xn-jhC" kind="show" id="1gv-hA-jFb"/>
                             </connections>
