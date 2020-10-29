@@ -301,13 +301,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     // Add constraints to cardView
     private func addCardViewConstraint(cardView: UIView) {
         cardView.translatesAutoresizingMaskIntoConstraints = false
-        let viewMargins = self.view.layoutMarginsGuide
-        let toolbarMargins = self.toolBar.layoutMarginsGuide
         NSLayoutConstraint.activate([
-            cardView.leadingAnchor.constraint(equalTo: viewMargins.leadingAnchor, constant: K.CardView.Constraint.leading),
-            cardView.trailingAnchor.constraint(equalTo: viewMargins.trailingAnchor, constant: K.CardView.Constraint.trailing),
-            cardView.topAnchor.constraint(equalTo: viewMargins.topAnchor, constant: K.CardView.Constraint.top),
-            cardView.bottomAnchor.constraint(equalTo: toolbarMargins.topAnchor, constant: K.CardView.Constraint.bottom)
+            cardView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: K.CardView.Constraint.leading),
+            cardView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: K.CardView.Constraint.trailing),
+            cardView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: K.CardView.Constraint.top),
+            cardView.bottomAnchor.constraint(equalTo: self.toolBar.topAnchor, constant: K.CardView.Constraint.bottom)
         ])
         
         // Style
@@ -326,17 +324,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     // Add constraints to imageView
     private func addImageViewConstraint(imageView: UIImageView, constrainTo cardView: UIView) {
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        
         NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: cardView.topAnchor, constant: K.ImageView.Constraint.top),
-            imageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: K.ImageView.Constraint.leading),
-            imageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: K.ImageView.Constraint.trailing),
-            imageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: K.ImageView.Constraint.bottom)
+            imageView.topAnchor.constraint(equalTo: cardView.topAnchor),
+            imageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor)
         ])
         
         // Style
         imageView.contentMode = .scaleAspectFit
-        imageView.layer.cornerRadius = 20
+        imageView.layer.cornerRadius = K.CardView.Style.cornerRadius
         imageView.clipsToBounds = true
     }
     
@@ -723,18 +720,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if let view = sender.view {
             switch sender.state {
             case .changed:
-                // The view can only be panned around when it's zoomed in
-                    // Get the touch position
-                    let translation = sender.translation(in: view)
-                    
-                    // Edit the center of the target by adding the gesture position
-                    let zoomRatio = view.frame.width / view.bounds.width
-                    view.center = CGPoint(
-                        x: view.center.x + translation.x * zoomRatio,
-                        y: view.center.y + translation.y * zoomRatio
-                    )
-                    sender.setTranslation(.zero, in: view)
-            
+                // Get the touch position
+                let translation = sender.translation(in: view)
+                
+                // Edit the center of the target by adding the gesture position
+                let zoomRatio = view.frame.width / view.bounds.width
+                view.center = CGPoint(
+                    x: view.center.x + translation.x * zoomRatio,
+                    y: view.center.y + translation.y * zoomRatio
+                )
+                sender.setTranslation(.zero, in: view)
+                
             default:
                 // Smoothly restore the transform to the original state
                 UIView.animate(withDuration: 0.4, delay: 0, options: .curveEaseInOut, animations: {
