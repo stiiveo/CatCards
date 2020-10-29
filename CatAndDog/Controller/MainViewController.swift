@@ -60,8 +60,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private lazy var cardPan: UIPanGestureRecognizer = {
         return UIPanGestureRecognizer(target: self, action: #selector(handleCardPan))
     }()
-    private lazy var cardPreviewZoom: UIPinchGestureRecognizer = {
-        return UIPinchGestureRecognizer(target: self, action: #selector(handleCardPreviewZoom))
+    private lazy var imageZoom: UIPinchGestureRecognizer = {
+        return UIPinchGestureRecognizer(target: self, action: #selector(handleImageZoom))
     }()
     
     override func viewDidLoad() {
@@ -81,6 +81,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
         addImageViewConstraint(imageView: imageView1, constrainTo: firstCard)
         addImageViewConstraint(imageView: imageView2, constrainTo: secondCard)
+        
+        imageView1.isUserInteractionEnabled = true
+        imageView2.isUserInteractionEnabled = true
         
         // Create local image folder in file system or load data from it
         databaseManager.createDirectory()
@@ -236,7 +239,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             if true {
                 // Add gesture recognizer to undo card
                 undoCard.addGestureRecognizer(self.cardPan)
-                undoCard.addGestureRecognizer(self.cardPreviewZoom)
+                undoImageView.addGestureRecognizer(self.imageZoom)
                 self.currentCard = .undo
                 
                 // Update favorite button image
@@ -347,7 +350,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     
                     // Add gesture recognizer to first card
                     self.firstCard.addGestureRecognizer(self.cardPan)
-                    self.firstCard.addGestureRecognizer(self.cardPreviewZoom)
+                    self.imageView1.addGestureRecognizer(self.imageZoom)
                 }
             }
         case 1:
@@ -541,7 +544,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 
                 // Remove dismissed card's gesture recognizer
                 card.removeGestureRecognizer(self.cardPan)
-                card.removeGestureRecognizer(self.cardPreviewZoom)
+                card.removeGestureRecognizer(self.imageZoom)
                 card.removeFromSuperview()
                 
                 switch self.currentCard {
@@ -557,12 +560,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     switch self.cardBelowUndoCard! {
                     case .firstCard:
                         self.firstCard.addGestureRecognizer(self.cardPan)
-                        self.firstCard.addGestureRecognizer(self.cardPreviewZoom)
+                        self.imageView1.addGestureRecognizer(self.imageZoom)
                         self.currentCard = .first
                         self.refreshButtonState()
                     case .secondCard:
                         self.secondCard.addGestureRecognizer(self.cardPan)
-                        self.secondCard.addGestureRecognizer(self.cardPreviewZoom)
+                        self.imageView2.addGestureRecognizer(self.imageZoom)
                         self.currentCard = .second
                         self.refreshButtonState()
                     }
@@ -587,7 +590,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             currentCard = .second
             // Attach gesture recognizer
             secondCard.addGestureRecognizer(self.cardPan)
-            secondCard.addGestureRecognizer(self.cardPreviewZoom)
+            imageView2.addGestureRecognizer(self.imageZoom)
             
             // Put the dismissed card behind the current card
             self.view.insertSubview(firstCard, belowSubview: secondCard)
@@ -602,7 +605,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         case .secondCard:
             currentCard = .first
             firstCard.addGestureRecognizer(self.cardPan)
-            firstCard.addGestureRecognizer(self.cardPreviewZoom)
+            imageView1.addGestureRecognizer(self.imageZoom)
             
             // Put the dismissed card behind the current card
             self.view.insertSubview(secondCard, belowSubview: firstCard)
@@ -689,7 +692,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Card Zooming Methods
     
-    @objc private func handleCardPreviewZoom(sender: UIPinchGestureRecognizer) {
+    @objc private func handleImageZoom(sender: UIPinchGestureRecognizer) {
         if let view = sender.view {
             switch sender.state {
             case .changed:
@@ -709,7 +712,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             default:
                 // If the gesture has cancelled/terminated/failed or everything else that's not performing
                 // Smoothly restore the transform to the "original"
-                UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut, animations: {
+                UIView.animate(withDuration: 0.3, delay: 0.1, options: .curveEaseInOut, animations: {
                     view.transform = .identity
                 })
             }
