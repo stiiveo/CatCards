@@ -233,15 +233,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         addImageViewConstraint(imageView: undoImageView, constrainTo: undoCard)
         undoImageView.isUserInteractionEnabled = true
         
+        // Load up image and set image view's content mode
+        if let data = dismissedCardData {
+            undoImageView.image = data.image
+            undoImageView.contentMode = dynamicScale(image: undoImageView.image!)
+        }
+        
         // Set position and rotation
         if let originalPosition = dismissedCardPosition, let originalTransform = dismissedCardTransform {
             undoCard.center = originalPosition
             undoCard.transform = originalTransform
-        }
-        
-        // Set up image view
-        if let data = dismissedCardData {
-            undoImageView.image = data.image
         }
         
         UIView.animate(withDuration: 0.5) {
@@ -296,7 +297,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Constraints Implementation
+    //MARK: - Constraints and Style Methods
     
     // Add constraints to cardView
     private func addCardViewConstraint(cardView: UIView) {
@@ -332,9 +333,15 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         ])
         
         // Style
-        imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = K.CardView.Style.cornerRadius
         imageView.clipsToBounds = true
+    }
+    
+    private func dynamicScale(image: UIImage) -> UIView.ContentMode {
+        let imageAspectRatio = image.size.width / image.size.height
+        let imageViewAspectRatio = self.imageView1.bounds.width / self.imageView1.bounds.height
+        // Fill the image view if image's aspect ratio is close to the one of the image view
+        return (abs(imageAspectRatio - imageViewAspectRatio) >= K.ImageView.dynamicScaleThreshold) ? .scaleAspectFit : .scaleAspectFill
     }
     
     //MARK: - Data Fetching & Updating
@@ -348,7 +355,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             networkManager.performRequest(imageDownloadNumber: K.Data.dataRequestNumber)
         }
     }
-
+    
     // Update UI when new data is downloaded succesfully
     internal func dataDidFetch() {
         let dataSet = networkManager.serializedData
@@ -362,6 +369,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 DispatchQueue.main.async {
                     self.indicator1.stopAnimating()
                     self.imageView1.image = firstData.image
+                    self.imageView1.contentMode = self.dynamicScale(image: self.imageView1.image!)
                     
                     // Refresh toolbar buttons' state
                     self.refreshButtonState()
@@ -377,6 +385,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 DispatchQueue.main.async {
                     self.indicator2.stopAnimating()
                     self.imageView2.image = secondData.image
+                    self.imageView2.contentMode = self.dynamicScale(image: self.imageView2.image!)
                 }
                 dataIndex += 1
                 secondCardData = secondData
@@ -648,7 +657,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     // Prepare the next cardView to be shown
     private func updateCardView() {
-        
         let dataSet = networkManager.serializedData
         var dataAllocation: Card = .firstCard
         dataAllocation = ((self.dataIndex + 1) % 2 == 1) ? .firstCard : .secondCard
@@ -660,6 +668,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 DispatchQueue.main.async {
                     self.indicator1.stopAnimating()
                     self.imageView1.image = newData.image
+                    self.imageView1.contentMode = self.dynamicScale(image: self.imageView1.image!)
                 }
                 dataIndex += 1
                 firstCardData = newData
@@ -667,6 +676,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 DispatchQueue.main.async {
                     self.indicator2.stopAnimating()
                     self.imageView2.image = newData.image
+                    self.imageView2.contentMode = self.dynamicScale(image: self.imageView2.image!)
                 }
                 dataIndex += 1
                 secondCardData = newData

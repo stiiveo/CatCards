@@ -65,7 +65,7 @@ class ImageScrollView: UIScrollView {
         let minScale = min(xScale, yScale)
         
         self.minimumZoomScale = minScale
-        self.maximumZoomScale = 2.0
+        self.maximumZoomScale = 1.5
     }
     
     func centerImage() {
@@ -110,7 +110,7 @@ class ImageScrollView: UIScrollView {
             // Scale image to precisely fill the entire scroll view
             toScale = max(scrollViewSize.width / imageViewSize.width, scrollViewSize.height / imageViewSize.height)
         } else {
-            toScale = self.minimumZoomScale + 1.0
+            toScale = self.minimumZoomScale + 0.5
         }
          
         let finalScale = (currentScale == minScale) ? toScale! : minScale // Scale image if it's not scaled by the user yet

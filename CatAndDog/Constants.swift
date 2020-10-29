@@ -46,6 +46,7 @@ struct K {
         }
     }
     struct ImageView {
+        static let dynamicScaleThreshold: CGFloat = 0.15
         struct Constraint {
             static let leading: CGFloat = 0.0
             static let trailing: CGFloat = -0.0
