@@ -212,9 +212,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         switch currentCard {
         case .first:
             self.firstCard.removeGestureRecognizer(self.panCard)
+            self.imageView1.removeGestureRecognizer(self.zoomImage)
+            self.imageView1.removeGestureRecognizer(self.panImage)
             cardBelowUndoCard = .firstCard
         case .second:
             self.secondCard.removeGestureRecognizer(self.panCard)
+            self.imageView2.removeGestureRecognizer(self.zoomImage)
+            self.imageView2.removeGestureRecognizer(self.panImage)
             cardBelowUndoCard = .secondCard
         case .undo:
             print("Error: Undo button should have not been enabled")
@@ -227,6 +231,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         undoCard.addSubview(undoImageView)
         addCardViewConstraint(cardView: undoCard)
         addImageViewConstraint(imageView: undoImageView, constrainTo: undoCard)
+        undoImageView.isUserInteractionEnabled = true
         
         // Set position and rotation
         if let originalPosition = dismissedCardPosition, let originalTransform = dismissedCardTransform {
@@ -732,7 +737,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             default:
                 // Smoothly restore the transform to the original state
-                UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseInOut, animations: {
+                UIView.animate(withDuration: 0.4, delay: 0, options: .curveEaseInOut, animations: {
                     view.center = self.imageViewAnchor
                 })
             }
@@ -759,7 +764,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             default:
                 // If the gesture has cancelled/terminated/failed or everything else that's not performing
                 // Smoothly restore the transform to the "original"
-                UIView.animate(withDuration: 0.3, delay: 0.1, options: .curveEaseInOut, animations: {
+                UIView.animate(withDuration: 0.4, delay: 0.0, options: .curveEaseInOut, animations: {
                     view.transform = .identity
                 })
             }
