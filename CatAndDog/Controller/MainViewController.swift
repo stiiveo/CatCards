@@ -746,21 +746,25 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     @objc private func handleImageZoom(sender: UIPinchGestureRecognizer) {
         if let view = sender.view {
+            let cardBounds = view.bounds
+            let cardFrame = view.frame
             switch sender.state {
             case .changed:
-                // Limit the minimum scale the card can be shrinked down
-                let cardBoundsWidth = view.bounds.size.width
-                let cardFrameWidth = view.frame.width
-                if cardFrameWidth >= cardBoundsWidth {
-                    // Coordinate of the pinch center where the view's center is (0, 0)
-                    let pinchCenter = CGPoint(x: sender.location(in: view).x - view.bounds.midX,
-                                              y: sender.location(in: view).y - view.bounds.midY)
-                    let transform = view.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
-                        .scaledBy(x: sender.scale, y: sender.scale)
-                        .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
+                // Coordinate of the pinch center where the view's center is (0, 0)
+                let pinchCenter = CGPoint(x: sender.location(in: view).x - view.bounds.midX,
+                                          y: sender.location(in: view).y - view.bounds.midY)
+                let transform = view.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
+                    .scaledBy(x: sender.scale, y: sender.scale)
+                    .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
+                
+                // Limit the minimum scale the card can be zoomed out
+                if cardFrame.width >= cardBounds.width {
                     view.transform = transform
-                    sender.scale = 1
+                } else {
+                    view.transform = CGAffineTransform.identity
                 }
+                
+                sender.scale = 1
             default:
                 // If the gesture has cancelled/terminated/failed or everything else that's not performing
                 // Smoothly restore the transform to the "original"
