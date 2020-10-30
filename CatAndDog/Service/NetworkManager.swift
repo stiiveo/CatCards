@@ -34,8 +34,7 @@ class NetworkManager {
                     return
                 } else {
                     if let safeData = data {
-                        let processedData = self.removeBrecketsInJSON(data: safeData)
-                        self.parseJSON(data: processedData)
+                        self.parseJSON(data: safeData)
                     }
                 }
             }
@@ -43,33 +42,18 @@ class NetworkManager {
         }
     }
     
-    private func removeBrecketsInJSON(data: Data) -> Data {
-        let dataToString = String(data: data, encoding: .utf8)! // convert Data to String
-        var stringToArray = Array(dataToString) // convert String to Array
-        
-        // remove the first and last element ('[' & ']') of the array
-        stringToArray.removeFirst()
-        stringToArray.removeLast()
-        
-        // convert Array to String
-        var arrayToString: String = ""
-        for character in stringToArray {
-            arrayToString.append(character)
-        }
-        let stringToData = arrayToString.data(using: .utf8)! // convert String to Data
-        return stringToData
-    }
-    
     private func parseJSON(data: Data) {
         let jsonDecoder = JSONDecoder()
         do {
-            let decodedData = try jsonDecoder.decode(JSONModel.self, from: data)
-            guard let imageURL = URL(string: decodedData.url) else {
+            // The raw string data of returned JSON is enclosed within a pair of square brackets
+            let decodedData = try jsonDecoder.decode([JSONModel].self, from: data) // Decoded data type: [JSONModel]
+            let jsonData = decodedData[0] // [JSONModel] -> JSONModel
+            guard let imageURL = URL(string: jsonData.url) else {
                 print("Error creating URL object from fetched url.")
                 return
             }
             let newImage = imageFromURL(url: imageURL)
-            let newID = decodedData.id
+            let newID = jsonData.id
             
             // Construct new CatData object and append to catDataArray
             let newData = CatData(imageURL: imageURL, id: newID, image: newImage)
