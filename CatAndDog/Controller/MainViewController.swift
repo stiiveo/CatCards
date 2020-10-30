@@ -471,10 +471,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             let releasePoint = CGPoint(x: card.frame.midX, y: card.frame.midY)
             
             if card.center.x < halfViewWidth / 2 && currentData != nil { // card was at the left side of the screen
+                resetCardTransform()
                 dismissedCardData = currentData!
                 dismissCard(card, to: .left, from: releasePoint)
             }
             else if card.center.x > halfViewWidth * 3/2 && currentData != nil { // card was at the right side of the screen
+                resetCardTransform()
                 dismissedCardData = currentData!
                 dismissCard(card, to: .right, from: releasePoint)
             }
@@ -511,6 +513,25 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                             )
                         }
                     }
+                }
+            }
+        }
+    }
+    
+    private func resetCardTransform() {
+        UIView.animate(withDuration: 0.1) {
+            switch self.currentCard {
+            case .first:
+                self.secondCard.transform = .identity
+            case .second:
+                self.firstCard.transform = .identity
+            case .undo:
+                guard self.cardBelowUndoCard != nil else { return }
+                switch self.cardBelowUndoCard! {
+                case .firstCard:
+                    self.firstCard.transform = .identity
+                case .secondCard:
+                    self.secondCard.transform = .identity
                 }
             }
         }
