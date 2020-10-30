@@ -23,9 +23,7 @@ struct K {
         static let share = UIImage(systemName: "square.and.arrow.up")
     }
     struct Data {
-        static let initialDataRequestNumber: Int = 6
-        static let dataRequestNumber: Int = 1
-        static let maxDataNumberStored: Int = 7
+        static let maxOfCachedData: Int = 10
     }
     struct ToolBar {
         static let height: CGFloat = 44.0

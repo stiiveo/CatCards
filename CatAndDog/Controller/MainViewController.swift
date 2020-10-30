@@ -95,6 +95,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
         addImageViewConstraint(imageView: imageView1, constrainTo: firstCard)
         addImageViewConstraint(imageView: imageView2, constrainTo: secondCard)
+        addIndicator(to: firstCard)
         
         imageView1.isUserInteractionEnabled = true
         imageView2.isUserInteractionEnabled = true
@@ -347,12 +348,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     //MARK: - Data Fetching & Updating
     
     private func fetchNewData(initialRequest: Bool) {
-        // first time requesting image data
-        if initialRequest {
-            networkManager.performRequest(imageDownloadNumber: K.Data.initialDataRequestNumber)
-            addIndicator(to: firstCard)
-        } else {
-            networkManager.performRequest(imageDownloadNumber: K.Data.dataRequestNumber)
+        switch initialRequest {
+        case true:
+            networkManager.performRequest(numberOfRequests: K.Data.maxOfCachedData)
+        case false:
+            networkManager.performRequest(numberOfRequests: 1)
         }
     }
     

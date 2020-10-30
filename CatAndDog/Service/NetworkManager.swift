@@ -15,13 +15,13 @@ protocol NetworkManagerDelegate {
 
 class NetworkManager {
     
-    let catUrl = "https://api.thecatapi.com/v1/images/search"
-    var delegate: NetworkManagerDelegate?
-    var serializedData: [Int: CatData] = [:]
-    var dataIndex: Int = 0
+    private let catUrl = "https://api.thecatapi.com/v1/images/search"
+    internal var delegate: NetworkManagerDelegate?
+    internal var serializedData: [Int: CatData] = [:]
+    private var dataIndex: Int = 0
     
-    func performRequest(imageDownloadNumber: Int) {
-        for _ in 0..<imageDownloadNumber {
+    internal func performRequest(numberOfRequests: Int) {
+        for _ in 0..<numberOfRequests {
             let session = URLSession(configuration: .default)
             guard let url = URL(string: catUrl) else {
                 print("Error creating URL object from API's HTTP address")
@@ -61,11 +61,10 @@ class NetworkManager {
             serializedData[dataIndex] = newData
             
             // Remove the first saved data in the array if numbers of data exceed threshold
-            if serializedData.count > K.Data.maxDataNumberStored {
-                serializedData[dataIndex - K.Data.maxDataNumberStored] = nil
+            if serializedData.count > K.Data.maxOfCachedData {
+                serializedData[dataIndex - K.Data.maxOfCachedData] = nil
             }
-            // Execute code at MainViewController
-            delegate?.dataDidFetch()
+            delegate?.dataDidFetch() // Execute code at MainViewController
         } catch {
             debugPrint(error.localizedDescription)
         }
