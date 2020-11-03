@@ -140,7 +140,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         var isDataLoaded: Bool { return currentData != nil }
         favoriteBtn.isEnabled = isDataLoaded ? true : false
         shareBtn.isEnabled = isDataLoaded ? true : false
-        if favoriteBtn.isEnabled == true {
+        if isDataLoaded {
             if let data = currentData {
                 let isDataSaved = databaseManager.isDataSaved(data: data)
                 favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
@@ -157,9 +157,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Disable current card's gesture recognizer and save its UIView
         switch currentCard {
         case .first:
-            self.firstCard.removeGestureRecognizer(self.panCard)
-            self.firstCard.imageView.removeGestureRecognizer(self.zoomImage)
-            self.firstCard.imageView.removeGestureRecognizer(self.panImage)
+            removeGestureRecognizers(from: firstCard)
             cardBelowUndoCard = .firstCard
         case .second:
             self.secondCard.removeGestureRecognizer(self.panCard)
@@ -192,9 +190,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         } completion: { (true) in
             if true {
                 // Add gesture recognizer to undo card
-                self.undoCard.addGestureRecognizer(self.panCard)
-                self.undoCard.imageView.addGestureRecognizer(self.zoomImage)
-                self.undoCard.imageView.addGestureRecognizer(self.panImage)
+                self.attachGestureRecognizers(to: self.undoCard)
                 self.currentCard = .undo
                 
                 // Update favorite button image
@@ -282,9 +278,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.refreshButtonState()
                     
                     // Add gesture recognizer to first card
-                    self.firstCard.addGestureRecognizer(self.panCard)
-                    self.firstCard.imageView.addGestureRecognizer(self.zoomImage)
-                    self.firstCard.imageView.addGestureRecognizer(self.panImage)
+                    self.attachGestureRecognizers(to: self.firstCard)
                 }
             }
         case 1:
@@ -497,23 +491,19 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 switch self.currentCard {
                 case .first:
                     card.transform = CGAffineTransform.identity
-                    self.rotateCard(card: .firstCard)
+                    self.rotateCard(self.firstCard)
                 case .second:
                     card.transform = CGAffineTransform.identity
-                    self.rotateCard(card: .secondCard)
+                    self.rotateCard(self.secondCard)
                 case .undo:
                     // Enable the card's GR after it was dismissed
                     switch self.cardBelowUndoCard {
                     case .firstCard:
-                        self.firstCard.addGestureRecognizer(self.panCard)
-                        self.firstCard.imageView.addGestureRecognizer(self.zoomImage)
-                        self.firstCard.imageView.addGestureRecognizer(self.panImage)
+                        self.attachGestureRecognizers(to: self.firstCard)
                         self.currentCard = .first
                         self.refreshButtonState()
                     case .secondCard:
-                        self.secondCard.addGestureRecognizer(self.panCard)
-                        self.secondCard.imageView.addGestureRecognizer(self.zoomImage)
-                        self.secondCard.imageView.addGestureRecognizer(self.panImage)
+                        self.attachGestureRecognizers(to: self.secondCard)
                         self.currentCard = .second
                         self.refreshButtonState()
                     }
@@ -524,52 +514,24 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func rotateCard(card: Card) {
-        /*
-         1. Update favorite button's status
-         2. Place the dismissed card beneath the current cardView
-         3. Set up dismissed card's position and constraint
-         4. Update imageView's image
-         5. Fetch new data
-         6. Enable gesture recognizer
-        */
-        switch card {
-        case .firstCard:
-            firstCard.data = nil
-            currentCard = .second
-            // Attach gesture recognizer
-            secondCard.addGestureRecognizer(self.panCard)
-            secondCard.imageView.addGestureRecognizer(self.zoomImage)
-            secondCard.imageView.addGestureRecognizer(self.panImage)
-            
-            // Put the dismissed card behind the current card
-            self.view.insertSubview(firstCard, belowSubview: secondCard)
-            firstCard.center = cardViewAnchor
-            addCardViewConstraint(card: firstCard)
-            
-            // Shrink the size of the newly added card view
-            firstCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-            
-            updateCardView()
-            fetchNewData(initialRequest: false)
-        case .secondCard:
-            secondCard.data = nil
-            currentCard = .first
-            firstCard.addGestureRecognizer(self.panCard)
-            firstCard.imageView.addGestureRecognizer(self.zoomImage)
-            firstCard.imageView.addGestureRecognizer(self.panImage)
-            
-            // Put the dismissed card behind the current card
-            self.view.insertSubview(secondCard, belowSubview: firstCard)
-            secondCard.center = cardViewAnchor
-            addCardViewConstraint(card: secondCard)
-            
-            // Shrink the size of the newly added card view
-            secondCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-            
-            updateCardView()
-            fetchNewData(initialRequest: false)
-        }
+    private func rotateCard(_ dismissedCard: CardView) {
+        let cardToShow = (dismissedCard == firstCard) ? secondCard : firstCard
+        currentCard = (cardToShow == firstCard) ? .first : .second
+        
+        dismissedCard.data = nil
+        // Attach gesture recognizer
+        attachGestureRecognizers(to: cardToShow)
+        
+        // Put the dismissed card behind the current card
+        self.view.insertSubview(dismissedCard, belowSubview: cardToShow)
+        dismissedCard.center = cardViewAnchor
+        addCardViewConstraint(card: dismissedCard)
+        
+        // Shrink the size of the newly added card view
+        dismissedCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+        
+        updateCardView()
+        fetchNewData(initialRequest: false)
     }
     
     //MARK: - Update Image of imageView
@@ -577,11 +539,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     // Prepare the next cardView to be shown
     private func updateCardView() {
         let dataSet = networkManager.serializedData
-        var dataAllocation: Card = .firstCard
-        dataAllocation = ((self.dataIndex + 1) % 2 == 1) ? .firstCard : .secondCard
+        let dataAllocation: Card = ((self.dataIndex + 1) % 2 == 1) ? .firstCard : .secondCard
         
-        // New data is available to be loaded
-        if let newData = dataSet[dataIndex + 1] {
+        if let newData = dataSet[dataIndex + 1] { // New data is available
             switch dataAllocation {
             case .firstCard: // Data is for first card
                 firstCard.data = newData
@@ -651,6 +611,18 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 })
             }
         }
+    }
+    
+    private func attachGestureRecognizers(to card: CardView) {
+        card.addGestureRecognizer(panCard)
+        card.imageView.addGestureRecognizer(zoomImage)
+        card.imageView.addGestureRecognizer(panImage)
+    }
+    
+    private func removeGestureRecognizers(from card: CardView) {
+        card.removeGestureRecognizer(panCard)
+        card.imageView.removeGestureRecognizer(zoomImage)
+        card.imageView.removeGestureRecognizer(panImage)
     }
     
     //MARK: - Error Handling Section
