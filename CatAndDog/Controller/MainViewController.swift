@@ -50,9 +50,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             return undoCard.data
         }
     }
-    private var cardBelowUndoCard: Card = .firstCard
-    private var dismissedCardPosition = CGPoint()
-    private var dismissedCardTransform = CGAffineTransform()
+    private var nextCard: Card = .firstCard
     
     private lazy var panCard: UIPanGestureRecognizer = {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handleCardPan))
@@ -154,16 +152,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
         undoBtn.isEnabled = false
         
-        // Disable current card's gesture recognizer and save its UIView
+        // Disable current card's gesture recognizer and save its reference
         switch currentCard {
         case .first:
             removeGestureRecognizers(from: firstCard)
-            cardBelowUndoCard = .firstCard
+            nextCard = .firstCard
         case .second:
-            self.secondCard.removeGestureRecognizer(self.panCard)
-            self.secondCard.imageView.removeGestureRecognizer(self.zoomImage)
-            self.secondCard.imageView.removeGestureRecognizer(self.panImage)
-            cardBelowUndoCard = .secondCard
+            self.removeGestureRecognizers(from: secondCard)
+            nextCard = .secondCard
         case .undo:
             print("Error: Undo button should have not been enabled")
         }
@@ -171,10 +167,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Insert undo card to main view
         view.addSubview(undoCard)
         addCardViewConstraint(card: undoCard)
-        
-        // Set position and rotation
-        undoCard.center = dismissedCardPosition
-        undoCard.transform = dismissedCardTransform
         
         UIView.animate(withDuration: 0.5) {
             self.undoCard.center = self.cardViewAnchor
@@ -298,7 +290,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     /// Handling the cardView's panning effect which is responded to user's input via finger dragging on the cardView itself.
     /// - Parameter sender: A concrete subclass of UIGestureRecognizer that looks for panning (dragging) gestures.
     @objc private func handleCardPan(_ sender: UIPanGestureRecognizer) {
-        guard let card = sender.view else { return }
+        guard let card = sender.view as? CardView else { return }
         
         let halfViewWidth = view.frame.width / 2
         
@@ -342,7 +334,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 y: transform + (xOffset * (1 - transform))
             )
         case .undo:
-            switch cardBelowUndoCard {
+            switch nextCard {
             case .firstCard:
                 firstCard.transform = CGAffineTransform(
                     scaleX: transform + (xOffset * (1 - transform)),
@@ -393,7 +385,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                             y: K.CardView.Size.transform
                         )
                     case .undo:
-                        switch self.cardBelowUndoCard {
+                        switch self.nextCard {
                         case .firstCard:
                             self.firstCard.transform = CGAffineTransform(
                                 scaleX: K.CardView.Size.transform,
@@ -419,7 +411,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             case .second:
                 self.firstCard.transform = .identity
             case .undo:
-                switch self.cardBelowUndoCard {
+                switch self.nextCard {
                 case .firstCard:
                     self.firstCard.transform = .identity
                 case .secondCard:
@@ -429,7 +421,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func animateCard(_ card: UIView, to side: Side, from releasePoint: CGPoint) {
+    private func animateCard(_ card: CardView, to side: Side, from releasePoint: CGPoint) {
         enum Zone {
             case upper
             case middle
@@ -479,13 +471,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
         } completion: { (true) in
             if true {
-                self.dismissedCardPosition = card.center
-                self.dismissedCardTransform = card.transform
+                self.undoCard.center = card.center
+                self.undoCard.transform = card.transform
                 
-                // Remove dismissed card's gesture recognizer
-                card.removeGestureRecognizer(self.panCard)
-                card.removeGestureRecognizer(self.zoomImage)
-                card.removeGestureRecognizer(self.panImage)
+                self.removeGestureRecognizers(from: card)
                 card.removeFromSuperview()
                 
                 switch self.currentCard {
@@ -497,17 +486,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.rotateCard(self.secondCard)
                 case .undo:
                     // Enable the card's GR after it was dismissed
-                    switch self.cardBelowUndoCard {
+                    switch self.nextCard {
                     case .firstCard:
                         self.attachGestureRecognizers(to: self.firstCard)
                         self.currentCard = .first
-                        self.refreshButtonState()
                     case .secondCard:
                         self.attachGestureRecognizers(to: self.secondCard)
                         self.currentCard = .second
-                        self.refreshButtonState()
                     }
                 }
+                self.refreshButtonState()
                 // Re-enable undo button
                 self.undoBtn.isEnabled = true
             }
