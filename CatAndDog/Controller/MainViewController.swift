@@ -50,7 +50,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             return undoCard.data
         }
     }
-    private var nextCard: Card = .firstCard
+    private var nextCard: Card = .secondCard
     
     private lazy var panCard: UIPanGestureRecognizer = {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handleCardPan))
@@ -79,7 +79,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         networkManager.delegate = self
         toolBar.heightAnchor.constraint(equalToConstant: K.ToolBar.height).isActive = true // define toolBar's height
         fetchNewData(initialRequest: true) // initiate data downloading
-
+        
         // Add cardView, ImageView and implement neccesary constraints
         view.addSubview(firstCard)
         view.insertSubview(secondCard, belowSubview: firstCard)
@@ -152,7 +152,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
         undoBtn.isEnabled = false
         
-        // Disable current card's gesture recognizer and save its reference
+        // Remove current card's gesture recognizer and save its reference
         switch currentCard {
         case .first:
             removeGestureRecognizers(from: firstCard)
@@ -189,7 +189,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 self.refreshButtonState()
             }
         }
-
+        
     }
     
     //MARK: - Favorite Action
@@ -285,123 +285,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Card Animation & Rotation Section
-    
-    /// Handling the cardView's panning effect which is responded to user's input via finger dragging on the cardView itself.
-    /// - Parameter sender: A concrete subclass of UIGestureRecognizer that looks for panning (dragging) gestures.
-    @objc private func handleCardPan(_ sender: UIPanGestureRecognizer) {
-        guard let card = sender.view as? CardView else { return }
-        
-        let halfViewWidth = view.frame.width / 2
-        
-        // Point of the finger in the view's coordinate system
-        let fingerMovement = sender.translation(in: view)
-        
-        // Amount of x-axis offset the card moved from its original position
-        let xAxisOffset = card.center.x - cardViewAnchor.x
-        
-        // 1.0 Radian = 180º
-        let rotationAtMax: CGFloat = 1.0
-        let cardRotationRadian = (rotationAtMax / 3) * (xAxisOffset / halfViewWidth)
-        
-        // Card move to where the user's finger is
-        card.center = CGPoint(x: cardViewAnchor.x + fingerMovement.x, y: cardViewAnchor.y + fingerMovement.y)
-        
-        // Card's rotation increase when it approaches the side edge of the screen
-        card.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
-        
-        // Revert the card view behind to its original size as the current view is moved away from its original position
-        var xOffset: CGFloat {
-            if abs(xAxisOffset) <= halfViewWidth {
-                return abs(xAxisOffset) / halfViewWidth
-            } else {
-                return 1
-            }
-        }
-        
-        // Change the size of the card behind
-        let transform = K.CardView.Size.transform
-        
-        switch currentCard {
-        case .first:
-            secondCard.transform = CGAffineTransform(
-                scaleX: transform + (xOffset * (1 - transform)),
-                y: transform + (xOffset * (1 - transform))
-            )
-        case .second:
-            firstCard.transform = CGAffineTransform(
-                scaleX: transform + (xOffset * (1 - transform)),
-                y: transform + (xOffset * (1 - transform))
-            )
-        case .undo:
-            switch nextCard {
-            case .firstCard:
-                firstCard.transform = CGAffineTransform(
-                    scaleX: transform + (xOffset * (1 - transform)),
-                    y: transform + (xOffset * (1 - transform))
-                )
-            case .secondCard:
-                secondCard.transform = CGAffineTransform(
-                    scaleX: transform + (xOffset * (1 - transform)),
-                    y: transform + (xOffset * (1 - transform))
-                )
-            }
-        }
-        
-        // When user's finger left the screen
-        if sender.state == .ended {
-            /*
-             Card can only be dismissed when it's dragged to the side of the screen
-             and the current image view's image is available
-             */
-            let releasePoint = CGPoint(x: card.frame.midX, y: card.frame.midY)
-            
-            if card.center.x < halfViewWidth / 2 && currentData != nil { // card was at the left side of the screen
-                resetCardTransform()
-                undoCard.data = currentData!
-                animateCard(card, to: .left, from: releasePoint)
-            }
-            else if card.center.x > halfViewWidth * 3/2 && currentData != nil { // card was at the right side of the screen
-                resetCardTransform()
-                undoCard.data = currentData!
-                animateCard(card, to: .right, from: releasePoint)
-            }
-            // Reset card's position and rotation state
-            else {
-                UIView.animate(withDuration: 0.2) {
-                    card.center = self.cardViewAnchor
-                    card.transform = CGAffineTransform.identity
-                    
-                    // Revert the size of the card view behind
-                    switch self.currentCard {
-                    case .first:
-                        self.secondCard.transform = CGAffineTransform(
-                            scaleX: K.CardView.Size.transform,
-                            y: K.CardView.Size.transform
-                        )
-                    case .second:
-                        self.firstCard.transform = CGAffineTransform(
-                            scaleX: K.CardView.Size.transform,
-                            y: K.CardView.Size.transform
-                        )
-                    case .undo:
-                        switch self.nextCard {
-                        case .firstCard:
-                            self.firstCard.transform = CGAffineTransform(
-                                scaleX: K.CardView.Size.transform,
-                                y: K.CardView.Size.transform
-                            )
-                        case .secondCard:
-                            self.secondCard.transform = CGAffineTransform(
-                                scaleX: K.CardView.Size.transform,
-                                y: K.CardView.Size.transform
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //MARK: - Cards Rotation Section
     
     private func resetCardTransform() {
         UIView.animate(withDuration: 0.1) {
@@ -485,14 +369,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     card.transform = CGAffineTransform.identity
                     self.rotateCard(self.secondCard)
                 case .undo:
-                    // Enable the card's GR after it was dismissed
+                    // Enable the next card's gesture recognizers
                     switch self.nextCard {
                     case .firstCard:
                         self.attachGestureRecognizers(to: self.firstCard)
                         self.currentCard = .first
+                        self.nextCard = .secondCard
                     case .secondCard:
                         self.attachGestureRecognizers(to: self.secondCard)
                         self.currentCard = .second
+                        self.nextCard = .firstCard
                     }
                 }
                 self.refreshButtonState()
@@ -503,6 +389,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     private func rotateCard(_ dismissedCard: CardView) {
+        nextCard = (dismissedCard == firstCard) ? .firstCard : .secondCard
         let cardToShow = (dismissedCard == firstCard) ? secondCard : firstCard
         currentCard = (cardToShow == firstCard) ? .first : .second
         
@@ -544,7 +431,122 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Card Zooming and Panning Methods
+    //MARK: - Card Panning Methods
+    
+    /// Handling the cardView's panning effect which is responded to user's input via finger dragging on the cardView itself.
+    /// - Parameter sender: A concrete subclass of UIGestureRecognizer that looks for panning (dragging) gestures.
+    @objc private func handleCardPan(_ sender: UIPanGestureRecognizer) {
+        guard let card = sender.view as? CardView else { return }
+        
+        let halfViewWidth = view.frame.width / 2
+        
+        // Point of the finger in the view's coordinate system
+        let fingerMovement = sender.translation(in: view)
+        
+        // Amount of x-axis offset the card moved from its original position
+        let xAxisOffset = card.center.x - cardViewAnchor.x
+        
+        // 1.0 Radian = 180º
+        let rotationAtMax: CGFloat = 1.0
+        let cardRotationRadian = (rotationAtMax / 3) * (xAxisOffset / halfViewWidth)
+        
+        switch sender.state {
+        case .changed:
+            // Disable image's gesture recognizers
+            for gestureRecognizer in card.imageView.gestureRecognizers! {
+                gestureRecognizer.isEnabled = false
+            }
+            
+            // Card move to where the user's finger is
+            card.center = CGPoint(x: cardViewAnchor.x + fingerMovement.x, y: cardViewAnchor.y + fingerMovement.y)
+            
+            // Card's rotation increase when it approaches the side edge of the screen
+            card.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
+            
+            // Revert the card view behind to its original size as the current view is moved away from its original position
+            var xOffset: CGFloat {
+                if abs(xAxisOffset) <= halfViewWidth {
+                    return abs(xAxisOffset) / halfViewWidth
+                } else {
+                    return 1
+                }
+            }
+            
+            // Change the size of the card behind
+            let transform = K.CardView.Size.transform
+            var cardToTransform = CardView()
+            switch nextCard {
+            case .firstCard:
+                cardToTransform = firstCard
+            case .secondCard:
+                cardToTransform = secondCard
+            }
+            
+            cardToTransform.transform = CGAffineTransform(
+                scaleX: transform + (xOffset * (1 - transform)),
+                y: transform + (xOffset * (1 - transform))
+            )
+            
+        // When user's finger left the screen
+        default:
+            // Re-enable image's gesture recognizers
+            for gestureRecognizer in card.imageView.gestureRecognizers! {
+                gestureRecognizer.isEnabled = true
+            }
+            
+            /*
+             Card is dismissed when it's dragged to either side of the screen
+             AND the current image view's data is not invalid
+             */
+            let releasePoint = CGPoint(x: card.frame.midX, y: card.frame.midY)
+            if card.center.x < halfViewWidth / 2 && currentData != nil { // card was at the left side of the screen
+                resetCardTransform()
+                undoCard.data = currentData!
+                animateCard(card, to: .left, from: releasePoint)
+            }
+            else if card.center.x > halfViewWidth * 3/2 && currentData != nil { // card was at the right side of the screen
+                resetCardTransform()
+                undoCard.data = currentData!
+                animateCard(card, to: .right, from: releasePoint)
+            }
+            // Reset card's position and rotation state
+            else {
+                UIView.animate(withDuration: 0.2) {
+                    card.center = self.cardViewAnchor
+                    card.transform = CGAffineTransform.identity
+                    
+                    // Revert the size of the card view behind
+                    switch self.currentCard {
+                    case .first:
+                        self.secondCard.transform = CGAffineTransform(
+                            scaleX: K.CardView.Size.transform,
+                            y: K.CardView.Size.transform
+                        )
+                    case .second:
+                        self.firstCard.transform = CGAffineTransform(
+                            scaleX: K.CardView.Size.transform,
+                            y: K.CardView.Size.transform
+                        )
+                    case .undo:
+                        switch self.nextCard {
+                        case .firstCard:
+                            self.firstCard.transform = CGAffineTransform(
+                                scaleX: K.CardView.Size.transform,
+                                y: K.CardView.Size.transform
+                            )
+                        case .secondCard:
+                            self.secondCard.transform = CGAffineTransform(
+                                scaleX: K.CardView.Size.transform,
+                                y: K.CardView.Size.transform
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    //MARK: - Image Zooming and Panning Methods
     
     @objc private func handleImagePan(sender: UIPanGestureRecognizer) {
         if let view = sender.view {
