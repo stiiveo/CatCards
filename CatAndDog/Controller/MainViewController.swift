@@ -33,31 +33,27 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     private var networkManager = NetworkManager()
     private let databaseManager = DatabaseManager()
-    private let firstCard = UIView()
-    private let secondCard = UIView()
-    private let imageView1 = UIImageView()
-    private let imageView2 = UIImageView()
+    private let firstCard = CardView()
+    private let secondCard = CardView()
+    private let undoCard = CardView()
     private var cardViewAnchor = CGPoint()
     private var imageViewAnchor = CGPoint()
     private var dataIndex: Int = 0
-    private var isLoading: Bool = true
-    private var firstCardData: CatData?
-    private var secondCardData: CatData?
     private var currentCard: CurrentView = .first
     private var currentData: CatData? {
         switch currentCard {
         case .first:
-            return firstCardData
+            return firstCard.data
         case .second:
-            return secondCardData
+            return secondCard.data
         case .undo:
-            return dismissedCardData
+            return undoCard.data
         }
     }
-    private var cardBelowUndoCard: Card?
-    private var dismissedCardData: CatData?
-    private var dismissedCardPosition: CGPoint?
-    private var dismissedCardTransform: CGAffineTransform?
+    private var cardBelowUndoCard: Card = .firstCard
+    private var dismissedCardPosition = CGPoint()
+    private var dismissedCardTransform = CGAffineTransform()
+    
     private lazy var panCard: UIPanGestureRecognizer = {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handleCardPan))
         pan.delegate = self
@@ -65,11 +61,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         pan.maximumNumberOfTouches = 1
         return pan
     }()
+    
     private lazy var zoomImage: UIPinchGestureRecognizer = {
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(handleImageZoom))
         pinch.delegate = self
         return pinch
     }()
+    
     private lazy var panImage: UIPanGestureRecognizer = {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handleImagePan))
         pan.delegate = self
@@ -87,18 +85,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Add cardView, ImageView and implement neccesary constraints
         view.addSubview(firstCard)
         view.insertSubview(secondCard, belowSubview: firstCard)
-        firstCard.addSubview(imageView1)
-        secondCard.addSubview(imageView2)
         
-        addCardViewConstraint(cardView: firstCard)
-        addCardViewConstraint(cardView: secondCard)
+        addCardViewConstraint(card: firstCard)
+        addCardViewConstraint(card: secondCard)
         secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
-        addImageViewConstraint(imageView: imageView1, constrainTo: firstCard)
-        addImageViewConstraint(imageView: imageView2, constrainTo: secondCard)
-        addIndicator(to: firstCard)
-        
-        imageView1.isUserInteractionEnabled = true
-        imageView2.isUserInteractionEnabled = true
         
         // Create local image folder in file system or load data from it
         databaseManager.createDirectory()
@@ -135,60 +125,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         super.viewDidAppear(animated)
         // Save the center position of the created card view
         cardViewAnchor = firstCard.center
-        imageViewAnchor = imageView1.center
+        imageViewAnchor = firstCard.imageView.center
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         // Un-hidden nav bar's hairline
         self.navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
-    }
-    
-    //MARK: - Activity Indicator
-    
-    let indicator1 = UIActivityIndicatorView()
-    let indicator2 = UIActivityIndicatorView()
-    
-    // indicator is placed right at the center of the cardView
-    private func addIndicatorConstraint(indicator: UIActivityIndicatorView, constraintTo imageView: UIImageView) {
-        let imageViewMargins = imageView.layoutMarginsGuide
-        indicator.centerXAnchor.constraint(equalTo: imageViewMargins.centerXAnchor).isActive = true
-        indicator.centerYAnchor.constraint(equalTo: imageViewMargins.centerYAnchor).isActive = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        // style
-        indicator.style = .large
-        indicator.hidesWhenStopped = true
-    }
-    
-    private func addIndicator(to cardView: UIView) {
-        switch cardView {
-        case firstCard:
-            imageView1.addSubview(indicator1)
-            addIndicatorConstraint(indicator: indicator1, constraintTo: imageView1)
-            indicator1.startAnimating()
-        case secondCard:
-            imageView2.addSubview(indicator2)
-            addIndicatorConstraint(indicator: indicator2, constraintTo: imageView2)
-            indicator2.startAnimating()
-        default:
-            return
-        }
-        
-    }
-    
-    private func showIndicator(to card: Card) {
-        switch card {
-        case .firstCard:
-            DispatchQueue.main.async {
-                self.imageView1.image = nil
-                self.addIndicator(to: self.firstCard)
-            }
-        case .secondCard:
-            DispatchQueue.main.async {
-                self.imageView2.image = nil
-                self.addIndicator(to: self.secondCard)
-            }
-        }
     }
     
     //MARK: - Toolbar Button Method and State Control
@@ -206,6 +149,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
     }
     
+    //MARK: - Undo Action
+    
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
         undoBtn.isEnabled = false
         
@@ -213,42 +158,29 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         switch currentCard {
         case .first:
             self.firstCard.removeGestureRecognizer(self.panCard)
-            self.imageView1.removeGestureRecognizer(self.zoomImage)
-            self.imageView1.removeGestureRecognizer(self.panImage)
+            self.firstCard.imageView.removeGestureRecognizer(self.zoomImage)
+            self.firstCard.imageView.removeGestureRecognizer(self.panImage)
             cardBelowUndoCard = .firstCard
         case .second:
             self.secondCard.removeGestureRecognizer(self.panCard)
-            self.imageView2.removeGestureRecognizer(self.zoomImage)
-            self.imageView2.removeGestureRecognizer(self.panImage)
+            self.secondCard.imageView.removeGestureRecognizer(self.zoomImage)
+            self.secondCard.imageView.removeGestureRecognizer(self.panImage)
             cardBelowUndoCard = .secondCard
         case .undo:
             print("Error: Undo button should have not been enabled")
         }
         
-        // Create new card
-        let undoCard = UIView()
-        let undoImageView = UIImageView()
+        // Insert undo card to main view
         view.addSubview(undoCard)
-        undoCard.addSubview(undoImageView)
-        addCardViewConstraint(cardView: undoCard)
-        addImageViewConstraint(imageView: undoImageView, constrainTo: undoCard)
-        undoImageView.isUserInteractionEnabled = true
-        
-        // Load up image and set image view's content mode
-        if let data = dismissedCardData {
-            undoImageView.image = data.image
-            undoImageView.contentMode = dynamicScale(image: undoImageView.image!)
-        }
+        addCardViewConstraint(card: undoCard)
         
         // Set position and rotation
-        if let originalPosition = dismissedCardPosition, let originalTransform = dismissedCardTransform {
-            undoCard.center = originalPosition
-            undoCard.transform = originalTransform
-        }
+        undoCard.center = dismissedCardPosition
+        undoCard.transform = dismissedCardTransform
         
         UIView.animate(withDuration: 0.5) {
-            undoCard.center = self.cardViewAnchor
-            undoCard.transform = .identity
+            self.undoCard.center = self.cardViewAnchor
+            self.undoCard.transform = .identity
             switch self.currentCard {
             case .first:
                 self.firstCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
@@ -260,9 +192,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         } completion: { (true) in
             if true {
                 // Add gesture recognizer to undo card
-                undoCard.addGestureRecognizer(self.panCard)
-                undoImageView.addGestureRecognizer(self.zoomImage)
-                undoImageView.addGestureRecognizer(self.panImage)
+                self.undoCard.addGestureRecognizer(self.panCard)
+                self.undoCard.imageView.addGestureRecognizer(self.zoomImage)
+                self.undoCard.imageView.addGestureRecognizer(self.panImage)
                 self.currentCard = .undo
                 
                 // Update favorite button image
@@ -301,48 +233,26 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     //MARK: - Constraints and Style Methods
     
     // Add constraints to cardView
-    private func addCardViewConstraint(cardView: UIView) {
-        cardView.translatesAutoresizingMaskIntoConstraints = false
+    private func addCardViewConstraint(card: UIView) {
+        card.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            cardView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: K.CardView.Constraint.leading),
-            cardView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: K.CardView.Constraint.trailing),
-            cardView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: K.CardView.Constraint.top),
-            cardView.bottomAnchor.constraint(equalTo: self.toolBar.topAnchor, constant: K.CardView.Constraint.bottom)
+            card.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: K.CardView.Constraint.leading),
+            card.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: K.CardView.Constraint.trailing),
+            card.topAnchor.constraint(equalTo: self.view.topAnchor, constant: K.CardView.Constraint.top),
+            card.bottomAnchor.constraint(equalTo: self.toolBar.topAnchor, constant: K.CardView.Constraint.bottom)
         ])
         
         // Style
-        cardView.backgroundColor = K.CardView.Style.backgroundColor
-        cardView.layer.cornerRadius = K.CardView.Style.cornerRadius
+        card.backgroundColor = K.CardView.Style.backgroundColor
+        card.layer.cornerRadius = K.CardView.Style.cornerRadius
         
         // Shadow
-        cardView.layer.shadowColor = UIColor.black.cgColor
-        cardView.layer.shadowOpacity = 0.2
-        cardView.layer.shadowOffset = .zero
-        cardView.layer.shadowRadius = 5
-        cardView.layer.shouldRasterize = true
-        cardView.layer.rasterizationScale = UIScreen.main.scale
-    }
-    
-    // Add constraints to imageView
-    private func addImageViewConstraint(imageView: UIImageView, constrainTo cardView: UIView) {
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: cardView.topAnchor),
-            imageView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
-            imageView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor)
-        ])
-        
-        // Style
-        imageView.layer.cornerRadius = K.CardView.Style.cornerRadius
-        imageView.clipsToBounds = true
-    }
-    
-    private func dynamicScale(image: UIImage) -> UIView.ContentMode {
-        let imageAspectRatio = image.size.width / image.size.height
-        let imageViewAspectRatio = self.imageView1.bounds.width / self.imageView1.bounds.height
-        // Fill the image view if image's aspect ratio is close to the one of the image view
-        return (abs(imageAspectRatio - imageViewAspectRatio) >= K.ImageView.dynamicScaleThreshold) ? .scaleAspectFit : .scaleAspectFill
+        card.layer.shadowColor = UIColor.black.cgColor
+        card.layer.shadowOpacity = 0.2
+        card.layer.shadowOffset = .zero
+        card.layer.shadowRadius = 5
+        card.layer.shouldRasterize = true
+        card.layer.rasterizationScale = UIScreen.main.scale
     }
     
     //MARK: - Data Fetching & Updating
@@ -365,34 +275,25 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         case 0:
             if let firstData = dataSet[dataIndex + 1] {
                 dataIndex += 1
-                firstCardData = firstData
+                firstCard.data = firstData
                 DispatchQueue.main.async {
-                    self.indicator1.stopAnimating()
-                    self.imageView1.image = firstData.image
-                    self.imageView1.contentMode = self.dynamicScale(image: self.imageView1.image!)
                     
                     // Refresh toolbar buttons' state
                     self.refreshButtonState()
                     
                     // Add gesture recognizer to first card
                     self.firstCard.addGestureRecognizer(self.panCard)
-                    self.imageView1.addGestureRecognizer(self.zoomImage)
-                    self.imageView1.addGestureRecognizer(self.panImage)
+                    self.firstCard.imageView.addGestureRecognizer(self.zoomImage)
+                    self.firstCard.imageView.addGestureRecognizer(self.panImage)
                 }
             }
         case 1:
             if let secondData = dataSet[dataIndex + 1] {
-                DispatchQueue.main.async {
-                    self.indicator2.stopAnimating()
-                    self.imageView2.image = secondData.image
-                    self.imageView2.contentMode = self.dynamicScale(image: self.imageView2.image!)
-                }
+                secondCard.data = secondData
                 dataIndex += 1
-                secondCardData = secondData
-                isLoading = false
             }
         default:
-            if isLoading {
+            if firstCard.data == nil || secondCard.data == nil {
                 updateCardView()
             }
         }
@@ -447,8 +348,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 y: transform + (xOffset * (1 - transform))
             )
         case .undo:
-            guard cardBelowUndoCard != nil else { return }
-            switch cardBelowUndoCard! {
+            switch cardBelowUndoCard {
             case .firstCard:
                 firstCard.transform = CGAffineTransform(
                     scaleX: transform + (xOffset * (1 - transform)),
@@ -472,13 +372,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             if card.center.x < halfViewWidth / 2 && currentData != nil { // card was at the left side of the screen
                 resetCardTransform()
-                dismissedCardData = currentData!
-                dismissCard(card, to: .left, from: releasePoint)
+                undoCard.data = currentData!
+                animateCard(card, to: .left, from: releasePoint)
             }
             else if card.center.x > halfViewWidth * 3/2 && currentData != nil { // card was at the right side of the screen
                 resetCardTransform()
-                dismissedCardData = currentData!
-                dismissCard(card, to: .right, from: releasePoint)
+                undoCard.data = currentData!
+                animateCard(card, to: .right, from: releasePoint)
             }
             // Reset card's position and rotation state
             else {
@@ -499,8 +399,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                             y: K.CardView.Size.transform
                         )
                     case .undo:
-                        guard self.cardBelowUndoCard != nil else { return }
-                        switch self.cardBelowUndoCard! {
+                        switch self.cardBelowUndoCard {
                         case .firstCard:
                             self.firstCard.transform = CGAffineTransform(
                                 scaleX: K.CardView.Size.transform,
@@ -526,8 +425,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             case .second:
                 self.firstCard.transform = .identity
             case .undo:
-                guard self.cardBelowUndoCard != nil else { return }
-                switch self.cardBelowUndoCard! {
+                switch self.cardBelowUndoCard {
                 case .firstCard:
                     self.firstCard.transform = .identity
                 case .secondCard:
@@ -537,8 +435,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func dismissCard(_ card: UIView, to side: Side, from releasePoint: CGPoint) {
-        
+    private func animateCard(_ card: UIView, to side: Side, from releasePoint: CGPoint) {
         enum Zone {
             case upper
             case middle
@@ -606,18 +503,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.rotateCard(card: .secondCard)
                 case .undo:
                     // Enable the card's GR after it was dismissed
-                    guard self.cardBelowUndoCard != nil else { return }
-                    switch self.cardBelowUndoCard! {
+                    switch self.cardBelowUndoCard {
                     case .firstCard:
                         self.firstCard.addGestureRecognizer(self.panCard)
-                        self.imageView1.addGestureRecognizer(self.zoomImage)
-                        self.imageView1.addGestureRecognizer(self.panImage)
+                        self.firstCard.imageView.addGestureRecognizer(self.zoomImage)
+                        self.firstCard.imageView.addGestureRecognizer(self.panImage)
                         self.currentCard = .first
                         self.refreshButtonState()
                     case .secondCard:
                         self.secondCard.addGestureRecognizer(self.panCard)
-                        self.imageView2.addGestureRecognizer(self.zoomImage)
-                        self.imageView2.addGestureRecognizer(self.panImage)
+                        self.secondCard.imageView.addGestureRecognizer(self.zoomImage)
+                        self.secondCard.imageView.addGestureRecognizer(self.panImage)
                         self.currentCard = .second
                         self.refreshButtonState()
                     }
@@ -639,16 +535,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         */
         switch card {
         case .firstCard:
+            firstCard.data = nil
             currentCard = .second
             // Attach gesture recognizer
             secondCard.addGestureRecognizer(self.panCard)
-            imageView2.addGestureRecognizer(self.zoomImage)
-            imageView2.addGestureRecognizer(self.panImage)
+            secondCard.imageView.addGestureRecognizer(self.zoomImage)
+            secondCard.imageView.addGestureRecognizer(self.panImage)
             
             // Put the dismissed card behind the current card
             self.view.insertSubview(firstCard, belowSubview: secondCard)
             firstCard.center = cardViewAnchor
-            addCardViewConstraint(cardView: firstCard)
+            addCardViewConstraint(card: firstCard)
             
             // Shrink the size of the newly added card view
             firstCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
@@ -656,15 +553,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             updateCardView()
             fetchNewData(initialRequest: false)
         case .secondCard:
+            secondCard.data = nil
             currentCard = .first
             firstCard.addGestureRecognizer(self.panCard)
-            imageView1.addGestureRecognizer(self.zoomImage)
-            imageView1.addGestureRecognizer(self.panImage)
+            firstCard.imageView.addGestureRecognizer(self.zoomImage)
+            firstCard.imageView.addGestureRecognizer(self.panImage)
             
             // Put the dismissed card behind the current card
             self.view.insertSubview(secondCard, belowSubview: firstCard)
             secondCard.center = cardViewAnchor
-            addCardViewConstraint(cardView: secondCard)
+            addCardViewConstraint(card: secondCard)
             
             // Shrink the size of the newly added card view
             secondCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
@@ -686,58 +584,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if let newData = dataSet[dataIndex + 1] {
             switch dataAllocation {
             case .firstCard: // Data is for first card
-                DispatchQueue.main.async {
-                    self.indicator1.stopAnimating()
-                    self.imageView1.image = newData.image
-                    self.imageView1.contentMode = self.dynamicScale(image: self.imageView1.image!)
-                }
+                firstCard.data = newData
                 dataIndex += 1
-                firstCardData = newData
             case .secondCard: // Data is for second card
-                DispatchQueue.main.async {
-                    self.indicator2.stopAnimating()
-                    self.imageView2.image = newData.image
-                    self.imageView2.contentMode = self.dynamicScale(image: self.imageView2.image!)
-                }
+                secondCard.data = newData
                 dataIndex += 1
-                secondCardData = newData
-            }
-            
-            // Determine if the other card was still loading for new data
-            switch currentCard {
-            case .first:
-                isLoading = (secondCardData == nil) ? true : false
-            case .second:
-                isLoading = (firstCardData == nil) ? true : false
-            case .undo:
-                return
-            }
-        }
-        // New data is not downloaded yet
-        else {
-            // Display loading indicators on both cards
-            if isLoading {
-                switch currentCard {
-                case .first:
-                    showIndicator(to: .secondCard)
-                    secondCardData = nil
-                case .second:
-                    showIndicator(to: .firstCard)
-                    firstCardData = nil
-                case .undo:
-                    return
-                }
-            }
-            // Trigger method updateCardView to be executed when new data is fetched successfully
-            isLoading = true
-            
-            switch dataAllocation {
-            case .firstCard: // New data for first card is not available
-                showIndicator(to: .firstCard)
-                firstCardData = nil
-            case .secondCard: // New data for second card is not available
-                showIndicator(to: .secondCard)
-                secondCardData = nil
             }
         }
         DispatchQueue.main.async {
