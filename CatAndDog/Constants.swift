@@ -29,6 +29,12 @@ struct K {
         static let height: CGFloat = 44.0
     }
     struct CardView {
+        struct Animation {
+            struct Threshold {
+                static let distance: CGFloat = 80
+                static let speed: CGFloat = 800
+            }
+        }
         struct Size {
             static let transform: CGFloat = 0.9
         }

@@ -10,9 +10,9 @@ import UIKit
 
 class CardView: UIView {
 
-    let imageView = UIImageView()
-    let indicator = UIActivityIndicatorView()
-    var data: CatData? {
+    internal let imageView = UIImageView()
+    private let indicator = UIActivityIndicatorView()
+    internal var data: CatData? {
         didSet {
             guard data != nil else {
                 imageView.image = nil
@@ -24,11 +24,8 @@ class CardView: UIView {
                 self.indicator.stopAnimating()
                 self.set(image: self.data!.image)
             }
-            
         }
     }
-    
-    var isShown: Bool = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -43,12 +40,12 @@ class CardView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func set(image: UIImage) {
+    internal func set(image: UIImage) {
         imageView.image = image
         setContentMode(image: image)
     }
     
-    func setContentMode(image: UIImage) {
+    private func setContentMode(image: UIImage) {
         let imageAspectRatio = image.size.width / image.size.height
         let imageViewAspectRatio = imageView.bounds.width / imageView.bounds.height
         // Determine the content mode by comparing the aspect ratio of the image and image view
@@ -56,7 +53,7 @@ class CardView: UIView {
         imageView.contentMode = (aspectRatioDiff >= K.ImageView.dynamicScaleThreshold) ? .scaleAspectFit : .scaleAspectFill
     }
     
-    func addImageViewConstraint() {
+    private func addImageViewConstraint() {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             imageView.topAnchor.constraint(equalTo: self.topAnchor),
@@ -70,7 +67,7 @@ class CardView: UIView {
         imageView.clipsToBounds = true
     }
     
-    func addIndicator() {
+    private func addIndicator() {
         self.addSubview(indicator)
         // constraint
         indicator.translatesAutoresizingMaskIntoConstraints = false
