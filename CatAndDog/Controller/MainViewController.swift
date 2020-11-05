@@ -159,28 +159,19 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             print("Error: Undo button should have not been enabled")
         }
         
-        // Insert undo card to main view
+        // Place undoed card onto the current card
         view.addSubview(undoCard)
         addCardViewConstraint(card: undoCard)
         
         UIView.animate(withDuration: 0.5) {
             self.undoCard.center = self.cardViewAnchor
             self.undoCard.transform = .identity
-            switch self.currentCard {
-            case .first:
-                self.firstCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-            case .second:
-                self.secondCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-            case .undo:
-                print("Error: Undo button should have not been enabled")
-            }
+            self.firstCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            self.secondCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         } completion: { (true) in
             if true {
-                // Add gesture recognizer to undo card
                 self.attachGestureRecognizers(to: self.undoCard)
                 self.currentCard = .undo
-                
-                // Update favorite button image
                 self.refreshButtonState()
             }
         }
@@ -449,10 +440,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             switch self.currentCard {
             case .first:
-                card.transform = CGAffineTransform.identity
                 self.rotateCard(self.firstCard)
             case .second:
-                card.transform = CGAffineTransform.identity
                 self.rotateCard(self.secondCard)
             case .undo:
                 // Enable the next card's gesture recognizers
@@ -490,8 +479,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 sender.setTranslation(.zero, in: view)
                 
             case .ended, .cancelled, .failed:
-                // Smoothly restore the transform to the original state
-                UIView.animate(withDuration: 0.4, delay: 0, options: .curveEaseInOut, animations: {
+                // Reset card's position
+                UIView.animate(withDuration: 0.4, animations: {
                     view.center = self.imageViewAnchor
                 })
             default:
@@ -515,9 +504,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 view.transform = (view.frame.width >= view.bounds.width) ? transform : CGAffineTransform.identity
                 sender.scale = 1
             case .ended, .cancelled, .failed:
-                // If the gesture has cancelled/terminated/failed or everything else that's not performing
-                // Smoothly restore the transform to the "original"
-                UIView.animate(withDuration: 0.4, delay: 0.0, options: .curveEaseInOut, animations: {
+                // Reset card's size with delay which allows card's position to be reseted first
+                UIView.animate(withDuration: 0.4, delay: 0.4, options: .curveEaseInOut, animations: {
                     view.transform = .identity
                 })
             default:
@@ -526,6 +514,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
+    /// Reset the next card's transform with animation
     private func animateNextCardTransform() {
         UIView.animate(withDuration: 0.1) {
             switch self.nextCard {
@@ -551,7 +540,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Error Handling Section
     
-    // Present error message to the user if any error occurs in the data fetching process
+    /// Present error message to the user if any error occurs in the data fetching process
     func errorDidOccur() {
         DispatchQueue.main.async {
             let alert = UIAlertController(
