@@ -16,7 +16,8 @@ class DatabaseManager {
     let folderName = FileManager.SearchPathDirectory.documentDirectory
     let subFolderName = "Cat_Pictures"
     var favoriteArray = [Favorite]()
-    static var imageArray = [UIImage]()
+    var imageURLs = [URL]()
+    
 
     //MARK: - Data Deletion
     
@@ -47,36 +48,26 @@ class DatabaseManager {
             }
         }
         
-        // Refresh image array
-        DatabaseManager.imageArray = []
-        loadImages()
+        // Update image url array
+        imageURLs.removeAll()
+        loadImageURLs()
     }
     
     //MARK: - Data Loading
     
-    internal func loadImages() {
+    internal func loadImageURLs() {
         let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let imageFolderURL = url.appendingPathComponent(subFolderName, isDirectory: true)
         let fileList = listOfFileNames() // Get list of image files from local database
-        for file in fileList {
-            let fileURL = imageFolderURL.appendingPathComponent("\(file).jpg") // Create URL for each image file
-            do {
-                let data = try Data(contentsOf: fileURL)
-                guard let image = UIImage(data: data) else { return }
-                DatabaseManager.imageArray.append(image)
-            } catch {
-                print("Error generating data from file system: \(error)")
-            }
+        for fileName in fileList {
+            let fileURL = imageFolderURL.appendingPathComponent("\(fileName).jpg") // Create URL for each image file
+            imageURLs.append(fileURL)
         }
     }
     
     //MARK: - Data Saving
     
     internal func saveData(_ data: CatData) {
-        
-        // Save new image to array used by collection view
-        DatabaseManager.imageArray.append(data.image)
-        
         // Save data to local database
         let newData = Favorite(context: context)
         newData.id = data.id
@@ -108,6 +99,7 @@ class DatabaseManager {
         if let fileURL = url?.appendingPathComponent(subFolderName, isDirectory: true).appendingPathComponent(fileName) {
             do {
                 try data.write(to: fileURL) // Write data to assigned URL
+                imageURLs.append(fileURL)
             } catch {
                 print("error: \(error)")
             }

@@ -83,9 +83,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         addCardViewConstraint(card: secondCard)
         secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
         
-        // Create local image folder in file system or load data from it
+        // Create local image folder in file system or load data from it if it already exists
         databaseManager.createDirectory()
-        databaseManager.loadImages()
+        databaseManager.loadImageURLs()
         
         // Disable favorite and share button before data is downloaded
         favoriteBtn.isEnabled = false
@@ -125,6 +125,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         super.viewWillDisappear(animated)
         // Un-hidden nav bar's hairline
         self.navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
+    }
+    
+    // Copy image URL array from database manager to collection VC
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let destination = segue.destination as? CollectionVC {
+            destination.imageURLs = databaseManager.imageURLs
+        }
     }
     
     //MARK: - Toolbar Button Method and State Control
@@ -504,8 +511,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 view.transform = (view.frame.width >= view.bounds.width) ? transform : CGAffineTransform.identity
                 sender.scale = 1
             case .ended, .cancelled, .failed:
-                // Reset card's size with delay which allows card's position to be reseted first
-                UIView.animate(withDuration: 0.4, delay: 0.4, options: .curveEaseInOut, animations: {
+                // Reset card's size
+                UIView.animate(withDuration: 0.4, animations: {
                     view.transform = .identity
                 })
             default:

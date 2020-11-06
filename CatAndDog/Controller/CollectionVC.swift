@@ -7,12 +7,14 @@
 //
 
 import UIKit
+import ImageIO
 
 class CollectionVC: UICollectionViewController {
     
-    var selectedCellIndex: Int?
-    var reversedImageArray = [UIImage]()
     let screenWidth = UIScreen.main.bounds.width
+    var selectedCellIndex: Int?
+    var imageURLs = [URL]()
+    var reversedImageURLs = [UIImage]()
     
     // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
     var cellNumberPerRow: CGFloat {
@@ -43,7 +45,6 @@ class CollectionVC: UICollectionViewController {
         flowLayout.minimumLineSpacing = interCellSpacing
         
         // TEST AREA
-        
     }
     
     // Refresh the collection view every time the view is about to be shown to the user
@@ -53,8 +54,8 @@ class CollectionVC: UICollectionViewController {
         self.navigationController?.navigationBar.barTintColor = K.Color.backgroundColor
         self.navigationController?.isToolbarHidden = true
         
-        if DatabaseManager.imageArray.count == 0 {
-            let label = getDefaultLabel()
+        if imageURLs.count == 0 {
+            let label = defaultLabel() // Display default message on the background
             collectionView.backgroundView = label
         } else {
             collectionView.backgroundView = nil
@@ -65,11 +66,11 @@ class CollectionVC: UICollectionViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destination = segue.destination as? SingleImageVC {
             destination.selectedIndex = selectedCellIndex
-            destination.imageArray = reversedImageArray
+            destination.imageArray = reversedImageURLs
         }
     }
 
-    private func getDefaultLabel() -> UILabel {
+    private func defaultLabel() -> UILabel {
         let noDataLabel = UILabel(frame: CGRect(x: 0,
                                                 y: 0,
                                                 width: collectionView.bounds.size.width,
@@ -91,19 +92,38 @@ class CollectionVC: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return DatabaseManager.imageArray.count
+        return imageURLs.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CollectionCell.cellIdentifier, for: indexPath) as! CollectionCell
-
-        // Configure each cell's imageView in reversed order
-        let savedImages = DatabaseManager.imageArray
-        let reversedArray: [UIImage] = Array(savedImages.reversed())
-        cell.imageView.image = reversedArray[indexPath.item]
-        reversedImageArray = reversedArray // Used for single view controller
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Cell.reuseIdentifier, for: indexPath) as? Cell else {
+            fatalError("Expected `\(Cell.self)` type for reuseIdentifier \(Cell.reuseIdentifier). Check the configuration in Main.storyboard.")
+        }
+        cell.layoutIfNeeded() // Ensure imageView is its final size
+        
+        let reversedURLs: [URL] = imageURLs.reversed()
+        let imageViewSize = cell.imageView.bounds.size
+        let scale = collectionView.traitCollection.displayScale
+        
+        let downsampledImage = downsample(imageAt: reversedURLs[indexPath.row], to: imageViewSize, scale: scale)
+        cell.imageView.image = downsampledImage
         
         return cell
+    }
+    
+    private func downsample(imageAt imageURL: URL, to pointSize: CGSize, scale: CGFloat) -> UIImage {
+        let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
+        let imageSource = CGImageSourceCreateWithURL(imageURL as CFURL, imageSourceOptions)!
+        
+        let maxDimensionInPixels = max(pointSize.width, pointSize.height) * scale
+        let downsampleOptions =
+            [kCGImageSourceCreateThumbnailFromImageAlways: true,
+             kCGImageSourceShouldCacheImmediately: true,
+             kCGImageSourceCreateThumbnailWithTransform: true,
+             kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
+        
+        let downsampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downsampleOptions)!
+        return UIImage(cgImage: downsampledImage)
     }
 
     // MARK: UICollectionViewDelegate

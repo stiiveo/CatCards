@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		F60214D424E5205500872F34 /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F60214D224E5205500872F34 /* DataModel.xcdatamodeld */; };
 		F639A17D24E29FB600FB6C0A /* CollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F639A17C24E29FB600FB6C0A /* CollectionVC.swift */; };
-		F639A17F24E29FD000FB6C0A /* CollectionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F639A17E24E29FD000FB6C0A /* CollectionCell.swift */; };
+		F639A17F24E29FD000FB6C0A /* Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F639A17E24E29FD000FB6C0A /* Cell.swift */; };
 		F64FFF0D2518A10900E80DE2 /* SingleImageVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F64FFF0C2518A10900E80DE2 /* SingleImageVC.swift */; };
 		F6746FE524C6DCF2006A2905 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6746FE424C6DCF2006A2905 /* AppDelegate.swift */; };
 		F6746FE724C6DCF2006A2905 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6746FE624C6DCF2006A2905 /* SceneDelegate.swift */; };
@@ -29,7 +29,7 @@
 /* Begin PBXFileReference section */
 		F60214D324E5205500872F34 /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
 		F639A17C24E29FB600FB6C0A /* CollectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionVC.swift; sourceTree = "<group>"; };
-		F639A17E24E29FD000FB6C0A /* CollectionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionCell.swift; sourceTree = "<group>"; };
+		F639A17E24E29FD000FB6C0A /* Cell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cell.swift; sourceTree = "<group>"; };
 		F64FFF0C2518A10900E80DE2 /* SingleImageVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageVC.swift; sourceTree = "<group>"; };
 		F6746FE124C6DCF2006A2905 /* CatAndDog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CatAndDog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6746FE424C6DCF2006A2905 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -117,7 +117,7 @@
 			children = (
 				F6746FFE24C6E245006A2905 /* MainViewController.swift */,
 				F639A17C24E29FB600FB6C0A /* CollectionVC.swift */,
-				F639A17E24E29FD000FB6C0A /* CollectionCell.swift */,
+				F639A17E24E29FD000FB6C0A /* Cell.swift */,
 				F64FFF0C2518A10900E80DE2 /* SingleImageVC.swift */,
 			);
 			path = Controller;
@@ -209,7 +209,7 @@
 				F6C928202540678B00BAB89E /* ImageScrollView.swift in Sources */,
 				F60214D424E5205500872F34 /* DataModel.xcdatamodeld in Sources */,
 				F674700124C6E8F3006A2905 /* JSONModel.swift in Sources */,
-				F639A17F24E29FD000FB6C0A /* CollectionCell.swift in Sources */,
+				F639A17F24E29FD000FB6C0A /* Cell.swift in Sources */,
 				F6746FE524C6DCF2006A2905 /* AppDelegate.swift in Sources */,
 				F67E4E3224D3C571006DDE96 /* Constants.swift in Sources */,
 				F639A17D24E29FB600FB6C0A /* CollectionVC.swift in Sources */,
