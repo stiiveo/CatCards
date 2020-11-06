@@ -85,7 +85,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Create local image folder in file system or load data from it if it already exists
         databaseManager.createDirectory()
-        databaseManager.loadImageURLs()
+        databaseManager.loadThumbnailImages()
         
         // Disable favorite and share button before data is downloaded
         favoriteBtn.isEnabled = false
@@ -93,6 +93,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Undo button is disabled until one card is dismissed by user
         undoBtn.isEnabled = false
+        
+        setDownsampleSize() // Prepare ImageProcess's operation parameter
         
         // TEST AREA
     }
@@ -130,8 +132,28 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     // Copy image URL array from database manager to collection VC
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destination = segue.destination as? CollectionVC {
-            destination.imageURLs = databaseManager.imageURLs
+            destination.cellImages = databaseManager.thumbnailImages
         }
+    }
+    
+    //MARK: - Save Device Screen Info
+    private func setDownsampleSize() {
+        // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
+        let screenWidth = UIScreen.main.bounds.width
+        var cellNumberPerRow: CGFloat {
+            if screenWidth >= 414 {
+                return 4.0
+            } else {
+                return 3.0
+            }
+        }
+        let interCellSpacing: CGFloat = 1.5
+        let cellWidth = floor((screenWidth - (interCellSpacing * (cellNumberPerRow - 1))) / cellNumberPerRow)
+        
+        // Floor the calculated width to remove any decimal number
+        let cellSize = CGSize(width: cellWidth, height: cellWidth)
+        databaseManager.imageProcess.size = cellSize
+        databaseManager.imageProcess.scale = self.view.traitCollection.displayScale
     }
     
     //MARK: - Toolbar Button Method and State Control

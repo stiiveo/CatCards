@@ -21,7 +21,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     var previousPage: Int?
     var anchorPosition: CGPoint?
     let databaseManager = DatabaseManager()
-    var imageArray = [UIImage]()
+    var fullImages = [UIImage]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -88,7 +88,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     }
     
     private func addImagesToStackView() {
-        for image in imageArray {
+        for image in fullImages {
             self.imageScrollView = ImageScrollView(frame: view.bounds)
             self.imageScrollView.set(image: image)
             stackView.addArrangedSubview(self.imageScrollView)
@@ -114,7 +114,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     //MARK: - Toolbar Button Methods
     
     @objc func shareButtonPressed() {
-        let imageToShare = imageArray[currentPage]
+        let imageToShare = fullImages[currentPage]
         
         // present activity controller
         let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
@@ -126,7 +126,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let deleteAction = UIAlertAction(title: "Delete Image", style: .destructive) { (action) in
             
             let savedImageIDs = self.databaseManager.listOfFileNames()
-            let reversedIDIndex = (self.imageArray.count - 1) - self.currentPage // Find the data index from the reversed image array
+            let reversedIDIndex = (self.fullImages.count - 1) - self.currentPage // Find the data index from the reversed image array
             let dataToDeleteID = savedImageIDs[reversedIDIndex]
             
             // Delete data in file system and database and refresh the imageArray

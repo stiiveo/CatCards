@@ -13,8 +13,7 @@ class CollectionVC: UICollectionViewController {
     
     let screenWidth = UIScreen.main.bounds.width
     var selectedCellIndex: Int?
-    var imageURLs = [URL]()
-    var reversedImageURLs = [UIImage]()
+    var cellImages = [UIImage]()
     
     // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
     var cellNumberPerRow: CGFloat {
@@ -54,7 +53,7 @@ class CollectionVC: UICollectionViewController {
         self.navigationController?.navigationBar.barTintColor = K.Color.backgroundColor
         self.navigationController?.isToolbarHidden = true
         
-        if imageURLs.count == 0 {
+        if cellImages.count == 0 {
             let label = defaultLabel() // Display default message on the background
             collectionView.backgroundView = label
         } else {
@@ -62,11 +61,15 @@ class CollectionVC: UICollectionViewController {
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        
+    }
+    
     // Send the selected cell index to the SingleImageVC
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destination = segue.destination as? SingleImageVC {
             destination.selectedIndex = selectedCellIndex
-            destination.imageArray = reversedImageURLs
+//            destination.fullImages = fullImages
         }
     }
 
@@ -92,38 +95,17 @@ class CollectionVC: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return imageURLs.count
+        return cellImages.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Cell.reuseIdentifier, for: indexPath) as? Cell else {
             fatalError("Expected `\(Cell.self)` type for reuseIdentifier \(Cell.reuseIdentifier). Check the configuration in Main.storyboard.")
         }
-        cell.layoutIfNeeded() // Ensure imageView is its final size
         
-        let reversedURLs: [URL] = imageURLs.reversed()
-        let imageViewSize = cell.imageView.bounds.size
-        let scale = collectionView.traitCollection.displayScale
-        
-        let downsampledImage = downsample(imageAt: reversedURLs[indexPath.row], to: imageViewSize, scale: scale)
-        cell.imageView.image = downsampledImage
-        
+        _ = cellImages.reversed() // Reverse the order of image array so the last saved image is displayed first
+        cell.imageView.image = cellImages[indexPath.row]
         return cell
-    }
-    
-    private func downsample(imageAt imageURL: URL, to pointSize: CGSize, scale: CGFloat) -> UIImage {
-        let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
-        let imageSource = CGImageSourceCreateWithURL(imageURL as CFURL, imageSourceOptions)!
-        
-        let maxDimensionInPixels = max(pointSize.width, pointSize.height) * scale
-        let downsampleOptions =
-            [kCGImageSourceCreateThumbnailFromImageAlways: true,
-             kCGImageSourceShouldCacheImmediately: true,
-             kCGImageSourceCreateThumbnailWithTransform: true,
-             kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
-        
-        let downsampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downsampleOptions)!
-        return UIImage(cgImage: downsampledImage)
     }
 
     // MARK: UICollectionViewDelegate
