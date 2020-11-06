@@ -21,7 +21,9 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     var previousPage: Int?
     var anchorPosition: CGPoint?
     let databaseManager = DatabaseManager()
-    var fullImages = [UIImage]()
+    
+    // TEST
+    var fullImages = DatabaseManager.thumbImages
     
     override func viewDidLoad() {
         super.viewDidLoad()

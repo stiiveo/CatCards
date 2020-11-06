@@ -145,7 +145,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Floor the calculated width to remove any decimal number
         let cellSize = CGSize(width: cellWidth, height: cellWidth)
-        databaseManager.imageProcess.size = cellSize
+        databaseManager.imageProcess.cellSize = cellSize
         databaseManager.imageProcess.scale = self.view.traitCollection.displayScale
     }
     

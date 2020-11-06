@@ -101,9 +101,8 @@ class CollectionVC: UICollectionViewController {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Cell.reuseIdentifier, for: indexPath) as? Cell else {
             fatalError("Expected `\(Cell.self)` type for reuseIdentifier \(Cell.reuseIdentifier). Check the configuration in Main.storyboard.")
         }
+        cell.imageView.image = cellImages.reversed()[indexPath.row] // Reverse the order of image array so the last saved image is displayed first
         
-        _ = cellImages.reversed() // Reverse the order of image array so the last saved image is displayed first
-        cell.imageView.image = cellImages[indexPath.row]
         return cell
     }
 

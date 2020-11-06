@@ -19,6 +19,7 @@ class NetworkManager {
     internal var delegate: NetworkManagerDelegate?
     internal var serializedData: [Int: CatData] = [:]
     private var dataIndex: Int = 0
+    private let imageProcesser = ImageProcess()
     
     internal func performRequest(numberOfRequests: Int) {
         for _ in 0..<numberOfRequests {
@@ -53,10 +54,11 @@ class NetworkManager {
                 return
             }
             let newImage = imageFromURL(url: imageURL)
+            let resizedImage = imageProcesser.resizeImage(newImage) // Resize image if its size is bigger than set threshold
             let newID = jsonData.id
             
             // Construct new CatData object and append to catDataArray
-            let newData = CatData(imageURL: imageURL, id: newID, image: newImage)
+            let newData = CatData(imageURL: imageURL, id: newID, image: resizedImage)
             dataIndex += 1
             serializedData[dataIndex] = newData
             
