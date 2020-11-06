@@ -18,8 +18,8 @@ class DatabaseManager {
     private let thumbFolderName = "Thumbnails"
     let imageProcess = ImageProcess()
     var favoriteArray = [Favorite]()
-    var thumbnailImages = [UIImage]()
-    var fullImages = [UIImage]()
+    static var thumbImages = [UIImage]()
+    static var fullImages = [UIImage]()
     
     //MARK: - Data Loading
     
@@ -33,7 +33,7 @@ class DatabaseManager {
             do {
                 let data = try Data(contentsOf: fileURL)
                 guard let image = UIImage(data: data) else { return }
-                thumbnailImages.append(image)
+                DatabaseManager.thumbImages.append(image)
             } catch {
                 print("Error loading data from file system to memory buffer: \(error)")
             }
@@ -48,7 +48,7 @@ class DatabaseManager {
     
     internal func saveData(_ data: CatData) {
         // Save data's image to array
-        thumbnailImages.append(data.image)
+        DatabaseManager.thumbImages.append(data.image)
         
         // Save data to local database
         let newData = Favorite(context: context)
@@ -129,7 +129,7 @@ class DatabaseManager {
         }
         
         // Update image url array
-        thumbnailImages.removeAll()
+        DatabaseManager.thumbImages.removeAll()
         loadThumbnailImages()
     }
     

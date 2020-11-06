@@ -129,13 +129,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         self.navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
     }
     
-    // Copy image URL array from database manager to collection VC
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let destination = segue.destination as? CollectionVC {
-            destination.cellImages = databaseManager.thumbnailImages
-        }
-    }
-    
     //MARK: - Save Device Screen Info
     private func setDownsampleSize() {
         // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices

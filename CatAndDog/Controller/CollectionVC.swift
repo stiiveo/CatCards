@@ -13,7 +13,7 @@ class CollectionVC: UICollectionViewController {
     
     let screenWidth = UIScreen.main.bounds.width
     var selectedCellIndex: Int?
-    var cellImages = [UIImage]()
+    let cellImages = DatabaseManager.thumbImages
     
     // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
     var cellNumberPerRow: CGFloat {
@@ -69,7 +69,6 @@ class CollectionVC: UICollectionViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destination = segue.destination as? SingleImageVC {
             destination.selectedIndex = selectedCellIndex
-//            destination.fullImages = fullImages
         }
     }
 
