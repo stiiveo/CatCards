@@ -21,9 +21,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     var previousPage: Int?
     var anchorPosition: CGPoint?
     let databaseManager = DatabaseManager()
-    
-    // TEST
-    var fullImages = DatabaseManager.thumbImages
+    var images = DatabaseManager.fullImages
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -90,7 +88,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     }
     
     private func addImagesToStackView() {
-        for image in fullImages {
+        for image in images {
             self.imageScrollView = ImageScrollView(frame: view.bounds)
             self.imageScrollView.set(image: image)
             stackView.addArrangedSubview(self.imageScrollView)
@@ -116,7 +114,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     //MARK: - Toolbar Button Methods
     
     @objc func shareButtonPressed() {
-        let imageToShare = fullImages[currentPage]
+        let imageToShare = images[currentPage]
         
         // present activity controller
         let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
@@ -127,9 +125,8 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let alert = UIAlertController(title: "This action can not be reverted.", message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: "Delete Image", style: .destructive) { (action) in
             
-            let savedImageIDs = self.databaseManager.listOfFileNames()
-            let reversedIDIndex = (self.fullImages.count - 1) - self.currentPage // Find the data index from the reversed image array
-            let dataToDeleteID = savedImageIDs[reversedIDIndex]
+            let savedDataIDs = self.databaseManager.listOfFileNames()
+            let dataToDeleteID = savedDataIDs[self.currentPage]
             
             // Delete data in file system and database and refresh the imageArray
             self.databaseManager.deleteData(id: dataToDeleteID)

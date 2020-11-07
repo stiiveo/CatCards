@@ -61,10 +61,6 @@ class CollectionVC: UICollectionViewController {
         }
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        
-    }
-    
     // Send the selected cell index to the SingleImageVC
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destination = segue.destination as? SingleImageVC {
@@ -101,7 +97,7 @@ class CollectionVC: UICollectionViewController {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Cell.reuseIdentifier, for: indexPath) as? Cell else {
             fatalError("Expected `\(Cell.self)` type for reuseIdentifier \(Cell.reuseIdentifier). Check the configuration in Main.storyboard.")
         }
-        cell.imageView.image = cellImages.reversed()[indexPath.row] // Reverse the order of image array so the last saved image is displayed first
+        cell.imageView.image = cellImages[indexPath.row]
         
         return cell
     }

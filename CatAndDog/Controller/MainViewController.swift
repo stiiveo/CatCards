@@ -85,7 +85,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Create local image folder in file system or load data from it if it already exists
         databaseManager.createDirectory()
-        databaseManager.loadThumbnailImages()
+        databaseManager.loadImagesFromLocalSystem()
         
         // Disable favorite and share button before data is downloaded
         favoriteBtn.isEnabled = false
@@ -146,7 +146,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Floor the calculated width to remove any decimal number
         let cellSize = CGSize(width: cellWidth, height: cellWidth)
         databaseManager.imageProcess.cellSize = cellSize
-        databaseManager.imageProcess.scale = self.view.traitCollection.displayScale
     }
     
     //MARK: - Toolbar Button Method and State Control

@@ -24,31 +24,33 @@ class DatabaseManager {
     //MARK: - Data Loading
     
     // Load thumbnail images from local folder
-    internal func loadThumbnailImages() {
+    internal func loadImagesFromLocalSystem() {
         let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let imageFolderURL = url.appendingPathComponent(thumbFolderName, isDirectory: true)
-        let fileList = listOfFileNames() // Get list of image files from local database
+        let thumbnailFolderURL = url.appendingPathComponent(thumbFolderName, isDirectory: true)
+        let imageFolderURL = url.appendingPathComponent(imageFolderName, isDirectory: true)
+        let fileList = listOfFileNames() // Get list of image file IDs from local database
         for fileName in fileList {
-            let fileURL = imageFolderURL.appendingPathComponent("\(fileName).jpg") // Create URL for each image file
+            let imageURL = imageFolderURL.appendingPathComponent("\(fileName).jpg")
+            let thumbImageURL = thumbnailFolderURL.appendingPathComponent("\(fileName).jpg") // Create URL for each image file
             do {
-                let data = try Data(contentsOf: fileURL)
-                guard let image = UIImage(data: data) else { return }
-                DatabaseManager.thumbImages.append(image)
+                let imageData = try Data(contentsOf: imageURL)
+                guard let image = UIImage(data: imageData) else { return }
+                DatabaseManager.fullImages.append(image) // Load full images
+                
+                let thumbData = try Data(contentsOf: thumbImageURL)
+                guard let thumbImage = UIImage(data: thumbData) else { return }
+                DatabaseManager.thumbImages.append(thumbImage) // Load thumbnail images
             } catch {
-                print("Error loading data from file system to memory buffer: \(error)")
+                print("Error loading image data from file system to memory buffer: \(error)")
             }
         }
-    }
-    
-    internal func loadFullImages() {
-        
     }
     
     //MARK: - Data Saving
     
     internal func saveData(_ data: CatData) {
-        // Save data's image to array
-        DatabaseManager.thumbImages.append(data.image)
+        // Save resized images to array used by collection and single image VC
+        DatabaseManager.fullImages.insert(data.image, at: 0)
         
         // Save data to local database
         let newData = Favorite(context: context)
@@ -69,9 +71,12 @@ class DatabaseManager {
         writeFileTo(folder: imageFolderName, withData: compressedJPG, withName: "\(fileName).jpg")
         
         // Save downsampled image
-        let downsampledData = imageProcess.downsample(dataAt: compressedJPG)
-        guard let compressedThumbnail = downsampledData.jpegData(compressionQuality: 0.5) else { return }
-        writeFileTo(folder: thumbFolderName, withData: compressedThumbnail, withName: "\(fileName).jpg")
+        let downsampledImage = imageProcess.downsample(dataAt: compressedJPG)
+        guard let JpegData = downsampledImage.jpegData(compressionQuality: 0.5) else { return }
+        writeFileTo(folder: thumbFolderName, withData: JpegData, withName: "\(fileName).jpg")
+        
+        // Save thumbnail images to array used by collection VC
+        DatabaseManager.thumbImages.insert(downsampledImage, at: 0)
     }
     
     // Write data into application's document folder
@@ -129,8 +134,9 @@ class DatabaseManager {
         }
         
         // Update image url array
+        DatabaseManager.fullImages.removeAll()
         DatabaseManager.thumbImages.removeAll()
-        loadThumbnailImages()
+        loadImagesFromLocalSystem()
     }
     
     //MARK: - Creation of Directory / sub-Directory
@@ -176,8 +182,8 @@ class DatabaseManager {
     internal func listOfFileNames() -> [String] {
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         
-        // Sort properties by the attribute 'date' in ascending order
-        let sort = NSSortDescriptor(key: "date", ascending: true)
+        // Sort data by making the last saved data at first
+        let sort = NSSortDescriptor(key: "date", ascending: false)
         fetchRequest.sortDescriptors = [sort]
         
         var fileNameList = [String]()

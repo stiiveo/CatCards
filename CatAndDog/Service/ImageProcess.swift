@@ -11,13 +11,13 @@ import ImageIO
 
 class ImageProcess {
     
-    let screenSize = UIScreen.main.bounds.size
+    let screenScale = UIScreen.main.scale
     var cellSize = CGSize()
-    var scale = CGFloat()
+    let screenSize = UIScreen.main.bounds.size
     
     internal func resizeImage(_ image: UIImage) -> UIImage {
         let imageSize = image.size
-        let maxSize = CGSize(width: screenSize.width * 1.5, height: screenSize.height * 1.5)
+        let maxSize = CGSize(width: screenSize.width * 2, height: screenSize.height * 2) // The image size can be no more than four times bigger than the screen
         
         // Return original image if its height or width is smaller than threshold
         guard imageSize.height > maxSize.height && imageSize.width > maxSize.width else { return image }
@@ -49,7 +49,7 @@ class ImageProcess {
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         let imageSource = CGImageSourceCreateWithData(data as CFData, imageSourceOptions)!
         
-        let maxDimensionInPixels = max(cellSize.width, cellSize.height) * scale
+        let maxDimensionInPixels = max(cellSize.width, cellSize.height) * screenScale
         let downsampleOptions =
             [kCGImageSourceCreateThumbnailFromImageAlways: true,
              kCGImageSourceShouldCacheImmediately: true,
