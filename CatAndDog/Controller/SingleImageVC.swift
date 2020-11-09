@@ -21,7 +21,6 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     var previousPage: Int?
     var anchorPosition: CGPoint?
     let databaseManager = DatabaseManager()
-    var images = DatabaseManager.fullImages
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -88,7 +87,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     }
     
     private func addImagesToStackView() {
-        for image in images {
+        for image in DatabaseManager.fullImages {
             self.imageScrollView = ImageScrollView(frame: view.bounds)
             self.imageScrollView.set(image: image)
             stackView.addArrangedSubview(self.imageScrollView)
@@ -114,7 +113,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     //MARK: - Toolbar Button Methods
     
     @objc func shareButtonPressed() {
-        let imageToShare = images[currentPage]
+        let imageToShare = DatabaseManager.fullImages[currentPage]
         
         // present activity controller
         let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
@@ -129,7 +128,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
             let dataToDeleteID = savedDataIDs[self.currentPage]
             
             // Delete data in file system and database and refresh the imageArray
-            self.databaseManager.deleteData(id: dataToDeleteID)
+            self.databaseManager.deleteData(id: dataToDeleteID, atIndex: self.currentPage)
             
             // Animate the scroll view
             self.scrollAndRemoveImageView()

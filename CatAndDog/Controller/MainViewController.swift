@@ -210,7 +210,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 databaseManager.saveData(data)
                 self.favoriteBtn.image = K.ButtonImage.filledHeart
             case true:
-                databaseManager.deleteData(id: data.id)
+                databaseManager.deleteData(id: data.id, atIndex: 0)
                 self.favoriteBtn.image = K.ButtonImage.heart
             }
         }

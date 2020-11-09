@@ -18,6 +18,8 @@ class DatabaseManager {
     private let thumbFolderName = "Thumbnails"
     let imageProcess = ImageProcess()
     var favoriteArray = [Favorite]()
+    
+    // Cached images for collection and single image view
     static var thumbImages = [UIImage]()
     static var fullImages = [UIImage]()
     
@@ -99,9 +101,9 @@ class DatabaseManager {
     //MARK: - Data Deletion
     
     // Delete specific data in database and file system
-    internal func deleteData(id: String) {
+    internal func deleteData(id: String, atIndex cacheIndex: Int) {
         
-        // Delete data from database
+        // Delete data matching the ID in database and file system
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id MATCHES %@", id) // Fetch data with the matched ID value
         do {
@@ -114,7 +116,7 @@ class DatabaseManager {
             print("Error fetching result from container: \(error)")
         }
         
-        // Delete image and thumbnail files from local directory
+        // Delete image file in local file system
         let fileName = "\(id).jpg"
         let imageURL = folderURL(name: imageFolderName).appendingPathComponent(fileName)
         if fileManager.fileExists(atPath: imageURL.path) {
@@ -124,6 +126,7 @@ class DatabaseManager {
                 print("Error removing image from file system: \(error)")
             }
         }
+        // Delete thumbnail file in local file system
         let thumbnailURL = folderURL(name: thumbFolderName).appendingPathComponent(fileName)
         if fileManager.fileExists(atPath: thumbnailURL.path) {
             do {
@@ -133,10 +136,9 @@ class DatabaseManager {
             }
         }
         
-        // Update image url array
-        DatabaseManager.fullImages.removeAll()
-        DatabaseManager.thumbImages.removeAll()
-        loadImagesFromLocalSystem()
+        // Remove cached thumbnail and full image
+        DatabaseManager.fullImages.remove(at: cacheIndex)
+        DatabaseManager.thumbImages.remove(at: cacheIndex)
     }
     
     //MARK: - Creation of Directory / sub-Directory
