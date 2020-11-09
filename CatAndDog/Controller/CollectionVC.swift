@@ -13,7 +13,6 @@ class CollectionVC: UICollectionViewController {
     
     let screenWidth = UIScreen.main.bounds.width
     var selectedCellIndex: Int?
-    let cellImages = DatabaseManager.thumbImages
     
     // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
     var cellNumberPerRow: CGFloat {
@@ -53,7 +52,7 @@ class CollectionVC: UICollectionViewController {
         self.navigationController?.navigationBar.barTintColor = K.Color.backgroundColor
         self.navigationController?.isToolbarHidden = true
         
-        if cellImages.count == 0 {
+        if DatabaseManager.thumbImages.count == 0 {
             let label = defaultLabel() // Display default message on the background
             collectionView.backgroundView = label
         } else {
@@ -90,14 +89,14 @@ class CollectionVC: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return cellImages.count
+        return DatabaseManager.thumbImages.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Cell.reuseIdentifier, for: indexPath) as? Cell else {
             fatalError("Expected `\(Cell.self)` type for reuseIdentifier \(Cell.reuseIdentifier). Check the configuration in Main.storyboard.")
         }
-        cell.imageView.image = cellImages[indexPath.row]
+        cell.imageView.image = DatabaseManager.thumbImages[indexPath.row]
         
         return cell
     }
