@@ -21,7 +21,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     var previousPage = Int()
     let databaseManager = DatabaseManager()
     var imageViews = [ImageScrollView()] // ImageViews cache used to populate stackView
-    let defaultImage = UIColor.white.image() // Default image used as default image in stackView
+    let defaultImage = UIColor.systemGray5.image(CGSize(width: 400, height: 400)) // Default image used as default image in stackView
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,9 +71,11 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         if currentPage > previousPage { // User swipes to next imageView
             setImages(at: currentPage) // Set current and 4 nearby imageView image respectively
             if currentPage > 2 { // Current index number is 3 or more
-                // Reset the imageView 3 index before the current imageView with default image
-                if let imageViewToReset = stackView.arrangedSubviews[currentPage - 3] as? ImageScrollView {
-                    imageViewToReset.set(image: defaultImage)
+                // Reset the imageViews 3 index before the current imageView with default image
+                for index in 0...(currentPage - 3) {
+                    if let imageViewToReset = stackView.arrangedSubviews[index] as? ImageScrollView {
+                        imageViewToReset.set(image: defaultImage)
+                    }
                 }
             }
             
@@ -81,9 +83,11 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
             setImages(at: currentPage) // Set current and 4 nearby imageView image respectively
             let lastIndex = stackView.arrangedSubviews.count - 1
             if currentPage < lastIndex - 2 { // Current index is 2 short of the last index number
-                // Reset the imageView 3 index behind the current imageView with default image
-                if let imageViewToReset = stackView.arrangedSubviews[currentPage + 3] as? ImageScrollView {
-                    imageViewToReset.set(image: defaultImage)
+                // Reset the imageViews 3 index behind the current imageView with default image
+                for index in (currentPage + 3)..<stackView.arrangedSubviews.count {
+                    if let imageViewToReset = stackView.arrangedSubviews[index] as? ImageScrollView {
+                        imageViewToReset.set(image: defaultImage)
+                    }
                 }
             }
         }
