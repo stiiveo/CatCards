@@ -156,18 +156,16 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
                 // Set the current view's alpha to 0
                 self.stackView.arrangedSubviews[self.currentPage].alpha = 0
                 
-                // Scroll to the left/right imageView
+                // Scroll to next/previous imageView
                 if let pageIndex = pageToScroll {
                     self.scrollView.contentOffset = CGPoint(x: CGFloat(pageIndex) * self.scrollView.frame.width, y: 0)
                 }
-            } completion: { (success) in
-                if success {
-                    self.removeImageView(at: originalPage) // Remove imageView from the stackView
-                    
-                    // Compensate scroll view's content offset after the imageView is removed from stackView
-                    if pageToScroll == originalPage + 1 {
-                        self.scrollView.contentOffset = CGPoint(x: CGFloat(originalPage) * self.scrollView.frame.width, y: 0)
-                    }
+            } completion: { _ in
+                self.removeImageView(at: originalPage) // Remove imageView from the stackView
+                
+                // Compensate scroll view's content offset after the imageView is removed from stackView
+                if pageToScroll == originalPage + 1 {
+                    self.scrollView.contentOffset = CGPoint(x: CGFloat(originalPage) * self.scrollView.frame.width, y: 0)
                 }
             }
         }
@@ -177,6 +175,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let viewToDelete = stackView.arrangedSubviews[index]
         stackView.removeArrangedSubview(viewToDelete)
         viewToDelete.removeFromSuperview()
+        imageViews.remove(at: index) // Remove cached imageView
     }
     
     //MARK: - Toolbar Button Methods
