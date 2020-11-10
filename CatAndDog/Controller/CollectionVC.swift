@@ -12,7 +12,7 @@ import ImageIO
 class CollectionVC: UICollectionViewController {
     
     let screenWidth = UIScreen.main.bounds.width
-    var selectedCellIndex: Int?
+    var selectedCellIndex: Int = 0
     
     // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
     var cellNumberPerRow: CGFloat {
@@ -63,7 +63,7 @@ class CollectionVC: UICollectionViewController {
     // Send the selected cell index to the SingleImageVC
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if let destination = segue.destination as? SingleImageVC {
-            destination.selectedIndex = selectedCellIndex
+            destination.selectedCellIndex = self.selectedCellIndex
         }
     }
 

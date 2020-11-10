@@ -19,9 +19,9 @@ class DatabaseManager {
     let imageProcess = ImageProcess()
     var favoriteArray = [Favorite]()
     
-    // Cached images for collection and single image view
+    // Cache thumbnail images for collection view
     static var thumbImages = [UIImage]()
-    static var fullImages = [UIImage]()
+    static var imageFilePaths = [String]()
     
     //MARK: - Data Loading
     
@@ -31,29 +31,29 @@ class DatabaseManager {
         let thumbnailFolderURL = url.appendingPathComponent(thumbFolderName, isDirectory: true)
         let imageFolderURL = url.appendingPathComponent(imageFolderName, isDirectory: true)
         let fileList = listOfFileNames() // Get list of image file IDs from local database
+                
+        // Load thumbnail images to cache
         for fileName in fileList {
-            let imageURL = imageFolderURL.appendingPathComponent("\(fileName).jpg")
             let thumbImageURL = thumbnailFolderURL.appendingPathComponent("\(fileName).jpg") // Create URL for each image file
             do {
-                let imageData = try Data(contentsOf: imageURL)
-                guard let image = UIImage(data: imageData) else { return }
-                DatabaseManager.fullImages.append(image) // Load full images
-                
                 let thumbData = try Data(contentsOf: thumbImageURL)
                 guard let thumbImage = UIImage(data: thumbData) else { return }
-                DatabaseManager.thumbImages.append(thumbImage) // Load thumbnail images
+                DatabaseManager.thumbImages.append(thumbImage)
             } catch {
                 print("Error loading image data from file system to memory buffer: \(error)")
             }
+        }
+        
+        // Load full size image file path to cache
+        for fileName in fileList {
+            let imageURL = imageFolderURL.appendingPathComponent("\(fileName).jpg")
+            DatabaseManager.imageFilePaths.append(imageURL.path)
         }
     }
     
     //MARK: - Data Saving
     
     internal func saveData(_ data: CatData) {
-        // Save resized images to array used by collection and single image VC
-        DatabaseManager.fullImages.insert(data.image, at: 0)
-        
         // Save data to local database
         let newData = Favorite(context: context)
         newData.id = data.id
@@ -69,12 +69,12 @@ class DatabaseManager {
     
     private func saveImageToLocalSystem(_ image: UIImage, _ fileName: String) {
         // Save full scale image
-        guard let compressedJPG = image.jpegData(compressionQuality: 0.5) else { return }
+        guard let compressedJPG = image.jpegData(compressionQuality: 0.7) else { return }
         writeFileTo(folder: imageFolderName, withData: compressedJPG, withName: "\(fileName).jpg")
         
         // Save downsampled image
         let downsampledImage = imageProcess.downsample(dataAt: compressedJPG)
-        guard let JpegData = downsampledImage.jpegData(compressionQuality: 0.5) else { return }
+        guard let JpegData = downsampledImage.jpegData(compressionQuality: 0.7) else { return }
         writeFileTo(folder: thumbFolderName, withData: JpegData, withName: "\(fileName).jpg")
         
         // Save thumbnail images to array used by collection VC
@@ -89,11 +89,17 @@ class DatabaseManager {
             appropriateFor: nil,
             create: true
         )
+        
         if let fileURL = url?.appendingPathComponent(folderName, isDirectory: true).appendingPathComponent(fileName) {
             do {
                 try data.write(to: fileURL) // Write data to assigned URL
             } catch {
                 print("Error writing data into document directory: \(error)")
+            }
+            
+            // Cache file path
+            if folderName == imageFolderName {
+                DatabaseManager.imageFilePaths.insert(fileURL.path, at: 0)
             }
         }
     }
@@ -136,8 +142,11 @@ class DatabaseManager {
             }
         }
         
-        // Remove cached thumbnail and full image
-        DatabaseManager.fullImages.remove(at: cacheIndex)
+        // Remove thumbnail and image cache
+        guard cacheIndex < DatabaseManager.imageFilePaths.count else { return }
+        DatabaseManager.imageFilePaths.remove(at: cacheIndex)
+        
+        guard cacheIndex < DatabaseManager.thumbImages.count else { return }
         DatabaseManager.thumbImages.remove(at: cacheIndex)
     }
     
