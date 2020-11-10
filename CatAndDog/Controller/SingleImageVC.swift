@@ -69,21 +69,19 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         previousImage.zoomScale = previousImage.minimumZoomScale
         
         if currentPage > previousPage { // User swipes to next imageView
-            // Set image to the imageView 3 index behind the current imageView
-            setImages(at: currentPage)
-            if currentPage > 2 {
-                // Reset the imageView's image 3 index before the current imageView
+            setImages(at: currentPage) // Set current and 4 nearby imageView image respectively
+            if currentPage > 2 { // Current index number is 3 or more
+                // Reset the imageView 3 index before the current imageView with default image
                 if let imageViewToReset = stackView.arrangedSubviews[currentPage - 3] as? ImageScrollView {
                     imageViewToReset.set(image: defaultImage)
                 }
             }
             
         } else if currentPage < previousPage { // User swipes to previous imageView
-            // Set image to the imageView 3 index before the current imageView
-            setImages(at: currentPage)
-            
-            if currentPage < stackView.arrangedSubviews.count - 3 {
-                // Reset the imageView's image 3 index behind the current imageView
+            setImages(at: currentPage) // Set current and 4 nearby imageView image respectively
+            let lastIndex = stackView.arrangedSubviews.count - 1
+            if currentPage < lastIndex - 2 { // Current index is 2 short of the last index number
+                // Reset the imageView 3 index behind the current imageView with default image
                 if let imageViewToReset = stackView.arrangedSubviews[currentPage + 3] as? ImageScrollView {
                     imageViewToReset.set(image: defaultImage)
                 }
