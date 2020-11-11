@@ -23,7 +23,9 @@ struct K {
         static let share = UIImage(systemName: "square.and.arrow.up")
     }
     struct Data {
+//        static let maxOfCachedData: Int = 3 // TEST USE
         static let maxOfCachedData: Int = 10
+        static let maxBufferDataNumber: Int = 3
     }
     struct ToolBar {
         static let height: CGFloat = 44.0
@@ -32,7 +34,7 @@ struct K {
         struct Animation {
             struct Threshold {
                 static let distance: CGFloat = 80
-                static let speed: CGFloat = 800
+                static let speed: CGFloat = 1000
             }
         }
         struct Size {
@@ -51,11 +53,5 @@ struct K {
     }
     struct ImageView {
         static let dynamicScaleThreshold: CGFloat = 0.15
-        struct Constraint {
-            static let leading: CGFloat = 0.0
-            static let trailing: CGFloat = -0.0
-            static let top: CGFloat = 0.0
-            static let bottom: CGFloat = -0.0
-        }
     }
 }

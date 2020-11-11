@@ -30,17 +30,18 @@ class ImageScrollView: UIScrollView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func set(image: UIImage) {
+    internal func set(image: UIImage) {
         imageZoomView?.removeFromSuperview()
         imageZoomView = nil
         
         imageZoomView = UIImageView(image: image)
+        imageZoomView.contentMode = .scaleAspectFit
         self.addSubview(imageZoomView)
         
         configurateFor(imageSize: image.size)
     }
 
-    func configurateFor(imageSize: CGSize) {
+    private func configurateFor(imageSize: CGSize) {
         self.contentSize = imageSize
         
         setCurrentMaxAndMinZoomScale()
@@ -56,7 +57,7 @@ class ImageScrollView: UIScrollView {
         self.centerImage()
     }
     
-    func setCurrentMaxAndMinZoomScale() {
+    private func setCurrentMaxAndMinZoomScale() {
         let scrollViewSize = self.bounds.size
         let imageViewSize = imageZoomView.bounds.size
         
@@ -68,7 +69,7 @@ class ImageScrollView: UIScrollView {
         self.maximumZoomScale = 1.5
     }
     
-    func centerImage() {
+    private func centerImage() {
         let boundsSize = self.bounds.size
         var frameToCenter = imageZoomView.frame
         
@@ -94,7 +95,7 @@ class ImageScrollView: UIScrollView {
         self.zoom(point: location, animated: true)
     }
     
-    func zoom(point: CGPoint, animated: Bool) {
+    private func zoom(point: CGPoint, animated: Bool) {
         let currentScale = self.zoomScale
         let minScale = self.minimumZoomScale
         var toScale: CGFloat?
@@ -118,7 +119,7 @@ class ImageScrollView: UIScrollView {
         self.zoom(to: zoomRect, animated: animated)
     }
     
-    func zoomRect(scale: CGFloat, center: CGPoint) -> CGRect {
+    private func zoomRect(scale: CGFloat, center: CGPoint) -> CGRect {
         var zoomRect = CGRect.zero
         let bounds = self.bounds
         

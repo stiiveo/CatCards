@@ -21,7 +21,8 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     var previousPage = Int()
     let databaseManager = DatabaseManager()
     var imageViews = [ImageScrollView()] // ImageViews cache used to populate stackView
-    let defaultImage = UIColor.systemGray5.image(CGSize(width: 400, height: 400)) // Default image used as default image in stackView
+    let defaultImage = UIColor.systemGray5.image(CGSize(width: 400, height: 400)) // Default image in stackView
+    let bufferImageNumber: Int = K.Data.maxBufferDataNumber
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,15 +35,14 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        // Populate cache array with same amount of ImageScrollView object as the total image number and set default image to each object
-        imageViews = (1...DatabaseManager.imageFilePaths.count).map { _ in
-            let imageView = ImageScrollView(frame: view.bounds)
-            imageView.set(image: defaultImage)
-            return imageView
+        initiateImageViewCache() // Create imageView cache
+        generateDefaultImageViews() // Populate cache array with default imageViews
+        
+        // Set images to selected imageView and nearby ones
+        for index in (selectedCellIndex - 3)...(selectedCellIndex + 3) {
+            setImage(at: index)
         }
         
-        generateTemplateImageViews()
-        setImages(at: selectedCellIndex)
         setScrollViewOffset() // Scroll to show the user selected image
     }
     
@@ -59,7 +59,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         self.previousPage = self.currentPage // Save the index of scrollView's page before it's changed by the user
     }
     
-    /// Dynamically load/unload images and control the total number of arranged subviews in the stackView to limit the system memory usage
+    /// Dynamically load/unload images and control the total number of arranged subviews in the stackView to limit the system memory consumption
     /// - Parameter scrollView: The scroll-view object that is decelerating the scrolling of the content view.
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         guard currentPage != previousPage else { return }
@@ -68,55 +68,69 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let previousImage = stackView.arrangedSubviews[previousPage] as! ImageScrollView
         previousImage.zoomScale = previousImage.minimumZoomScale
         
-        if currentPage > previousPage { // User swipes to next imageView
-            setImages(at: currentPage) // Set current and 4 nearby imageView image respectively
-            if currentPage > 2 { // Current index number is 3 or more
-                // Reset the imageViews 3 index before the current imageView with default image
-                for index in 0...(currentPage - 3) {
+        // User swipes to next imageView
+        if currentPage > previousPage {
+            // Update imageViews ahead of current displayed view
+            for index in (currentPage - 1)...(currentPage + bufferImageNumber) {
+                setImage(at: index)
+            }
+            
+            // Image number on the left is bigger than buffer number
+            if currentPage > bufferImageNumber {
+                // Reset image if cached number surpasses the buffer limit
+                for index in 0...(currentPage - bufferImageNumber - 1) {
                     if let imageViewToReset = stackView.arrangedSubviews[index] as? ImageScrollView {
                         imageViewToReset.set(image: defaultImage)
                     }
                 }
             }
+        // User swipes to previous imageView
+        } else if currentPage < previousPage {
+            // Update imageViews before the current displayed view
+            for index in (currentPage - bufferImageNumber)...(currentPage + 1) {
+                setImage(at: index)
+            }
             
-        } else if currentPage < previousPage { // User swipes to previous imageView
-            setImages(at: currentPage) // Set current and 4 nearby imageView image respectively
-            let lastIndex = stackView.arrangedSubviews.count - 1
-            if currentPage < lastIndex - 2 { // Current index is 2 short of the last index number
-                // Reset the imageViews 3 index behind the current imageView with default image
-                for index in (currentPage + 3)..<stackView.arrangedSubviews.count {
+            let totalIndexNumber = stackView.arrangedSubviews.count
+            // Image number on the right is bigger than buffer number
+            if currentPage < (totalIndexNumber - bufferImageNumber) {
+                // Reset image if cached number surpasses the buffer limit
+                for index in (currentPage + bufferImageNumber)..<stackView.arrangedSubviews.count {
                     if let imageViewToReset = stackView.arrangedSubviews[index] as? ImageScrollView {
                         imageViewToReset.set(image: defaultImage)
                     }
                 }
             }
         }
+        
     }
     
     //MARK: - StackView Subview Loading
     
+    private func setImage(at index: Int) {
+        // Ensure index is within the bound of array
+        guard 0 <= index && index < DatabaseManager.imageFilePaths.count else { return }
+        
+        let filePath = DatabaseManager.imageFilePaths[index]
+        guard let imageAtDisk = UIImage(contentsOfFile: filePath) else { return }
+            
+        imageViews[index].set(image: imageAtDisk) // Set image to imageView at valid index value
+    }
+    
+    private func initiateImageViewCache() {
+        imageViews = (1...DatabaseManager.imageFilePaths.count).map { _ in
+            let imageView = ImageScrollView(frame: view.bounds)
+            imageView.set(image: defaultImage)
+            return imageView
+        }
+    }
+    
     /// Load ImageScrollView objects from cached array of 'imageViews' into stackView
-    private func generateTemplateImageViews() {
+    private func generateDefaultImageViews() {
         for index in 0...(DatabaseManager.imageFilePaths.count - 1) {
             stackView.addArrangedSubview(imageViews[index])
             imageViews[index].widthAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.widthAnchor).isActive = true
             imageViews[index].heightAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.heightAnchor).isActive = true
-        }
-    }
-    
-    private func setImages(at index: Int) {
-        for index in (index - 2)...(index + 2) { // Load 5 images from disk where the third image is the user selected one
-            guard 0 <= index && index < DatabaseManager.imageFilePaths.count else { continue } // Ensure index is within the bound of array
-            
-            let filePath = DatabaseManager.imageFilePaths[index]
-            if let imageFromDisk = UIImage(contentsOfFile: filePath) {
-                // Skip image loading process if the image has already been cached.
-                if let existingImage = imageViews[index].imageZoomView.image {
-                    guard !existingImage.isEqual(imageFromDisk) else { continue }
-                }
-                imageViews[index].set(image: imageFromDisk) // Set image to imageView at valid index value
-            }
-            
         }
     }
     
