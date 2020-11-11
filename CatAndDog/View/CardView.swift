@@ -40,9 +40,9 @@ class CardView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    internal func set(image: UIImage) {
-        imageView.image = image
+    private func set(image: UIImage) {
         setContentMode(image: image)
+        imageView.image = image
     }
     
     private func setContentMode(image: UIImage) {

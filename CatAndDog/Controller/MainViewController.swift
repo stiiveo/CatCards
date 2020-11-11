@@ -180,11 +180,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             print("Error: Undo button should have not been enabled")
         }
         
-        // Place undoed card onto the current card
+        // Place undo card in front of the current card
         view.addSubview(undoCard)
         addCardViewConstraint(card: undoCard)
         
-        UIView.animate(withDuration: 0.5) {
+        UIView.animate(withDuration: 0.5) { // Introduction of undo card
             self.undoCard.center = self.cardViewAnchor
             self.undoCard.transform = .identity
             self.firstCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
@@ -411,9 +411,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             let distanceThreshold = K.CardView.Animation.Threshold.distance
             
             if currentData != nil && speed > speedThreshold && travelDistance > distanceThreshold {
+                let endPoint = CGPoint(x: cardViewAnchor.x + velocity.x / 2, y: cardViewAnchor.y + velocity.y / 2)
+                animateCard(card, to: endPoint)
                 animateNextCardTransform()
                 undoCard.data = currentData!
-                animateCard(card, withVelocity: velocity)
             }
             
             // Reset card's position and rotation state
@@ -445,11 +446,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func animateCard(_ card: CardView, withVelocity velocity: CGPoint) {
-        let destination = CGPoint(x: cardViewAnchor.x + velocity.x / 2, y: cardViewAnchor.y + velocity.y / 2)
-        
+    private func animateCard(_ card: CardView, to endPoint: CGPoint) {
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
-            card.center = destination
+            card.center = endPoint
             
         } completion: { (true) in
             // Save spawn position and transform of undo card
