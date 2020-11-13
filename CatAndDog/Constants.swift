@@ -26,6 +26,7 @@ struct K {
 //        static let maxOfCachedData: Int = 3 // TEST USE
         static let maxOfCachedData: Int = 10
         static let maxBufferImageNumber: Int = 4
+        static let maxImageSize = CGSize(width: 1024, height: 1024)
     }
     struct ToolBar {
         static let height: CGFloat = 44.0

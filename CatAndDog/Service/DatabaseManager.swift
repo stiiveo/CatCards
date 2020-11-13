@@ -26,7 +26,7 @@ class DatabaseManager {
     //MARK: - Data Loading
     
     // Load thumbnail images from local folder
-    internal func loadImagesFromLocalSystem() {
+    internal func loadImageFromLocalSystem() {
         let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let thumbnailFolderURL = url.appendingPathComponent(thumbFolderName, isDirectory: true)
         let imageFolderURL = url.appendingPathComponent(imageFolderName, isDirectory: true)
@@ -67,14 +67,27 @@ class DatabaseManager {
         saveImageToLocalSystem(data.image, data.id)
     }
     
+    /// Save downloaded image and downsampled image to user's local disk.
+    ///
+    ///  * Image is compressed to JPG file.
+    ///  * Thumbnail image is made by downsampling the image data and converting to JPG file.
+    /// - Parameters:
+    ///   - image: Image to be processed and saved.
+    ///   - fileName: The name used to be saved in local file system, both image and thumbnail image.
     private func saveImageToLocalSystem(_ image: UIImage, _ fileName: String) {
-        // Save full scale image
-        guard let compressedJPG = image.jpegData(compressionQuality: 0.7) else { return }
+        // Compress image to JPG data and save it in local disk
+        guard let compressedJPG = image.jpegData(compressionQuality: 0.7) else {
+            print("Unable to convert UIImage to JPG data."); return }
         writeFileTo(folder: imageFolderName, withData: compressedJPG, withName: "\(fileName).jpg")
         
-        // Save downsampled image
-        let downsampledImage = imageProcess.downsample(dataAt: compressedJPG)
-        guard let JpegData = downsampledImage.jpegData(compressionQuality: 0.7) else { return }
+        // Downsample the downloaded image
+        guard let imageData = image.pngData() else {
+            print("Unable to convert UIImage object to PNG data."); return }
+        let downsampledImage = imageProcess.downsample(dataAt: imageData)
+        
+        // Convert downsampled image to JPG data and save it to local disk
+        guard let JpegData = downsampledImage.jpegData(compressionQuality: 0.7) else {
+            print("Error: Unable to convert downsampled image data to JPG data."); return }
         writeFileTo(folder: thumbFolderName, withData: JpegData, withName: "\(fileName).jpg")
         
         // Save thumbnail images to array used by collection VC

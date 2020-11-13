@@ -17,7 +17,7 @@ class ImageProcess {
     
     internal func resizeImage(_ image: UIImage) -> UIImage {
         let imageSize = image.size
-        let maxSize = CGSize(width: screenSize.width * 2, height: screenSize.height * 2) // The image size can be no more than four times bigger than the screen
+        let maxSize = K.Data.maxImageSize
         
         // Return original image if its height or width is smaller than threshold
         guard imageSize.height > maxSize.height && imageSize.width > maxSize.width else { return image }
@@ -56,8 +56,13 @@ class ImageProcess {
              kCGImageSourceCreateThumbnailWithTransform: true,
              kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
         
-        let downsampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downsampleOptions)!
-        return UIImage(cgImage: downsampledImage)
+        if let downsampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downsampleOptions) {
+            return UIImage(cgImage: downsampledImage)
+        } else {
+            print("Error: Unable to downsample image source to thumbnail image data.")
+            return UIImage(data: data)!
+        }
+        
     }
     
 }
