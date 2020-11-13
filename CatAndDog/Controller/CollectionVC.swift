@@ -11,11 +11,11 @@ import ImageIO
 
 class CollectionVC: UICollectionViewController {
     
-    let screenWidth = UIScreen.main.bounds.width
-    var selectedCellIndex: Int = 0
+    private let screenWidth = UIScreen.main.bounds.width
+    private var selectedCellIndex: Int = 0
     
     // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
-    var cellNumberPerRow: CGFloat {
+    private var cellNumberPerRow: CGFloat {
         if screenWidth >= 414 {
             return 4.0
         } else {

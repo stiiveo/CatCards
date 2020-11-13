@@ -8,12 +8,12 @@
 
 import UIKit
 
-enum Card {
+private enum Card {
     case firstCard
     case secondCard
 }
 
-enum CurrentView {
+private enum CurrentView {
     case first
     case second
     case undo
@@ -338,12 +338,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Card Panning Methods
     
-    enum Side {
+    private enum Side {
         case upper
         case lower
     }
     
-    var firstFingerLocation: Side?
+    private var firstFingerLocation: Side?
     
     /// Handling the cardView's panning effect which is responded to user's input via finger dragging on the cardView itself.
     /// - Parameter sender: A concrete subclass of UIGestureRecognizer that looks for panning (dragging) gestures.
