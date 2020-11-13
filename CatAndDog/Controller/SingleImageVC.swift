@@ -117,17 +117,17 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     /// - Parameter index: Image's index number of the image buffer array
     private func setImage(at index: Int) {
         // Ensure index is within the bound of array
-        guard 0 <= index && index < DatabaseManager.imageFilePaths.count else { return }
+        guard 0 <= index && index < DatabaseManager.imageFileURLs.count else { return }
         
-        let filePath = DatabaseManager.imageFilePaths[index]
-        guard let imageAtDisk = UIImage(contentsOfFile: filePath) else { return }
+        let imageFileURL = DatabaseManager.imageFileURLs[index].image
+        guard let imageAtDisk = UIImage(contentsOfFile: imageFileURL.path) else { return }
             
         bufferImageArray[index].set(image: imageAtDisk) // Set image to imageView at valid index value
     }
     
     /// Create an `ImageScrollView` array with same item number as local saved image number and set each object's image property the default image defined in this class
     private func initiateImageBufferArray() {
-        bufferImageArray = (1...DatabaseManager.imageFilePaths.count).map { _ in
+        bufferImageArray = (1...DatabaseManager.imageFileURLs.count).map { _ in
             let imageView = ImageScrollView(frame: view.bounds)
             imageView.set(image: defaultImage)
             return imageView
@@ -136,7 +136,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     
     /// Load ImageScrollView objects from cached array of 'imageViews' into stackView
     private func loadDefaultImageView() {
-        for index in 0...(DatabaseManager.imageFilePaths.count - 1) {
+        for index in 0...(DatabaseManager.imageFileURLs.count - 1) {
             stackView.addArrangedSubview(bufferImageArray[index])
             bufferImageArray[index].widthAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.widthAnchor).isActive = true
             bufferImageArray[index].heightAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.heightAnchor).isActive = true
@@ -208,8 +208,8 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     //MARK: - Toolbar Button Methods
     
     @objc func shareButtonPressed() {
-        let filePath = DatabaseManager.imageFilePaths[currentPage]
-        if let imageToShare = UIImage(contentsOfFile: filePath) {
+        let imageFileURL = DatabaseManager.imageFileURLs[currentPage].image
+        if let imageToShare = UIImage(contentsOfFile: imageFileURL.path) {
             // present activity controller
             let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
             self.present(activityController, animated: true)

@@ -18,36 +18,31 @@ class DatabaseManager {
     private let thumbFolderName = "Thumbnails"
     let imageProcess = ImageProcess()
     var favoriteArray = [Favorite]()
+    static var imageFileURLs = [FilePath]()
     
-    // Cache thumbnail images for collection view
-    static var thumbImages = [UIImage]()
-    static var imageFilePaths = [String]()
+    struct FilePath {
+        let image: URL
+        let thumbnail: URL
+    }
     
     //MARK: - Data Loading
     
     // Load thumbnail images from local folder
-    internal func loadImageFromLocalSystem() {
-        let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let thumbnailFolderURL = url.appendingPathComponent(thumbFolderName, isDirectory: true)
-        let imageFolderURL = url.appendingPathComponent(imageFolderName, isDirectory: true)
-        let fileList = listOfFileNames() // Get list of image file IDs from local database
-                
-        // Load thumbnail images to cache
-        for fileName in fileList {
-            let thumbImageURL = thumbnailFolderURL.appendingPathComponent("\(fileName).jpg") // Create URL for each image file
-            do {
-                let thumbData = try Data(contentsOf: thumbImageURL)
-                guard let thumbImage = UIImage(data: thumbData) else { return }
-                DatabaseManager.thumbImages.append(thumbImage)
-            } catch {
-                print("Error loading image data from file system to memory buffer: \(error)")
-            }
-        }
+    internal func getImageFileURLs() {
+        DatabaseManager.imageFileURLs.removeAll() // Clean image file URL cache
         
-        // Load full size image file path to cache
+        let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let imageFolderURL = url.appendingPathComponent(imageFolderName, isDirectory: true)
+        let thumbnailFolderURL = url.appendingPathComponent(thumbFolderName, isDirectory: true)
+        
+        // Load image file path to cache
+        let fileList = listOfFileNames() // Get list of image file IDs from local database
+        
         for fileName in fileList {
             let imageURL = imageFolderURL.appendingPathComponent("\(fileName).jpg")
-            DatabaseManager.imageFilePaths.append(imageURL.path)
+            let thumbnailURL = thumbnailFolderURL.appendingPathComponent("\(fileName).jpg")
+            let newFilePath = FilePath(image: imageURL, thumbnail: thumbnailURL)
+            DatabaseManager.imageFileURLs.append(newFilePath)
         }
     }
     
@@ -90,8 +85,8 @@ class DatabaseManager {
             print("Error: Unable to convert downsampled image data to JPG data."); return }
         writeFileTo(folder: thumbFolderName, withData: JpegData, withName: "\(fileName).jpg")
         
-        // Save thumbnail images to array used by collection VC
-        DatabaseManager.thumbImages.insert(downsampledImage, at: 0)
+        // Refresh image file url cache
+        getImageFileURLs()
     }
     
     // Write data into application's document folder
@@ -109,20 +104,15 @@ class DatabaseManager {
             } catch {
                 print("Error writing data into document directory: \(error)")
             }
-            
-            // Cache file path
-            if folderName == imageFolderName {
-                DatabaseManager.imageFilePaths.insert(fileURL.path, at: 0)
-            }
         }
     }
     
     //MARK: - Data Deletion
     
-    // Delete specific data in database and file system
+    // Delete data matching the ID in database and file system
     internal func deleteData(id: String, atIndex cacheIndex: Int) {
         
-        // Delete data matching the ID in database and file system
+        // Delete data in database (CoreData)
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id MATCHES %@", id) // Fetch data with the matched ID value
         do {
@@ -155,12 +145,8 @@ class DatabaseManager {
             }
         }
         
-        // Remove thumbnail and image cache
-        guard cacheIndex < DatabaseManager.imageFilePaths.count else { return }
-        DatabaseManager.imageFilePaths.remove(at: cacheIndex)
-        
-        guard cacheIndex < DatabaseManager.thumbImages.count else { return }
-        DatabaseManager.thumbImages.remove(at: cacheIndex)
+        // Refresh the image file URL cache
+        getImageFileURLs()
     }
     
     //MARK: - Creation of Directory / sub-Directory

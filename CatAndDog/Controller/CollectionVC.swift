@@ -52,7 +52,7 @@ class CollectionVC: UICollectionViewController {
         self.navigationController?.navigationBar.barTintColor = K.Color.backgroundColor
         self.navigationController?.isToolbarHidden = true
         
-        if DatabaseManager.thumbImages.count == 0 {
+        if DatabaseManager.imageFileURLs.count == 0 {
             let label = defaultLabel() // Display default message on the background
             collectionView.backgroundView = label
         } else {
@@ -89,14 +89,15 @@ class CollectionVC: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return DatabaseManager.thumbImages.count
+        return DatabaseManager.imageFileURLs.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Cell.reuseIdentifier, for: indexPath) as? Cell else {
             fatalError("Expected `\(Cell.self)` type for reuseIdentifier \(Cell.reuseIdentifier). Check the configuration in Main.storyboard.")
         }
-        cell.imageView.image = DatabaseManager.thumbImages[indexPath.row]
+        let thumbnailURL = DatabaseManager.imageFileURLs[indexPath.row].thumbnail
+        cell.imageView.image = UIImage(contentsOfFile: thumbnailURL.path)
         
         return cell
     }

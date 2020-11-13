@@ -85,7 +85,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Create local image folder in file system or load data from it if it already exists
         databaseManager.createDirectory()
-        databaseManager.loadImageFromLocalSystem()
+        databaseManager.getImageFileURLs()
         
         // Disable favorite and share button before data is downloaded
         favoriteBtn.isEnabled = false
