@@ -10,8 +10,8 @@ import UIKit
 
 class ImageScrollView: UIScrollView {
 
-    var imageZoomView: UIImageView!
-    lazy var zoomingTap: UITapGestureRecognizer = {
+    private var imageZoomView: UIImageView!
+    private lazy var zoomingTap: UITapGestureRecognizer = {
         let zoomingTap = UITapGestureRecognizer(target: self, action: #selector(handleZoomingTap))
         zoomingTap.numberOfTapsRequired = 2
         return zoomingTap

@@ -14,15 +14,24 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     @IBOutlet weak var stackView: UIStackView!
     
     var selectedCellIndex: Int = 0
-    var imageScrollView: ImageScrollView!
-    var currentPage: Int {
-        Int(round(scrollView.contentOffset.x / scrollView.frame.width))
+    private var currentPage: Int = 0 {
+        didSet(oldPage) {
+            if currentPage > oldPage {
+                updateImage(at: .forward)
+            }
+            if currentPage < oldPage {
+                updateImage(at: .backward)
+            }
+        }
     }
-    var previousPage = Int()
-    let databaseManager = DatabaseManager()
-    var imageViews = [ImageScrollView()] // ImageViews cache used to populate stackView
-    let defaultImage = UIColor.systemGray5.image(CGSize(width: 400, height: 400)) // Default image in stackView
-    let bufferImageNumber: Int = K.Data.maxBufferDataNumber
+    private var previousPage: Int = 0
+    private var bufferImageArray = [ImageScrollView()] // ImageViews cache used to populate stackView
+    private let bufferImageNumber: Int = K.Data.maxBufferImageNumber
+    private let defaultImage = UIColor.systemGray5.image(CGSize(width: 400, height: 400)) // Default image in stackView
+    
+    private enum ScrollDirection {
+        case forward, backward
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,11 +44,11 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        initiateImageViewCache() // Create imageView cache
-        generateDefaultImageViews() // Populate cache array with default imageViews
+        initiateImageBufferArray() // Create imageView cache
+        loadDefaultImageView() // Populate cache array with default imageViews
         
-        // Set images to selected imageView and nearby ones
-        for index in (selectedCellIndex - 3)...(selectedCellIndex + 3) {
+        // Load images to selected imageView and nearby ones
+        for index in (selectedCellIndex - (bufferImageNumber / 2))...(selectedCellIndex + (bufferImageNumber / 2)) {
             setImage(at: index)
         }
         
@@ -56,57 +65,56 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     //MARK: - Image Loading & Zoom Scale Control
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        self.previousPage = self.currentPage // Save the index of scrollView's page before it's changed by the user
+        previousPage = currentPage // Save the index of scrollView's page before it's changed by the user
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        currentPage = Int(round(scrollView.contentOffset.x / scrollView.frame.width))
     }
     
     /// Dynamically load/unload images and control the total number of arranged subviews in the stackView to limit the system memory consumption
     /// - Parameter scrollView: The scroll-view object that is decelerating the scrolling of the content view.
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        guard currentPage != previousPage else { return }
-        
+        guard currentPage != previousPage else { return } // Make sure the page is changed
         // Reset zoom scale
         let previousImage = stackView.arrangedSubviews[previousPage] as! ImageScrollView
         previousImage.zoomScale = previousImage.minimumZoomScale
         
-        // User swipes to next imageView
-        if currentPage > previousPage {
-            // Update imageViews ahead of current displayed view
-            for index in (currentPage - 1)...(currentPage + bufferImageNumber) {
-                setImage(at: index)
-            }
-            
-            // Image number on the left is bigger than buffer number
-            if currentPage > bufferImageNumber {
-                // Reset image if cached number surpasses the buffer limit
-                for index in 0...(currentPage - bufferImageNumber - 1) {
-                    if let imageViewToReset = stackView.arrangedSubviews[index] as? ImageScrollView {
-                        imageViewToReset.set(image: defaultImage)
-                    }
-                }
-            }
-        // User swipes to previous imageView
-        } else if currentPage < previousPage {
-            // Update imageViews before the current displayed view
-            for index in (currentPage - bufferImageNumber)...(currentPage + 1) {
-                setImage(at: index)
-            }
-            
-            let totalIndexNumber = stackView.arrangedSubviews.count
-            // Image number on the right is bigger than buffer number
-            if currentPage < (totalIndexNumber - bufferImageNumber) {
-                // Reset image if cached number surpasses the buffer limit
-                for index in (currentPage + bufferImageNumber)..<stackView.arrangedSubviews.count {
-                    if let imageViewToReset = stackView.arrangedSubviews[index] as? ImageScrollView {
-                        imageViewToReset.set(image: defaultImage)
-                    }
-                }
-            }
-        }
-        
     }
     
-    //MARK: - StackView Subview Loading
+    //MARK: - StackView Image Loading
     
+    /// Load image from disk and reset buffered image.
+    ///
+    /// When user scrolls to next / previous page, the image which index is within the buffer range is loaded from local disk and the one outside the buffer range is reset.
+    /// - Parameter direction: User's scrolling direction: Either 'forward' or 'backward'
+    private func updateImage(at direction: ScrollDirection) {
+        switch direction {
+        case .forward:
+            // Update imageView ahead of current page
+            setImage(at: currentPage + (bufferImageNumber / 2))
+            
+            // Reset image out of the buffer range
+            let bufferToRemoveIndex = currentPage - (bufferImageNumber / 2) - 1
+            guard bufferToRemoveIndex >= 0 && bufferToRemoveIndex < bufferImageArray.count else { return }
+            if let imageToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
+                imageToReset.set(image: defaultImage)
+            }
+        case .backward:
+            // Update imageView before the current page
+            setImage(at: currentPage - (bufferImageNumber / 2))
+            
+            // Reset image out of the buffer range
+            let bufferToRemoveIndex = currentPage + (bufferImageNumber / 2) + 1
+            guard bufferToRemoveIndex >= 0 && bufferToRemoveIndex < bufferImageArray.count else { return }
+            if let imageToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
+                imageToReset.set(image: defaultImage)
+            }
+        }
+    }
+    
+    /// Load image at designated index from local disk to memory buffer
+    /// - Parameter index: Image's index number of the image buffer array
     private func setImage(at index: Int) {
         // Ensure index is within the bound of array
         guard 0 <= index && index < DatabaseManager.imageFilePaths.count else { return }
@@ -114,11 +122,12 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let filePath = DatabaseManager.imageFilePaths[index]
         guard let imageAtDisk = UIImage(contentsOfFile: filePath) else { return }
             
-        imageViews[index].set(image: imageAtDisk) // Set image to imageView at valid index value
+        bufferImageArray[index].set(image: imageAtDisk) // Set image to imageView at valid index value
     }
     
-    private func initiateImageViewCache() {
-        imageViews = (1...DatabaseManager.imageFilePaths.count).map { _ in
+    /// Create an `ImageScrollView` array with same item number as local saved image number and set each object's image property the default image defined in this class
+    private func initiateImageBufferArray() {
+        bufferImageArray = (1...DatabaseManager.imageFilePaths.count).map { _ in
             let imageView = ImageScrollView(frame: view.bounds)
             imageView.set(image: defaultImage)
             return imageView
@@ -126,11 +135,11 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     }
     
     /// Load ImageScrollView objects from cached array of 'imageViews' into stackView
-    private func generateDefaultImageViews() {
+    private func loadDefaultImageView() {
         for index in 0...(DatabaseManager.imageFilePaths.count - 1) {
-            stackView.addArrangedSubview(imageViews[index])
-            imageViews[index].widthAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.widthAnchor).isActive = true
-            imageViews[index].heightAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.heightAnchor).isActive = true
+            stackView.addArrangedSubview(bufferImageArray[index])
+            bufferImageArray[index].widthAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.widthAnchor).isActive = true
+            bufferImageArray[index].heightAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.heightAnchor).isActive = true
         }
     }
     
@@ -193,7 +202,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let viewToDelete = stackView.arrangedSubviews[index]
         stackView.removeArrangedSubview(viewToDelete)
         viewToDelete.removeFromSuperview()
-        imageViews.remove(at: index) // Remove cached imageView
+        bufferImageArray.remove(at: index) // Remove cached imageView
     }
     
     //MARK: - Toolbar Button Methods
@@ -211,11 +220,12 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let alert = UIAlertController(title: "This action can not be reverted.", message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: "Delete Image", style: .destructive) { (action) in
             
-            let savedDataList = self.databaseManager.listOfFileNames()
+            let databaseManager = DatabaseManager()
+            let savedDataList = databaseManager.listOfFileNames()
             let dataID = savedDataList[self.currentPage]
             
             // Delete data in file system, database and refresh the imageArray
-            self.databaseManager.deleteData(id: dataID, atIndex: self.currentPage)
+            databaseManager.deleteData(id: dataID, atIndex: self.currentPage)
             
             // Animate the scroll view
             self.scrollAndRemoveImageView()
@@ -252,7 +262,8 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
 }
 
 extension UIColor {
-    /// Simple way to generate solid-color UIimage object
+    /// Simplified way to create a solid-color UIimage object with set size
+    ///
     /// Demo code: *let image0 = UIColor.orange.image(CGSize(width: 128, height: 128)); let image1 = UIColor.yellow.image()*
     /// - Parameter size: *Optional*: Default size is CGSize(width: 1, height: 1)
     /// - Returns: UIImage object with designated color
