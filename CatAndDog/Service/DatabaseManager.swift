@@ -14,8 +14,8 @@ class DatabaseManager {
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     private let fileManager = FileManager.default
     private let documentDirectory = FileManager.SearchPathDirectory.documentDirectory
-    private let imageFolderName = "Cat_Pictures"
-    private let thumbFolderName = "Thumbnails"
+    private let imageFolderName = K.Data.FolderName.fullImage
+    private let thumbFolderName = K.Data.FolderName.thumbnail
     let imageProcess = ImageProcess()
     var favoriteArray = [Favorite]()
     static var imageFileURLs = [FilePath]()

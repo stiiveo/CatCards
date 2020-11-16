@@ -15,7 +15,7 @@ protocol NetworkManagerDelegate {
 
 class NetworkManager {
     
-    private let catUrl = "https://api.thecatapi.com/v1/images/search?mime_types=jpg"
+    private let catUrl = K.Data.apiUrlAddress
     internal var delegate: NetworkManagerDelegate?
     internal var serializedData: [Int: CatData] = [:]
     private var dataIndex: Int = 0

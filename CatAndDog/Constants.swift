@@ -24,9 +24,14 @@ struct K {
     }
     struct Data {
 //        static let maxOfCachedData: Int = 3 // TEST USE
-        static let maxOfCachedData: Int = 10
+        static let maxOfCachedData: Int = 10 // The value should be between 1 to 10
         static let maxBufferImageNumber: Int = 4
         static let maxImageSize = CGSize(width: 1024, height: 1024)
+        static let apiUrlAddress = "https://api.thecatapi.com/v1/images/search?mime_types=jpg"
+        struct FolderName {
+            static let fullImage = "Cat_Pictures"
+            static let thumbnail = "Thumbnails"
+        }
     }
     struct ToolBar {
         static let height: CGFloat = 44.0
