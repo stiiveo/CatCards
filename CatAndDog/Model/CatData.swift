@@ -9,7 +9,6 @@
 import UIKit
 
 struct CatData {
-    let imageURL: URL
     let id: String
     let image: UIImage
 }

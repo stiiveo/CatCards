@@ -17,7 +17,7 @@ class ImageProcess {
     
     internal func resizeImage(_ image: UIImage) -> UIImage {
         let imageSize = image.size
-        let maxSize = K.Data.maxImageSize
+        let maxSize = K.Image.maxImageSize
         
         // Return original image if its height or width is smaller than threshold
         guard imageSize.height > maxSize.height && imageSize.width > maxSize.width else { return image }
@@ -59,7 +59,7 @@ class ImageProcess {
         if let downsampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downsampleOptions) {
             return UIImage(cgImage: downsampledImage)
         } else {
-            print("Error: Unable to downsample image source to thumbnail image data.")
+            debugPrint("Error: Unable to downsample image source to thumbnail image data.")
             return UIImage(data: data)!
         }
         

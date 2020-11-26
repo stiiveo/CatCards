@@ -13,10 +13,9 @@ class DatabaseManager {
     
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     private let fileManager = FileManager.default
-    private let documentDirectory = FileManager.SearchPathDirectory.documentDirectory
-    private let imageFolderName = K.Data.FolderName.fullImage
-    private let thumbFolderName = K.Data.FolderName.thumbnail
-    let imageProcess = ImageProcess()
+    private let imageFolderName = K.Image.FolderName.fullImage
+    private let thumbFolderName = K.Image.FolderName.thumbnail
+    internal let imageProcess = ImageProcess()
     var favoriteArray = [Favorite]()
     static var imageFileURLs = [FilePath]()
     
@@ -29,21 +28,25 @@ class DatabaseManager {
     
     // Load thumbnail images from local folder
     internal func getImageFileURLs() {
-        DatabaseManager.imageFileURLs.removeAll() // Clean image file URL cache
+        DatabaseManager.imageFileURLs.removeAll() // Clean all image file URLs in memory buffer first
         
         let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let imageFolderURL = url.appendingPathComponent(imageFolderName, isDirectory: true)
         let thumbnailFolderURL = url.appendingPathComponent(thumbFolderName, isDirectory: true)
         
         // Load image file path to cache
-        let fileList = listOfFileNames() // Get list of image file IDs from local database
-        
+        let fileList = listOfSavedFileNames() // Get list of image file IDs from local database
         for fileName in fileList {
-            let imageURL = imageFolderURL.appendingPathComponent("\(fileName).jpg")
-            let thumbnailURL = thumbnailFolderURL.appendingPathComponent("\(fileName).jpg")
+            let fileExtension = K.API.imageType
+            let imageURL = imageFolderURL.appendingPathComponent(fileName + "." + fileExtension)
+            let thumbnailURL = thumbnailFolderURL.appendingPathComponent(fileName + "." + fileExtension)
             let newFilePath = FilePath(image: imageURL, thumbnail: thumbnailURL)
+            
             DatabaseManager.imageFileURLs.append(newFilePath)
         }
+        
+        // TEST USE
+        print("Local Document Directory Path: \(url.path)")
     }
     
     //MARK: - Data Saving
@@ -59,7 +62,7 @@ class DatabaseManager {
         favoriteArray.append(newData)
         
         // Save image to local file system with ID as the file name
-        saveImageToLocalSystem(data.image, data.id)
+        saveImageToLocalSystem(image: data.image, fileName: data.id)
     }
     
     /// Save downloaded image and downsampled image to user's local disk.
@@ -69,20 +72,20 @@ class DatabaseManager {
     /// - Parameters:
     ///   - image: Image to be processed and saved.
     ///   - fileName: The name used to be saved in local file system, both image and thumbnail image.
-    private func saveImageToLocalSystem(_ image: UIImage, _ fileName: String) {
+    private func saveImageToLocalSystem(image: UIImage, fileName: String) {
         // Compress image to JPG data and save it in local disk
         guard let compressedJPG = image.jpegData(compressionQuality: 0.7) else {
-            print("Unable to convert UIImage to JPG data."); return }
+            debugPrint("Unable to convert UIImage to JPG data."); return }
         writeFileTo(folder: imageFolderName, withData: compressedJPG, withName: "\(fileName).jpg")
         
         // Downsample the downloaded image
         guard let imageData = image.pngData() else {
-            print("Unable to convert UIImage object to PNG data."); return }
+            debugPrint("Unable to convert UIImage object to PNG data."); return }
         let downsampledImage = imageProcess.downsample(dataAt: imageData)
         
         // Convert downsampled image to JPG data and save it to local disk
         guard let JpegData = downsampledImage.jpegData(compressionQuality: 0.7) else {
-            print("Error: Unable to convert downsampled image data to JPG data."); return }
+            debugPrint("Error: Unable to convert downsampled image data to JPG data."); return }
         writeFileTo(folder: thumbFolderName, withData: JpegData, withName: "\(fileName).jpg")
         
         // Refresh image file url cache
@@ -92,7 +95,7 @@ class DatabaseManager {
     // Write data into application's document folder
     private func writeFileTo(folder folderName: String, withData data: Data, withName fileName: String) {
         let url = try? fileManager.url(
-            for: documentDirectory,
+            for: .documentDirectory,
             in: .userDomainMask,
             appropriateFor: nil,
             create: true
@@ -102,7 +105,7 @@ class DatabaseManager {
             do {
                 try data.write(to: fileURL) // Write data to assigned URL
             } catch {
-                print("Error writing data into document directory: \(error)")
+                debugPrint("Error writing data into document directory: \(error)")
             }
         }
     }
@@ -122,7 +125,7 @@ class DatabaseManager {
             }
             saveContext()
         } catch {
-            print("Error fetching result from container: \(error)")
+            debugPrint("Error fetching result from container: \(error)")
         }
         
         // Delete image file in local file system
@@ -132,7 +135,7 @@ class DatabaseManager {
             do {
                 try fileManager.removeItem(at: imageURL)
             } catch {
-                print("Error removing image from file system: \(error)")
+                debugPrint("Error removing image from file system: \(error)")
             }
         }
         // Delete thumbnail file in local file system
@@ -141,7 +144,7 @@ class DatabaseManager {
             do {
                 try fileManager.removeItem(at: thumbnailURL)
             } catch {
-                print("Error removing thumbnail image from file system: \(error)")
+                debugPrint("Error removing thumbnail image from file system: \(error)")
             }
         }
         
@@ -176,11 +179,11 @@ class DatabaseManager {
     }
     
     private func folderURL(name: String) -> URL {
-        let documentURL = fileManager.urls(for: documentDirectory, in: .userDomainMask).first!
+        let documentURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         return documentURL.appendingPathComponent(name, isDirectory: true)
     }
     
-    //MARK: - Support
+    //MARK: - CoreData and File Manager Tools
     
     internal func isDataSaved(data: CatData) -> Bool {
         let url = folderURL(name: imageFolderName)
@@ -189,7 +192,7 @@ class DatabaseManager {
         return fileManager.fileExists(atPath: newFileURL.path)
     }
     
-    internal func listOfFileNames() -> [String] {
+        internal func listOfSavedFileNames() -> [String] {
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         
         // Sort data by making the last saved data at first
@@ -206,7 +209,7 @@ class DatabaseManager {
             }
             return fileNameList
         } catch {
-            print("Error fetching Favorite entity from container: \(error)")
+            debugPrint("Error fetching Favorite entity from container: \(error)")
         }
         return []
     }
@@ -215,7 +218,7 @@ class DatabaseManager {
         do {
             try self.context.save()
         } catch {
-            print("Error saving Favorite object to container: \(error)")
+            debugPrint("Error saving Favorite object to container: \(error)")
         }
     }
    

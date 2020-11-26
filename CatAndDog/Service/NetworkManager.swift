@@ -15,31 +15,35 @@ protocol NetworkManagerDelegate {
 
 class NetworkManager {
     
-    private let catUrl = K.Data.apiUrlAddress
     internal var delegate: NetworkManagerDelegate?
     internal var serializedData: [Int: CatData] = [:]
     private var dataIndex: Int = 0
     private let imageProcesser = ImageProcess()
     
     internal func performRequest(numberOfRequests: Int) {
-        for _ in 0..<numberOfRequests {
-            let session = URLSession(configuration: .default)
-            guard let url = URL(string: catUrl) else {
-                print("Error creating URL object from API's HTTP address")
+        guard numberOfRequests > 0 else { debugPrint("Error: Number of network request equals 0 or less."); return }
+        for _ in 1...numberOfRequests {
+            // Create URL object using API's HTTP address string
+            guard let url = URL(string: K.API.urlString) else {
+                debugPrint("Error creating URL object from API's HTTP address")
                 return
             }
-            let task = session.dataTask(with: url) { (data, response, error) in
+            
+            let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+                // Error occured during process of network data fetching
                 if error != nil {
                     self.delegate?.errorDidOccur()
-                    print("Error fetching data with url.")
+                    debugPrint("Error fetching data with url.")
                     return
-                } else {
-                    if let safeData = data {
-                        self.parseJSON(data: safeData)
+                }
+                // Data is required successfully
+                else {
+                    if let fetchedData = data {
+                        self.parseJSON(data: fetchedData)
                     }
                 }
             }
-            task.resume()
+            task.resume() // Start the newly-initialized task
         }
     }
     
@@ -50,7 +54,7 @@ class NetworkManager {
             let decodedData = try jsonDecoder.decode([JSONModel].self, from: data) // Decoded data type: [JSONModel]
             let jsonData = decodedData[0] // [JSONModel] -> JSONModel
             guard let imageURL = URL(string: jsonData.url) else {
-                print("Error creating URL object from fetched url.")
+                debugPrint("Error creating URL object from fetched url.")
                 return
             }
             let newImage = imageFromURL(url: imageURL)
@@ -58,9 +62,10 @@ class NetworkManager {
             let newID = jsonData.id
             
             // Construct new CatData object and append to catDataArray
-            let newData = CatData(imageURL: imageURL, id: newID, image: resizedImage)
+            let newData = CatData(id: newID, image: resizedImage)
+            
             dataIndex += 1
-            serializedData[dataIndex] = newData
+            serializedData[dataIndex] = newData // Save newly-initialized data to memory buffer
             
             // Remove the first saved data in the array if numbers of data exceed threshold
             if serializedData.count > K.Data.maxOfCachedData {
@@ -76,12 +81,12 @@ class NetworkManager {
         do {
             let imageData = try Data(contentsOf: url)
             guard let image = UIImage(data: imageData) else {
-                print("Error converting imageData into UIImage object.")
+                debugPrint("Error converting imageData into UIImage object.")
                 return UIImage(named: "default")!
             }
             return image
         } catch {
-            print("Error creating image data from url: \(error)")
+            debugPrint("Error creating image data from url: \(error)")
         }
         return UIImage(named: "default")!
     }

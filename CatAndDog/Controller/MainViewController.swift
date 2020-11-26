@@ -177,7 +177,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             self.removeGestureRecognizers(from: secondCard)
             nextCard = .secondCard
         case .undo:
-            print("Error: Undo button should have not been enabled")
+            debugPrint("Error: Undo button should have not been enabled")
         }
         
         // Place undo card in front of the current card
@@ -199,7 +199,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
     }
     
-    //MARK: - Favorite Action
+    //MARK: - Data Saving Method
     
     @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
         if let data = currentData {
@@ -216,7 +216,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Share Action
+    //MARK: - Image Sharing Method
     
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
         if let imageToShare = currentData?.image {
@@ -225,7 +225,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Constraints and Style Methods
+    //MARK: - Constraints and Style Method
     
     // Add constraints to cardView
     private func addCardViewConstraint(card: UIView) {
@@ -442,7 +442,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 }
             }
         default:
-            print("Error handling card panning detection.")
+            debugPrint("Error handling card panning detection.")
         }
     }
     
@@ -504,7 +504,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     view.center = self.imageViewAnchor
                 })
             default:
-                print("Error handling image panning")
+                debugPrint("Error handling image panning")
             }
         }
     }
@@ -529,7 +529,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     view.transform = .identity
                 })
             default:
-                print("Error handling image zooming")
+                debugPrint("Error handling image zooming")
             }
         }
     }
