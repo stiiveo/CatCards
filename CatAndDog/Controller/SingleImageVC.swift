@@ -27,7 +27,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     private var previousPage: Int = 0
     private var bufferImageArray = [ImageScrollView()] // ImageViews cache used to populate stackView
     private let bufferImageNumber: Int = K.Data.maxBufferImageNumber
-    private let defaultImage = UIColor.systemGray5.image(CGSize(width: 400, height: 400)) // Default image in stackView
+    private let defaultImage = K.Image.defaultImage
     
     private enum ScrollDirection {
         case forward, backward
@@ -37,7 +37,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         super.viewDidLoad()
         self.scrollView.delegate = self
         disableTwoFingerScroll() // Prevent scrollView from responding to two-finger panning events
-        removeImageView(at: 0) // Remove the template imageView set up in storyboard interface
+        removeImageView(atPage: 0) // Remove the template imageView set up in storyboard interface
         setupToolbar()
         
         /// TEST AREA
@@ -89,23 +89,24 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     /// When user scrolls to next / previous page, the image which index is within the buffer range is loaded from local disk and the one outside the buffer range is reset.
     /// - Parameter direction: User's scrolling direction: Either 'forward' or 'backward'
     private func updateImage(at direction: ScrollDirection) {
+        let bufferImageEachSide = bufferImageNumber / 2 // Number of arranged subviews loaded with image on each side of current view
         switch direction {
         case .forward:
             // Update imageView ahead of current page
-            setImage(at: currentPage + (bufferImageNumber / 2))
+            setImage(at: currentPage + bufferImageEachSide)
             
             // Reset image out of the buffer range
-            let bufferToRemoveIndex = currentPage - (bufferImageNumber / 2) - 1
+            let bufferToRemoveIndex = currentPage - bufferImageEachSide - 1
             guard bufferToRemoveIndex >= 0 && bufferToRemoveIndex < bufferImageArray.count else { return }
             if let imageToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
                 imageToReset.set(image: defaultImage)
             }
         case .backward:
             // Update imageView before the current page
-            setImage(at: currentPage - (bufferImageNumber / 2))
+            setImage(at: currentPage - bufferImageEachSide)
             
             // Reset image out of the buffer range
-            let bufferToRemoveIndex = currentPage + (bufferImageNumber / 2) + 1
+            let bufferToRemoveIndex = currentPage + bufferImageEachSide + 1
             guard bufferToRemoveIndex >= 0 && bufferToRemoveIndex < bufferImageArray.count else { return }
             if let imageToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
                 imageToReset.set(image: defaultImage)
@@ -161,17 +162,14 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     
     //MARK: - ImageView Deletion Methods
     
-    /// Stack view will be scrolled to the next page if the deleted view is not the last one in the stackView
+    /// Stack view scrolls to right (next page) if the deleted view is not the last one in the stackView.
     private func scrollAndRemoveImageView() {
         let originalPage = currentPage
         var pageToScroll: Int?
         let subviewCount = stackView.arrangedSubviews.count
         if subviewCount > 1 {
-            if currentPage != subviewCount - 1 { // Scroll to right if current page is NOT the last arranged subview
-                pageToScroll = currentPage + 1
-            } else { // Scroll to left if current page is the last one in the stackView
-                pageToScroll = currentPage - 1
-            }
+            // Scroll to right if current page is NOT the last arranged subview, vice versa
+            pageToScroll = (currentPage != subviewCount - 1) ? currentPage + 1 : currentPage - 1
         } else if subviewCount == 1 { // Only one subview is left in the stackView
             // Go back to collection view
             self.navigationController?.popViewController(animated: true)
@@ -188,21 +186,25 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
                     self.scrollView.contentOffset = CGPoint(x: CGFloat(pageIndex) * self.scrollView.frame.width, y: 0)
                 }
             } completion: { _ in
-                self.removeImageView(at: originalPage) // Remove imageView from the stackView
+                self.removeImageView(atPage: originalPage) // Remove imageView from the stackView
                 
-                // Compensate scroll view's content offset after the imageView is removed from stackView
+                // Compensate the reduced number of arranged stackView if stack view is scrolled to the next page
                 if pageToScroll == originalPage + 1 {
                     self.scrollView.contentOffset = CGPoint(x: CGFloat(originalPage) * self.scrollView.frame.width, y: 0)
+                    
+                    // After reverting to original page, the 'auto buffer updating' method will reset the buffer image out of buffer range, which causes the reset image falling into a trap which prevent it from being updated.
+                    // Therefore, it's neccesary to update the image which was reset due to the compensation of page number change.
+                    let bufferNumberAtEachSide = self.bufferImageNumber / 2
+                    self.setImage(at: originalPage + bufferNumberAtEachSide)
                 }
             }
         }
     }
     
-    private func removeImageView(at index: Int) {
+    private func removeImageView(atPage index: Int) {
         let viewToDelete = stackView.arrangedSubviews[index]
         stackView.removeArrangedSubview(viewToDelete)
         viewToDelete.removeFromSuperview()
-        bufferImageArray.remove(at: index) // Remove cached imageView
     }
     
     //MARK: - Toolbar Button Methods
@@ -226,6 +228,9 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
             
             // Delete data in file system, database and refresh the imageArray
             databaseManager.deleteData(id: dataID, atIndex: self.currentPage)
+            
+            // Remove buffer view in memory buffer array
+            self.bufferImageArray.remove(at: self.currentPage)
             
             // Animate the scroll view
             self.scrollAndRemoveImageView()

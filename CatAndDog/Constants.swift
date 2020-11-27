@@ -32,6 +32,7 @@ struct K {
     
     struct Image {
         static let maxImageSize = CGSize(width: 1024, height: 1024)
+        static let defaultImage = UIColor.systemGray5.image(CGSize(width: 400, height: 400)) // Default image stackView
         
         struct FolderName {
             static let fullImage = "Cat_Pictures"

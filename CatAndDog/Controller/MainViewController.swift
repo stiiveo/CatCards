@@ -9,14 +9,11 @@
 import UIKit
 
 private enum Card {
-    case firstCard
-    case secondCard
+    case firstCard, secondCard
 }
 
 private enum CurrentView {
-    case first
-    case second
-    case undo
+    case first, second, undo
 }
 
 class MainViewController: UIViewController, NetworkManagerDelegate {
@@ -339,8 +336,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     //MARK: - Card Panning Methods
     
     private enum Side {
-        case upper
-        case lower
+        case upper, lower
     }
     
     private var firstFingerLocation: Side?
