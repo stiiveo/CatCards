@@ -192,7 +192,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
                 if pageToScroll == originalPage + 1 {
                     self.scrollView.contentOffset = CGPoint(x: CGFloat(originalPage) * self.scrollView.frame.width, y: 0)
                     
-                    // After reverting to original page, the 'auto buffer updating' method will reset the buffer image out of buffer range, which causes the reset image falling into a trap which prevent it from being updated.
+                    // After reverting to original page, the 'auto buffer updating' method will move the buffer image (2 images after the current image) out of buffer range, which causes it to be reset and not being updated when user scrolls to the next page.
                     // Therefore, it's neccesary to update the image which was reset due to the compensation of page number change.
                     let bufferNumberAtEachSide = self.bufferImageNumber / 2
                     self.setImage(at: originalPage + bufferNumberAtEachSide)
