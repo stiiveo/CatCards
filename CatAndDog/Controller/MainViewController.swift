@@ -94,6 +94,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         setDownsampleSize() // Prepare ImageProcess's operation parameter
         
         // TEST AREA
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -224,8 +225,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Constraints and Style Method
     
-    // Add constraints to cardView
-    private func addCardViewConstraint(card: UIView) {
+    /// Add constraints to cardView
+    private func addCardViewConstraint(card: CardView) {
         card.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             card.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: K.CardView.Constraint.leading),

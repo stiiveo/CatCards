@@ -47,9 +47,14 @@ class CardView: UIView {
     
     private func setContentMode(image: UIImage) {
         let imageAspectRatio = image.size.width / image.size.height
-        let imageViewAspectRatio = imageView.bounds.width / imageView.bounds.height
+        var imageViewAspectRatio = imageView.bounds.width / imageView.bounds.height
+        // Set the value of imageViewAspectRatio as 1 if it's not a number
+        if imageViewAspectRatio.isNaN == true {
+            imageViewAspectRatio = 1
+        }
         // Determine the content mode by comparing the aspect ratio of the image and image view
         let aspectRatioDiff = abs(imageAspectRatio - imageViewAspectRatio)
+        
         imageView.contentMode = (aspectRatioDiff >= K.ImageView.dynamicScaleThreshold) ? .scaleAspectFit : .scaleAspectFill
     }
     
