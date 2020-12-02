@@ -19,43 +19,52 @@ class NetworkManager {
     internal var serializedData: [Int: CatData] = [:]
     private var dataIndex: Int = 0
     private let imageProcesser = ImageProcess()
+    private let defaultImage = UIColor.systemGray5.image(CGSize(width: 400, height: 400))
+    static var networkIsSuspended: Bool = false //
     
     internal func performRequest(numberOfRequests: Int) {
         guard numberOfRequests > 0 else { debugPrint("Error: Number of network request equals 0 or less."); return }
         for _ in 1...numberOfRequests {
             // Create URL object using API's HTTP address string
             guard let url = URL(string: K.API.urlString) else {
-                debugPrint("Error creating URL object from API's HTTP address")
+                debugPrint("Error initiating an URL object from API's HTTP address string.")
                 return
             }
             
-            let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
-                // Error occured during the process of retrieving data
-                if error != nil {
-                    self.delegate?.errorDidOccur()
-                    debugPrint("Error retrieving data with CatAPI's public URL.")
+            URLSession.shared.dataTask(with: url) { (data, response, error) in
+                // Transport error occured
+                if let error = error {
+                    self.delegate?.errorDidOccur() // Alert the main VC that an error occured in the data retrieving process.
+                    debugPrint("Error sending URLSession request to the server or getting response from the server. Error: \(error)")
+                    NetworkManager.networkIsSuspended = true
+                    return
+                }
+                
+                // Server-side error occured
+                let response = response as! HTTPURLResponse
+                let status = response.statusCode
+                guard (200...299).contains(status) else {
+                    debugPrint("Server-side error response is received from API's server. (HTTP status code: \(status)")
                     return
                 }
                 
                 // Data is retrieved successfully
-                else {
-                    if let fetchedData = data {
-                        self.parseJSON(data: fetchedData)
-                    }
+                if let fetchedData = data {
+                    self.parseJSON(data: fetchedData)
+                    NetworkManager.networkIsSuspended = false
                 }
-            }
-            task.resume() // Start the newly-initialized task
+            }.resume() // Start the newly-initialized task
         }
     }
     
     private func parseJSON(data: Data) {
         let jsonDecoder = JSONDecoder()
         do {
-            // The raw string data of returned JSON is enclosed within a pair of square brackets
+            // The returned json data is wrapped in an array
             let decodedData = try jsonDecoder.decode([JSONModel].self, from: data) // Decoded data type: [JSONModel]
             let jsonData = decodedData[0] // [JSONModel] -> JSONModel
             guard let imageURL = URL(string: jsonData.url) else {
-                debugPrint("Error creating URL object from fetched url.")
+                debugPrint("Error creating image URL object from decoded json data.")
                 return
             }
             let newImage = imageFromURL(url: imageURL)
@@ -81,14 +90,12 @@ class NetworkManager {
     private func imageFromURL(url: URL) -> UIImage {
         do {
             let imageData = try Data(contentsOf: url)
-            guard let image = UIImage(data: imageData) else {
-                debugPrint("Error converting imageData into UIImage object.")
-                return UIImage(named: "default")!
+            if let image = UIImage(data: imageData) {
+                return image
             }
-            return image
         } catch {
-            debugPrint("Error creating image data from url: \(error)")
+            debugPrint("Error initializing image data from image URL object. Error: \(error)")
         }
-        return UIImage(named: "default")!
+        return self.defaultImage // Return default image if any error occured.
     }
 }
