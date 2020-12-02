@@ -41,14 +41,16 @@ class CardView: UIView {
     }
     
     private func set(image: UIImage) {
-        setContentMode(image: image)
         imageView.image = image
+        setContentMode(image: image)
     }
     
     private func setContentMode(image: UIImage) {
         let imageAspectRatio = image.size.width / image.size.height
         var imageViewAspectRatio = imageView.bounds.width / imageView.bounds.height
-        // Set the value of imageViewAspectRatio as 1 if it's not a number
+        // When the first undo card's image is set, the bounds of the imageView is yet to be defined (width = 0, height = 0),
+        // Which makes the value of 'imageViewAspectRatio' to be 'Not a Number'.
+        // If this happens, forcely set aspect ratio to 1 to prevent unwanted result.
         if imageViewAspectRatio.isNaN == true {
             imageViewAspectRatio = 1
         }

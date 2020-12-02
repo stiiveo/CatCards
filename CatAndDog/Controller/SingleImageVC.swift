@@ -245,11 +245,20 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     
     //MARK: - Stack View & Toolbar Preparation
     
+    /// Enable the built-in toolbar and setup its style and buttons
     private func setupToolbar() {
-        self.navigationController?.isToolbarHidden = false
-        self.navigationController?.toolbar.clipsToBounds = true
-        self.navigationController?.toolbar.isTranslucent = false
+        guard let toolbar = self.navigationController?.toolbar else {
+            debugPrint("Error: Could not initiate the built-in toolbar in single image view. Check toolbar setting method in \(self)")
+            return
+        }
+        self.navigationController?.isToolbarHidden = false // Enable the built-in toolbar
+        toolbar.isTranslucent = false // Disable the translucent effect to make the toolbar's background color consistent with the view
         
+        // Style
+        toolbar.barTintColor = K.Color.backgroundColor
+        toolbar.tintColor = K.Color.toolbarItem
+        
+        // Toolbar's buttons
         var items = [UIBarButtonItem]()
         let shareItem = UIBarButtonItem(image: K.ButtonImage.share, style: .plain, target: self, action: #selector(shareButtonPressed))
         let deleteItem = UIBarButtonItem(image: K.ButtonImage.trash, style: .plain, target: self, action: #selector(deleteButtonPressed))
