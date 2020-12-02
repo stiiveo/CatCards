@@ -564,15 +564,27 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 title: "Cannot connect to the Internet",
                 message: "Signal from Cat Planet is too weak.\n Please check your antenna. 📡",
                 preferredStyle: .alert)
+            
+            // Settings button which directs user to the device's setting page
             let settingsAction = UIAlertAction(title: "Settings", style: .default) { (_) -> Void in
                 if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(settingsUrl, options: [:], completionHandler: nil)
                 }
             }
-            let cancelAction = UIAlertAction(title: "OK", style: .cancel)
+            
+            // Retry button which send network request to the network manager
+            let retryAction = UIAlertAction(title: "Try Again", style: .default) { _ in
+                self.networkManager.performRequest(numberOfRequests: K.Data.maxOfCachedData)
+            }
+            
+            // Add actions to alert controller
             alert.addAction(settingsAction)
-            alert.addAction(cancelAction)
-            self.present(alert, animated: true, completion: nil)
+            alert.addAction(retryAction)
+            
+            // Before presenting the alert view controller, ensure there's no existing one being presented already.
+            if self.presentedViewController == nil {
+                self.present(alert, animated: true, completion: nil)
+            }
         }
     }
 }

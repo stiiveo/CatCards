@@ -30,13 +30,14 @@ class NetworkManager {
             }
             
             let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
-                // Error occured during process of network data fetching
+                // Error occured during the process of retrieving data
                 if error != nil {
                     self.delegate?.errorDidOccur()
-                    debugPrint("Error fetching data with url.")
+                    debugPrint("Error retrieving data with CatAPI's public URL.")
                     return
                 }
-                // Data is required successfully
+                
+                // Data is retrieved successfully
                 else {
                     if let fetchedData = data {
                         self.parseJSON(data: fetchedData)
