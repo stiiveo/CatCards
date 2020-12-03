@@ -16,7 +16,7 @@ struct K {
     
     struct Color {
         static let backgroundColor = UIColor(named: "backgroundColor")
-        static let toolbarItem = UIColor(named: "buttonColor")
+        static let toolbarTint = UIColor(named: "buttonColor")
     }
     
     struct SegueIdentifier {

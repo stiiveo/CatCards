@@ -12,6 +12,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
 
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var stackView: UIStackView!
+    @IBOutlet weak var toolbar: UIToolbar!
     
     var selectedCellIndex: Int = 0
     private var currentPage: Int = 0 {
@@ -38,7 +39,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         self.scrollView.delegate = self
         disableTwoFingerScroll() // Prevent scrollView from responding to two-finger panning events
         removeImageView(atPage: 0) // Remove the template imageView set up in storyboard interface
-        setupToolbar()
+        setUpToolbar()
         
         /// TEST AREA
     }
@@ -209,7 +210,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     
     //MARK: - Toolbar Button Methods
     
-    @objc func shareButtonPressed() {
+    @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
         let imageFileURL = DatabaseManager.imageFileURLs[currentPage].image
         if let imageToShare = UIImage(contentsOfFile: imageFileURL.path) {
             // present activity controller
@@ -218,7 +219,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    @objc func deleteButtonPressed() {
+    @IBAction func deleteButtonPressed(_ sender: UIBarButtonItem) {
         let alert = UIAlertController(title: "This action can not be reverted.", message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: "Delete Image", style: .destructive) { (action) in
             
@@ -245,32 +246,10 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     
     //MARK: - Stack View & Toolbar Preparation
     
-    /// Enable the built-in toolbar and setup its style and buttons
-    private func setupToolbar() {
-        guard let toolbar = self.navigationController?.toolbar else {
-            debugPrint("Error: Could not initiate the built-in toolbar in single image view. Check toolbar setting method in \(self)")
-            return
-        }
-        self.navigationController?.isToolbarHidden = false // Enable the built-in toolbar
-        toolbar.isTranslucent = false // Disable the translucent effect to make the toolbar's background color consistent with the view
-        
-        // Style
-        toolbar.barTintColor = K.Color.backgroundColor
-        toolbar.tintColor = K.Color.toolbarItem
-        
-        // Toolbar's buttons
-        var items = [UIBarButtonItem]()
-        let shareItem = UIBarButtonItem(image: K.ButtonImage.share, style: .plain, target: self, action: #selector(shareButtonPressed))
-        let deleteItem = UIBarButtonItem(image: K.ButtonImage.trash, style: .plain, target: self, action: #selector(deleteButtonPressed))
-        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let fixedSpace = UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil)
-        fixedSpace.width = 50
-        items = [fixedSpace, shareItem, flexibleSpace, deleteItem, fixedSpace] // Distribution of items in toolbar
-        self.toolbarItems = items
-        
-        // Style
-        self.navigationController?.toolbar.barTintColor = K.Color.backgroundColor
-        self.navigationController?.toolbar.tintColor = K.Color.toolbarItem
+    private func setUpToolbar() {
+        toolbar.clipsToBounds = true // Remove hairline on top of the toolbar
+        toolbar.barTintColor = K.Color.backgroundColor // Set background color
+        toolbar.isTranslucent = false // Prevent the translucent effect from making background color not consistent with the view
     }
     
 }
