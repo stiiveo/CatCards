@@ -27,7 +27,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     private var previousPage: Int = 0
     private var bufferImageArray = [ImageScrollView()] // ImageViews cache used to populate stackView
     private let bufferImageNumber: Int = K.Data.maxBufferImageNumber
-    private let defaultImage = K.Image.defaultImage
+    private let defaultCacheImage = K.Image.defaultCacheImage
     
     private enum ScrollDirection {
         case forward, backward
@@ -99,7 +99,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
             let bufferToRemoveIndex = currentPage - bufferImageEachSide - 1
             guard bufferToRemoveIndex >= 0 && bufferToRemoveIndex < bufferImageArray.count else { return }
             if let imageToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
-                imageToReset.set(image: defaultImage)
+                imageToReset.set(image: defaultCacheImage)
             }
         case .backward:
             // Update imageView before the current page
@@ -109,7 +109,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
             let bufferToRemoveIndex = currentPage + bufferImageEachSide + 1
             guard bufferToRemoveIndex >= 0 && bufferToRemoveIndex < bufferImageArray.count else { return }
             if let imageToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
-                imageToReset.set(image: defaultImage)
+                imageToReset.set(image: defaultCacheImage)
             }
         }
     }
@@ -130,7 +130,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     private func initiateImageBufferArray() {
         bufferImageArray = (1...DatabaseManager.imageFileURLs.count).map { _ in
             let imageView = ImageScrollView(frame: view.bounds)
-            imageView.set(image: defaultImage)
+            imageView.set(image: defaultCacheImage)
             return imageView
         }
     }

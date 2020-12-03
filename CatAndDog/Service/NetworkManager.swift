@@ -19,8 +19,6 @@ class NetworkManager {
     internal var serializedData: [Int: CatData] = [:]
     private var dataIndex: Int = 0
     private let imageProcesser = ImageProcess()
-    private let defaultImage = UIColor.systemGray5.image(CGSize(width: 400, height: 400))
-    static var networkIsSuspended: Bool = false //
     
     internal func performRequest(numberOfRequests: Int) {
         guard numberOfRequests > 0 else { debugPrint("Error: Number of network request equals 0 or less."); return }
@@ -36,7 +34,6 @@ class NetworkManager {
                 if let error = error {
                     self.delegate?.errorDidOccur() // Alert the main VC that an error occured in the data retrieving process.
                     debugPrint("Error sending URLSession request to the server or getting response from the server. Error: \(error)")
-                    NetworkManager.networkIsSuspended = true
                     return
                 }
                 
@@ -51,7 +48,6 @@ class NetworkManager {
                 // Data is retrieved successfully
                 if let fetchedData = data {
                     self.parseJSON(data: fetchedData)
-                    NetworkManager.networkIsSuspended = false
                 }
             }.resume() // Start the newly-initialized task
         }
@@ -96,6 +92,6 @@ class NetworkManager {
         } catch {
             debugPrint("Error initializing image data from image URL object. Error: \(error)")
         }
-        return self.defaultImage // Return default image if any error occured.
+        return K.Image.defaultImage // Return default image if any error occured.
     }
 }
