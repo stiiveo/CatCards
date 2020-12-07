@@ -170,7 +170,7 @@
 					};
 				};
 			};
-			buildConfigurationList = F6746FDC24C6DCF2006A2905 /* Build configuration list for PBXProject "CatAndDog" */;
+			buildConfigurationList = F6746FDC24C6DCF2006A2905 /* Build configuration list for PBXProject "CatCard" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -373,7 +373,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ouyangapps.CatAndDog;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ouyangapps.CatCard;
 				PRODUCT_NAME = "Cat Card";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -391,7 +391,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ouyangapps.CatAndDog;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ouyangapps.CatCard;
 				PRODUCT_NAME = "Cat Card";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -401,7 +401,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F6746FDC24C6DCF2006A2905 /* Build configuration list for PBXProject "CatAndDog" */ = {
+		F6746FDC24C6DCF2006A2905 /* Build configuration list for PBXProject "CatCard" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F6746FF524C6DCF5006A2905 /* Debug */,

@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "F6746FE024C6DCF2006A2905"
-               BuildableName = "CatAndDog.app"
+               BuildableName = "Cat Card.app"
                BlueprintName = "CatAndDog"
-               ReferencedContainer = "container:CatAndDog.xcodeproj">
+               ReferencedContainer = "container:CatCard.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F6746FE024C6DCF2006A2905"
-            BuildableName = "CatAndDog.app"
+            BuildableName = "Cat Card.app"
             BlueprintName = "CatAndDog"
-            ReferencedContainer = "container:CatAndDog.xcodeproj">
+            ReferencedContainer = "container:CatCard.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F6746FE024C6DCF2006A2905"
-            BuildableName = "CatAndDog.app"
+            BuildableName = "Cat Card.app"
             BlueprintName = "CatAndDog"
-            ReferencedContainer = "container:CatAndDog.xcodeproj">
+            ReferencedContainer = "container:CatCard.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

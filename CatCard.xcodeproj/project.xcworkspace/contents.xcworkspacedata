@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:CatAndDog.xcodeproj">
+      location = "self:/Users/jasonouyang/Desktop/CatAndDog/CatCard.xcodeproj">
    </FileRef>
 </Workspace>
