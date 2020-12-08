@@ -69,7 +69,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         networkManager.delegate = self
-        toolBar.heightAnchor.constraint(equalToConstant: K.ToolBar.height).isActive = true // define toolBar's height
         fetchNewData(initialRequest: true) // initiate data downloading
         
         // Add cardView, ImageView and implement neccesary constraints

@@ -13,7 +13,7 @@
         <!--Main View Controller-->
         <scene sceneID="Fey-D6-ugN">
             <objects>
-                <viewController id="jpg-gr-ShF" customClass="MainViewController" customModule="CatAndDog" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="jpg-gr-ShF" customClass="MainViewController" customModule="Cat_Card" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cSQ-ii-ZYK">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -75,7 +75,7 @@
         <!--Saved-->
         <scene sceneID="GWV-aL-vGk">
             <objects>
-                <collectionViewController id="nfh-xn-jhC" customClass="CollectionVC" customModule="CatAndDog" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController id="nfh-xn-jhC" customClass="CollectionVC" customModule="Cat_Card" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="s03-pl-d20">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -87,7 +87,7 @@
                             <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                         </collectionViewFlowLayout>
                         <cells>
-                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="Cell" id="6LJ-Hb-XQH" customClass="Cell" customModule="CatAndDog" customModuleProvider="target">
+                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="Cell" id="6LJ-Hb-XQH" customClass="Cell" customModule="Cat_Card" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="d7M-7o-cuP">
@@ -127,7 +127,7 @@
         <!--Single ImageVC-->
         <scene sceneID="lxw-3u-W9X">
             <objects>
-                <viewController id="qlD-G6-Afc" customClass="SingleImageVC" customModule="CatAndDog" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="qlD-G6-Afc" customClass="SingleImageVC" customModule="Cat_Card" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="qn6-hw-Gab">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
