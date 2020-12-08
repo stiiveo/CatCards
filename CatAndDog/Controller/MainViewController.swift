@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import GoogleMobileAds
 
 private enum Card {
     case firstCard, secondCard
@@ -66,18 +67,19 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         return pan
     }()
     
+    private var bannerView: GADBannerView!
+    private var bannerSize: CGSize!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         networkManager.delegate = self
         fetchNewData(initialRequest: true) // initiate data downloading
         
-        // Add cardView, ImageView and implement neccesary constraints
-        view.addSubview(firstCard)
-        view.insertSubview(secondCard, belowSubview: firstCard)
-        
-        addCardViewConstraint(card: firstCard)
-        addCardViewConstraint(card: secondCard)
-        secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
+        // Add a new ad banner to view and set the ad unit ID on it.
+        bannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait) // Define ad banner's size
+        addBannerViewToView(bannerView)
+        bannerView.adUnitID = K.AD.adMobTestID // Set ad unit ID with Test ID provided by Google
+        bannerView.rootViewController = self
         
         // Create local image folder in file system or load data from it if it already exists
         databaseManager.createDirectory()
@@ -111,19 +113,82 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         self.toolBar.clipsToBounds = true
         self.toolBar.barTintColor = K.Color.backgroundColor
         self.toolBar.isTranslucent = false
+        
+        // Note loadBannerAd is called in viewDidAppear as this is the first time that
+        // the safe area is known. If safe area is not a concern (e.g., your app is
+        // locked in portrait mode), the banner can be loaded in viewWillAppear.
+        loadBannerAd()
+        
+        // Add two cardViews to the view
+        view.addSubview(firstCard)
+        view.insertSubview(secondCard, belowSubview: firstCard)
+        
+        // Add constraints to both cardViews and shrink the second card's size
+        // These methods can only be called after the method 'loadBannerAd()'
+        // because the ad banner's height is only then determined
+        addCardViewConstraint(card: firstCard)
+        addCardViewConstraint(card: secondCard)
+        secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        // Save the center position of the created card view
+        
+        // Save the center position of the card as default position
         cardViewAnchor = firstCard.center
         imageViewAnchor = firstCard.imageView.center
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        
         // Un-hidden nav bar's hairline
         self.navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        // Reload the banner's ad if the orientation of the screen is about to change
+        coordinator.animate { _ in
+            self.loadBannerAd()
+        }
+    }
+    
+    //MARK: - Ad Banner Methods
+    
+    private func loadBannerAd() {
+        // Determine the view width to use for the ad width.
+        let frame = { () -> CGRect in
+            // Here safe area is taken into account, hence the view frame is used
+            // after the view has been laid out.
+            if #available(iOS 11.0, *) {
+                return view.frame.inset(by: view.safeAreaInsets)
+            } else {
+                return view.frame
+            }
+        }()
+        let viewWidth = frame.size.width
+        
+        // Get Adaptive GADAdSize and set the ad view.
+        // Here the current interface orientation is used. If the ad is being preloaded
+        // for a future orientation change or different orientation, the function for the
+        // relevant orientation should be used.
+        bannerView.adSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(viewWidth)
+        
+        // Create an ad request and load the adaptive banner ad.
+        bannerView.load(GADRequest())
+        
+        self.bannerSize = bannerView.frame.size
+    }
+    
+    private func addBannerViewToView(_ bannerView: GADBannerView) {
+        bannerView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(bannerView)
+        view.addConstraints([
+            NSLayoutConstraint(item: bannerView, attribute: .bottom, relatedBy: .equal, toItem: toolBar.safeAreaLayoutGuide, attribute: .top, multiplier: 1, constant: K.AD.Constraint.bottom),
+            NSLayoutConstraint(item: bannerView, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1, constant: 0)
+        ])
     }
     
     //MARK: - Save Device Screen Info
@@ -228,10 +293,21 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private func addCardViewConstraint(card: CardView) {
         card.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            card.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: K.CardView.Constraint.leading),
-            card.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: K.CardView.Constraint.trailing),
-            card.topAnchor.constraint(equalTo: self.view.topAnchor, constant: K.CardView.Constraint.top),
-            card.bottomAnchor.constraint(equalTo: self.toolBar.topAnchor, constant: K.CardView.Constraint.bottom)
+            card.leadingAnchor.constraint(
+                equalTo: self.view.leadingAnchor,
+                constant: K.CardView.Constraint.leading
+            ),
+            card.trailingAnchor.constraint(
+                equalTo: self.view.trailingAnchor,
+                constant: K.CardView.Constraint.trailing
+            ),
+            card.topAnchor.constraint(
+                equalTo: self.view.topAnchor,
+                constant: K.CardView.Constraint.top
+            ),
+            card.bottomAnchor.constraint(
+                equalTo: self.toolBar.topAnchor,
+                constant: -bannerSize.height + K.AD.Constraint.bottom + K.CardView.Constraint.bottom)
         ])
         
         // Style
