@@ -17,7 +17,7 @@ private enum CurrentView {
     case first, second, undo
 }
 
-class MainViewController: UIViewController, NetworkManagerDelegate {
+class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerViewDelegate {
     
     @IBOutlet weak var toolBar: UIToolbar!
     @IBOutlet weak var favoriteBtn: UIBarButtonItem!
@@ -82,6 +82,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         addBannerToView(bannerView)
         bannerView.adUnitID = K.Banner.unitID
         bannerView.rootViewController = self
+        bannerView.delegate = self
         
         // Create local image folder in file system or load data from it if it already exists
         databaseManager.createDirectory()
@@ -187,6 +188,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Update the height of the fixed space for ad the same as the adaptive banner's height
         adFixedSpaceHeight.constant = bannerView.frame.height
         adFixedSpace.layoutIfNeeded()
+    }
+    
+    func adView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: GADRequestError) {
+        debugPrint("adView: didFailToReceiveAdWithError: \(error.localizedDescription)")
     }
     
     //MARK: - Save Device Screen Info
