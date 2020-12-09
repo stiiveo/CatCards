@@ -9,7 +9,7 @@
 import UIKit
 
 struct K {
-    struct AD {
+    struct Banner {
         struct Constraint {
             static let bottom: CGFloat = -10
         }

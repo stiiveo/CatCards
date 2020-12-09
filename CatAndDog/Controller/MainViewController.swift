@@ -31,6 +31,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private let undoCard = CardView()
     private var cardViewAnchor = CGPoint()
     private var imageViewAnchor = CGPoint()
+    private var cardsAreCreated = false
     private var dataIndex: Int = 0
     private var currentCard: CurrentView = .first
     private var currentData: CatData? {
@@ -78,7 +79,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Add a new ad banner to view and set the ad unit ID on it.
         bannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait) // Define ad banner's size
         addBannerViewToView(bannerView)
-        bannerView.adUnitID = K.AD.adMobTestID // Set ad unit ID with Test ID provided by Google
+        bannerView.adUnitID = K.Banner.adMobTestID // Set ad unit ID with Test ID provided by Google
         bannerView.rootViewController = self
         
         // Create local image folder in file system or load data from it if it already exists
@@ -119,24 +120,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // locked in portrait mode), the banner can be loaded in viewWillAppear.
         loadBannerAd()
         
-        // Add two cardViews to the view
-        view.addSubview(firstCard)
-        view.insertSubview(secondCard, belowSubview: firstCard)
-        
-        // Add constraints to both cardViews and shrink the second card's size
-        // These methods can only be called after the method 'loadBannerAd()'
-        // because the ad banner's height is only then determined
-        addCardViewConstraint(card: firstCard)
-        addCardViewConstraint(card: secondCard)
-        secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
+        // * CardView can only be added to the view after the height of the ad banner is set.
+        addCardViews()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        // Save the center position of the card as default position
-        cardViewAnchor = firstCard.center
-        imageViewAnchor = firstCard.imageView.center
+        // Get the default position of cardView and cardView's imageView
+        cardViewAnchor = (cardViewAnchor == CGPoint(x: 0.0, y: 0.0)) ? firstCard.center : cardViewAnchor
+        imageViewAnchor = (imageViewAnchor == CGPoint(x: 0.0, y: 0.0)) ? firstCard.imageView.center : imageViewAnchor
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -186,7 +179,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         bannerView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(bannerView)
         view.addConstraints([
-            NSLayoutConstraint(item: bannerView, attribute: .bottom, relatedBy: .equal, toItem: toolBar.safeAreaLayoutGuide, attribute: .top, multiplier: 1, constant: K.AD.Constraint.bottom),
+            NSLayoutConstraint(item: bannerView, attribute: .bottom, relatedBy: .equal, toItem: toolBar.safeAreaLayoutGuide, attribute: .top, multiplier: 1, constant: K.Banner.Constraint.bottom),
             NSLayoutConstraint(item: bannerView, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1, constant: 0)
         ])
     }
@@ -289,8 +282,25 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Constraints and Style Method
     
+    /// Add two cardViews to the view and shrink the second card's size.
+    private func addCardViews() {
+        if cardsAreCreated {
+            return
+        } else {
+            view.addSubview(firstCard)
+            view.insertSubview(secondCard, belowSubview: firstCard)
+            
+            addCardViewConstraint(card: firstCard)
+            addCardViewConstraint(card: secondCard)
+            secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
+            
+            cardsAreCreated = true
+        }
+    }
+    
     /// Add constraints to cardView
     private func addCardViewConstraint(card: CardView) {
+        // Constraint
         card.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             card.leadingAnchor.constraint(
@@ -307,7 +317,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             ),
             card.bottomAnchor.constraint(
                 equalTo: self.toolBar.topAnchor,
-                constant: -bannerSize.height + K.AD.Constraint.bottom + K.CardView.Constraint.bottom)
+                constant: (self.bannerSize.height * -1) + K.Banner.Constraint.bottom + K.CardView.Constraint.bottom)
         ])
         
         // Style
