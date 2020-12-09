@@ -18,6 +18,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Initialize Google Mobile Ads SDK
         GADMobileAds.sharedInstance().start(completionHandler: nil)
         
+        // Enable Ad Test Mode
+        GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers =
+            [ K.Banner.testDeviceIdentifier ] 
+        
         return true
     }
     

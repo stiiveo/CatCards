@@ -80,7 +80,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Add a new ad banner to view and set the ad unit ID on it.
         bannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait) // Define ad banner's size
         addBannerToView(bannerView)
-        bannerView.adUnitID = K.Banner.testUnitID
+        bannerView.adUnitID = K.Banner.unitID
         bannerView.rootViewController = self
         
         // Create local image folder in file system or load data from it if it already exists
