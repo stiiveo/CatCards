@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -72,7 +72,6 @@
 				41168D40AA6045FECBED4B3F /* Pods-CatAndDog.debug.xcconfig */,
 				681AB58E2DF9E98BFA9DCD21 /* Pods-CatAndDog.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};

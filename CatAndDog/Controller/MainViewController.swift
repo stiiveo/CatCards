@@ -23,6 +23,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @IBOutlet weak var favoriteBtn: UIBarButtonItem!
     @IBOutlet weak var shareBtn: UIBarButtonItem!
     @IBOutlet weak var undoBtn: UIBarButtonItem!
+    @IBOutlet weak var adFixedSpace: UIView!
+    @IBOutlet weak var adFixedSpaceHeight: NSLayoutConstraint!
     
     private var networkManager = NetworkManager()
     private let databaseManager = DatabaseManager()
@@ -69,7 +71,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }()
     
     private var bannerView: GADBannerView!
-    private var bannerSize: CGSize!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -78,8 +79,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Add a new ad banner to view and set the ad unit ID on it.
         bannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait) // Define ad banner's size
-        addBannerViewToView(bannerView)
-        bannerView.adUnitID = K.Banner.adMobTestID // Set ad unit ID with Test ID provided by Google
+        addBannerToView(bannerView)
+        bannerView.adUnitID = K.Banner.testUnitID
         bannerView.rootViewController = self
         
         // Create local image folder in file system or load data from it if it already exists
@@ -171,17 +172,21 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Create an ad request and load the adaptive banner ad.
         bannerView.load(GADRequest())
-        
-        self.bannerSize = bannerView.frame.size
     }
     
-    private func addBannerViewToView(_ bannerView: GADBannerView) {
+    private func addBannerToView(_ bannerView: GADBannerView) {
         bannerView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(bannerView)
-        view.addConstraints([
-            NSLayoutConstraint(item: bannerView, attribute: .bottom, relatedBy: .equal, toItem: toolBar.safeAreaLayoutGuide, attribute: .top, multiplier: 1, constant: K.Banner.Constraint.bottom),
-            NSLayoutConstraint(item: bannerView, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1, constant: 0)
+        adFixedSpace.addSubview(bannerView)
+        
+        // Place the banner at the center of the ad fixed space
+        NSLayoutConstraint.activate([
+            bannerView.centerYAnchor.constraint(equalTo: adFixedSpace.centerYAnchor),
+            bannerView.centerXAnchor.constraint(equalTo: adFixedSpace.centerXAnchor)
         ])
+        
+        // Update the height of the fixed space for ad the same as the adaptive banner's height
+        adFixedSpaceHeight.constant = bannerView.frame.height
+        adFixedSpace.layoutIfNeeded()
     }
     
     //MARK: - Save Device Screen Info
@@ -218,7 +223,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
     }
     
-    //MARK: - Undo Action
+    // Undo Action
     
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
         undoBtn.isEnabled = false
@@ -254,7 +259,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
     }
     
-    //MARK: - Data Saving Method
+    // Data Saving Method
     
     @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
         if let data = currentData {
@@ -271,7 +276,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Image Sharing Method
+    // Image Sharing Method
     
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
         if let imageToShare = currentData?.image {
@@ -317,7 +322,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             ),
             card.bottomAnchor.constraint(
                 equalTo: self.toolBar.topAnchor,
-                constant: (self.bannerSize.height * -1) + K.Banner.Constraint.bottom + K.CardView.Constraint.bottom)
+                constant: K.CardView.Constraint.bottom)
         ])
         
         // Style

@@ -13,8 +13,9 @@ struct K {
         struct Constraint {
             static let bottom: CGFloat = -10
         }
-        static let adMobID = "ca-app-pub-2421510056015407~5275025170" // my real ad unit ID
-        static let adMobTestID = "ca-app-pub-3940256099942544/2934735716" // test ad unit ID
+        static let adMobAppID = "ca-app-pub-2421510056015407~5275025170"
+        static let unitID = "ca-app-pub-2421510056015407/2067597276" // my real ad unit ID
+        static let testUnitID = "ca-app-pub-3940256099942544/2934735716" // test ad unit ID
     }
     struct API {
         static let urlString = "https://api.thecatapi.com/v1/images/search?mime_types=\(imageType)"
@@ -76,7 +77,7 @@ struct K {
             static let leading: CGFloat = 10.0
             static let trailing: CGFloat = -10.0
             static let top: CGFloat = 10
-            static let bottom: CGFloat = -20
+            static let bottom: CGFloat = -10
         }
     }
     
