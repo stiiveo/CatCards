@@ -77,9 +77,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
         networkManager.delegate = self
         fetchNewData(initialRequest: true) // initiate data downloading
         
-        // Add a new ad banner to view and set the ad unit ID on it.
+        // Initialize ad banner
         bannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait) // Define ad banner's size
-        addBannerToView(bannerView)
         bannerView.adUnitID = K.Banner.unitID
         bannerView.rootViewController = self
         bannerView.delegate = self
@@ -88,11 +87,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
         databaseManager.createDirectory()
         databaseManager.getImageFileURLs()
         
-        // Disable favorite and share button before data is downloaded
+        // Configure default status of toolbar's item buttons
         favoriteBtn.isEnabled = false
         shareBtn.isEnabled = false
-        
-        // Undo button is disabled until one card is dismissed by user
         undoBtn.isEnabled = false
         
         setDownsampleSize() // Prepare ImageProcess's operation parameter
@@ -116,6 +113,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
         self.toolBar.clipsToBounds = true
         self.toolBar.barTintColor = K.Color.backgroundColor
         self.toolBar.isTranslucent = false
+        
+        addBannerToView(bannerView)
         
         // Note loadBannerAd is called in viewDidAppear as this is the first time that
         // the safe area is known. If safe area is not a concern (e.g., your app is
@@ -153,6 +152,20 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
     //MARK: - Ad Banner Methods
     
     private func loadBannerAd() {
+        // Create an ad request and load the adaptive banner ad.
+        bannerView.load(GADRequest())
+    }
+    
+    private func addBannerToView(_ bannerView: GADBannerView) {
+        bannerView.translatesAutoresizingMaskIntoConstraints = false
+        adFixedSpace.addSubview(bannerView)
+        
+        // Place the banner at the center of the ad fixed space
+        NSLayoutConstraint.activate([
+            bannerView.centerYAnchor.constraint(equalTo: adFixedSpace.centerYAnchor),
+            bannerView.centerXAnchor.constraint(equalTo: adFixedSpace.centerXAnchor)
+        ])
+        
         // Determine the view width to use for the ad width.
         let frame = { () -> CGRect in
             // Here safe area is taken into account, hence the view frame is used
@@ -171,25 +184,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
         // relevant orientation should be used.
         bannerView.adSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(viewWidth)
         
-        // Create an ad request and load the adaptive banner ad.
-        bannerView.load(GADRequest())
-    }
-    
-    private func addBannerToView(_ bannerView: GADBannerView) {
-        bannerView.translatesAutoresizingMaskIntoConstraints = false
-        adFixedSpace.addSubview(bannerView)
-        
-        // Place the banner at the center of the ad fixed space
-        NSLayoutConstraint.activate([
-            bannerView.centerYAnchor.constraint(equalTo: adFixedSpace.centerYAnchor),
-            bannerView.centerXAnchor.constraint(equalTo: adFixedSpace.centerXAnchor)
-        ])
-        
-        // Update the height of the fixed space for ad the same as the adaptive banner's height
+        // Set the height of the reserved ad space the same as the adaptive banner's height
         adFixedSpaceHeight.constant = bannerView.frame.height
         adFixedSpace.layoutIfNeeded()
     }
     
+    /// Failed to receive ad with error
     func adView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: GADRequestError) {
         debugPrint("adView: didFailToReceiveAdWithError: \(error.localizedDescription)")
     }
