@@ -195,20 +195,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
     }
     
     //MARK: - Save Device Screen Info
+    /// Determine the downsample size of image by calculating the thumbnail's width footprint on the user's device
     private func setDownsampleSize() {
         // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
         let screenWidth = UIScreen.main.bounds.width
-        var cellNumberPerRow: CGFloat {
-            if screenWidth >= 414 {
-                return 4.0
-            } else {
-                return 3.0
-            }
-        }
-        let interCellSpacing: CGFloat = 1.5
-        let cellWidth = floor((screenWidth - (interCellSpacing * (cellNumberPerRow - 1))) / cellNumberPerRow)
+        let wideScreenWidth: CGFloat = 414 // Point width of iPhone Plus or Max series
+        let cellsPerRow: CGFloat = (screenWidth >= wideScreenWidth) ? 4.0 : 3.0
+        let cellSpacing: CGFloat = 1.5 // Space between each cell
         
         // Floor the calculated width to remove any decimal number
+        let cellWidth = floor((screenWidth - (cellSpacing * (cellsPerRow - 1))) / cellsPerRow)
+        
         let cellSize = CGSize(width: cellWidth, height: cellWidth)
         databaseManager.imageProcess.cellSize = cellSize
     }
