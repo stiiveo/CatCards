@@ -186,7 +186,15 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
         adFixedSpace.layoutIfNeeded()
     }
     
-    /// Failed to receive ad with error
+    /// An ad request successfully receive an ad.
+    func adViewDidReceiveAd(_ bannerView: GADBannerView) {
+        bannerView.alpha = 0
+        UIView.animate(withDuration: 1.0) {
+            bannerView.alpha = 1
+        }
+    }
+    
+    /// Failed to receive ad with error.
     func adView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: GADRequestError) {
         debugPrint("adView: didFailToReceiveAdWithError: \(error.localizedDescription)")
     }
