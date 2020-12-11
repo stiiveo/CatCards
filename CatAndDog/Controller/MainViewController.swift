@@ -116,12 +116,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
         
         addBannerToView(bannerView)
         
-        // Note loadBannerAd is called in viewDidAppear as this is the first time that
-        // the safe area is known. If safe area is not a concern (e.g., your app is
-        // locked in portrait mode), the banner can be loaded in viewWillAppear.
-        loadBannerAd()
-        
-        // * CardView can only be added to the view after the height of the ad banner is set.
+        // * CardView can only be added to the view after the height of the ad banner is known.
         addCardViews()
     }
     
@@ -156,11 +151,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
         bannerView.load(GADRequest())
     }
     
+    /// Place the banner at the center of the reserved ad space
     private func addBannerToView(_ bannerView: GADBannerView) {
         bannerView.translatesAutoresizingMaskIntoConstraints = false
         adFixedSpace.addSubview(bannerView)
         
-        // Place the banner at the center of the ad fixed space
+        // Note that the size of the adaptive ad banner is returned by Google,
+        // therefore defining height or width here is not necessary.
         NSLayoutConstraint.activate([
             bannerView.centerYAnchor.constraint(equalTo: adFixedSpace.centerYAnchor),
             bannerView.centerXAnchor.constraint(equalTo: adFixedSpace.centerXAnchor)
@@ -368,6 +365,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
                     
                     // Add gesture recognizer to first card
                     self.attachGestureRecognizers(to: self.firstCard)
+                    
+                    // Load banner ad after first card is loaded
+                    self.loadBannerAd()
                 }
             }
         case 1:
