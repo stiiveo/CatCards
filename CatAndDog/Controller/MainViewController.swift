@@ -8,6 +8,7 @@
 
 import UIKit
 import GoogleMobileAds
+import UserNotifications
 
 private enum Card {
     case firstCard, secondCard
@@ -28,6 +29,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     private var networkManager = NetworkManager()
     private let databaseManager = DatabaseManager()
+    private let defaults = UserDefaults.standard
     private let firstCard = CardView()
     private let secondCard = CardView()
     private let undoCard = CardView()
@@ -36,6 +38,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var cardsAreCreated = false
     private var dataIndex: Int = 0
     private var currentCard: CurrentView = .first
+    private var nextCard: Card = .secondCard
+    
+    private var viewCount: Int! {
+        didSet {
+            //..
+        }
+    } // Number of cards with cat images the user has seen
+    
     private var currentData: CatData? {
         switch currentCard {
         case .first:
@@ -46,7 +56,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             return undoCard.data
         }
     }
-    private var nextCard: Card = .secondCard
     
     private lazy var panCard: UIPanGestureRecognizer = {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handleCardPan))
@@ -87,7 +96,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         networkManager.delegate = self
         fetchNewData(initialRequest: true) // initiate data downloading
         
-        
         // Create local image folder in file system or load data from it if it already exists
         databaseManager.createDirectory()
         databaseManager.getImageFileURLs()
@@ -99,8 +107,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         setDownsampleSize() // Prepare ImageProcess's operation parameter
         
-        // TEST AREA
+        // Load value from defaults if there's any
+        let savedViewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
+        self.viewCount = (savedViewCount != 0) ? savedViewCount : 0
         
+        // Notify this VC that when the app entered the background, execute selected method.
+        NotificationCenter.default.addObserver(self, selector: #selector(saveViewCount), name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -138,6 +150,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Un-hidden nav bar's hairline
         self.navigationController?.navigationBar.setBackgroundImage(nil, for: .default)
+        
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -191,16 +204,22 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         adFixedSpace.layoutIfNeeded()
     }
     
-    //MARK: - Save Device Screen Info
+    //MARK: - Support Methods
+    
+    /// Save the value of card view count to user defaults
+    @objc func saveViewCount() {
+        guard viewCount != nil else { return }
+        defaults.setValue(viewCount, forKey: K.UserDefaultsKeys.viewCount)
+    }
     
     /// Determine if the user is the new user
     private func isOldUser() -> Bool {
         // Make sure the bool value exists
-        if UserDefaults.standard.bool(forKey: K.UserDefaultsKeys.isOldUser) {
+        if defaults.bool(forKey: K.UserDefaultsKeys.isOldUser) {
             return true
         } else {
             // Set the value to true
-            UserDefaults.standard.setValue(true, forKey: K.UserDefaultsKeys.isOldUser)
+            defaults.setValue(true, forKey: K.UserDefaultsKeys.isOldUser)
             return false
         }
     }
@@ -223,16 +242,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     //MARK: - Toolbar Button Method and State Control
     
     private func refreshButtonState() {
-        var isDataLoaded: Bool { return currentData != nil }
-        favoriteBtn.isEnabled = isDataLoaded ? true : false
-        shareBtn.isEnabled = isDataLoaded ? true : false
-        if isDataLoaded {
-            if let data = currentData {
-                let isDataSaved = databaseManager.isDataSaved(data: data)
-                favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
-            }
-        }
+        let dataIsLoaded = currentData != nil
         
+        // Toggle the availability of toolbar buttons
+        favoriteBtn.isEnabled = dataIsLoaded ? true : false
+        shareBtn.isEnabled = dataIsLoaded ? true : false
+        
+        // Toggle the status of favorite button
+        if let data = currentData {
+            let isDataSaved = databaseManager.isDataSaved(data: data)
+            favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
+        }
     }
     
     // Undo Action
@@ -268,7 +288,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 self.refreshButtonState()
             }
         }
-        
     }
     
     // Data Saving Method
@@ -371,8 +390,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             if let firstData = dataSet[dataIndex + 1] {
                 dataIndex += 1
                 firstCard.data = firstData
+                viewCount += 1 // Increment the number of cat the user has seen
+                
                 DispatchQueue.main.async {
-                    
                     // Refresh toolbar buttons' state
                     self.refreshButtonState()
                     
@@ -405,6 +425,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let currentCard = (self.currentCard == .first) ? firstCard : secondCard
         attachGestureRecognizers(to: currentCard)
         
+        // Update the count of view the user has seen if the current card's data is valid
+        if currentData != nil {
+            viewCount += 1
+        }
+        
         // Put the dismissed card behind the current card
         self.view.insertSubview(card, belowSubview: currentCard)
         card.center = cardViewAnchor
@@ -419,21 +444,27 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Update Image of imageView
     
-    // Prepare the next cardView to be shown
+    /// Update card's content if new data is available.
     private func updateCardView() {
         let dataSet = networkManager.serializedData
         let dataAllocation: Card = ((self.dataIndex + 1) % 2 == 1) ? .firstCard : .secondCard
         
-        if let newData = dataSet[dataIndex + 1] { // New data is available
-            switch dataAllocation {
-            case .firstCard: // Data is for first card
+        // Increment the view count if card's data is invalid and about to be updated
+        if currentData == nil {
+            self.viewCount += 1
+        }
+        
+        if let newData = dataSet[dataIndex + 1] { // Make sure new data is available
+            switch dataAllocation { // Decide which card the data is to be allocated
+            case .firstCard:
                 firstCard.data = newData
                 dataIndex += 1
-            case .secondCard: // Data is for second card
+            case .secondCard:
                 secondCard.data = newData
                 dataIndex += 1
             }
         }
+        
         DispatchQueue.main.async {
             self.refreshButtonState()
         }

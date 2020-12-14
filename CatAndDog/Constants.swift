@@ -11,6 +11,7 @@ import UIKit
 struct K {
     
     struct UserDefaultsKeys {
+        static let viewCount = "viewCount"
         static let isOldUser = "isOldUser"
     }
     
@@ -58,7 +59,11 @@ struct K {
     
     struct Data {
 //        static let maxOfCachedData: Int = 3 // TEST USE
-        static let maxOfCachedData: Int = 10 // The value should be between 1 to 10
+        
+        // If this value is too small, the user could have to experience more loading time.
+        // However, the more the cache data, the more the memory usage is.
+        // After some testing, 10 is a pretty sweat spot between UX and memory usage.
+        static let maxOfCachedData: Int = 10
         static let maxBufferImageNumber: Int = 4
     }
     
