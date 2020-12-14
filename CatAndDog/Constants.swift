@@ -9,6 +9,11 @@
 import UIKit
 
 struct K {
+    
+    struct UserDefaultsKeys {
+        static let isOldUser = "isOldUser"
+    }
+    
     struct Banner {
         struct Constraint {
             static let bottom: CGFloat = -10
@@ -18,6 +23,7 @@ struct K {
         static let testUnitID = "ca-app-pub-3940256099942544/2934735716" // test ad unit ID
         static let testDeviceIdentifier = "183f37d224cd0bdff5a8ee1b7b3b7daf" // Identifier of the test device
     }
+    
     struct API {
         static let urlString = "https://api.thecatapi.com/v1/images/search?mime_types=\(imageType)"
         static let imageType: String = "jpg" // Input option: 'gif', 'jpg', 'png', 'jpg,gif,png'

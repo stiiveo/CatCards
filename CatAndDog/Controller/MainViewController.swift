@@ -192,6 +192,19 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     //MARK: - Save Device Screen Info
+    
+    /// Determine if the user is the new user
+    private func isOldUser() -> Bool {
+        // Make sure the bool value exists
+        if UserDefaults.standard.bool(forKey: K.UserDefaultsKeys.isOldUser) {
+            return true
+        } else {
+            // Set the value to true
+            UserDefaults.standard.setValue(true, forKey: K.UserDefaultsKeys.isOldUser)
+            return false
+        }
+    }
+    
     /// Determine the downsample size of image by calculating the thumbnail's width footprint on the user's device
     private func setDownsampleSize() {
         // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
