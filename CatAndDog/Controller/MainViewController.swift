@@ -17,7 +17,7 @@ private enum CurrentView {
     case first, second, undo
 }
 
-class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerViewDelegate {
+class MainViewController: UIViewController, NetworkManagerDelegate {
     
     @IBOutlet weak var toolBar: UIToolbar!
     @IBOutlet weak var favoriteBtn: UIBarButtonItem!
@@ -70,18 +70,23 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
         return pan
     }()
     
-    private var bannerView: GADBannerView!
+    private lazy var adBannerView: GADBannerView = {
+        // Initialize ad banner
+        let adBannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait) // Define ad banner's size
+        adBannerView.adUnitID = K.Banner.unitID
+        adBannerView.rootViewController = self
+        adBannerView.delegate = self
+        
+        return adBannerView
+    }()
+    
+    //MARK: - View Overriding Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
         networkManager.delegate = self
         fetchNewData(initialRequest: true) // initiate data downloading
         
-        // Initialize ad banner
-        bannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait) // Define ad banner's size
-        bannerView.adUnitID = K.Banner.unitID
-        bannerView.rootViewController = self
-        bannerView.delegate = self
         
         // Create local image folder in file system or load data from it if it already exists
         databaseManager.createDirectory()
@@ -114,7 +119,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
         self.toolBar.barTintColor = K.Color.backgroundColor
         self.toolBar.isTranslucent = false
         
-        addBannerToView(bannerView)
+        addBannerToView(adBannerView)
         
         // * CardView can only be added to the view after the height of the ad banner is known.
         addCardViews()
@@ -148,7 +153,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
     
     private func loadBannerAd() {
         // Create an ad request and load the adaptive banner ad.
-        bannerView.load(GADRequest())
+        adBannerView.load(GADRequest())
     }
     
     /// Place the banner at the center of the reserved ad space
@@ -184,19 +189,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
         // Set the height of the reserved ad space the same as the adaptive banner's height
         adFixedSpaceHeight.constant = bannerView.frame.height
         adFixedSpace.layoutIfNeeded()
-    }
-    
-    /// An ad request successfully receive an ad.
-    func adViewDidReceiveAd(_ bannerView: GADBannerView) {
-        bannerView.alpha = 0
-        UIView.animate(withDuration: 1.0) {
-            bannerView.alpha = 1
-        }
-    }
-    
-    /// Failed to receive ad with error.
-    func adView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: GADRequestError) {
-        debugPrint("adView: didFailToReceiveAdWithError: \(error.localizedDescription)")
     }
     
     //MARK: - Save Device Screen Info
@@ -678,6 +670,21 @@ class MainViewController: UIViewController, NetworkManagerDelegate, GADBannerVie
                 self.present(alert, animated: true, completion: nil)
             }
         }
+    }
+}
+
+extension MainViewController: GADBannerViewDelegate {
+    /// An ad request successfully receive an ad.
+    func adViewDidReceiveAd(_ bannerView: GADBannerView) {
+        bannerView.alpha = 0
+        UIView.animate(withDuration: 1.0) {
+            bannerView.alpha = 1
+        }
+    }
+    
+    /// Failed to receive ad with error.
+    func adView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: GADRequestError) {
+        debugPrint("adView: didFailToReceiveAdWithError: \(error.localizedDescription)")
     }
 }
 
