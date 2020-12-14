@@ -67,7 +67,7 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="mlT-4e-zaz">
-                        <barButtonItem key="rightBarButtonItem" image="tray.and.arrow.down" catalog="system" id="sSu-jw-cTH">
+                        <barButtonItem key="rightBarButtonItem" image="square.grid.3x2.fill" catalog="system" id="sSu-jw-cTH">
                             <connections>
                                 <segue destination="nfh-xn-jhC" kind="show" id="1gv-hA-jFb"/>
                             </connections>
@@ -241,8 +241,8 @@
         <image name="default_image" width="778" height="994"/>
         <image name="heart" catalog="system" width="128" height="109"/>
         <image name="square.and.arrow.up" catalog="system" width="115" height="128"/>
+        <image name="square.grid.3x2.fill" catalog="system" width="128" height="80"/>
         <image name="trash" catalog="system" width="121" height="128"/>
-        <image name="tray.and.arrow.down" catalog="system" width="128" height="109"/>
         <namedColor name="backgroundColor">
             <color red="0.97647058823529409" green="0.89411764705882357" blue="0.75294117647058822" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
