@@ -135,6 +135,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // * CardView can only be added to the view after the height of the ad banner is known.
         addCardViews()
+        
+        // TEST
+        if isOldUser() {
+            hideToolbarAndNavItems()
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -160,6 +165,80 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         coordinator.animate { _ in
             self.loadBannerAd()
         }
+    }
+    
+    //MARK: - Onboarding Methods
+    
+    /// Hide nav-bar's items and toolbar
+    private func hideToolbarAndNavItems() {
+        self.navigationController?.navigationBar.tintColor = K.Color.backgroundColor
+        toolBar.alpha = 0
+    }
+    
+    private func displayInitialTutorial() {
+        // Display welcome message
+        let messageView = UIView()
+        let textLabel = UILabel()
+        let anchorPoint = self.cardViewAnchor
+        
+        // Add message block to view
+        self.view.addSubview(messageView)
+        messageView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            messageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
+            messageView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10),
+            messageView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
+//            messageView.heightAnchor.constraint(equalToConstant: 60)
+        ])
+        
+        // Message block style
+        messageView.backgroundColor = .systemTeal
+        messageView.layer.cornerRadius = 15
+        
+        // Add text label to message block
+        messageView.addSubview(textLabel)
+        textLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            textLabel.topAnchor.constraint(equalTo: messageView.topAnchor, constant: 15),
+            textLabel.leadingAnchor.constraint(equalTo: messageView.leadingAnchor, constant: 15),
+            textLabel.trailingAnchor.constraint(equalTo: messageView.trailingAnchor, constant: -15),
+            textLabel.bottomAnchor.constraint(equalTo: messageView.bottomAnchor, constant: -15)
+        ])
+        
+        // Text label style
+        textLabel.text = "Swipe the card to reveal the next cat image."
+        textLabel.textColor = .white
+        textLabel.font = .systemFont(ofSize: 25, weight: .semibold)
+        textLabel.adjustsFontSizeToFitWidth = true
+        textLabel.numberOfLines = 0
+        textLabel.textAlignment = .natural
+        
+        // Animate the appearence of the message block
+        messageView.alpha = 0
+        UIView.animate(withDuration: 0.8, delay: 0.5) {
+            messageView.alpha = 1
+
+        } completion: { _ in
+            // Shake the first card to hint the user how swiping gesture works
+            UIView.animate(withDuration: 0.7, delay: 1.0) {
+                self.firstCard.transform = CGAffineTransform(rotationAngle: 0.1)
+                self.firstCard.center = CGPoint(x: anchorPoint.x + 20, y: anchorPoint.y)
+            } completion: { _ in
+                UIView.animate(withDuration: 0.7, delay: 0.1) {
+                    self.firstCard.transform = CGAffineTransform(rotationAngle: -0.1)
+                    self.firstCard.center = CGPoint(x: anchorPoint.x - 20, y: anchorPoint.y)
+                } completion: { _ in
+                    UIView.animate(withDuration: 0.7) {
+                        self.firstCard.transform = .identity
+                        self.firstCard.center = anchorPoint
+                    } completion: { _ in
+                        print("Swipe gesture tutorial completed.")
+                    }
+
+                }
+            }
+        }
+        
     }
     
     //MARK: - Ad Banner Methods
@@ -399,8 +478,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     // Add gesture recognizer to first card
                     self.attachGestureRecognizers(to: self.firstCard)
                     
-                    // Load banner ad after first card is loaded
-                    self.loadBannerAd()
+                    // ! TEST PARAMETER, CHANGE AFTER TESTING !
+                    if self.isOldUser() {
+                        self.displayInitialTutorial()
+                    }
+                    
+//                    // Load banner ad after first card is loaded
+//                    self.loadBannerAd()
                 }
             }
         case 1:
