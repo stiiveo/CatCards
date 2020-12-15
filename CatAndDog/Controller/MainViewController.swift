@@ -26,6 +26,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @IBOutlet weak var undoBtn: UIBarButtonItem!
     @IBOutlet weak var adFixedSpace: UIView!
     @IBOutlet weak var adFixedSpaceHeight: NSLayoutConstraint!
+    @IBOutlet weak var goToCollectionViewBtn: UIBarButtonItem!
     
     private var networkManager = NetworkManager()
     private let databaseManager = DatabaseManager()
@@ -39,7 +40,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var dataIndex: Int = 0
     private var currentCard: CurrentView = .first
     private var nextCard: Card = .secondCard
-    private var initialHintDisplayed = false
+    private var cardHintDisplayed = false
+    private var toolbarHintDisplayed = false
     
     private var viewCount: Int! {
         didSet {
@@ -137,9 +139,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // * CardView can only be added to the view after the height of the ad banner is known.
         addCardViews()
         
-        // TEST
+        // Hide the toolbar and nav-bar item to prepare for new user onboarding tutorial
         if isOldUser() {
-            hideToolbarAndNavItems()
+            disableAllButtons()
         }
     }
     
@@ -176,26 +178,69 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var topConstraint2: NSLayoutConstraint!
     
     /// Teach the user how each button of toolbar works
-    private func displaySecondTutorial() {
-        topConstraint2 = hintView.bottomAnchor.constraint(equalTo: toolBar.topAnchor, constant: -10)
+    private func displayToolbarTutorial() {
+        guard !toolbarHintDisplayed else { return } // Make sure the tutorial was not displayed before.
         
-        UIView.animate(withDuration: 0.8) {
+        // Move the hintView to overlay at the bottom of the cardView
+        topConstraint2 = hintView.topAnchor.constraint(equalTo: toolBar.bottomAnchor, constant: 10)
+        
+        // Hide the hintView with the first tutorial message
+        UIView.animate(withDuration: 0.5) {
             self.hintView.alpha = 0
         } completion: { _ in
             // Set hintView's new top anchor constraint
             self.topConstraint1.isActive = false
             self.topConstraint2.isActive = true
             
-            // Set toolbar buttons' text tutorial
-            self.hintLabel.text = ""
+            // Set second hintView's tutorial message
+            self.hintLabel.text = "Share current image."
+            self.hintLabel.textAlignment = .center
             
+            // Enable share button
+            self.shareBtn.isEnabled = true
+            
+            // Show the second hint view
             UIView.animate(withDuration: 0.8, delay: 0.2) {
                 self.toolBar.alpha = 1
+                self.hintView.alpha = 1
             } completion: { _ in
-                UIView.animate(withDuration: 0.8) {
-                    self.hintView.alpha = 1
+                // Hide hintView
+                UIView.animate(withDuration: 0.8, delay: 1.5) {
+                    self.hintLabel.alpha = 0
                 } completion: { _ in
-                    print("Second tutorial displayed.")
+                    // Enable the undo button only and update the hintLabel
+                    self.shareBtn.isEnabled = false
+                    self.undoBtn.isEnabled = true
+                    self.hintLabel.text = "Undo the last swiped card."
+                    UIView.animate(withDuration: 0.5) {
+                        self.hintLabel.alpha = 1
+                    } completion: { _ in
+                        // Hide the hintView
+                        UIView.animate(withDuration: 0.8, delay: 1.5) {
+                            self.hintLabel.alpha = 0
+                        } completion: { _ in
+                            self.undoBtn.isEnabled = false
+                            self.favoriteBtn.isEnabled = true
+                            self.hintLabel.text = "Save the current image."
+                            UIView.animate(withDuration: 0.5) {
+                                self.hintLabel.alpha = 1
+                            } completion: { _ in
+                                // Hide the hintView
+                                UIView.animate(withDuration: 0.8, delay: 1.5) {
+                                    self.hintView.alpha = 0
+                                } completion: { _ in
+                                    // Enable all toolbar buttons
+                                    self.shareBtn.isEnabled = true
+                                    self.undoBtn.isEnabled = true
+                                    self.toolbarHintDisplayed = true
+                                }
+
+                            }
+
+                        }
+
+                    }
+
                 }
             }
         }
@@ -203,8 +248,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     /// Teach the user how the swiping gesture works
-    private func displayInitialTutorial() {
-        guard !initialHintDisplayed else { return } // Make sure the initial tutorial was not displayed yet.
+    private func displayCardTutorial() {
+        guard !cardHintDisplayed else { return } // Make sure the tutorial was not displayed before.
         
         self.hintView = UIView()
         self.hintLabel = UILabel()
@@ -214,7 +259,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         view.insertSubview(hintView, belowSubview: firstCard)
         hintView.translatesAutoresizingMaskIntoConstraints = false
         
-        topConstraint1 = hintView.topAnchor.constraint(equalTo: toolBar.topAnchor, constant: 0)
+        topConstraint1 = hintView.topAnchor.constraint(equalTo: toolBar.topAnchor, constant: 10)
         NSLayoutConstraint.activate([
             topConstraint1,
             hintView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
@@ -222,8 +267,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         ])
         
         // Message block style
-        hintView.backgroundColor = .systemTeal
-        hintView.layer.cornerRadius = 15
+        hintView.backgroundColor = K.Color.hintViewBackground
+        hintView.layer.cornerRadius = 10
         
         // Add text label to message block
         hintView.addSubview(hintLabel)
@@ -237,8 +282,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Text label style
         hintLabel.text = "Swipe the card to reveal the next cat image."
-        hintLabel.textColor = .white
-        hintLabel.font = .systemFont(ofSize: 20, weight: .regular)
+        hintLabel.textColor = K.Color.backgroundColor
+        hintLabel.font = .systemFont(ofSize: 20, weight: .medium)
         hintLabel.adjustsFontSizeToFitWidth = true
         hintLabel.numberOfLines = 0
         hintLabel.textAlignment = .natural
@@ -249,20 +294,23 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             self.hintView.alpha = 1
 
         } completion: { _ in
-            // Shake the first card to hint the user how swiping gesture works
+            // Rotate the first card to hint the user how swiping gesture works
+            // Rotate the first card to right
             UIView.animate(withDuration: 0.4, delay: 0.5) {
                 self.firstCard.transform = CGAffineTransform(rotationAngle: 0.1)
                 self.firstCard.center = CGPoint(x: anchorPoint.x + 20, y: anchorPoint.y)
             } completion: { _ in
+                // Rotate the first card to left
                 UIView.animate(withDuration: 0.4, delay: 0.0) {
                     self.firstCard.transform = CGAffineTransform(rotationAngle: -0.1)
                     self.firstCard.center = CGPoint(x: anchorPoint.x - 20, y: anchorPoint.y)
                 } completion: { _ in
+                    // Rotate the first card back to original position
                     UIView.animate(withDuration: 0.4) {
                         self.firstCard.transform = .identity
                         self.firstCard.center = anchorPoint
                     } completion: { _ in
-                        self.initialHintDisplayed = true
+                        self.cardHintDisplayed = true
                     }
 
                 }
@@ -271,10 +319,15 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
     }
     
-    /// Hide nav-bar's items and toolbar
-    private func hideToolbarAndNavItems() {
-        self.navigationController?.navigationBar.tintColor = K.Color.backgroundColor
+    /// Disable and hide button items in nav-bar and toolbar
+    private func disableAllButtons() {
+        navigationController?.navigationBar.tintColor = K.Color.backgroundColor
+        goToCollectionViewBtn.isEnabled = false
+        
         toolBar.alpha = 0
+        shareBtn.isEnabled = false
+        undoBtn.isEnabled = false
+        favoriteBtn.isEnabled = false
     }
     
     //MARK: - Ad Banner Methods
@@ -357,11 +410,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     //MARK: - Toolbar Button Method and State Control
     
     private func refreshButtonState() {
+        guard toolbarHintDisplayed else { return }
+        
         let dataIsLoaded = currentData != nil
         
         // Toggle the availability of toolbar buttons
         favoriteBtn.isEnabled = dataIsLoaded ? true : false
         shareBtn.isEnabled = dataIsLoaded ? true : false
+        undoBtn.isEnabled = true
         
         // Toggle the status of favorite button
         if let data = currentData {
@@ -516,7 +572,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     
                     // ! TEST PARAMETER, CHANGE AFTER TESTING !
                     if self.isOldUser() {
-                        self.displayInitialTutorial()
+                        self.displayCardTutorial()
                     }
                     
 //                    // Load banner ad after first card is loaded
@@ -670,9 +726,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 animateNextCardTransform()
                 undoCard.data = currentData!
                 
-                if self.initialHintDisplayed {
-                    self.displaySecondTutorial()
-                }
+                self.displayToolbarTutorial() // Display toolbar tutorial
             }
             
             // Reset card's position and rotation state
@@ -735,7 +789,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 }
             }
             self.refreshButtonState()
-            self.undoBtn.isEnabled = true
         }
     }
     
