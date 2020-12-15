@@ -39,6 +39,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var dataIndex: Int = 0
     private var currentCard: CurrentView = .first
     private var nextCard: Card = .secondCard
+    private var initialHintDisplayed = false
     
     private var viewCount: Int! {
         didSet {
@@ -169,76 +170,111 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Onboarding Methods
     
-    /// Hide nav-bar's items and toolbar
-    private func hideToolbarAndNavItems() {
-        self.navigationController?.navigationBar.tintColor = K.Color.backgroundColor
-        toolBar.alpha = 0
+    private var hintView: UIView!
+    private var hintLabel: UILabel!
+    private var topConstraint1: NSLayoutConstraint!
+    private var topConstraint2: NSLayoutConstraint!
+    
+    /// Teach the user how each button of toolbar works
+    private func displaySecondTutorial() {
+        topConstraint2 = hintView.bottomAnchor.constraint(equalTo: toolBar.topAnchor, constant: -10)
+        
+        UIView.animate(withDuration: 0.8) {
+            self.hintView.alpha = 0
+        } completion: { _ in
+            // Set hintView's new top anchor constraint
+            self.topConstraint1.isActive = false
+            self.topConstraint2.isActive = true
+            
+            // Set toolbar buttons' text tutorial
+            self.hintLabel.text = ""
+            
+            UIView.animate(withDuration: 0.8, delay: 0.2) {
+                self.toolBar.alpha = 1
+            } completion: { _ in
+                UIView.animate(withDuration: 0.8) {
+                    self.hintView.alpha = 1
+                } completion: { _ in
+                    print("Second tutorial displayed.")
+                }
+            }
+        }
+
     }
     
+    /// Teach the user how the swiping gesture works
     private func displayInitialTutorial() {
-        // Display welcome message
-        let messageView = UIView()
-        let textLabel = UILabel()
+        guard !initialHintDisplayed else { return } // Make sure the initial tutorial was not displayed yet.
+        
+        self.hintView = UIView()
+        self.hintLabel = UILabel()
         let anchorPoint = self.cardViewAnchor
         
         // Add message block to view
-        self.view.addSubview(messageView)
-        messageView.translatesAutoresizingMaskIntoConstraints = false
+        view.insertSubview(hintView, belowSubview: firstCard)
+        hintView.translatesAutoresizingMaskIntoConstraints = false
+        
+        topConstraint1 = hintView.topAnchor.constraint(equalTo: toolBar.topAnchor, constant: 0)
         NSLayoutConstraint.activate([
-            messageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
-            messageView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10),
-            messageView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
-//            messageView.heightAnchor.constraint(equalToConstant: 60)
+            topConstraint1,
+            hintView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 10),
+            hintView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10)
         ])
         
         // Message block style
-        messageView.backgroundColor = .systemTeal
-        messageView.layer.cornerRadius = 15
+        hintView.backgroundColor = .systemTeal
+        hintView.layer.cornerRadius = 15
         
         // Add text label to message block
-        messageView.addSubview(textLabel)
-        textLabel.translatesAutoresizingMaskIntoConstraints = false
+        hintView.addSubview(hintLabel)
+        hintLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            textLabel.topAnchor.constraint(equalTo: messageView.topAnchor, constant: 15),
-            textLabel.leadingAnchor.constraint(equalTo: messageView.leadingAnchor, constant: 15),
-            textLabel.trailingAnchor.constraint(equalTo: messageView.trailingAnchor, constant: -15),
-            textLabel.bottomAnchor.constraint(equalTo: messageView.bottomAnchor, constant: -15)
+            hintLabel.topAnchor.constraint(equalTo: hintView.topAnchor, constant: 15),
+            hintLabel.leadingAnchor.constraint(equalTo: hintView.leadingAnchor, constant: 15),
+            hintLabel.trailingAnchor.constraint(equalTo: hintView.trailingAnchor, constant: -15),
+            hintLabel.bottomAnchor.constraint(equalTo: hintView.bottomAnchor, constant: -15)
         ])
         
         // Text label style
-        textLabel.text = "Swipe the card to reveal the next cat image."
-        textLabel.textColor = .white
-        textLabel.font = .systemFont(ofSize: 25, weight: .semibold)
-        textLabel.adjustsFontSizeToFitWidth = true
-        textLabel.numberOfLines = 0
-        textLabel.textAlignment = .natural
+        hintLabel.text = "Swipe the card to reveal the next cat image."
+        hintLabel.textColor = .white
+        hintLabel.font = .systemFont(ofSize: 20, weight: .regular)
+        hintLabel.adjustsFontSizeToFitWidth = true
+        hintLabel.numberOfLines = 0
+        hintLabel.textAlignment = .natural
         
         // Animate the appearence of the message block
-        messageView.alpha = 0
-        UIView.animate(withDuration: 0.8, delay: 0.5) {
-            messageView.alpha = 1
+        hintView.alpha = 0
+        UIView.animate(withDuration: 0.8, delay: 0.2) {
+            self.hintView.alpha = 1
 
         } completion: { _ in
             // Shake the first card to hint the user how swiping gesture works
-            UIView.animate(withDuration: 0.7, delay: 1.0) {
+            UIView.animate(withDuration: 0.4, delay: 0.5) {
                 self.firstCard.transform = CGAffineTransform(rotationAngle: 0.1)
                 self.firstCard.center = CGPoint(x: anchorPoint.x + 20, y: anchorPoint.y)
             } completion: { _ in
-                UIView.animate(withDuration: 0.7, delay: 0.1) {
+                UIView.animate(withDuration: 0.4, delay: 0.0) {
                     self.firstCard.transform = CGAffineTransform(rotationAngle: -0.1)
                     self.firstCard.center = CGPoint(x: anchorPoint.x - 20, y: anchorPoint.y)
                 } completion: { _ in
-                    UIView.animate(withDuration: 0.7) {
+                    UIView.animate(withDuration: 0.4) {
                         self.firstCard.transform = .identity
                         self.firstCard.center = anchorPoint
                     } completion: { _ in
-                        print("Swipe gesture tutorial completed.")
+                        self.initialHintDisplayed = true
                     }
 
                 }
             }
         }
         
+    }
+    
+    /// Hide nav-bar's items and toolbar
+    private func hideToolbarAndNavItems() {
+        self.navigationController?.navigationBar.tintColor = K.Color.backgroundColor
+        toolBar.alpha = 0
     }
     
     //MARK: - Ad Banner Methods
@@ -627,11 +663,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             let speedThreshold = K.CardView.Animation.Threshold.speed
             let distanceThreshold = K.CardView.Animation.Threshold.distance
             
+            // The threshold to dismiss the current card view
             if currentData != nil && speed > speedThreshold && travelDistance > distanceThreshold {
                 let endPoint = CGPoint(x: cardViewAnchor.x + velocity.x / 2, y: cardViewAnchor.y + velocity.y / 2)
                 animateCard(card, to: endPoint)
                 animateNextCardTransform()
                 undoCard.data = currentData!
+                
+                if self.initialHintDisplayed {
+                    self.displaySecondTutorial()
+                }
             }
             
             // Reset card's position and rotation state
