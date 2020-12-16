@@ -251,12 +251,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         } completion: { _ in
             // Rotate the first card to hint the user how swiping gesture works
             // Rotate the first card to right
-            UIView.animate(withDuration: 0.3, delay: 0.5) {
+            UIView.animate(withDuration: 0.3, delay: 0.3) {
                 self.firstCard.transform = CGAffineTransform(rotationAngle: 0.1)
                 self.firstCard.center = CGPoint(x: anchorPoint.x + 20, y: anchorPoint.y)
             } completion: { _ in
                 // Rotate the first card to left
-                UIView.animate(withDuration: 0.3, delay: 0.0) {
+                UIView.animate(withDuration: 0.3) {
                     self.firstCard.transform = CGAffineTransform(rotationAngle: -0.1)
                     self.firstCard.center = CGPoint(x: anchorPoint.x - 20, y: anchorPoint.y)
                 } completion: { _ in
@@ -295,50 +295,51 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // Set second hintView's tutorial message
             self.hintLabel.text = "Share current image."
             self.hintLabel.textAlignment = .center
-           
-            self.shareBtn.isEnabled = true // Enable share button
             
-            // Show toolbar and make second card transparant
+            // Make second card transparant
             UIView.animate(withDuration: 0.8, delay: 0.2) {
                 self.secondCard.alpha = 0.5
-                
             } completion: { _ in
                 // Show the toolbar
-                UIView.animate(withDuration: 0.5, delay: 0.2) {
+                UIView.animate(withDuration: 0.5, delay: 0.1) {
                     self.toolBar.alpha = 1
                 } completion: { _ in
                     // Show the second hint view
-                    UIView.animate(withDuration: 0.5, delay: 0.5) {
-                        self.hintView.alpha = 1
+                    UIView.animate(withDuration: 0.1, delay: 0.8) {
+                        self.shareBtn.isEnabled = true // Enable share button
                     } completion: { _ in
-                        // Hide hintView
-                        UIView.animate(withDuration: 0.8, delay: 1.5) {
-                            self.hintLabel.alpha = 0
+                        UIView.animate(withDuration: 0.5, delay: 0.5) {
+                            self.hintView.alpha = 1
                         } completion: { _ in
-                            // Enable the undo button only and update the hintLabel
-                            self.shareBtn.isEnabled = false
-                            self.undoBtn.isEnabled = true
-                            self.hintLabel.text = "Undo the last swiped card."
-                            UIView.animate(withDuration: 0.5) {
-                                self.hintLabel.alpha = 1
+                            // Hide hintView
+                            UIView.animate(withDuration: 0.8, delay: 1.5) {
+                                self.hintLabel.alpha = 0
                             } completion: { _ in
-                                // Hide the hintView
-                                UIView.animate(withDuration: 0.8, delay: 1.5) {
-                                    self.hintLabel.alpha = 0
+                                // Enable the undo button only and update the hintLabel
+                                self.shareBtn.isEnabled = false
+                                self.undoBtn.isEnabled = true
+                                self.hintLabel.text = "Undo the last swiped card."
+                                UIView.animate(withDuration: 0.5) {
+                                    self.hintLabel.alpha = 1
                                 } completion: { _ in
-                                    self.undoBtn.isEnabled = false
-                                    self.favoriteBtn.isEnabled = true
-                                    self.hintLabel.text = "Save the current image."
-                                    UIView.animate(withDuration: 0.5) {
-                                        self.hintLabel.alpha = 1
+                                    // Hide the hintView
+                                    UIView.animate(withDuration: 0.8, delay: 1.5) {
+                                        self.hintLabel.alpha = 0
                                     } completion: { _ in
-                                        // Hide the hintView
-                                        UIView.animate(withDuration: 0.8, delay: 1.5) {
-                                            self.hintView.alpha = 0
+                                        self.undoBtn.isEnabled = false
+                                        self.favoriteBtn.isEnabled = true
+                                        self.hintLabel.text = "Save the current image."
+                                        UIView.animate(withDuration: 0.5) {
+                                            self.hintLabel.alpha = 1
                                         } completion: { _ in
-                                            self.favoriteBtn.isEnabled = false
-                                            self.toolbarHintDisplayed = true // Toolbar tutorial completed
-                                            self.displayNavBarButtonTutorial()
+                                            // Hide the hintView
+                                            UIView.animate(withDuration: 0.8, delay: 1.5) {
+                                                self.hintView.alpha = 0
+                                            } completion: { _ in
+                                                self.favoriteBtn.isEnabled = false
+                                                self.toolbarHintDisplayed = true // Toolbar tutorial completed
+                                                self.displayNavBarButtonTutorial()
+                                            }
                                         }
                                     }
                                 }
@@ -381,11 +382,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.hintLabel.text = "Enjoy!"
                     
                     // Show the hintView
-                    UIView.animate(withDuration: 0.5, delay: 1.0) {
+                    UIView.animate(withDuration: 0.5, delay: 0.5) {
                         self.hintView.alpha = 1
                     } completion: { _ in
                         // Hide the hintView
-                        UIView.animate(withDuration: 0.8, delay: 1.0) {
+                        UIView.animate(withDuration: 0.8, delay: 0.8) {
                             self.hintView.alpha = 0
                         } completion: { _ in
                             self.navBarHintDisplayed = true
@@ -393,11 +394,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                             self.defaults.setValue(true, forKey: K.UserDefaultsKeys.isOldUser)
                             
                             // Enable card view
-                            UIView.animate(withDuration: 0.5, delay: 0.5) {
+                            UIView.animate(withDuration: 0.5, delay: 0.2) {
                                 self.secondCard.alpha = 1
                             } completion: { _ in
-                                self.firstCard.alpha = 1
-                                UIView.animate(withDuration: 0.1, delay: 0.2) {
+                                UIView.animate(withDuration: 0.1, delay: 0.8) {
+                                    self.firstCard.alpha = 1
                                     // Enable second card's GR and all buttons
                                     self.secondCard.gestureRecognizers?.first?.isEnabled = true
                                     
