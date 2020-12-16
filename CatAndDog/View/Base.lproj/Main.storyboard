@@ -69,7 +69,7 @@
                     <navigationItem key="navigationItem" id="mlT-4e-zaz">
                         <barButtonItem key="rightBarButtonItem" image="square.grid.3x2.fill" catalog="system" id="sSu-jw-cTH">
                             <connections>
-                                <segue destination="nfh-xn-jhC" kind="show" id="1gv-hA-jFb"/>
+                                <segue destination="nfh-xn-jhC" kind="show" identifier="mainToCollection" id="1gv-hA-jFb"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

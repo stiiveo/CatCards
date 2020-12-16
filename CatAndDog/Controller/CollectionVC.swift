@@ -106,7 +106,7 @@ class CollectionVC: UICollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         selectedCellIndex = indexPath.row
-        performSegue(withIdentifier: K.SegueIdentifier.collectionToSingle, sender: self)
+        performSegue(withIdentifier: K.SegueIdentifiers.collectionToSingle, sender: self)
     }
 
 }

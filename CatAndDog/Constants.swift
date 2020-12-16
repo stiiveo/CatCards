@@ -37,8 +37,9 @@ struct K {
         static let hintViewBackground = UIColor(named: "hintView_background")
     }
     
-    struct SegueIdentifier {
+    struct SegueIdentifiers {
         static let collectionToSingle = "collectionToSingle"
+        static let mainToCollection = "mainToCollection"
     }
     
     struct ButtonImage {

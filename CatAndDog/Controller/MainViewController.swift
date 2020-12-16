@@ -417,6 +417,15 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
+    // Disable the nav-bar button until the tutorial is completed.
+    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
+        if identifier == K.SegueIdentifiers.mainToCollection {
+            return navBarHintDisplayed
+        } else {
+            return true
+        }
+    }
+    
     //MARK: - Ad Banner Methods
     
     private func loadAdBanner() {
