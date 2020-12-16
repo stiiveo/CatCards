@@ -14,16 +14,7 @@ class CardView: UIView {
     private let indicator = UIActivityIndicatorView()
     internal var data: CatData? {
         didSet {
-            guard data != nil else {
-                imageView.image = nil
-                indicator.startAnimating()
-                return
-            }
-            // value of data is not nil
-            DispatchQueue.main.async {
-                self.indicator.stopAnimating()
-                self.set(image: self.data!.image)
-            }
+            updateImage()
         }
     }
     
@@ -33,6 +24,7 @@ class CardView: UIView {
         addImageViewConstraint()
         addIndicator()
         imageView.isUserInteractionEnabled = true
+        imageView.alpha = 0 // Default status
         indicator.startAnimating()
     }
     
@@ -83,6 +75,34 @@ class CardView: UIView {
         // style
         indicator.style = .large
         indicator.hidesWhenStopped = true
+    }
+    
+    private func updateImage() {
+        // Data is valid
+        if data != nil {
+            DispatchQueue.main.async {
+                self.set(image: self.data!.image)
+                
+                UIView.animate(withDuration: 0.5) {
+                    self.indicator.alpha = 0
+                    self.imageView.alpha = 1
+                } completion: { _ in
+                    self.indicator.stopAnimating()
+                }
+                
+            }
+        }
+        // Data is not valid
+        else {
+            DispatchQueue.main.async {
+                self.indicator.startAnimating()
+                UIView.animate(withDuration: 0.5) {
+                    self.imageView.alpha = 0
+                    self.indicator.alpha = 1
+                }
+            }
+        }
+        
     }
     
 }
