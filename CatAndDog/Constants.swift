@@ -13,6 +13,7 @@ struct K {
     struct UserDefaultsKeys {
         static let viewCount = "viewCount"
         static let isOldUser = "isOldUser"
+        static let loadAdBanner = "loadAdBanner"
     }
     
     struct Banner {
@@ -32,7 +33,7 @@ struct K {
     
     struct Color {
         static let backgroundColor = UIColor(named: "backgroundColor")
-        static let toolbarTint = UIColor(named: "buttonColor")
+        static let tintColor = UIColor(named: "buttonColor")
         static let hintViewBackground = UIColor(named: "hintView_background")
     }
     
