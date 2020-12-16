@@ -243,11 +243,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         hintLabel.numberOfLines = 0
         hintLabel.textAlignment = .natural
         
+        // Start the animation
         // Animate the appearence of the message block
         hintView.alpha = 0
         UIView.animate(withDuration: 0.8, delay: 0.2) {
             self.hintView.alpha = 1
-
         } completion: { _ in
             // Rotate the first card to hint the user how swiping gesture works
             // Rotate the first card to right
@@ -301,7 +301,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 self.secondCard.alpha = 0.5
             } completion: { _ in
                 // Show the toolbar
-                UIView.animate(withDuration: 0.5, delay: 0.1) {
+                UIView.animate(withDuration: 0.5, delay: 0.0) {
                     self.toolBar.alpha = 1
                 } completion: { _ in
                     // Show the second hint view
