@@ -105,6 +105,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         networkManager.delegate = self
         fetchNewData(initialRequest: true) // initiate data downloading
         
+        // Configure default status of toolbar's item buttons
+        favoriteBtn.isEnabled = false
+        shareBtn.isEnabled = false
+        undoBtn.isEnabled = false
+        
+        currentCard = .first
+        
         // Create local image folder in file system or load data from it if it already exists
         databaseManager.createDirectory()
         databaseManager.getImageFileURLs()
@@ -499,14 +506,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     //MARK: - Toolbar Button Method and State Control
     
     private func refreshButtonState() {
-        guard toolbarHintDisplayed else { return }
-        
-        let dataIsLoaded = currentData != nil
+        guard toolbarHintDisplayed else { return } // Make sure the toolbar tutorial had been shown.
         
         // Toggle the availability of toolbar buttons
+        let dataIsLoaded = currentData != nil
         favoriteBtn.isEnabled = dataIsLoaded ? true : false
         shareBtn.isEnabled = dataIsLoaded ? true : false
-        undoBtn.isEnabled = true
+        
+        let currentDataID = currentData?.id
+        let firstDataID = networkManager.serializedData[1]?.id
+        let isFirstCard = currentDataID == firstDataID
+        undoBtn.isEnabled = currentCard != .undo && !isFirstCard ? true : false
         
         // Toggle the status of favorite button
         if let data = currentData {
@@ -518,6 +528,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     // Undo Action
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
         guard navBarHintDisplayed else { return }
+        guard undoCard.data != nil else { return }
         
         undoBtn.isEnabled = false
         
@@ -674,6 +685,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 dataIndex += 1
             }
         default:
+            // Update either cardView if its data is not available
             if firstCard.data == nil || secondCard.data == nil {
                 updateCardView()
             }
@@ -725,11 +737,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let dataSet = networkManager.serializedData
         let dataAllocation: Card = ((self.dataIndex + 1) % 2 == 1) ? .firstCard : .secondCard
         
-        // Increment the view count if card's data is invalid and about to be updated
-        if currentData == nil {
-            self.viewCount += 1
-        }
-        
         if let newData = dataSet[dataIndex + 1] { // Make sure new data is available
             switch dataAllocation { // Decide which card the data is to be allocated
             case .firstCard:
@@ -738,6 +745,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             case .secondCard:
                 secondCard.data = newData
                 dataIndex += 1
+            }
+            
+            // Increment the view count if card's data was invalid but updated
+            if currentData == nil {
+                self.viewCount += 1
             }
         }
         
@@ -878,7 +890,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             case .second:
                 self.rotateCard(self.secondCard)
             case .undo:
-                // Enable the next card's gesture recognizers
+                // Enable the next card's gesture recognizers and update card status
                 switch self.nextCard {
                 case .firstCard:
                     self.attachGestureRecognizers(to: self.firstCard)
