@@ -130,11 +130,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             navBarHintDisplayed = true
         }
         
-        // Load ad banner
-        if defaults.bool(forKey: K.UserDefaultsKeys.loadAdBanner) {
-            loadAdBanner()
-        }
-        
         // Notify this VC that when the app entered the background, execute selected method.
         NotificationCenter.default.addObserver(self, selector: #selector(saveViewCount), name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
@@ -676,6 +671,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     // Show onboarding tutorial if the user is a new comer
                     if !self.isOldUser() {
                         self.displayCardTutorial()
+                    }
+                    
+                    // Load ad banner
+                    if self.defaults.bool(forKey: K.UserDefaultsKeys.loadAdBanner) {
+                        self.loadAdBanner()
                     }
                 }
             }
