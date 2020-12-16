@@ -10,7 +10,7 @@ import UIKit
 
 protocol NetworkManagerDelegate {
     func dataDidFetch()
-    func errorDidOccur()
+    func networkErrorDidOccur()
 }
 
 class NetworkManager {
@@ -32,7 +32,7 @@ class NetworkManager {
             URLSession.shared.dataTask(with: url) { (data, response, error) in
                 // Transport error occured
                 if let error = error {
-                    self.delegate?.errorDidOccur() // Alert the main VC that an error occured in the data retrieving process.
+                    self.delegate?.networkErrorDidOccur() // Alert the main VC that an error occured in the data retrieving process.
                     debugPrint("Error sending URLSession request to the server or getting response from the server. Error: \(error)")
                     return
                 }

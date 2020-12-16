@@ -102,6 +102,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         super.viewDidLoad()
         
         navBar = self.navigationController?.navigationBar // Save the reference of the built-in navigation bar
+        MainViewController.databaseManager.delegate = self
         networkManager.delegate = self
         fetchNewData(initialRequest: true) // initiate data downloading
         
@@ -985,7 +986,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     //MARK: - Error Handling Section
     
     /// Present error message to the user if any error occurs in the data fetching process
-    func errorDidOccur() {
+    func networkErrorDidOccur() {
         DispatchQueue.main.async {
             let alert = UIAlertController(
                 title: "Cannot connect to the Internet",
@@ -1008,6 +1009,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
 }
 
+extension MainViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+}
+
 extension MainViewController: GADBannerViewDelegate {
     /// An ad request successfully receive an ad.
     func adViewDidReceiveAd(_ bannerView: GADBannerView) {
@@ -1023,8 +1030,14 @@ extension MainViewController: GADBannerViewDelegate {
     }
 }
 
-extension MainViewController: UIGestureRecognizerDelegate {
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
+extension MainViewController: DatabaseManagerDelegate {
+    /// Number of saved images has reached the limit.
+    func savedImagesMaxReached() {
+        // Show alert to the user
+        let alert = UIAlertController(title: "Maximum number of saved images is reached.", message: "Currently the limit of storage is \(K.Data.maxSavedImages) images.", preferredStyle: .alert)
+        let acknowledgeAction = UIAlertAction(title: "OK", style: .cancel)
+        alert.addAction(acknowledgeAction)
+        
+        present(alert, animated: true, completion: nil)
     }
 }

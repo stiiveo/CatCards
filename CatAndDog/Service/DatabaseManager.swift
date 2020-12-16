@@ -9,6 +9,10 @@
 import UIKit
 import CoreData
 
+protocol DatabaseManagerDelegate {
+    func savedImagesMaxReached()
+}
+
 class DatabaseManager {
     
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -18,6 +22,7 @@ class DatabaseManager {
     internal let imageProcess = ImageProcess()
     private var favoriteArray: [Favorite]!
     static var imageFileURLs = [FilePath]()
+    internal var delegate: DatabaseManagerDelegate?
     
     struct FilePath {
         let image: URL
@@ -53,8 +58,7 @@ class DatabaseManager {
     
     internal func saveData(_ data: CatData) {
         guard favoriteArray.count < K.Data.maxSavedImages else {
-            
-            print("Number of saved images has hit the limit.")
+            delegate?.savedImagesMaxReached() // Notify the error to the delegate.
             
             return
         }
