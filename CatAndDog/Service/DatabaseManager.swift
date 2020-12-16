@@ -16,7 +16,7 @@ class DatabaseManager {
     private let imageFolderName = K.Image.FolderName.fullImage
     private let thumbFolderName = K.Image.FolderName.thumbnail
     internal let imageProcess = ImageProcess()
-    var favoriteArray = [Favorite]()
+    private var favoriteArray: [Favorite]!
     static var imageFileURLs = [FilePath]()
     
     struct FilePath {
@@ -52,6 +52,13 @@ class DatabaseManager {
     //MARK: - Data Saving
     
     internal func saveData(_ data: CatData) {
+        guard favoriteArray.count < K.Data.maxSavedImages else {
+            
+            print("Number of saved images has hit the limit.")
+            
+            return
+        }
+        
         // Save data to local database
         let newData = Favorite(context: context)
         newData.id = data.id
@@ -113,7 +120,7 @@ class DatabaseManager {
     //MARK: - Data Deletion
     
     // Delete data matching the ID in database and file system
-    internal func deleteData(id: String, atIndex cacheIndex: Int) {
+    internal func deleteData(id: String) {
         
         // Delete data in database (CoreData)
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
@@ -138,6 +145,7 @@ class DatabaseManager {
                 debugPrint("Error removing image from file system: \(error)")
             }
         }
+        
         // Delete thumbnail file in local file system
         let thumbnailURL = folderURL(name: thumbFolderName).appendingPathComponent(fileName)
         if fileManager.fileExists(atPath: thumbnailURL.path) {
@@ -150,6 +158,13 @@ class DatabaseManager {
         
         // Refresh the image file URL cache
         getImageFileURLs()
+        
+        // Remove the cached favorite item matching the id
+        for item in favoriteArray {
+            if item.id == id {
+                favoriteArray.removeAll{$0 == item} // Remove all elements that satisfy the predicate
+            }
+        }
     }
     
     //MARK: - Creation of Directory / sub-Directory
@@ -192,7 +207,7 @@ class DatabaseManager {
         return fileManager.fileExists(atPath: newFileURL.path)
     }
     
-        internal func listOfSavedFileNames() -> [String] {
+    internal func listOfSavedFileNames() -> [String] {
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         
         // Sort data by making the last saved data at first

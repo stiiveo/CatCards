@@ -68,6 +68,7 @@ struct K {
         // After some testing, 10 is a pretty sweat spot between UX and memory usage.
         static let maxOfCachedData: Int = 10
         static let maxBufferImageNumber: Int = 4
+        static let maxSavedImages: Int = 24
     }
     
     struct ToolBar {

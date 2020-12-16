@@ -223,12 +223,12 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let alert = UIAlertController(title: "This action can not be reverted.", message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: "Delete Image", style: .destructive) { (action) in
             
-            let databaseManager = DatabaseManager()
+            let databaseManager = MainViewController.databaseManager
             let savedDataList = databaseManager.listOfSavedFileNames()
             let dataID = savedDataList[self.currentPage]
             
             // Delete data in file system, database and refresh the imageArray
-            databaseManager.deleteData(id: dataID, atIndex: self.currentPage)
+            databaseManager.deleteData(id: dataID)
             
             // Remove buffer view in memory buffer array
             self.bufferImageArray.remove(at: self.currentPage)
@@ -236,6 +236,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
             // Animate the scroll view
             self.scrollAndRemoveImageView()
         }
+        
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action) in
             return
         }

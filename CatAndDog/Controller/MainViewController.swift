@@ -30,7 +30,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     private var navBar: UINavigationBar!
     private var networkManager = NetworkManager()
-    private let databaseManager = DatabaseManager()
+    static let databaseManager = DatabaseManager()
     private let defaults = UserDefaults.standard
     private let firstCard = CardView()
     private let secondCard = CardView()
@@ -113,8 +113,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         currentCard = .first
         
         // Create local image folder in file system or load data from it if it already exists
-        databaseManager.createDirectory()
-        databaseManager.getImageFileURLs()
+        MainViewController.databaseManager.createDirectory()
+        MainViewController.databaseManager.getImageFileURLs()
         
         setDownsampleSize() // Prepare ImageProcess's operation parameter
         
@@ -495,7 +495,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let cellWidth = floor((screenWidth - (cellSpacing * (cellsPerRow - 1))) / cellsPerRow)
         
         let cellSize = CGSize(width: cellWidth, height: cellWidth)
-        databaseManager.imageProcess.cellSize = cellSize
+        MainViewController.databaseManager.imageProcess.cellSize = cellSize
     }
     
     //MARK: - Toolbar Button Method and State Control
@@ -515,7 +515,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Toggle the status of favorite button
         if let data = currentData {
-            let isDataSaved = databaseManager.isDataSaved(data: data)
+            let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
             favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
         }
     }
@@ -562,16 +562,15 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         guard navBarHintDisplayed else { return }
         
         if let data = currentData {
-            // Save data if it's absent in database, otherwise delete it in database
-            let isDataSaved = databaseManager.isDataSaved(data: data)
+            // Save data if it's absent in database, otherwise delete it.
+            let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
             switch isDataSaved {
             case false:
-                databaseManager.saveData(data)
-                self.favoriteBtn.image = K.ButtonImage.filledHeart
+                MainViewController.databaseManager.saveData(data)
             case true:
-                databaseManager.deleteData(id: data.id, atIndex: 0)
-                self.favoriteBtn.image = K.ButtonImage.heart
+                MainViewController.databaseManager.deleteData(id: data.id)
             }
+            refreshButtonState()
         }
     }
     
