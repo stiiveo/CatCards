@@ -10,6 +10,7 @@
 		EBD91FB1421399BAC051F833 /* Pods_CatAndDog.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39448A309171C754A6A718C9 /* Pods_CatAndDog.framework */; };
 		F60214D424E5205500872F34 /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F60214D224E5205500872F34 /* DataModel.xcdatamodeld */; };
 		F612B5F62554F304008BBCDC /* ImageProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = F612B5F52554F304008BBCDC /* ImageProcess.swift */; };
+		F6240A9B258B18EE00217C2D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F6240A9D258B18EE00217C2D /* Localizable.strings */; };
 		F639A17D24E29FB600FB6C0A /* CollectionVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F639A17C24E29FB600FB6C0A /* CollectionVC.swift */; };
 		F639A17F24E29FD000FB6C0A /* Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F639A17E24E29FD000FB6C0A /* Cell.swift */; };
 		F64FFF0D2518A10900E80DE2 /* SingleImageVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F64FFF0C2518A10900E80DE2 /* SingleImageVC.swift */; };
@@ -34,6 +35,10 @@
 		681AB58E2DF9E98BFA9DCD21 /* Pods-CatAndDog.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CatAndDog.release.xcconfig"; path = "Target Support Files/Pods-CatAndDog/Pods-CatAndDog.release.xcconfig"; sourceTree = "<group>"; };
 		F60214D324E5205500872F34 /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
 		F612B5F52554F304008BBCDC /* ImageProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcess.swift; sourceTree = "<group>"; };
+		F6240A96258B186C00217C2D /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Main.strings"; sourceTree = "<group>"; };
+		F6240A9C258B18EE00217C2D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F6240A9F258B190000217C2D /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		F6240AA1258B192400217C2D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
 		F639A17C24E29FB600FB6C0A /* CollectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionVC.swift; sourceTree = "<group>"; };
 		F639A17E24E29FD000FB6C0A /* Cell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cell.swift; sourceTree = "<group>"; };
 		F64FFF0C2518A10900E80DE2 /* SingleImageVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageVC.swift; sourceTree = "<group>"; };
@@ -113,6 +118,7 @@
 				F67E4DEA24CC7725006DDE96 /* Service */,
 				F6746FEF24C6DCF5006A2905 /* Assets.xcassets */,
 				F6746FF424C6DCF5006A2905 /* Info.plist */,
+				F6240A9D258B18EE00217C2D /* Localizable.strings */,
 			);
 			path = CatAndDog;
 			sourceTree = "<group>";
@@ -203,6 +209,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hant",
 			);
 			mainGroup = F6746FD824C6DCF2006A2905;
 			productRefGroup = F6746FE224C6DCF2006A2905 /* Products */;
@@ -220,6 +227,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F6746FF324C6DCF5006A2905 /* LaunchScreen.storyboard in Resources */,
+				F6240A9B258B18EE00217C2D /* Localizable.strings in Resources */,
 				F6746FF024C6DCF5006A2905 /* Assets.xcassets in Resources */,
 				F6746FEE24C6DCF2006A2905 /* Main.storyboard in Resources */,
 			);
@@ -295,10 +303,21 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		F6240A9D258B18EE00217C2D /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F6240A9C258B18EE00217C2D /* en */,
+				F6240A9F258B190000217C2D /* zh-Hant */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
 		F6746FEC24C6DCF2006A2905 /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
 				F6746FED24C6DCF2006A2905 /* Base */,
+				F6240A96258B186C00217C2D /* zh-Hant */,
+				F6240AA1258B192400217C2D /* en */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -318,6 +337,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -379,6 +399,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
