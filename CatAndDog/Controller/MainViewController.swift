@@ -9,6 +9,7 @@
 import UIKit
 import GoogleMobileAds
 import UserNotifications
+import AppTrackingTransparency
 
 private enum Card {
     case firstCard, secondCard
@@ -182,7 +183,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Reload the banner's ad if the orientation of the screen is about to change
         coordinator.animate { _ in
-            self.loadAdBanner()
+            self.loadBannerAd()
         }
     }
     
@@ -429,11 +430,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Ad Banner Methods
+    //MARK: - Advertisement Methods
     
-    private func loadAdBanner() {
+    private func loadBannerAd() {
         // Create an ad request and load the adaptive banner ad.
-        adBannerView.load(GADRequest())
+        DispatchQueue.main.async {
+            self.adBannerView.load(GADRequest())
+        }
     }
     
     /// Place the banner at the center of the reserved ad space
@@ -469,6 +472,15 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Set the height of the reserved ad space the same as the adaptive banner's height
         adFixedSpaceHeight.constant = bannerView.frame.height
         adFixedSpace.layoutIfNeeded()
+    }
+    
+    /// Google recommend waiting for the completion callback prior to loading ads, so that if the user grants the App Tracking Transparency permission, the Google Mobile Ads SDK can use the IDFA in ad requests.
+    @available(iOS 14, *)
+    private func requestIDFA() {
+        ATTrackingManager.requestTrackingAuthorization { (status) in
+            // Tracking authorization completed. Start loading ads here.
+            self.loadBannerAd()
+        }
     }
     
     //MARK: - Support Methods
@@ -675,7 +687,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     
                     // Load ad banner
                     if self.defaults.bool(forKey: K.UserDefaultsKeys.loadAdBanner) {
-                        self.loadAdBanner()
+                        self.loadBannerAd()
                     }
                 }
             }
@@ -718,7 +730,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         updateCardView()
         fetchNewData(initialRequest: false)
         
-        // Load ad banner if bool value in defaults is true and if user had seen 10 cardView's with cat image
+        // Load ad banner if bool value in defaults is true and the user had viewed 10 cardViews with cat image
         // This method is put here to avoid the cardView dismissing issue where
         // the card dismissing destination might be disrupted if the constraints on view changed when
         // the dismissing animation is still executing at the same time.
@@ -726,7 +738,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // to a place which makes more sense.
         let loadAd = defaults.bool(forKey: K.UserDefaultsKeys.loadAdBanner)
         if loadAd && viewCount == 10 {
-            loadAdBanner()
+            if #available(iOS 14, *) {
+                // This method is available in iOS 14 and later
+                // User's permission is required to get device's identifier for advertising
+                requestIDFA()
+            } else {
+                loadBannerAd()
+            }
         }
     }
     
