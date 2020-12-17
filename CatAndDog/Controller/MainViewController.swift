@@ -22,9 +22,9 @@ private enum CurrentView {
 class MainViewController: UIViewController, NetworkManagerDelegate {
     
     @IBOutlet weak var toolBar: UIToolbar!
-    @IBOutlet weak var favoriteBtn: UIBarButtonItem!
-    @IBOutlet weak var shareBtn: UIBarButtonItem!
-    @IBOutlet weak var undoBtn: UIBarButtonItem!
+    @IBOutlet weak var saveButton: UIBarButtonItem!
+    @IBOutlet weak var shareButton: UIBarButtonItem!
+    @IBOutlet weak var undoButton: UIBarButtonItem!
     @IBOutlet weak var adFixedSpace: UIView!
     @IBOutlet weak var adFixedSpaceHeight: NSLayoutConstraint!
     @IBOutlet weak var goToCollectionViewBtn: UIBarButtonItem!
@@ -108,9 +108,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         fetchNewData(initialRequest: true) // initiate data downloading
         
         // Configure default status of toolbar's item buttons
-        favoriteBtn.isEnabled = false
-        shareBtn.isEnabled = false
-        undoBtn.isEnabled = false
+        saveButton.isEnabled = false
+        shareButton.isEnabled = false
+        undoButton.isEnabled = false
         
         currentCard = .first
         
@@ -201,9 +201,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         goToCollectionViewBtn.isEnabled = false
         
         toolBar.alpha = 0
-        shareBtn.isEnabled = false
-        undoBtn.isEnabled = false
-        favoriteBtn.isEnabled = false
+        shareButton.isEnabled = false
+        undoButton.isEnabled = false
+        saveButton.isEnabled = false
     }
     
     /// Teach the user how the swiping gesture works
@@ -240,7 +240,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         ])
         
         // Text label style
-        hintLabel.text = "Swipe the card to reveal the next cat image."
+        hintLabel.text = Z.OnboardingLabel.cardGesture
         hintLabel.textColor = K.Color.backgroundColor
         hintLabel.font = .systemFont(ofSize: 20, weight: .medium)
         hintLabel.adjustsFontSizeToFitWidth = true
@@ -297,7 +297,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             self.topToToolbarBottomConstraint.isActive = true
             
             // Set second hintView's tutorial message
-            self.hintLabel.text = "Share current image."
+            self.hintLabel.text = Z.OnboardingLabel.shareButton
             self.hintLabel.textAlignment = .center
             
             // Make second card transparant
@@ -310,7 +310,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 } completion: { _ in
                     // Show the second hint view
                     UIView.animate(withDuration: 0.1, delay: 0.8) {
-                        self.shareBtn.isEnabled = true // Enable share button
+                        self.shareButton.isEnabled = true // Enable share button
                     } completion: { _ in
                         UIView.animate(withDuration: 0.5, delay: 0.5) {
                             self.hintView.alpha = 1
@@ -320,9 +320,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                                 self.hintLabel.alpha = 0
                             } completion: { _ in
                                 // Enable the undo button only and update the hintLabel
-                                self.shareBtn.isEnabled = false
-                                self.undoBtn.isEnabled = true
-                                self.hintLabel.text = "Undo the last swiped card."
+                                self.shareButton.isEnabled = false
+                                self.undoButton.isEnabled = true
+                                self.hintLabel.text = Z.OnboardingLabel.undoButton
                                 UIView.animate(withDuration: 0.5) {
                                     self.hintLabel.alpha = 1
                                 } completion: { _ in
@@ -330,9 +330,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                                     UIView.animate(withDuration: 0.8, delay: 1.5) {
                                         self.hintLabel.alpha = 0
                                     } completion: { _ in
-                                        self.undoBtn.isEnabled = false
-                                        self.favoriteBtn.isEnabled = true
-                                        self.hintLabel.text = "Save the current image."
+                                        self.undoButton.isEnabled = false
+                                        self.saveButton.isEnabled = true
+                                        self.hintLabel.text = Z.OnboardingLabel.saveButton
                                         UIView.animate(withDuration: 0.5) {
                                             self.hintLabel.alpha = 1
                                         } completion: { _ in
@@ -340,7 +340,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                                             UIView.animate(withDuration: 0.8, delay: 1.5) {
                                                 self.hintView.alpha = 0
                                             } completion: { _ in
-                                                self.favoriteBtn.isEnabled = false
+                                                self.saveButton.isEnabled = false
                                                 self.toolbarHintDisplayed = true // Toolbar tutorial completed
                                                 self.displayNavBarButtonTutorial()
                                             }
@@ -361,7 +361,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         topToCardTopConstraint = hintView.topAnchor.constraint(equalTo: secondCard.topAnchor)
         
         // Show hintView below the nav-bar
-        self.hintLabel.text = "Browse your saved cat images."
+        self.hintLabel.text = Z.OnboardingLabel.browseButton
         topToToolbarBottomConstraint.isActive = false
         topToCardTopConstraint.isActive = true
         
@@ -383,7 +383,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     self.topToCardTopConstraint.isActive = false
                     self.topToToolbarBottomConstraint.isActive = true
                     
-                    self.hintLabel.text = "Enjoy!"
+                    self.hintLabel.text = Z.OnboardingLabel.blessLabel
                     
                     // Show the hintView
                     UIView.animate(withDuration: 0.5, delay: 0.5) {
@@ -406,9 +406,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                                     // Enable second card's GR and all buttons
                                     self.secondCard.gestureRecognizers?.first?.isEnabled = true
                                     
-                                    self.shareBtn.isEnabled = true
-                                    self.undoBtn.isEnabled = true
-                                    self.favoriteBtn.isEnabled = true
+                                    self.shareButton.isEnabled = true
+                                    self.undoButton.isEnabled = true
+                                    self.saveButton.isEnabled = true
                                     self.goToCollectionViewBtn.isEnabled = true
                                     
                                     // End of all tutorials
@@ -518,18 +518,18 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Toggle the availability of toolbar buttons
         let dataIsLoaded = currentData != nil
-        favoriteBtn.isEnabled = dataIsLoaded ? true : false
-        shareBtn.isEnabled = dataIsLoaded ? true : false
+        saveButton.isEnabled = dataIsLoaded ? true : false
+        shareButton.isEnabled = dataIsLoaded ? true : false
         
         let currentDataID = currentData?.id
         let firstDataID = networkManager.serializedData[1]?.id
         let isFirstCard = currentDataID == firstDataID
-        undoBtn.isEnabled = currentCard != .undo && !isFirstCard ? true : false
+        undoButton.isEnabled = currentCard != .undo && !isFirstCard ? true : false
         
         // Toggle the status of favorite button
         if let data = currentData {
             let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
-            favoriteBtn.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
+            saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
         }
     }
     
@@ -538,7 +538,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         guard navBarHintDisplayed else { return }
         guard undoCard.data != nil else { return }
         
-        undoBtn.isEnabled = false
+        undoButton.isEnabled = false
         
         // Remove current card's gesture recognizer and save its reference
         switch currentCard {
@@ -1007,12 +1007,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     func networkErrorDidOccur() {
         DispatchQueue.main.async {
             let alert = UIAlertController(
-                title: "Cannot connect to the Internet",
-                message: "Signal from Cat Planet is too weak.\n Please check your antenna. 📡",
+                title: Z.AlertMessage.NetworkError.alertTitle,
+                message: Z.AlertMessage.NetworkError.alertMessage,
                 preferredStyle: .alert)
             
             // Retry button which send network request to the network manager
-            let retryAction = UIAlertAction(title: "Try Again", style: .default) { _ in
+            let retryAction = UIAlertAction(title: Z.AlertMessage.NetworkError.actionTitle, style: .default) { _ in
                 self.networkManager.performRequest(numberOfRequests: K.Data.maxOfCachedData)
             }
             
@@ -1052,8 +1052,8 @@ extension MainViewController: DatabaseManagerDelegate {
     /// Number of saved images has reached the limit.
     func savedImagesMaxReached() {
         // Show alert to the user
-        let alert = UIAlertController(title: "Maximum number of saved images is reached.", message: "Currently the limit of storage is \(K.Data.maxSavedImages) images.", preferredStyle: .alert)
-        let acknowledgeAction = UIAlertAction(title: "OK", style: .cancel)
+        let alert = UIAlertController(title: Z.AlertMessage.DatabaseError.alertTitle, message: Z.AlertMessage.DatabaseError.alertMessage, preferredStyle: .alert)
+        let acknowledgeAction = UIAlertAction(title: Z.AlertMessage.DatabaseError.actionTitle, style: .cancel)
         alert.addAction(acknowledgeAction)
         
         present(alert, animated: true, completion: nil)

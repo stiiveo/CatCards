@@ -1,7 +1,39 @@
 /* 
-  Localizable.strings
+  Localizable.strings (Chinese, Traditional)
   CatCard
 
   Created by Jason Ou Yang on 2020/12/17.
   Copyright © 2020 Jason Ou Yang. All rights reserved.
 */
+
+// MainViewController
+
+// HintView
+"CARD_GESTURE" = "Swipe the card to reveal the next cat image.";
+"SHARE_BUTTON" = "Share current image.";
+"UNDO_BUTTON" = "Undo the last swiped card.";
+"SAVE_BUTTON" = "Save the current image.";
+"BROWSE_IMAGES" = "Browse your saved cat images.";
+"BLESS_LABEL" = "Enjoy!";
+
+// Network Error Alert
+"NETWORK_ERROR_ALERT_TITLE" = "Cannot connect to the Internet.";
+"NETWORK_ERROR_ALERT_MESSAGE" = "Signal from Cat Planet is too weak.\n Please check your antenna. 📡";
+"NETWORK_ERROR_ALERT_ACTION" = "Try Again";
+
+// Databse Error Alert
+"DATABASE_ERROR_ALERT_TITLE" = "Maximum number of saved images is reached.";
+"DATABASE_ERROR_ALERT_MESSAGE" = "Currently the storage of saved images is limited.";
+"DATABASE_ERROR_ALERT_ACTION" = "OK";
+
+// CollectionVC
+
+// Background view
+"NO_DATA_LABEL_TEXT" = "No Saved Images";
+
+// SingleImageVC
+
+// Image Deleting Warning
+"DELETE_WARNING_ALERT_TITLE" = "This action can not be reverted.";
+"DELETE_WARNING_ALERT_ACTION" = "Delete";
+"DELETE_WARNING_ALERT_CANCEL" = "Cancel";

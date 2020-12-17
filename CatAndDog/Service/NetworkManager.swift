@@ -21,7 +21,10 @@ class NetworkManager {
     private let imageProcesser = ImageProcess()
     
     internal func performRequest(numberOfRequests: Int) {
-        guard numberOfRequests > 0 else { debugPrint("Error: Number of network request equals 0 or less."); return }
+        guard numberOfRequests > 0 else {
+            debugPrint("Error: Number of network request equals 0 or less.")
+            return
+        }
         for _ in 1...numberOfRequests {
             // Create URL object using API's HTTP address string
             guard let url = URL(string: K.API.urlString) else {

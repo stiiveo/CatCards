@@ -73,7 +73,7 @@ class CollectionVC: UICollectionViewController {
                                                 width: collectionView.bounds.size.width,
                                                 height: collectionView.bounds.size.height)
         )
-        noDataLabel.text = "   Your Favorite Cat Images Are Right Here   "
+        noDataLabel.text = Z.BackgroundView.noDataLabel
         noDataLabel.font = .boldSystemFont(ofSize: 18)
         noDataLabel.adjustsFontSizeToFitWidth = true
         noDataLabel.minimumScaleFactor = 0.7

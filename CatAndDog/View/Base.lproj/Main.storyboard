@@ -76,11 +76,11 @@
                     <connections>
                         <outlet property="adFixedSpace" destination="cGb-6Z-c2Z" id="Qx4-YP-Hlk"/>
                         <outlet property="adFixedSpaceHeight" destination="xKe-58-e39" id="s4l-IN-9xV"/>
-                        <outlet property="favoriteBtn" destination="eix-IU-TsW" id="kOq-j5-OQe"/>
                         <outlet property="goToCollectionViewBtn" destination="sSu-jw-cTH" id="auR-gH-DQd"/>
-                        <outlet property="shareBtn" destination="qHs-X8-xcv" id="LC9-zj-rUj"/>
+                        <outlet property="saveButton" destination="eix-IU-TsW" id="kOq-j5-OQe"/>
+                        <outlet property="shareButton" destination="qHs-X8-xcv" id="LC9-zj-rUj"/>
                         <outlet property="toolBar" destination="ZI0-C0-QUe" id="1E1-XT-9aH"/>
-                        <outlet property="undoBtn" destination="c3g-fk-JM1" id="5Cm-E7-yo9"/>
+                        <outlet property="undoButton" destination="c3g-fk-JM1" id="5Cm-E7-yo9"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wgG-Tt-dvs" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

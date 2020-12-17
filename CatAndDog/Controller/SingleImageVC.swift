@@ -220,8 +220,8 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     }
     
     @IBAction func deleteButtonPressed(_ sender: UIBarButtonItem) {
-        let alert = UIAlertController(title: "This action can not be reverted.", message: nil, preferredStyle: .actionSheet)
-        let deleteAction = UIAlertAction(title: "Delete Image", style: .destructive) { (action) in
+        let alert = UIAlertController(title: Z.AlertMessage.DeleteWarning.alertTitle, message: nil, preferredStyle: .actionSheet)
+        let deleteAction = UIAlertAction(title: Z.AlertMessage.DeleteWarning.actionTitle, style: .destructive) { (action) in
             
             let databaseManager = MainViewController.databaseManager
             let savedDataList = databaseManager.listOfSavedFileNames()
@@ -237,7 +237,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
             self.scrollAndRemoveImageView()
         }
         
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action) in
+        let cancelAction = UIAlertAction(title: Z.AlertMessage.DeleteWarning.cancelTitle, style: .cancel) { (action) in
             return
         }
         alert.addAction(deleteAction)
