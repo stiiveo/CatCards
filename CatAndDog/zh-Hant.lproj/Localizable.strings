@@ -36,5 +36,5 @@
 
 // Image Deleting Warning
 "DELETE_WARNING_ALERT_TITLE" = "這個動作無法回復";
-"DELETE_WARNING_ALERT_ACTION" = "刪除";
+"DELETE_WARNING_ALERT_ACTION" = "刪除圖片";
 "DELETE_WARNING_ALERT_CANCEL" = "取消";

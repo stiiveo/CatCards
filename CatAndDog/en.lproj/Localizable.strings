@@ -36,5 +36,5 @@
 
 // Image Deleting Warning
 "DELETE_WARNING_ALERT_TITLE" = "This action can not be reverted.";
-"DELETE_WARNING_ALERT_ACTION" = "Delete";
+"DELETE_WARNING_ALERT_ACTION" = "Delete Picture";
 "DELETE_WARNING_ALERT_CANCEL" = "Cancel";
