@@ -5,17 +5,11 @@
 /* Class = "UIBarButtonItem"; title = "Delete"; ObjectID = "QaQ-75-ktH"; */
 "QaQ-75-ktH.title" = "Delete";
 
-/* Class = "UIBarButtonItem"; title = "Saved"; ObjectID = "Wgb-Bn-qm8"; */
-"Wgb-Bn-qm8.title" = "Saved";
-
 /* Class = "UIBarButtonItem"; title = "Undo"; ObjectID = "c3g-fk-JM1"; */
 "c3g-fk-JM1.title" = "Undo";
 
-/* Class = "UINavigationItem"; title = "Saved"; ObjectID = "d9n-lb-NFf"; */
-"d9n-lb-NFf.title" = "Saved";
-
 /* Class = "UIBarButtonItem"; title = "Favorite"; ObjectID = "eix-IU-TsW"; */
-"eix-IU-TsW.title" = "Favorite";
+"eix-IU-TsW.title" = "Save";
 
 /* Class = "UIBarButtonItem"; title = "Share"; ObjectID = "qHs-X8-xcv"; */
 "qHs-X8-xcv.title" = "Share";

@@ -40,7 +40,7 @@
                                                 </connections>
                                             </barButtonItem>
                                             <barButtonItem style="plain" systemItem="flexibleSpace" id="L2G-v4-WQZ"/>
-                                            <barButtonItem title="Favorite" image="heart" catalog="system" id="eix-IU-TsW">
+                                            <barButtonItem title="Save" image="heart" catalog="system" id="eix-IU-TsW">
                                                 <connections>
                                                     <action selector="favoriteButtonPressed:" destination="jpg-gr-ShF" id="BKN-yk-8P5"/>
                                                 </connections>
@@ -87,7 +87,7 @@
             </objects>
             <point key="canvasLocation" x="2568.8000000000002" y="-456.52173913043481"/>
         </scene>
-        <!--Saved-->
+        <!--CollectionVC-->
         <scene sceneID="GWV-aL-vGk">
             <objects>
                 <collectionViewController id="nfh-xn-jhC" customClass="CollectionVC" customModule="Cat_Card" customModuleProvider="target" sceneMemberID="viewController">
@@ -130,7 +130,7 @@
                             <outlet property="delegate" destination="nfh-xn-jhC" id="mOe-bk-7mo"/>
                         </connections>
                     </collectionView>
-                    <navigationItem key="navigationItem" title="Saved" id="d9n-lb-NFf"/>
+                    <navigationItem key="navigationItem" id="d9n-lb-NFf"/>
                     <connections>
                         <segue destination="qlD-G6-Afc" kind="show" identifier="collectionToSingle" id="pEZ-p6-Ugc"/>
                     </connections>
@@ -204,9 +204,7 @@
                             <constraint firstItem="1Ze-wL-vlY" firstAttribute="top" secondItem="PSN-rc-vX0" secondAttribute="top" id="zfI-F2-04S"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="afj-fq-RhJ">
-                        <barButtonItem key="backBarButtonItem" title="Saved" id="Wgb-Bn-qm8"/>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" id="afj-fq-RhJ"/>
                     <connections>
                         <outlet property="scrollView" destination="1Ze-wL-vlY" id="3Jb-52-g00"/>
                         <outlet property="stackView" destination="eiQ-d0-gPU" id="iCu-Re-zCs"/>

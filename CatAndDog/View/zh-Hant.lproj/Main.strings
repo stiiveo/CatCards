@@ -1,21 +1,15 @@
 
 /* Class = "UIBarButtonItem"; title = "Share"; ObjectID = "6Ck-bA-J7B"; */
-"6Ck-bA-J7B.title" = "Share";
+"6Ck-bA-J7B.title" = "分享";
 
 /* Class = "UIBarButtonItem"; title = "Delete"; ObjectID = "QaQ-75-ktH"; */
-"QaQ-75-ktH.title" = "Delete";
-
-/* Class = "UIBarButtonItem"; title = "Saved"; ObjectID = "Wgb-Bn-qm8"; */
-"Wgb-Bn-qm8.title" = "Saved";
+"QaQ-75-ktH.title" = "刪除";
 
 /* Class = "UIBarButtonItem"; title = "Undo"; ObjectID = "c3g-fk-JM1"; */
-"c3g-fk-JM1.title" = "Undo";
-
-/* Class = "UINavigationItem"; title = "Saved"; ObjectID = "d9n-lb-NFf"; */
-"d9n-lb-NFf.title" = "Saved";
+"c3g-fk-JM1.title" = "重來";
 
 /* Class = "UIBarButtonItem"; title = "Favorite"; ObjectID = "eix-IU-TsW"; */
-"eix-IU-TsW.title" = "Favorite";
+"eix-IU-TsW.title" = "儲存";
 
 /* Class = "UIBarButtonItem"; title = "Share"; ObjectID = "qHs-X8-xcv"; */
-"qHs-X8-xcv.title" = "Share";
+"qHs-X8-xcv.title" = "分享";

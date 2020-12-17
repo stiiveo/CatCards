@@ -36,11 +36,11 @@
 		681AB58E2DF9E98BFA9DCD21 /* Pods-CatAndDog.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CatAndDog.release.xcconfig"; path = "Target Support Files/Pods-CatAndDog/Pods-CatAndDog.release.xcconfig"; sourceTree = "<group>"; };
 		F60214D324E5205500872F34 /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
 		F612B5F52554F304008BBCDC /* ImageProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcess.swift; sourceTree = "<group>"; };
-		F6240A96258B186C00217C2D /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Main.strings"; sourceTree = "<group>"; };
 		F6240A9C258B18EE00217C2D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F6240A9F258B190000217C2D /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		F6240AA1258B192400217C2D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
 		F6240AA3258B2EB800217C2D /* Strings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
+		F6240AA8258B407600217C2D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
+		F6240AAA258B40AF00217C2D /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Main.strings"; sourceTree = "<group>"; };
 		F639A17C24E29FB600FB6C0A /* CollectionVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionVC.swift; sourceTree = "<group>"; };
 		F639A17E24E29FD000FB6C0A /* Cell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cell.swift; sourceTree = "<group>"; };
 		F64FFF0C2518A10900E80DE2 /* SingleImageVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageVC.swift; sourceTree = "<group>"; };
@@ -320,8 +320,8 @@
 			isa = PBXVariantGroup;
 			children = (
 				F6746FED24C6DCF2006A2905 /* Base */,
-				F6240A96258B186C00217C2D /* zh-Hant */,
-				F6240AA1258B192400217C2D /* en */,
+				F6240AA8258B407600217C2D /* en */,
+				F6240AAA258B40AF00217C2D /* zh-Hant */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
