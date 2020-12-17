@@ -22,8 +22,12 @@ struct K {
         }
         static let adMobAppID = "ca-app-pub-2421510056015407~5275025170"
         static let unitID = "ca-app-pub-2421510056015407/2067597276" // my real ad unit ID
+        
+        // TEST USE
         static let testUnitID = "ca-app-pub-3940256099942544/2934735716" // test ad unit ID
-        static let testDeviceIdentifier = "183f37d224cd0bdff5a8ee1b7b3b7daf" // Identifier of the test device
+        static let myTestDeviceIdentifier = "183f37d224cd0bdff5a8ee1b7b3b7daf" // Identifier of the test device
+        static let obamaTestDeviceIdentifier = "cab86adbac7f339092f5151f051e3f84" // Identifier of the test device
+        static let mandyTestDeviceIdentifier = "1828f1e5516280de49d9d7b8ce165764" // Identifier of the test device
     }
     
     struct API {

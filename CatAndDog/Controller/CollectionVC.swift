@@ -80,6 +80,7 @@ class CollectionVC: UICollectionViewController {
         noDataLabel.font = .boldSystemFont(ofSize: 20)
         noDataLabel.adjustsFontSizeToFitWidth = true
         noDataLabel.minimumScaleFactor = 0.7
+        noDataLabel.numberOfLines = 0
         noDataLabel.textColor = UIColor.systemGray
         noDataLabel.textAlignment = .center
         

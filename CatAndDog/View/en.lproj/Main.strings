@@ -8,7 +8,7 @@
 /* Class = "UIBarButtonItem"; title = "Undo"; ObjectID = "c3g-fk-JM1"; */
 "c3g-fk-JM1.title" = "Undo";
 
-/* Class = "UIBarButtonItem"; title = "Favorite"; ObjectID = "eix-IU-TsW"; */
+/* Class = "UIBarButtonItem"; title = "Save"; ObjectID = "eix-IU-TsW"; */
 "eix-IU-TsW.title" = "Save";
 
 /* Class = "UIBarButtonItem"; title = "Share"; ObjectID = "qHs-X8-xcv"; */
