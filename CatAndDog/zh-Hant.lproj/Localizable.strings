@@ -6,34 +6,35 @@
   Copyright © 2020 Jason Ou Yang. All rights reserved.
 */
 
+
 // MainViewController
 
 // HintView
-"CARD_GESTURE" = "Swipe the card to reveal the next cat image.";
-"SHARE_BUTTON" = "Share current image.";
-"UNDO_BUTTON" = "Undo the last swiped card.";
-"SAVE_BUTTON" = "Save the current image.";
-"BROWSE_IMAGES" = "Browse your saved cat images.";
-"BLESS_LABEL" = "Enjoy!";
+"CARD_GESTURE" = "移動卡片看下一張貓圖";
+"SHARE_BUTTON" = "分享目前的貓圖";
+"UNDO_BUTTON" = "召回上一張貓圖";
+"SAVE_BUTTON" = "儲存目前的貓圖";
+"BROWSE_IMAGES" = "瀏覽已儲存的貓圖";
+"BLESS_LABEL" = "開始享受吧！";
 
 // Network Error Alert
-"NETWORK_ERROR_ALERT_TITLE" = "Cannot connect to the Internet.";
-"NETWORK_ERROR_ALERT_MESSAGE" = "Signal from Cat Planet is too weak.\n Please check your antenna. 📡";
-"NETWORK_ERROR_ALERT_ACTION" = "Try Again";
+"NETWORK_ERROR_ALERT_TITLE" = "無法連接至網路";
+"NETWORK_ERROR_ALERT_MESSAGE" = "來自貓星球的訊號太弱\n 請檢查您裝置的天線 📡";
+"NETWORK_ERROR_ALERT_ACTION" = "再試一次";
 
 // Databse Error Alert
-"DATABASE_ERROR_ALERT_TITLE" = "Maximum number of saved images is reached.";
-"DATABASE_ERROR_ALERT_MESSAGE" = "Currently the storage of saved images is limited.";
-"DATABASE_ERROR_ALERT_ACTION" = "OK";
+"DATABASE_ERROR_ALERT_TITLE" = "已達到圖片儲存的上限";
+"DATABASE_ERROR_ALERT_MESSAGE" = "目前可以儲存的貓圖是有限的";
+"DATABASE_ERROR_ALERT_ACTION" = "了解";
 
 // CollectionVC
 
 // Background view
-"NO_DATA_LABEL_TEXT" = "No Saved Images";
+"NO_DATA_LABEL_TEXT" = "沒有已儲存的貓圖";
 
 // SingleImageVC
 
 // Image Deleting Warning
-"DELETE_WARNING_ALERT_TITLE" = "This action can not be reverted.";
-"DELETE_WARNING_ALERT_ACTION" = "Delete";
-"DELETE_WARNING_ALERT_CANCEL" = "Cancel";
+"DELETE_WARNING_ALERT_TITLE" = "這個動作無法回復";
+"DELETE_WARNING_ALERT_ACTION" = "刪除";
+"DELETE_WARNING_ALERT_CANCEL" = "取消";
