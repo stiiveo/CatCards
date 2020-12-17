@@ -1,0 +1,11 @@
+/* 
+  InfoPlist.strings
+  CatCard
+
+  Created by Jason Ou Yang on 2020/12/17.
+  Copyright © 2020 Jason Ou Yang. All rights reserved.
+*/
+
+NSPhotoLibraryAddUsageDescription = "需要權限才能儲存貓圖至您的照片資料庫";
+
+NSUserTrackingUsageDescription = "這個裝置的識別碼會被用來發送個人化的廣告給您";

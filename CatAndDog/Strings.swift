@@ -15,7 +15,7 @@ struct Z {
         static let undoButton = NSLocalizedString("UNDO_BUTTON", comment: "Undo the last card")
         static let saveButton = NSLocalizedString("SAVE_BUTTON", comment: "Saving image button")
         static let browseButton = NSLocalizedString("BROWSE_IMAGES", comment: "Browse saved images")
-        static let blessLabel = NSLocalizedString("SHARE_BUTTON", comment: "Bless the user")
+        static let blessLabel = NSLocalizedString("BLESS_LABEL", comment: "Bless the user")
     }
     
     struct AlertMessage {
