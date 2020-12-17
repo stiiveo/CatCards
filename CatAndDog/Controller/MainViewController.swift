@@ -234,8 +234,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         hintLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             hintLabel.topAnchor.constraint(equalTo: hintView.topAnchor, constant: 15),
-            hintLabel.leadingAnchor.constraint(equalTo: hintView.leadingAnchor, constant: 15),
-            hintLabel.trailingAnchor.constraint(equalTo: hintView.trailingAnchor, constant: -15),
+            hintLabel.leadingAnchor.constraint(equalTo: hintView.leadingAnchor, constant: 20),
+            hintLabel.trailingAnchor.constraint(equalTo: hintView.trailingAnchor, constant: -20),
             hintLabel.bottomAnchor.constraint(equalTo: hintView.bottomAnchor, constant: -15)
         ])
         

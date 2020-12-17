@@ -68,17 +68,21 @@ class CollectionVC: UICollectionViewController {
     }
 
     private func defaultLabel() -> UILabel {
-        let noDataLabel = UILabel(frame: CGRect(x: 0,
-                                                y: 0,
-                                                width: collectionView.bounds.size.width,
-                                                height: collectionView.bounds.size.height)
-        )
+        let noDataLabel = UILabel()
+        self.collectionView.addSubview(noDataLabel)
+        NSLayoutConstraint.activate([
+            noDataLabel.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor, constant: 20),
+            noDataLabel.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor, constant: -20),
+            noDataLabel.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
+        ])
+        
         noDataLabel.text = Z.BackgroundView.noDataLabel
-        noDataLabel.font = .boldSystemFont(ofSize: 18)
+        noDataLabel.font = .boldSystemFont(ofSize: 20)
         noDataLabel.adjustsFontSizeToFitWidth = true
         noDataLabel.minimumScaleFactor = 0.7
         noDataLabel.textColor = UIColor.systemGray
         noDataLabel.textAlignment = .center
+        
         return noDataLabel
     }
     
