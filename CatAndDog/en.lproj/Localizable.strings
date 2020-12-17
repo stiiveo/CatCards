@@ -10,12 +10,12 @@
 // MainViewController
 
 // HintView
-"CARD_GESTURE" = "Swipe the card to reveal the next cat image.";
-"SHARE_BUTTON" = "Share current image.";
-"UNDO_BUTTON" = "Undo the last swiped card.";
-"SAVE_BUTTON" = "Save the current image.";
-"BROWSE_IMAGES" = "Browse your saved cat images.";
-"BLESS_LABEL" = "Enjoy!";
+"CARD_GESTURE" = "Swipe the card to reveal the next one";
+"SHARE_BUTTON" = "Share current image";
+"UNDO_BUTTON" = "Undo the last swiped card";
+"SAVE_BUTTON" = "Save the current image";
+"BROWSE_IMAGES" = "Browse your saved cat images";
+"BLESS_LABEL" = "Enjoy";
 
 // Network Error Alert
 "NETWORK_ERROR_ALERT_TITLE" = "Cannot connect to the Internet.";
