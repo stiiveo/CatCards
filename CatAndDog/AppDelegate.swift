@@ -22,7 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // !!! REMOVE IT BEFORE SUBMITTING THE APP TO THE APP STORE !!!
         
         GADMobileAds.sharedInstance().requestConfiguration.testDeviceIdentifiers =
-            [ K.Banner.testDeviceIdentifier ]
+            [ K.Banner.myTestDeviceIdentifier ]
         
         // !!! REMOVE IT BEFORE SUBMITTING THE APP TO THE APP STORE !!!
         

@@ -115,16 +115,16 @@
 			children = (
 				F6746FE424C6DCF2006A2905 /* AppDelegate.swift */,
 				F6746FE624C6DCF2006A2905 /* SceneDelegate.swift */,
-				F67E4E3124D3C571006DDE96 /* Constants.swift */,
-				F6240AA3258B2EB800217C2D /* Strings.swift */,
 				F674700624C9631F006A2905 /* Model */,
 				F674700724C96330006A2905 /* View */,
 				F674700824C9633E006A2905 /* Controller */,
 				F67E4DEA24CC7725006DDE96 /* Service */,
-				F6746FEF24C6DCF5006A2905 /* Assets.xcassets */,
-				F6746FF424C6DCF5006A2905 /* Info.plist */,
+				F67E4E3124D3C571006DDE96 /* Constants.swift */,
+				F6240AA3258B2EB800217C2D /* Strings.swift */,
 				F6240A9D258B18EE00217C2D /* Localizable.strings */,
 				F6240AAC258B425C00217C2D /* InfoPlist.strings */,
+				F6746FF424C6DCF5006A2905 /* Info.plist */,
+				F6746FEF24C6DCF5006A2905 /* Assets.xcassets */,
 			);
 			path = CatAndDog;
 			sourceTree = "<group>";

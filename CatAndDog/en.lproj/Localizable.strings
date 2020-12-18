@@ -7,7 +7,7 @@
 */
 
 
-// MainViewController
+/// MainViewController
 
 // HintView
 "CARD_GESTURE" = "Swipe the card to reveal the next one";
@@ -27,12 +27,14 @@
 "DATABASE_ERROR_ALERT_MESSAGE" = "Currently the storage of saved images is limited.";
 "DATABASE_ERROR_ALERT_ACTION" = "OK";
 
-// CollectionVC
+
+/// CollectionVC
 
 // Background view
 "NO_DATA_LABEL_TEXT" = "No Saved Images";
 
-// SingleImageVC
+
+/// SingleImageVC
 
 // Image Deleting Warning
 "DELETE_WARNING_ALERT_TITLE" = "This action can not be reverted.";

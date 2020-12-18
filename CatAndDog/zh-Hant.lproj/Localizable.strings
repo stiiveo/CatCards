@@ -7,7 +7,7 @@
 */
 
 
-// MainViewController
+/// MainViewController
 
 // HintView
 "CARD_GESTURE" = "滑開卡片看下一張";
@@ -27,12 +27,14 @@
 "DATABASE_ERROR_ALERT_MESSAGE" = "目前可以儲存的貓圖數量是有限的";
 "DATABASE_ERROR_ALERT_ACTION" = "了解";
 
-// CollectionVC
+
+/// CollectionVC
 
 // Background view
 "NO_DATA_LABEL_TEXT" = "沒有已儲存的貓圖";
 
-// SingleImageVC
+
+/// SingleImageVC
 
 // Image Deleting Warning
 "DELETE_WARNING_ALERT_TITLE" = "這個動作無法回復";
