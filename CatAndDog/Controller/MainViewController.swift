@@ -30,14 +30,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @IBOutlet weak var goToCollectionViewBtn: UIBarButtonItem!
     
     private var navBar: UINavigationBar!
-    private var networkManager = NetworkManager()
+    private lazy var networkManager = NetworkManager()
     static let databaseManager = DatabaseManager()
     private let defaults = UserDefaults.standard
     private let firstCard = CardView()
     private let secondCard = CardView()
     private let undoCard = CardView()
-    private var cardViewAnchor = CGPoint()
-    private var imageViewAnchor = CGPoint()
+    private lazy var cardViewAnchor = CGPoint()
+    private lazy var imageViewAnchor = CGPoint()
     private var cardsAreCreated = false
     private var dataIndex: Int = 0
     private var currentCard: CurrentView = .first
@@ -155,7 +155,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         addBannerToView(adBannerView)
         
         // * CardView can only be added to the view after the height of the ad banner is known.
-        addCardViews()
+        if !cardsAreCreated {
+            addCardsToView()
+        }
         
         // Hide the toolbar and nav-bar item to prepare for new user onboarding tutorial
         if !isOldUser() {
@@ -597,22 +599,18 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Constraints and Style Method
+    //MARK: - Card Creation and Style
     
     /// Add two cardViews to the view and shrink the second card's size.
-    private func addCardViews() {
-        if cardsAreCreated {
-            return
-        } else {
-            view.addSubview(firstCard)
-            view.insertSubview(secondCard, belowSubview: firstCard)
-            
-            addCardViewConstraint(card: firstCard)
-            addCardViewConstraint(card: secondCard)
-            secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
-            
-            cardsAreCreated = true
-        }
+    private func addCardsToView() {
+        view.addSubview(firstCard)
+        view.insertSubview(secondCard, belowSubview: firstCard)
+        
+        addCardViewConstraint(card: firstCard)
+        addCardViewConstraint(card: secondCard)
+        secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
+        
+        cardsAreCreated = true
     }
     
     /// Add constraints to cardView
