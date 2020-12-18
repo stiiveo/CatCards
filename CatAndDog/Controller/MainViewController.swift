@@ -21,6 +21,8 @@ private enum CurrentView {
 
 class MainViewController: UIViewController, NetworkManagerDelegate {
     
+    //MARK: - IBOutlet
+    
     @IBOutlet weak var toolBar: UIToolbar!
     @IBOutlet weak var saveButton: UIBarButtonItem!
     @IBOutlet weak var shareButton: UIBarButtonItem!
@@ -28,6 +30,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @IBOutlet weak var adFixedSpace: UIView!
     @IBOutlet weak var adFixedSpaceHeight: NSLayoutConstraint!
     @IBOutlet weak var goToCollectionViewBtn: UIBarButtonItem!
+    
+    //MARK: - Global Properties
     
     private var navBar: UINavigationBar!
     private lazy var networkManager = NetworkManager()
@@ -124,13 +128,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let savedViewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
         self.viewCount = (savedViewCount != 0) ? savedViewCount : 0
         
-        // Save the completeness status of the onboarding progress
+        // Determine if the user is a new comer or old user
         let isOldUser = defaults.bool(forKey: K.UserDefaultsKeys.isOldUser)
         if isOldUser {
             cardHintDisplayed = true
             toolbarHintDisplayed = true
             navBarHintDisplayed = true
-        }
+        } 
         
         // Notify this VC that when the app entered the background, execute selected method.
         NotificationCenter.default.addObserver(self, selector: #selector(saveViewCount), name: UIApplication.didEnterBackgroundNotification, object: nil)
@@ -157,11 +161,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // * CardView can only be added to the view after the height of the ad banner is known.
         if !cardsAreCreated {
             addCardsToView()
-        }
-        
-        // Hide the toolbar and nav-bar item to prepare for new user onboarding tutorial
-        if !isOldUser() {
-            disableAllButtons()
         }
     }
     
@@ -667,8 +666,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         switch dataIndex {
         case 0:
             if let firstData = dataSet[dataIndex + 1] {
-                dataIndex += 1
                 firstCard.data = firstData
+                dataIndex += 1
                 viewCount += 1 // Increment the number of cat the user has seen
                 
                 DispatchQueue.main.async {
@@ -678,12 +677,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     // Add gesture recognizer to first card
                     self.attachGestureRecognizers(to: self.firstCard)
                     
-                    // Show onboarding tutorial if the user is a new comer
-                    if !self.isOldUser() {
-                        self.displayCardTutorial()
-                    }
-                    
-                    // Load ad banner
+                    // Load ad banner after the first card's data is loaded
                     if self.defaults.bool(forKey: K.UserDefaultsKeys.loadAdBanner) {
                         self.loadBannerAd()
                     }
@@ -835,7 +829,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
         // When user's finger left the screen
         case .ended, .cancelled, .failed:
-            firstFingerLocation = nil // reset finger location
+            firstFingerLocation = nil // Reset first finger location
             
             // Re-enable image's gesture recognizers
             for gestureRecognizer in card.imageView.gestureRecognizers! {

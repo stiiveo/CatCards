@@ -14,7 +14,7 @@ class CardView: UIView {
     private let indicator = UIActivityIndicatorView()
     internal var data: CatData? {
         didSet {
-            updateImage()
+            loadImage()
         }
     }
     
@@ -77,7 +77,7 @@ class CardView: UIView {
         indicator.hidesWhenStopped = true
     }
     
-    private func updateImage() {
+    private func loadImage() {
         // Data is valid
         if data != nil {
             DispatchQueue.main.async {
