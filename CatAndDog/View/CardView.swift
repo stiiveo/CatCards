@@ -83,7 +83,7 @@ class CardView: UIView {
             DispatchQueue.main.async {
                 self.set(image: self.data!.image)
                 
-                UIView.animate(withDuration: 0.5) {
+                UIView.animate(withDuration: 0.2) {
                     self.indicator.alpha = 0
                     self.imageView.alpha = 1
                 } completion: { _ in
@@ -96,7 +96,7 @@ class CardView: UIView {
         else {
             DispatchQueue.main.async {
                 self.indicator.startAnimating()
-                UIView.animate(withDuration: 0.5) {
+                UIView.animate(withDuration: 0.2) {
                     self.imageView.alpha = 0
                     self.indicator.alpha = 1
                 }
@@ -119,8 +119,8 @@ class CardView: UIView {
             // Create background view
             let backgroundView = UIView(frame: self.bounds)
             self.addSubview(backgroundView)
-            backgroundView.backgroundColor = .black
-            backgroundView.alpha = 0.75
+            backgroundView.backgroundColor = .secondarySystemBackground
+            backgroundView.alpha = 0.9
             
             // Create and put label onto the background view
             // By adding uiLabel as a subview to a uiview and attaching constraints to it
@@ -135,7 +135,7 @@ class CardView: UIView {
             ])
             
             // Label Text Style
-            label.textColor = .white
+            label.textColor = .label
             label.font = .preferredFont(forTextStyle: .title1)
             label.adjustsFontForContentSizeCategory = true
             label.adjustsFontSizeToFitWidth = true
@@ -158,13 +158,6 @@ class CardView: UIView {
         DispatchQueue.main.async {
             self.addLabelView()
             self.labelView.label.text = text
-            self.labelView.alpha = 0
-            UIView.animate(withDuration: 0.5) {
-                self.indicator.alpha = 0.0
-                self.imageView.alpha = 1.0
-                self.labelView.alpha = 1.0
-            } 
-            
         }
     }
     
