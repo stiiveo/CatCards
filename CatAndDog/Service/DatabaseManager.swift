@@ -32,7 +32,7 @@ class DatabaseManager {
     //MARK: - Data Loading
     
     // Load thumbnail images from local folder
-    internal func getImageFileURLs() {
+    internal func getSavedImageFileURLs() {
         DatabaseManager.imageFileURLs.removeAll() // Clean all image file URLs in memory buffer first
         
         let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -100,7 +100,7 @@ class DatabaseManager {
         writeFileTo(folder: thumbFolderName, withData: JpegData, withName: "\(fileName).jpg")
         
         // Refresh image file url cache
-        getImageFileURLs()
+        getSavedImageFileURLs()
     }
     
     // Write data into application's document folder
@@ -161,7 +161,7 @@ class DatabaseManager {
         }
         
         // Refresh the image file URL cache
-        getImageFileURLs()
+        getSavedImageFileURLs()
         
         // Remove the cached favorite item matching the id
         for item in favoriteArray {
