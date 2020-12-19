@@ -9,13 +9,10 @@
 
 /// MainViewController
 
-// HintView
-"CARD_GESTURE" = "滑開卡片看下一張";
-"SHARE_BUTTON" = "分享目前的貓圖";
-"UNDO_BUTTON" = "召回上一張卡片";
-"SAVE_BUTTON" = "儲存目前的貓圖";
-"BROWSE_IMAGES" = "觀賞已儲存的貓圖";
-"BLESS_LABEL" = "開始享受吧！";
+// Instruction Text
+"CARD_GESTURE" = "歡迎來到貓咪卡片的世界！\n\n請將我滑開來看操作解說";
+"BUTTON_INSTRUCTION" = "按鈕的功能：\n１．\n２．\n３．\n４．";
+"BLESS" = "開始享受吧！";
 
 // Network Error Alert
 "NETWORK_ERROR_ALERT_TITLE" = "無法連接至網路";

@@ -9,13 +9,10 @@
 import Foundation
 
 struct Z {
-    struct OnboardingLabel {
-        static let cardGesture = NSLocalizedString("CARD_GESTURE", comment: "Hint of card swiping gesture")
-        static let shareButton = NSLocalizedString("SHARE_BUTTON", comment: "Sharing button")
-        static let undoButton = NSLocalizedString("UNDO_BUTTON", comment: "Undo the last card")
-        static let saveButton = NSLocalizedString("SAVE_BUTTON", comment: "Saving image button")
-        static let browseButton = NSLocalizedString("BROWSE_IMAGES", comment: "Browse saved images")
-        static let blessLabel = NSLocalizedString("BLESS_LABEL", comment: "Bless the user")
+    struct InstructionText {
+        static let swipeGesture = NSLocalizedString("CARD_GESTURE", comment: "Hint of card swiping gesture")
+        static let buttonInstruction = NSLocalizedString("BUTTON_INSTRUCTION", comment: "Usage of all UI buttons")
+        static let bless = NSLocalizedString("BLESS", comment: "Bless the user")
     }
     
     struct AlertMessage {
