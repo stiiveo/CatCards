@@ -665,7 +665,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Update image, buttons and attach gesture recognizers
         switch dataIndex {
         case 0:
-            if let firstData = dataSet[dataIndex + 1] {
+            if let firstData = dataSet[dataIndex] {
                 firstCard.data = firstData
                 dataIndex += 1
                 viewCount += 1 // Increment the number of cat the user has seen
@@ -684,7 +684,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 }
             }
         case 1:
-            if let secondData = dataSet[dataIndex + 1] {
+            if let secondData = dataSet[dataIndex] {
                 secondCard.data = secondData
                 dataIndex += 1
             }
@@ -745,9 +745,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     /// Update card's content if new data is available.
     private func updateCardView() {
         let dataSet = networkManager.serializedData
-        let dataAllocation: Card = ((self.dataIndex + 1) % 2 == 1) ? .firstCard : .secondCard
+        let dataAllocation: Card = ((self.dataIndex) % 2 == 1) ? .secondCard : .firstCard
         
-        if let newData = dataSet[dataIndex + 1] { // Make sure new data is available
+        if let newData = dataSet[dataIndex] { // Make sure new data is available
             switch dataAllocation { // Decide which card the data is to be allocated
             case .firstCard:
                 firstCard.data = newData

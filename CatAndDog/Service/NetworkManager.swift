@@ -73,8 +73,8 @@ class NetworkManager {
             // Construct new CatData object and append to catDataArray
             let newData = CatData(id: newID, image: resizedImage)
             
-            dataIndex += 1
             serializedData[dataIndex] = newData // Save newly-initialized data to memory buffer
+            dataIndex += 1
             
             // Remove the first saved data in the array if numbers of data exceed threshold
             if serializedData.count > K.Data.maxOfCachedData {
