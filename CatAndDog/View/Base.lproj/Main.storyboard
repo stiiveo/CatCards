@@ -19,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="3kd-kf-SGh">
-                                <rect key="frame" x="0.0" y="654" width="375" height="124"/>
+                                <rect key="frame" x="0.0" y="714" width="375" height="64"/>
                                 <subviews>
                                     <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZI0-C0-QUe">
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
@@ -49,10 +49,10 @@
                                         </items>
                                     </toolbar>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cGb-6Z-c2Z" userLabel="Ad Fixed Space">
-                                        <rect key="frame" x="0.0" y="64" width="375" height="60"/>
+                                        <rect key="frame" x="0.0" y="64" width="375" height="0.0"/>
                                         <color key="backgroundColor" name="backgroundColor"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="60" id="xKe-58-e39"/>
+                                            <constraint firstAttribute="height" id="xKe-58-e39"/>
                                         </constraints>
                                     </view>
                                 </subviews>
@@ -74,12 +74,13 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="adFixedSpace" destination="cGb-6Z-c2Z" id="Qx4-YP-Hlk"/>
-                        <outlet property="adFixedSpaceHeight" destination="xKe-58-e39" id="s4l-IN-9xV"/>
+                        <outlet property="bannerSpace" destination="cGb-6Z-c2Z" id="Qx4-YP-Hlk"/>
+                        <outlet property="bannerSpaceHeight" destination="xKe-58-e39" id="s4l-IN-9xV"/>
                         <outlet property="goToCollectionViewBtn" destination="sSu-jw-cTH" id="auR-gH-DQd"/>
                         <outlet property="saveButton" destination="eix-IU-TsW" id="kOq-j5-OQe"/>
                         <outlet property="shareButton" destination="qHs-X8-xcv" id="LC9-zj-rUj"/>
-                        <outlet property="toolBar" destination="ZI0-C0-QUe" id="1E1-XT-9aH"/>
+                        <outlet property="toolbar" destination="ZI0-C0-QUe" id="1E1-XT-9aH"/>
+                        <outlet property="toolbarHeight" destination="7qg-j3-968" id="Ret-xM-7bd"/>
                         <outlet property="undoButton" destination="c3g-fk-JM1" id="5Cm-E7-yo9"/>
                     </connections>
                 </viewController>
