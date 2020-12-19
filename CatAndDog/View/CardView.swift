@@ -17,15 +17,13 @@ class CardView: UIView {
             loadImage()
         }
     }
+    var labelView = LabelView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.addSubview(imageView)
-        addImageViewConstraint()
+        addImageView()
         addIndicator()
-        imageView.isUserInteractionEnabled = true
-        imageView.alpha = 0 // Default status
-        indicator.startAnimating()
+        self.clipsToBounds = true // Make sure all subclasses' bounds are within this view
     }
     
     required init?(coder: NSCoder) {
@@ -52,7 +50,8 @@ class CardView: UIView {
         imageView.contentMode = (aspectRatioDiff >= K.ImageView.dynamicScaleThreshold) ? .scaleAspectFit : .scaleAspectFill
     }
     
-    private func addImageViewConstraint() {
+    private func addImageView() {
+        self.addSubview(imageView)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             imageView.topAnchor.constraint(equalTo: self.topAnchor),
@@ -62,8 +61,8 @@ class CardView: UIView {
         ])
         
         // Style
-        imageView.layer.cornerRadius = K.CardView.Style.cornerRadius
-        imageView.clipsToBounds = true
+        imageView.isUserInteractionEnabled = true
+        imageView.alpha = 0 // Default status
     }
     
     private func addIndicator() {
@@ -75,6 +74,7 @@ class CardView: UIView {
         // style
         indicator.style = .large
         indicator.hidesWhenStopped = true
+        indicator.startAnimating()
     }
     
     private func loadImage() {
@@ -103,6 +103,63 @@ class CardView: UIView {
             }
         }
         
+    }
+    
+    class LabelView: UIView {
+        
+        let label = UILabel()
+        
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+            
+            // Set labelView's style
+            self.backgroundColor = .black
+            self.clipsToBounds = true
+            
+            // Create and put label onto the labelView
+            // By adding uiLabel as a subview to a uiview and attaching constraints to it
+            // it creates same effect as having margins inside the uiLabel view itself
+            self.addSubview(label)
+            label.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                label.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 30),
+                label.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -30),
+                label.topAnchor.constraint(equalTo: self.topAnchor, constant: 30),
+                label.bottomAnchor.constraint(lessThanOrEqualTo: self.bottomAnchor, constant: -30)
+            ])
+            
+            // Text Style
+            label.textColor = .white
+            label.font = .preferredFont(forTextStyle: .title1)
+            label.adjustsFontForContentSizeCategory = true
+            label.adjustsFontSizeToFitWidth = true
+            label.minimumScaleFactor = 0.5
+            label.numberOfLines = 0
+        }
+        
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+    }
+    
+    private func addLabelView() {
+        // Create an LabelView instance and add it to CardView
+        self.labelView = LabelView(frame: self.bounds)
+        imageView.addSubview(self.labelView)
+    }
+    
+    func setAsTutorialCard(withHintText text: String) {
+        DispatchQueue.main.async {
+            self.addLabelView()
+            self.labelView.label.text = text
+            self.labelView.alpha = 0
+            UIView.animate(withDuration: 0.5) {
+                self.indicator.alpha = 0.0
+                self.imageView.alpha = 1.0
+                self.labelView.alpha = 0.5
+            } 
+            
+        }
     }
     
 }
