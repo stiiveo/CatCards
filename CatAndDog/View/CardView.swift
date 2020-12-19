@@ -113,13 +113,19 @@ class CardView: UIView {
             super.init(frame: frame)
             
             // Set labelView's style
-            self.backgroundColor = .black
+            self.backgroundColor = .clear
             self.clipsToBounds = true
             
-            // Create and put label onto the labelView
+            // Create background view
+            let backgroundView = UIView(frame: self.bounds)
+            self.addSubview(backgroundView)
+            backgroundView.backgroundColor = .black
+            backgroundView.alpha = 0.75
+            
+            // Create and put label onto the background view
             // By adding uiLabel as a subview to a uiview and attaching constraints to it
             // it creates same effect as having margins inside the uiLabel view itself
-            self.addSubview(label)
+            backgroundView.addSubview(label)
             label.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 label.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 30),
@@ -128,7 +134,7 @@ class CardView: UIView {
                 label.bottomAnchor.constraint(lessThanOrEqualTo: self.bottomAnchor, constant: -30)
             ])
             
-            // Text Style
+            // Label Text Style
             label.textColor = .white
             label.font = .preferredFont(forTextStyle: .title1)
             label.adjustsFontForContentSizeCategory = true
@@ -145,7 +151,7 @@ class CardView: UIView {
     private func addLabelView() {
         // Create an LabelView instance and add it to CardView
         self.labelView = LabelView(frame: self.bounds)
-        imageView.addSubview(self.labelView)
+        self.addSubview(self.labelView)
     }
     
     func setAsTutorialCard(withHintText text: String) {
@@ -156,7 +162,7 @@ class CardView: UIView {
             UIView.animate(withDuration: 0.5) {
                 self.indicator.alpha = 0.0
                 self.imageView.alpha = 1.0
-                self.labelView.alpha = 0.5
+                self.labelView.alpha = 1.0
             } 
             
         }
