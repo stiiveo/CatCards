@@ -47,13 +47,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var dataIndex: Int = 0
     private var currentCard: CurrentView = .first
     private var nextCard: Card = .secondCard
-    private var isNewUser = true
+    private var onboardCompleted = false
     private var adReceived = false
     
     private var viewCount: Int! { // Number of cards with cat images the user has seen
         didSet {
             if viewCount == 10 {
-                defaults.setValue(true, forKey: K.UserDefaultsKeys.loadAdBanner)
+                defaults.setValue(true, forKey: K.UserDefaultsKeys.loadBannerAd)
             }
         }
     }
@@ -124,11 +124,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         viewCount = (savedViewCount != 0) ? savedViewCount : 0
         
         // Notify this VC that if the app enters the background, save the cached view count value to UserDefaults.
-        NotificationCenter.default.addObserver(self, selector: #selector(saveViewCount), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(saveViewCount),
+                                               name: UIApplication.didEnterBackgroundNotification,
+                                               object: nil)
         
         // Show onboarding tutorial and hide toolbar if the user is a new comer
-        isNewUser = !defaults.bool(forKey: K.UserDefaultsKeys.isOldUser) // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
-        if isNewUser {
+        onboardCompleted = defaults.bool(forKey: K.UserDefaultsKeys.onboardCompleted)
+        if !onboardCompleted {
             hideUIButtons()
         }
         
@@ -147,7 +150,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         hideUIHairlines()
         
         // Load ad if conditions are met
-        if defaults.bool(forKey: K.UserDefaultsKeys.loadAdBanner) && !adReceived {
+        if defaults.bool(forKey: K.UserDefaultsKeys.loadBannerAd) && !adReceived {
             addBannerToView(adBannerView)
             loadBannerAd()
         }
@@ -276,7 +279,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
     }
     
-    /// Google recommend waiting for the completion callback prior to loading ads, so that if the user grants the App Tracking Transparency permission, the Google Mobile Ads SDK can use the IDFA in ad requests.
+    /// Google recommend waiting for the completion callback prior to loading ads,
+    /// so that if the user grants the App Tracking Transparency permission,
+    /// the Google Mobile Ads SDK can use the IDFA in ad requests.
     @available(iOS 14, *)
     private func requestIDFA() {
         ATTrackingManager.requestTrackingAuthorization { (status) in
@@ -326,7 +331,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     /// Update the toolbar buttons' status
     private func refreshButtonState() {
-        guard !isNewUser else { return } // Make sure the onboarding tutorial is completed.
+        guard onboardCompleted else { return } // Make sure the onboarding tutorial is completed.
         
         // Toggle the availability of toolbar buttons
         let dataIsLoaded = currentData != nil
@@ -409,7 +414,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         addCardViewConstraint(card: firstCard)
         addCardViewConstraint(card: secondCard)
-        secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
+        secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform,
+                                                 y: K.CardView.Size.transform)
         
         cardsAreAddedToView = true
     }
@@ -470,7 +476,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             if let firstData = dataSet[dataIndex] {
                 firstCard.data = firstData
                 
-                if isNewUser && dataIndex == 0 {
+                if !onboardCompleted && dataIndex == 0 {
                     firstCard.setAsTutorialCard(withHintText: tutorialTextArray[dataIndex])
                     DispatchQueue.main.async {
                         self.animateFirstCard()
@@ -489,7 +495,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             if let secondData = dataSet[dataIndex] {
                 secondCard.data = secondData
                 
-                if isNewUser {
+                if !onboardCompleted {
                     secondCard.setAsTutorialCard(withHintText: tutorialTextArray[dataIndex])
                 }
                 
@@ -522,24 +528,24 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Shrink the size of the newly added card view
         card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         
-        // Show toolbar buttons after the first tutorail card is dismissed
-        if isNewUser && dataIndex == 2 {
+        // Show toolbar buttons after the first tutorial card is dismissed
+        if !onboardCompleted && dataIndex == 2 {
             UIView.animate(withDuration: 0.5) {
                 self.showUIButtons()
             }
         }
         
         // Enable all UI buttons after the last tutorial card is dismissed
-        if dataIndex > self.tutorialTextArray.count && isNewUser {
-            isNewUser = false
+        if dataIndex > self.tutorialTextArray.count && !onboardCompleted {
+            onboardCompleted = true
             goToCollectionViewBtn.isEnabled = true
             
-            // Save User Defaults setting of isOldUser to true
-            defaults.setValue(true, forKey: K.UserDefaultsKeys.isOldUser)
+            // Save onboardCompleted status to true in User Defaults
+            defaults.setValue(true, forKey: K.UserDefaultsKeys.onboardCompleted)
         }
         
         // Update the count of view the user has seen if the current card's data is valid
-        if currentData != nil && !isNewUser {
+        if currentData != nil && onboardCompleted {
             viewCount += 1
         }
         
@@ -549,7 +555,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // the dismissing animation is still executing at the same time.
         // If this issue is solved in the future, consider move this method
         // to a place which makes more sense.
-        let loadAd = defaults.bool(forKey: K.UserDefaultsKeys.loadAdBanner)
+        let loadAd = defaults.bool(forKey: K.UserDefaultsKeys.loadBannerAd)
         if loadAd && viewCount == 20 { // "TEST" Load ad after the user has seen specific number of cat images
             guard !adReceived else { return }
             
@@ -577,21 +583,20 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if let newData = dataSet[dataIndex] { // Make sure new data is available
             switch dataAllocation { // Decide which card the data is to be allocated
             case .firstCard:
-                firstCard.data = newData
+                firstCard.data = newData // Update card's data
                 
-                // Show tutorial text on this card if there's still tutorial message left
-                if isNewUser && dataIndex < tutorialTextArray.count {
+                // Show tutorial text on this card if there's still tutorial to be shown
+                if !onboardCompleted && dataIndex < tutorialTextArray.count {
                     firstCard.setAsTutorialCard(withHintText: self.tutorialTextArray[dataIndex])
                 }
-                
                 dataIndex += 1
             case .secondCard:
-                secondCard.data = newData
+                secondCard.data = newData  // Update card's data
                 
-                if isNewUser && dataIndex < tutorialTextArray.count {
+                // Show tutorial text on this card if there's still tutorial to be shown
+                if !onboardCompleted && dataIndex < tutorialTextArray.count {
                     secondCard.setAsTutorialCard(withHintText: self.tutorialTextArray[dataIndex])
                 }
-                
                 dataIndex += 1
             }
             
@@ -639,7 +644,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let cardRotationRadian = (firstFingerLocation! == .upper) ? rotationDegree : -rotationDegree
         
         let velocity = sender.velocity(in: self.view) // points per second
-        let releasePoint = CGPoint(x: card.frame.midX - cardViewAnchor.x, y: card.frame.midY - cardViewAnchor.y)
+        let releasePoint = CGPoint(x: card.frame.midX - cardViewAnchor.x,
+                                   y: card.frame.midY - cardViewAnchor.y)
         let travelDistance = hypot(releasePoint.x, releasePoint.y)
         
         switch sender.state {
@@ -650,7 +656,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             }
             
             // Card move to where the user's finger is
-            card.center = CGPoint(x: cardViewAnchor.x + fingerMovement.x, y: cardViewAnchor.y + fingerMovement.y)
+            card.center = CGPoint(x: cardViewAnchor.x + fingerMovement.x,
+                                  y: cardViewAnchor.y + fingerMovement.y)
             
             // Card's rotation increase when it approaches the side edge of the screen
             card.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
@@ -720,7 +727,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
             card.center = endPoint
             
-        } completion: { (true) in
+        } completion: { _ in
             // Save spawn position and transform of undo card
             self.undoCard.center = card.center
             self.undoCard.transform = card.transform
@@ -729,10 +736,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             card.removeFromSuperview()
             
             switch self.currentCard {
-            case .first:
-                self.rotateCard(self.firstCard)
-            case .second:
-                self.rotateCard(self.secondCard)
+            case .first, .second:
+                self.rotateCard(card)
             case .undo:
                 // Enable the next card's gesture recognizers and update card status
                 switch self.nextCard {
@@ -851,6 +856,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             }
         }
     }
+    
+    // TEST USE
+    @IBAction func resetButtonPressed(_ sender: UIBarButtonItem) {
+        // Reset default setting of 'isNewUser' and 'loadBannerAd'
+        defaults.setValue(false, forKey: K.UserDefaultsKeys.onboardCompleted)
+        defaults.setValue(false, forKey: K.UserDefaultsKeys.loadBannerAd)
+    }
+    
 }
 
 extension MainViewController: UIGestureRecognizerDelegate {
@@ -879,8 +892,11 @@ extension MainViewController: DatabaseManagerDelegate {
     /// Number of saved images has reached the limit.
     func savedImagesMaxReached() {
         // Show alert to the user
-        let alert = UIAlertController(title: Z.AlertMessage.DatabaseError.alertTitle, message: Z.AlertMessage.DatabaseError.alertMessage, preferredStyle: .alert)
-        let acknowledgeAction = UIAlertAction(title: Z.AlertMessage.DatabaseError.actionTitle, style: .cancel)
+        let alert = UIAlertController(title: Z.AlertMessage.DatabaseError.alertTitle,
+                                      message: Z.AlertMessage.DatabaseError.alertMessage,
+                                      preferredStyle: .alert)
+        let acknowledgeAction = UIAlertAction(title: Z.AlertMessage.DatabaseError.actionTitle,
+                                              style: .cancel)
         alert.addAction(acknowledgeAction)
         
         present(alert, animated: true, completion: nil)

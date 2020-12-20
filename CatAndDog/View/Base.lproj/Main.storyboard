@@ -67,6 +67,11 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="mlT-4e-zaz">
+                        <barButtonItem key="leftBarButtonItem" title="Reset" id="7xB-JX-65w">
+                            <connections>
+                                <action selector="resetButtonPressed:" destination="jpg-gr-ShF" id="rZn-WE-5cG"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" image="square.grid.3x2.fill" catalog="system" id="sSu-jw-cTH">
                             <connections>
                                 <segue destination="nfh-xn-jhC" kind="show" identifier="mainToCollection" id="1gv-hA-jFb"/>

@@ -14,7 +14,7 @@ class CardView: UIView {
     private let indicator = UIActivityIndicatorView()
     internal var data: CatData? {
         didSet {
-            loadImage()
+            reloadImageData()
         }
     }
     var labelView = LabelView()
@@ -77,7 +77,7 @@ class CardView: UIView {
         indicator.startAnimating()
     }
     
-    private func loadImage() {
+    private func reloadImageData() {
         // Data is valid
         if data != nil {
             DispatchQueue.main.async {

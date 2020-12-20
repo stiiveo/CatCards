@@ -12,8 +12,8 @@ struct K {
     
     struct UserDefaultsKeys {
         static let viewCount = "viewCount"
-        static let isOldUser = "isOldUser"
-        static let loadAdBanner = "loadAdBanner"
+        static let onboardCompleted = "onboardCompleted"
+        static let loadBannerAd = "loadBannerAd"
     }
     
     struct Banner {
