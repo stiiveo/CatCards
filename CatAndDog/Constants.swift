@@ -22,6 +22,7 @@ struct K {
         }
         static let adMobAppID = "ca-app-pub-2421510056015407~5275025170"
         static let unitID = "ca-app-pub-2421510056015407/2067597276" // my real ad unit ID
+        static let cardViewedToLoadBannerAd: Int = 10
         
         // TEST USE
         static let testUnitID = "ca-app-pub-3940256099942544/2934735716" // test ad unit ID

@@ -49,14 +49,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var nextCard: Card = .secondCard
     private var onboardCompleted = false
     private var adReceived = false
-    
-    private var viewCount: Int! { // Number of cards with cat images the user has seen
-        didSet {
-            if viewCount == 10 {
-                defaults.setValue(true, forKey: K.UserDefaultsKeys.loadBannerAd)
-            }
-        }
-    }
+    private var viewCount: Int = 0 // Number of cards with cat images the user has seen
     
     private var currentData: CatData? {
         switch currentCard {
@@ -149,7 +142,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         refreshButtonState()
         hideUIHairlines()
         
-        // Load ad if conditions are met
+        // Load ad if status of loadBannerAd in user's device is true and no ad was received yet
         if defaults.bool(forKey: K.UserDefaultsKeys.loadBannerAd) && !adReceived {
             addBannerToView(adBannerView)
             loadBannerAd()
@@ -294,7 +287,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     /// Save the value of card view count to user defaults
     @objc func saveViewCount() {
-        guard viewCount != nil else { return }
         defaults.setValue(viewCount, forKey: K.UserDefaultsKeys.viewCount)
     }
     
@@ -547,25 +539,24 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Update the count of view the user has seen if the current card's data is valid
         if currentData != nil && onboardCompleted {
             viewCount += 1
-        }
         
-        // Load ad banner if bool value in defaults is true and the user had viewed 10 cardViews with cat image
-        // This method is put here to avoid the cardView dismissing issue where
-        // the card dismissing destination might be disrupted if the constraints on view changed when
-        // the dismissing animation is still executing at the same time.
-        // If this issue is solved in the future, consider move this method
-        // to a place which makes more sense.
-        let loadAd = defaults.bool(forKey: K.UserDefaultsKeys.loadBannerAd)
-        if loadAd && viewCount == 20 { // "TEST" Load ad after the user has seen specific number of cat images
-            guard !adReceived else { return }
+            // This method is put here to avoid the cardView dismissing issue where
+            // the card dismissing destination might be disrupted if the constraints on view changed when
+            // the dismissing animation is still executing at the same time.
+            // If this issue is solved in the future, consider move this method
+            // to a place which makes more sense.
             
-            addBannerToView(adBannerView)
-            if #available(iOS 14, *) {
-                // This method is available in iOS 14 and later
-                // User's permission is required to get device's identifier for advertising
-                requestIDFA()
-            } else {
-                loadBannerAd()
+            // Load banner ad if user has viewed certain number of cat images and the ad has yet to be loaded.
+            if viewCount >= K.Banner.cardViewedToLoadBannerAd && !adReceived {
+                addBannerToView(adBannerView)
+                if #available(iOS 14, *), ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
+                    // This method is available in iOS 14 and later
+                    // User's permission is required to get device's identifier for advertising
+                    requestIDFA()
+                } else {
+                    loadBannerAd()
+                }
+                defaults.setValue(true, forKey: K.UserDefaultsKeys.loadBannerAd) // Save default status to true
             }
         }
         
@@ -859,9 +850,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     // TEST USE
     @IBAction func resetButtonPressed(_ sender: UIBarButtonItem) {
-        // Reset default setting of 'isNewUser' and 'loadBannerAd'
+        // Reset all default setting
         defaults.setValue(false, forKey: K.UserDefaultsKeys.onboardCompleted)
         defaults.setValue(false, forKey: K.UserDefaultsKeys.loadBannerAd)
+        defaults.setValue((0), forKey: K.UserDefaultsKeys.viewCount)
     }
     
 }
