@@ -341,7 +341,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     // Undo Action
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
         guard undoCard.data != nil else { return }
-        
+        // Update the content mode of the imageView in case the aspect ratio was changed by the addition of ad banner to the main view
+        undoCard.data = undoCard.data
         self.undoButton.isEnabled = false
         
         // Remove current card's gesture recognizer and save its reference
@@ -670,7 +671,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 let endPoint = CGPoint(x: cardViewAnchor.x + velocity.x / 2, y: cardViewAnchor.y + velocity.y / 2)
                 animateCard(card, to: endPoint)
                 animateNextCardTransform()
-                undoCard.data = currentData!
             }
             
             // Reset card's position and rotation state
@@ -708,6 +708,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
         } completion: { _ in
             // Save spawn position and transform of undo card
+            self.undoCard.data = self.currentData!
             self.undoCard.center = card.center
             self.undoCard.transform = card.transform
             
