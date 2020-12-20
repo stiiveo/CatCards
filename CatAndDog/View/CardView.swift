@@ -32,11 +32,11 @@ class CardView: UIView {
     }
     
     private func setCardViewStyle() {
-        // Style
+        // Card Style
         self.backgroundColor = K.CardView.Style.backgroundColor
         self.layer.cornerRadius = K.CardView.Style.cornerRadius
         
-        // Shadow
+        // Card Shadow
         self.layer.shadowColor = UIColor.black.cgColor
         self.layer.shadowOpacity = 0.5
         self.layer.shadowOffset = CGSize(width: 0.0, height: 0.5)
@@ -142,8 +142,8 @@ class LabelView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        // Style
-        self.backgroundColor = .black
+        // Label View Style
+        self.backgroundColor = UIColor(named: "onboardBackground")
         
         addLabel(to: self)
         setLabelStyle()
