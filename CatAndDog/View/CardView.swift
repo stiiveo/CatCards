@@ -170,7 +170,7 @@ class LabelView: UIView {
     private func setLabelStyle() {
         // Label Text Style
         label.textColor = .label
-        label.font = .preferredFont(forTextStyle: .title1)
+        label.font = UIFont.preferredFont(forTextStyle: .title1)
         label.adjustsFontForContentSizeCategory = true
         label.adjustsFontSizeToFitWidth = true
         label.minimumScaleFactor = 0.5
