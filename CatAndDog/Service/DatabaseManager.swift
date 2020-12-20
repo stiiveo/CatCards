@@ -85,7 +85,7 @@ class DatabaseManager {
     ///   - fileName: The name used to be saved in local file system, both image and thumbnail image.
     private func saveImageToLocalSystem(image: UIImage, fileName: String) {
         // Compress image to JPG data and save it in local disk
-        guard let compressedJPG = image.jpegData(compressionQuality: 0.7) else {
+        guard let compressedJPG = image.jpegData(compressionQuality: K.Image.jpegCompressionQuality) else {
             debugPrint("Unable to convert UIImage to JPG data."); return }
         writeFileTo(folder: imageFolderName, withData: compressedJPG, withName: "\(fileName).jpg")
         
@@ -95,7 +95,7 @@ class DatabaseManager {
         let downsampledImage = imageProcess.downsample(dataAt: imageData)
         
         // Convert downsampled image to JPG data and save it to local disk
-        guard let JpegData = downsampledImage.jpegData(compressionQuality: 0.7) else {
+        guard let JpegData = downsampledImage.jpegData(compressionQuality: K.Image.jpegCompressionQuality) else {
             debugPrint("Error: Unable to convert downsampled image data to JPG data."); return }
         writeFileTo(folder: thumbFolderName, withData: JpegData, withName: "\(fileName).jpg")
         

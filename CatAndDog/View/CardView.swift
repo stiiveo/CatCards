@@ -21,13 +21,26 @@ class CardView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        
+        setCardViewStyle()
         addImageView()
         addIndicator()
-        self.clipsToBounds = true // Make sure all subclasses' bounds are within this view
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setCardViewStyle() {
+        // Style
+        self.backgroundColor = K.CardView.Style.backgroundColor
+        self.layer.cornerRadius = K.CardView.Style.cornerRadius
+        
+        // Shadow
+        self.layer.shadowColor = UIColor.black.cgColor
+        self.layer.shadowOpacity = 0.5
+        self.layer.shadowOffset = CGSize(width: 0.0, height: 0.5)
+        self.layer.shadowRadius = 5
     }
     
     private func set(image: UIImage) {
@@ -63,6 +76,8 @@ class CardView: UIView {
         // Style
         imageView.isUserInteractionEnabled = true
         imageView.alpha = 0 // Default status
+        imageView.clipsToBounds = true
+        imageView.layer.cornerRadius = K.CardView.Style.cornerRadius
     }
     
     private func addIndicator() {
@@ -105,60 +120,60 @@ class CardView: UIView {
         
     }
     
-    class LabelView: UIView {
-        
-        let label = UILabel()
-        
-        override init(frame: CGRect) {
-            super.init(frame: frame)
-            
-            // Set labelView's style
-            self.backgroundColor = .clear
-            self.clipsToBounds = true
-            
-            // Create background view
-            let backgroundView = UIView(frame: self.bounds)
-            self.addSubview(backgroundView)
-            backgroundView.backgroundColor = .secondarySystemBackground
-            backgroundView.alpha = 0.9
-            
-            // Create and put label onto the background view
-            // By adding uiLabel as a subview to a uiview and attaching constraints to it
-            // it creates same effect as having margins inside the uiLabel view itself
-            backgroundView.addSubview(label)
-            label.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                label.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 30),
-                label.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -30),
-                label.topAnchor.constraint(equalTo: self.topAnchor, constant: 30),
-                label.bottomAnchor.constraint(lessThanOrEqualTo: self.bottomAnchor, constant: -30)
-            ])
-            
-            // Label Text Style
-            label.textColor = .label
-            label.font = .preferredFont(forTextStyle: .title1)
-            label.adjustsFontForContentSizeCategory = true
-            label.adjustsFontSizeToFitWidth = true
-            label.minimumScaleFactor = 0.5
-            label.numberOfLines = 0
-        }
-        
-        required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-    }
-    
-    private func addLabelView() {
-        // Create an LabelView instance and add it to CardView
-        self.labelView = LabelView(frame: self.bounds)
-        self.addSubview(self.labelView)
-    }
-    
     func setAsTutorialCard(withHintText text: String) {
         DispatchQueue.main.async {
-            self.addLabelView()
-            self.labelView.label.text = text
+            self.addLabelViewToImageView(withText: text)
         }
     }
     
+    private func addLabelViewToImageView(withText text: String) {
+        // Create an LabelView instance and add it to CardView
+        self.labelView = LabelView(frame: imageView.bounds)
+        self.labelView.label.text = text
+        imageView.addSubview(self.labelView)
+    }
+    
+}
+
+class LabelView: UIView {
+    
+    let label = UILabel()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        // Style
+        self.backgroundColor = .black
+        
+        addLabel(to: self)
+        setLabelStyle()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    /// Create and put label onto the background view.
+    /// By adding uiLabel as a subview to a uiview and attaching constraints to it.
+    /// It creates same effect as having margins inside the uiLabel view itself
+    private func addLabel(to view: UIView) {
+        view.addSubview(label)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30),
+            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
+            label.topAnchor.constraint(equalTo: view.topAnchor, constant: 30),
+            label.bottomAnchor.constraint(lessThanOrEqualTo: view.bottomAnchor, constant: -30)
+        ])
+    }
+    
+    private func setLabelStyle() {
+        // Label Text Style
+        label.textColor = .label
+        label.font = .preferredFont(forTextStyle: .title1)
+        label.adjustsFontForContentSizeCategory = true
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.5
+        label.numberOfLines = 0
+    }
 }

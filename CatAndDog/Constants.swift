@@ -17,9 +17,6 @@ struct K {
     }
     
     struct Banner {
-        struct Constraint {
-            static let bottom: CGFloat = -10
-        }
         static let adMobAppID = "ca-app-pub-2421510056015407~5275025170"
         static let unitID = "ca-app-pub-2421510056015407/2067597276" // my real ad unit ID
         static let cardViewedToLoadBannerAd: Int = 10
@@ -58,6 +55,7 @@ struct K {
         static let maxImageSize = CGSize(width: 1024, height: 1024)
         static let defaultCacheImage = UIColor.systemGray5.image(CGSize(width: 400, height: 400)) // Default image for stackView
         static let defaultImage = UIImage(named: "default_image")! // Default image to be used if something went wrong
+        static let jpegCompressionQuality: CGFloat = 0.7 // 0: lowest quality; 1: highest quality
         
         struct FolderName {
             static let fullImage = "Cat_Pictures"
@@ -95,8 +93,8 @@ struct K {
             static let backgroundColor = UIColor(named: "cardBackgroundColor")
         }
         struct Constraint {
-            static let leading: CGFloat = 10.0
-            static let trailing: CGFloat = -10.0
+            static let leading: CGFloat = 15.0
+            static let trailing: CGFloat = -15.0
             static let top: CGFloat = 10
             static let bottom: CGFloat = -10
         }

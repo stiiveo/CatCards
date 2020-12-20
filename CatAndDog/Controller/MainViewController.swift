@@ -433,18 +433,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 equalTo: self.toolbar.topAnchor,
                 constant: K.CardView.Constraint.bottom)
         ])
-        
-        // Style
-        card.backgroundColor = K.CardView.Style.backgroundColor
-        card.layer.cornerRadius = K.CardView.Style.cornerRadius
-        
-        // Shadow
-        card.layer.shadowColor = UIColor.black.cgColor
-        card.layer.shadowOpacity = 0.2
-        card.layer.shadowOffset = .zero
-        card.layer.shadowRadius = 5
-        card.layer.shouldRasterize = true
-        card.layer.rasterizationScale = UIScreen.main.scale
     }
     
     //MARK: - Data Fetching & Updating
