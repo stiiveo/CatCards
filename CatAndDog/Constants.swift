@@ -9,7 +9,6 @@
 import UIKit
 
 struct K {
-    
     struct UserDefaultsKeys {
         static let viewCount = "viewCount"
         static let onboardCompleted = "onboardCompleted"
@@ -102,5 +101,13 @@ struct K {
     
     struct ImageView {
         static let dynamicScaleThreshold: CGFloat = 0.15
+    }
+    
+    struct Onboard {
+        struct ButtonImage {
+            static let shareButton = UIImage(systemName: "square.and.arrow.up")!
+            static let undoButton = UIImage(systemName: "arrow.counterclockwise")!
+            static let saveButton = UIImage(systemName: "heart")!
+        }
     }
 }

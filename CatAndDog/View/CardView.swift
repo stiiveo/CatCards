@@ -139,6 +139,19 @@ class LabelView: UIView {
     
     let label = UILabel()
     
+    // Contents of the onboard cards
+    private let data = [
+        OnboardData(title: Z.InstructionText.swipeGesture, content: nil, prompt: Z.InstructionText.prompt),
+        OnboardData(title: Z.InstructionText.buttonInstruction,
+                    content: [
+                        K.Onboard.ButtonImage.shareButton: Z.InstructionText.shareButton,
+                        K.Onboard.ButtonImage.undoButton: Z.InstructionText.undoButton,
+                        K.Onboard.ButtonImage.saveButton: Z.InstructionText.saveButton,
+                    ],
+                    prompt: Z.InstructionText.prompt),
+        OnboardData(title: Z.InstructionText.bless, content: nil, prompt: Z.InstructionText.prompt)
+    ]
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         

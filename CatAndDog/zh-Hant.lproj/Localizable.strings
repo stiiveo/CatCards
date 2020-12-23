@@ -13,6 +13,7 @@
 "CARD_GESTURE" = "歡迎來到貓咪卡片的世界！\n\n請將我滑開來看操作解說";
 "BUTTON_INSTRUCTION" = "按鈕的功能：\n１．\n２．\n３．\n４．";
 "BLESS" = "開始享受吧！";
+"PROMPT" = "將我滑開來看下一張卡片";
 
 // Network Error Alert
 "NETWORK_ERROR_ALERT_TITLE" = "無法連接至網路";
