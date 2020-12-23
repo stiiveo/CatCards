@@ -142,15 +142,32 @@ class LabelView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        // Label View Style
-        self.backgroundColor = UIColor(named: "onboardBackground")
-        
+        addBackgroundView()
         addLabel(to: self)
-        setLabelStyle()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    /// Add background view and blur effect to the label view
+    private func addBackgroundView() {
+        // Only applies blur effect view on top of this view if the user hadn't disable transparancy effects
+        if !UIAccessibility.isReduceTransparencyEnabled {
+            self.backgroundColor = .clear
+            
+            // Blur effect setting
+            let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+            let blurEffectView = UIVisualEffectView(effect: blurEffect)
+            
+            // Always fill the view
+            blurEffectView.frame = frame
+            blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            
+            self.addSubview(blurEffectView)
+        } else {
+            self.backgroundColor = UIColor(named: "onboardBackground")
+        }
     }
     
     /// Create and put label onto the background view.
@@ -165,6 +182,8 @@ class LabelView: UIView {
             label.topAnchor.constraint(equalTo: view.topAnchor, constant: 30),
             label.bottomAnchor.constraint(lessThanOrEqualTo: view.bottomAnchor, constant: -30)
         ])
+        
+        setLabelStyle()
     }
     
     private func setLabelStyle() {
