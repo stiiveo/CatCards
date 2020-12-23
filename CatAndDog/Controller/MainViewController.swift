@@ -267,7 +267,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         UIView.animate(withDuration: 0.5) {
             self.view.layoutIfNeeded() // Animate the update of bannerSpace's height
         } completion: { _ in
-            self.cardViewAnchor = self.firstCard.center // Update the new card anchor position
+            self.cardViewAnchor = self.firstCard.center // Update the card anchor
+            self.imageViewAnchor = self.firstCard.imageView.center // Update the imageView anchor
         }
         
     }
@@ -753,7 +754,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 sender.setTranslation(.zero, in: view)
                 
             case .ended, .cancelled, .failed:
-                // Reset card's position
+                // Move imageView back to default position
                 UIView.animate(withDuration: 0.4, animations: {
                     view.center = self.imageViewAnchor
                 })

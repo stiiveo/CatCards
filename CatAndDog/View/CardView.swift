@@ -65,13 +65,8 @@ class CardView: UIView {
     
     private func addImageView() {
         self.addSubview(imageView)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: self.topAnchor),
-            imageView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            imageView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
-        ])
+        imageView.frame = self.bounds
+        imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
         // Style
         imageView.isUserInteractionEnabled = true
