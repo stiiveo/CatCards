@@ -477,7 +477,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 secondCard.data = secondData
                 
                 if !onboardCompleted {
-                    secondCard.setAsTutorialCard(cardIndex: tutorialTextArray[dataIndex])
+                    secondCard.setAsTutorialCard(withHintText: tutorialTextArray[dataIndex])
                 }
                 
                 dataIndex += 1
