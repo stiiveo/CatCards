@@ -88,7 +88,7 @@ struct K {
             static let transform: CGFloat = 0.9
         }
         struct Style {
-            static let cornerRadius: CGFloat = 15
+            static let cornerRadius: CGFloat = 30
             static let backgroundColor = UIColor(named: "cardBackgroundColor")
         }
         struct Constraint {
@@ -113,7 +113,8 @@ struct K {
         }
         
         static let data = [
-            OnboardData(cellText: [Z.InstructionText.swipeGesture,
+            OnboardData(cellText: [Z.InstructionText.greeting,
+                                   Z.InstructionText.brief,
                                    Z.InstructionText.prompt], cellImage: nil),
             OnboardData(cellText: [Z.InstructionText.buttonInstruction,
                                    Z.InstructionText.shareButton,
@@ -124,7 +125,7 @@ struct K {
                                     K.Onboard.ButtonImage.undoButton,
                                     K.Onboard.ButtonImage.saveButton]),
             OnboardData(cellText: [Z.InstructionText.bless,
-                                   Z.InstructionText.prompt], cellImage: nil)
+                                   Z.InstructionText.startPrompt], cellImage: nil)
         ]
         
     }
