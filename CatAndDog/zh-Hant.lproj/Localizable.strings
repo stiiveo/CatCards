@@ -27,14 +27,14 @@
 
 // Databse Error Alert
 "DATABASE_ERROR_ALERT_TITLE" = "已達到圖片儲存的上限";
-"DATABASE_ERROR_ALERT_MESSAGE" = "目前可以儲存的貓圖數量是有限的";
+"DATABASE_ERROR_ALERT_MESSAGE" = "目前你可以最多儲存24張圖片";
 "DATABASE_ERROR_ALERT_ACTION" = "了解";
 
 
 /// CollectionVC
 
 // Background view
-"NO_DATA_LABEL_TEXT" = "沒有已儲存的貓圖";
+"NO_DATA_LABEL_TEXT" = "沒有已儲存的圖片";
 
 
 /// SingleImageVC

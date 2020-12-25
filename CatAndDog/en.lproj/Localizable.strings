@@ -27,7 +27,7 @@
 
 // Databse Error Alert
 "DATABASE_ERROR_ALERT_TITLE" = "Maximum number of saved images is reached.";
-"DATABASE_ERROR_ALERT_MESSAGE" = "Currently the storage of saved images is limited.";
+"DATABASE_ERROR_ALERT_MESSAGE" = "Currently you can save 24 images at most.";
 "DATABASE_ERROR_ALERT_ACTION" = "OK";
 
 
