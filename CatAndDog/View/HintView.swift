@@ -29,7 +29,7 @@ class HintView: UIView {
             self.backgroundColor = .clear
             
             // Blur effect setting
-            let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+            let blurEffect = UIBlurEffect(style: .systemMaterial)
             let blurEffectView = UIVisualEffectView(effect: blurEffect)
             
             // Always fill the view
