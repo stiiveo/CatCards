@@ -98,7 +98,7 @@ extension HintView: UITableViewDataSource {
         
         // Text style of cells in the middle
         cell.textLabel?.textColor = .label
-        cell.textLabel?.font = .preferredFont(withTextStyle: .body, maxSize: K.Onboard.maxTextSize)
+        cell.textLabel?.font = .preferredFont(withTextStyle: .title2, maxSize: K.Onboard.maxTextSize)
         cell.textLabel?.numberOfLines = 0
         cell.textLabel?.adjustsFontSizeToFitWidth = true
         cell.textLabel?.minimumScaleFactor = 0.5
@@ -109,11 +109,12 @@ extension HintView: UITableViewDataSource {
         // Text style of first and last cell
         if indexPath.row == 0 {
             // First cell
-            cell.textLabel?.font = .systemFont(ofSize: 30, weight: .regular)
+            cell.textLabel?.font = .preferredFont(forTextStyle: .title1)
             cell.textLabel?.numberOfLines = 1
         }
         if indexPath.row == data[cardNumber].cellText.count - 1 {
             // Last cell
+            cell.textLabel?.font = .preferredFont(forTextStyle: .title3)
             cell.textLabel?.textColor = .secondaryLabel
         }
         
