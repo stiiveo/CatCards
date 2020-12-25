@@ -9,7 +9,6 @@
 import UIKit
 
 struct OnboardData {
-    let title: String
-    let content: [UIImage: String]?
-    let prompt: String
+    let cellText: [String]
+    let cellImage: [UIImage]?
 }

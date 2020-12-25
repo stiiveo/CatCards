@@ -104,10 +104,27 @@ struct K {
     }
     
     struct Onboard {
+        static let contentMargin: CGFloat = 30
         struct ButtonImage {
             static let shareButton = UIImage(systemName: "square.and.arrow.up")!
             static let undoButton = UIImage(systemName: "arrow.counterclockwise")!
             static let saveButton = UIImage(systemName: "heart")!
         }
+        
+        static let data = [
+            OnboardData(cellText: [Z.InstructionText.swipeGesture,
+                                   Z.InstructionText.prompt], cellImage: nil),
+            OnboardData(cellText: [Z.InstructionText.buttonInstruction,
+                                   Z.InstructionText.shareButton,
+                                   Z.InstructionText.undoButton,
+                                   Z.InstructionText.saveButton,
+                                   Z.InstructionText.prompt],
+                        cellImage: [K.Onboard.ButtonImage.shareButton,
+                                    K.Onboard.ButtonImage.undoButton,
+                                    K.Onboard.ButtonImage.saveButton]),
+            OnboardData(cellText: [Z.InstructionText.bless,
+                                   Z.InstructionText.prompt], cellImage: nil)
+        ]
+        
     }
 }

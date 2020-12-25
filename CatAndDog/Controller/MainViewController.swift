@@ -34,22 +34,23 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Global Properties
     
-    private var navBar: UINavigationBar!
-    private lazy var networkManager = NetworkManager()
     static let databaseManager = DatabaseManager()
+    private let networkManager = NetworkManager()
     private let defaults = UserDefaults.standard
     private let firstCard = CardView()
     private let secondCard = CardView()
     private let undoCard = CardView()
+    private let onboardData = K.Onboard.data
+    private var navBar: UINavigationBar!
     private lazy var cardViewAnchor = CGPoint()
     private lazy var imageViewAnchor = CGPoint()
-    private var cardsAreAddedToView = false
     private var dataIndex: Int = 0
+    private var viewCount: Int = 0 // Number of cards with cat images the user has seen
     private var currentCard: CurrentView = .first
     private var nextCard: Card = .secondCard
+    private var cardsAreAddedToView = false
     private var onboardCompleted = false
     private var adReceived = false
-    private var viewCount: Int = 0 // Number of cards with cat images the user has seen
     
     private var currentData: CatData? {
         switch currentCard {
@@ -92,14 +93,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         adBannerView.delegate = self
         
         return adBannerView
-    }()
-    
-    private lazy var tutorialTextArray: [String] = {
-        return [
-            Z.InstructionText.swipeGesture,
-            Z.InstructionText.buttonInstruction,
-            Z.InstructionText.bless
-        ]
     }()
     
     //MARK: - View Overriding Methods
@@ -449,7 +442,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     // Update UI when new data is downloaded succesfully
-    internal func dataDidFetch() {
+    func dataDidFetch() {
         let dataSet = networkManager.serializedData
         
         // Update image, buttons and attach gesture recognizers
@@ -459,7 +452,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 firstCard.data = firstData
                 
                 if !onboardCompleted && dataIndex == 0 {
-                    firstCard.setAsTutorialCard(withHintText: tutorialTextArray[dataIndex])
+                    firstCard.setAsTutorialCard(cardIndex: 0)
                     DispatchQueue.main.async {
                         self.animateFirstCard()
                     }
@@ -478,7 +471,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 secondCard.data = secondData
                 
                 if !onboardCompleted {
-                    secondCard.setAsTutorialCard(withHintText: tutorialTextArray[dataIndex])
+                    secondCard.setAsTutorialCard(cardIndex: 1)
                 }
                 
                 dataIndex += 1
@@ -498,7 +491,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         self.currentCard = (nextCard == .firstCard) ? .second : .first
         
         card.data = nil
-        card.labelView.removeFromSuperview() // Remove label view on the card if there's any
+        card.hintView.removeFromSuperview() // Remove label view on the card if there's any
         let currentCard = (self.currentCard == .first) ? firstCard : secondCard
         attachGestureRecognizers(to: currentCard)
         
@@ -518,7 +511,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
         
         // Enable all UI buttons after the last tutorial card is dismissed
-        if dataIndex > self.tutorialTextArray.count && !onboardCompleted {
+        if dataIndex > onboardData.count && !onboardCompleted {
             onboardCompleted = true
             goToCollectionViewBtn.isEnabled = true
             
@@ -567,16 +560,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 firstCard.data = newData // Update card's data
                 
                 // Show tutorial text on this card if there's still tutorial to be shown
-                if !onboardCompleted && dataIndex < tutorialTextArray.count {
-                    firstCard.setAsTutorialCard(withHintText: self.tutorialTextArray[dataIndex])
+                if !onboardCompleted && dataIndex < onboardData.count {
+                    firstCard.setAsTutorialCard(cardIndex: dataIndex)
                 }
                 dataIndex += 1
             case .secondCard:
                 secondCard.data = newData  // Update card's data
                 
                 // Show tutorial text on this card if there's still tutorial to be shown
-                if !onboardCompleted && dataIndex < tutorialTextArray.count {
-                    secondCard.setAsTutorialCard(withHintText: self.tutorialTextArray[dataIndex])
+                if !onboardCompleted && dataIndex < onboardData.count {
+                    secondCard.setAsTutorialCard(cardIndex: dataIndex)
                 }
                 dataIndex += 1
             }

@@ -10,26 +10,12 @@ import UIKit
 
 class HintView: UIView {
     
-    let label = UILabel()
-    
-    // Contents of the onboard cards
-    private let data = [
-        OnboardData(title: Z.InstructionText.swipeGesture, content: nil, prompt: Z.InstructionText.prompt),
-        OnboardData(title: Z.InstructionText.buttonInstruction,
-                    content: [
-                        K.Onboard.ButtonImage.shareButton: Z.InstructionText.shareButton,
-                        K.Onboard.ButtonImage.undoButton: Z.InstructionText.undoButton,
-                        K.Onboard.ButtonImage.saveButton: Z.InstructionText.saveButton,
-                    ],
-                    prompt: Z.InstructionText.prompt),
-        OnboardData(title: Z.InstructionText.bless, content: nil, prompt: Z.InstructionText.prompt)
-    ]
+    var cardNumber: Int = 0
+    private let data = K.Onboard.data
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
         addBackgroundView()
-        addLabel(to: self)
     }
     
     required init?(coder: NSCoder) {
@@ -47,7 +33,7 @@ class HintView: UIView {
             let blurEffectView = UIVisualEffectView(effect: blurEffect)
             
             // Always fill the view
-            blurEffectView.frame = frame
+            blurEffectView.frame = self.frame
             blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             
             self.addSubview(blurEffectView)
@@ -56,30 +42,82 @@ class HintView: UIView {
         }
     }
     
-    /// Create and put label onto the background view.
-    /// By adding uiLabel as a subview to a uiview and attaching constraints to it.
-    /// It creates same effect as having margins inside the uiLabel view itself
-    private func addLabel(to view: UIView) {
-        view.addSubview(label)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30),
-            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
-            label.topAnchor.constraint(equalTo: view.topAnchor, constant: 30),
-            label.bottomAnchor.constraint(lessThanOrEqualTo: view.bottomAnchor, constant: -30)
-        ])
+    func addContentView(toCard index: Int) {
+        self.cardNumber = index
         
-        setLabelStyle()
+        // Add tableView to HintView
+        let tableView = UITableView()
+        self.addSubview(tableView)
+        
+        // Set the origin and size of the tableView
+        let margin = K.Onboard.contentMargin
+        let tableViewFrame = CGRect(
+            x: self.frame.origin.x + margin,
+            y: self.frame.origin.y + margin,
+            width: self.frame.width - margin * 2,
+            height: self.frame.height - margin * 2
+        )
+        tableView.frame = tableViewFrame
+        tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        // Delegate
+        tableView.dataSource = self
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        
+        // Style
+        tableView.separatorStyle = .none
+        tableView.backgroundColor = .clear
+        tableView.isScrollEnabled = false
+    }
+}
+
+extension HintView: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        // Return rows for title and prompt message only if body's value is nil
+        return data[cardNumber].cellText.count
     }
     
-    private func setLabelStyle() {
-        // Label Text Style
-        label.textColor = .label
-        label.font = UIFont.preferredFont(forTextStyle: .title1)
-        label.adjustsFontForContentSizeCategory = true
-        label.adjustsFontSizeToFitWidth = true
-        label.minimumScaleFactor = 0.5
-        label.numberOfLines = 0
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        
+        // Cell's text
+        cell.textLabel?.text = data[cardNumber].cellText[indexPath.row]
+        if cardNumber == 1 {
+            // Second card
+            switch indexPath.row {
+            case 1:
+                cell.imageView?.image = data[1].cellImage?[0]
+            case 2:
+                cell.imageView?.image = data[1].cellImage?[1]
+            case 3:
+                cell.imageView?.image = data[1].cellImage?[2]
+            default:
+                print("No image to be added to this cell. (Cell Number: \(indexPath.row)")
+            }
+        }
+        
+        // Style
+        cell.textLabel?.textColor = .label
+        cell.textLabel?.font = .preferredFont(forTextStyle: .body)
+        cell.textLabel?.numberOfLines = 2 // max number of lines per cell
+        cell.textLabel?.adjustsFontSizeToFitWidth = true
+        cell.backgroundColor = .clear
+        cell.isUserInteractionEnabled = false
+        
+        // Text Style
+        if indexPath.row == 0 {
+            // First cell
+            cell.textLabel?.font = .systemFont(ofSize: 30, weight: .regular)
+        }
+        if indexPath.row == data[cardNumber].cellText.count - 1 {
+            // Last cell
+            cell.textLabel?.font = .systemFont(ofSize: 20, weight: .medium)
+            cell.textLabel?.textColor = .secondaryLabel
+        }
+        
+        return cell
     }
+    
+    
 }
 

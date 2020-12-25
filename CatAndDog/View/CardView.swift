@@ -17,7 +17,7 @@ class CardView: UIView {
             reloadImageData()
         }
     }
-    var labelView = HintView()
+    var hintView = HintView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -115,17 +115,17 @@ class CardView: UIView {
         
     }
     
-    func setAsTutorialCard(withHintText text: String) {
-        DispatchQueue.main.async {
-            self.addLabelViewToImageView(withText: text)
-        }
+    private func addHintView(toCard index: Int) {
+        // Create an HintView instance and add it to CardView
+        hintView = HintView(frame: imageView.bounds)
+        imageView.addSubview(hintView)
+        hintView.addContentView(toCard: index)
     }
     
-    private func addLabelViewToImageView(withText text: String) {
-        // Create an LabelView instance and add it to CardView
-        self.labelView = HintView(frame: imageView.bounds)
-        self.labelView.label.text = text
-        imageView.addSubview(self.labelView)
+    func setAsTutorialCard(cardIndex index: Int) {
+        DispatchQueue.main.async {
+            self.addHintView(toCard: index)
+        }
     }
     
 }
