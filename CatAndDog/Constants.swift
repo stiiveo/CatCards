@@ -100,6 +100,9 @@ struct K {
     }
     
     struct ImageView {
+        // The difference of aspect ratio of downloaded image and the imageView
+        // If the difference is bigger than this value, the imageView's content
+        // mode is set to aspect fill scale, otherwise aspect fit scale.
         static let dynamicScaleThreshold: CGFloat = 0.15
     }
     
@@ -113,6 +116,8 @@ struct K {
         }
         
         static let data = [
+            // Text and images used for the onboarding card
+            // Each data represents the data each card uses
             OnboardData(cellText: [Z.InstructionText.greeting,
                                    Z.InstructionText.brief,
                                    Z.InstructionText.prompt], cellImage: nil),
