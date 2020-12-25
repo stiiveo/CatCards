@@ -11,7 +11,7 @@
 
 // Instruction Text
 "GREETING" = "Hey There! Cat Lover🐾";
-"BRIEF" = "Welcome to Cat Card.\nWe have infinite cat images which will make you sound 'aww'";
+"BRIEF" = "Welcome to Cat Card.\nInfinite adorable cat images are right here to make you sound 'aww'";
 "BUTTON_INSTRUCTION" = "How these buttons work";
 "SHARE_BUTTON" = "Share the image";
 "UNDO_BUTTON" = "Retrieve the last card";

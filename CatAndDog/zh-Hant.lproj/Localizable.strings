@@ -11,7 +11,7 @@
 
 // Instruction Text
 "GREETING" = "嗨！貓友🐾";
-"BRIEF" = "歡迎來到貓咪卡片\n這裡有無數個讓你發出「噢～」聲音的貓圖";
+"BRIEF" = "歡迎來到貓咪卡片\n這裡有無數個會讓你發出「噢～」聲音的貓圖";
 "BUTTON_INSTRUCTION" = "按鈕的功能";
 "SHARE_BUTTON" = "分享圖片";
 "UNDO_BUTTON" = "召回上一張卡片";
