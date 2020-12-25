@@ -10,10 +10,15 @@
 /// MainViewController
 
 // Instruction Text
-"CARD_GESTURE" = "Swipe the card to reveal the next one";
-"BUTTON_INSTRUCTION" = "How these buttons work:\n";
-"BLESS" = "Enjoy!";
+"GREETING" = "Hey There! Cat Lover🐾";
+"BRIEF" = "Welcome to Cat Card.\nWe have infinite cat images which will make you sound 'aww'";
+"BUTTON_INSTRUCTION" = "How these buttons work";
+"SHARE_BUTTON" = "Share the image";
+"UNDO_BUTTON" = "Retrieve the last card";
+"SAVE_BUTTON" = "Save the image";
+"BLESS" = "Enjoy it!";
 "PROMPT" = "Swipe me to see the next card";
+"START_PROMPT" = "Swipe me to start";
 
 // Network Error Alert
 "NETWORK_ERROR_ALERT_TITLE" = "Cannot connect to the Internet.";

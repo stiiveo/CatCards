@@ -10,13 +10,15 @@ import Foundation
 
 struct Z {
     struct InstructionText {
-        static let swipeGesture = NSLocalizedString("CARD_GESTURE", comment: "Hint of card swiping gesture")
+        static let greeting = NSLocalizedString("GREETING", comment: "Hint of card swiping gesture")
+        static let brief = NSLocalizedString("BRIEF", comment: "Brief description of this app's benefits")
         static let buttonInstruction = NSLocalizedString("BUTTON_INSTRUCTION", comment: "Usage of all UI buttons")
         static let shareButton = NSLocalizedString("SHARE_BUTTON", comment: "Usage of all UI buttons")
         static let undoButton = NSLocalizedString("UNDO_BUTTON", comment: "Usage of all UI buttons")
         static let saveButton = NSLocalizedString("SAVE_BUTTON", comment: "Usage of all UI buttons")
         static let bless = NSLocalizedString("BLESS", comment: "Bless the user")
         static let prompt = NSLocalizedString("PROMPT", comment: "Prompt message")
+        static let startPrompt = NSLocalizedString("START_PROMPT", comment: "Prompt message")
     }
     
     struct AlertMessage {

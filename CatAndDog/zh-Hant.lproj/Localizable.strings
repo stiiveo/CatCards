@@ -10,13 +10,15 @@
 /// MainViewController
 
 // Instruction Text
-"CARD_GESTURE" = "歡迎來到貓咪卡片的世界！";
+"GREETING" = "嗨！貓友🐾";
+"BRIEF" = "歡迎來到貓咪卡片\n這裡有無數個讓你發出「噢～」聲音的貓圖";
 "BUTTON_INSTRUCTION" = "按鈕的功能";
 "SHARE_BUTTON" = "分享圖片";
 "UNDO_BUTTON" = "召回上一張卡片";
 "SAVE_BUTTON" = "儲存圖片";
 "BLESS" = "開始享受吧！";
 "PROMPT" = "將我滑開來看下一張卡片";
+"START_PROMPT" = "將我滑開後開始";
 
 // Network Error Alert
 "NETWORK_ERROR_ALERT_TITLE" = "無法連接至網路";
