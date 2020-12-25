@@ -80,7 +80,7 @@ extension HintView: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
-        // Cell's text
+        // Cell's text and image
         cell.textLabel?.text = data[cardNumber].cellText[indexPath.row]
         if cardNumber == 1 {
             // Second card
@@ -92,26 +92,27 @@ extension HintView: UITableViewDataSource {
             case 3:
                 cell.imageView?.image = data[1].cellImage?[2]
             default:
-                print("No image to be added to this cell. (Cell Number: \(indexPath.row)")
+                debugPrint("No image for cell \(indexPath.row) in card \(cardNumber).")
             }
         }
         
-        // Style
+        // Text style of cells in the middle
         cell.textLabel?.textColor = .label
-        cell.textLabel?.font = .preferredFont(forTextStyle: .body)
-        cell.textLabel?.numberOfLines = 2 // max number of lines per cell
+        cell.textLabel?.font = .preferredFont(withTextStyle: .body, maxSize: K.Onboard.maxTextSize)
+        cell.textLabel?.numberOfLines = 0
         cell.textLabel?.adjustsFontSizeToFitWidth = true
+        cell.textLabel?.minimumScaleFactor = 0.1
+        
         cell.backgroundColor = .clear
         cell.isUserInteractionEnabled = false
         
-        // Text Style
+        // Text style of first and last cell
         if indexPath.row == 0 {
             // First cell
             cell.textLabel?.font = .systemFont(ofSize: 30, weight: .regular)
         }
         if indexPath.row == data[cardNumber].cellText.count - 1 {
             // Last cell
-            cell.textLabel?.font = .systemFont(ofSize: 20, weight: .medium)
             cell.textLabel?.textColor = .secondaryLabel
         }
         
@@ -121,3 +122,14 @@ extension HintView: UITableViewDataSource {
     
 }
 
+extension UIFont {
+
+  static func preferredFont(withTextStyle textStyle: UIFont.TextStyle, maxSize: CGFloat) -> UIFont {
+    // Get the descriptor
+    let fontDescriptor = UIFontDescriptor.preferredFontDescriptor(withTextStyle: textStyle)
+
+    // Return a font with the minimum size
+    return UIFont(descriptor: fontDescriptor, size: min(fontDescriptor.pointSize, maxSize))
+  }
+
+}

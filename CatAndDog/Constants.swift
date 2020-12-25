@@ -104,7 +104,8 @@ struct K {
     }
     
     struct Onboard {
-        static let contentMargin: CGFloat = 30
+        static let contentMargin: CGFloat = 25
+        static let maxTextSize: CGFloat = 30
         struct ButtonImage {
             static let shareButton = UIImage(systemName: "square.and.arrow.up")!
             static let undoButton = UIImage(systemName: "arrow.counterclockwise")!
