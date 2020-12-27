@@ -43,26 +43,6 @@ class CardView: UIView {
         self.layer.shadowRadius = 5
     }
     
-    private func set(image: UIImage) {
-        imageView.image = image
-        setContentMode(image: image)
-    }
-    
-    private func setContentMode(image: UIImage) {
-        let imageAspectRatio = image.size.width / image.size.height
-        var imageViewAspectRatio = imageView.bounds.width / imageView.bounds.height
-        // When the first undo card's image is set, the bounds of the imageView is yet to be defined (width = 0, height = 0),
-        // Which makes the value of 'imageViewAspectRatio' to be 'Not a Number'.
-        // If this happens, forcely set aspect ratio to 1 to prevent unwanted result.
-        if imageViewAspectRatio.isNaN == true {
-            imageViewAspectRatio = 1
-        }
-        // Determine the content mode by comparing the aspect ratio of the image and image view
-        let aspectRatioDiff = abs(imageAspectRatio - imageViewAspectRatio)
-        
-        imageView.contentMode = (aspectRatioDiff >= K.ImageView.dynamicScaleThreshold) ? .scaleAspectFit : .scaleAspectFill
-    }
-    
     private func addImageView() {
         self.addSubview(imageView)
         imageView.frame = self.bounds
@@ -115,6 +95,39 @@ class CardView: UIView {
         
     }
     
+    private func set(image: UIImage) {
+        imageView.image = image
+        setContentMode(image: image)
+    }
+    
+    private func setContentMode(image: UIImage) {
+        let imageAspectRatio = image.size.width / image.size.height
+        var imageViewAspectRatio = imageView.bounds.width / imageView.bounds.height
+        // When the first undo card's image is set, the bounds of the imageView is yet to be defined (width = 0, height = 0),
+        // Which makes the value of 'imageViewAspectRatio' to be 'Not a Number'.
+        // If this happens, forcely set aspect ratio to 1 to prevent unwanted result.
+        if imageViewAspectRatio.isNaN == true {
+            imageViewAspectRatio = 1
+        }
+        // Determine the content mode by comparing the aspect ratio of the image and image view
+        let aspectRatioDiff = abs(imageAspectRatio - imageViewAspectRatio)
+        
+        imageView.contentMode = (aspectRatioDiff >= K.ImageView.dynamicScaleThreshold) ? .scaleAspectFit : .scaleAspectFill
+        // To fill the empty place on the card
+        // if the current imageView is in scale aspect fit mode,
+        // add another imageView with the same image in .scaleAspectFill mode behind the current imageView
+        // and put a blur effect onto it
+        if imageView.contentMode == .scaleAspectFit {
+            fillEmptySpaceOnCardView()
+        }
+    }
+    
+    func setAsTutorialCard(cardIndex index: Int) {
+        DispatchQueue.main.async {
+            self.addHintView(toCard: index)
+        }
+    }
+    
     private func addHintView(toCard index: Int) {
         // Create an HintView instance and add it to CardView
         hintView = HintView(frame: imageView.bounds)
@@ -122,10 +135,23 @@ class CardView: UIView {
         hintView.addContentView(toCard: index)
     }
     
-    func setAsTutorialCard(cardIndex index: Int) {
-        DispatchQueue.main.async {
-            self.addHintView(toCard: index)
-        }
+    private func fillEmptySpaceOnCardView() {
+        // Add new imageView behind the current one
+        let secondImageView = UIImageView()
+        secondImageView.image = self.imageView.image
+        self.insertSubview(secondImageView, belowSubview: imageView)
+        secondImageView.frame = imageView.frame
+        secondImageView.contentMode = .scaleAspectFill
+        secondImageView.clipsToBounds = true
+        secondImageView.layer.cornerRadius = K.CardView.Style.cornerRadius
+        
+        // Add blur effect onto it
+        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.frame = secondImageView.frame
+        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        secondImageView.addSubview(blurEffectView)
     }
     
 }
