@@ -68,7 +68,7 @@ class CardView: UIView {
         backgroundImageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
         // Add blur effect onto it
-        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        let blurEffect = UIBlurEffect(style: .systemChromeMaterial)
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
         blurEffectView.frame = backgroundImageView.frame
         blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
