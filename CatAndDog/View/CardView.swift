@@ -11,6 +11,7 @@ import UIKit
 class CardView: UIView {
 
     internal let imageView = UIImageView()
+    private let backgroundImageView = UIImageView()
     private let indicator = UIActivityIndicatorView()
     internal var data: CatData? {
         didSet {
@@ -24,6 +25,7 @@ class CardView: UIView {
         
         setCardViewStyle()
         addImageView()
+        addBackgroundImageView()
         addIndicator()
     }
     
@@ -55,6 +57,25 @@ class CardView: UIView {
         imageView.layer.cornerRadius = K.CardView.Style.cornerRadius
     }
     
+    /// Add duplicated imageView with blur effect behind the primary one as the background
+    /// and fill the empty space in the cardView.
+    private func addBackgroundImageView() {
+        self.insertSubview(backgroundImageView, belowSubview: imageView)
+        backgroundImageView.frame = imageView.frame
+        backgroundImageView.contentMode = .scaleAspectFill
+        backgroundImageView.clipsToBounds = true
+        backgroundImageView.layer.cornerRadius = K.CardView.Style.cornerRadius
+        backgroundImageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        // Add blur effect onto it
+        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.frame = backgroundImageView.frame
+        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        backgroundImageView.addSubview(blurEffectView)
+    }
+    
     private func addIndicator() {
         self.addSubview(indicator)
         // constraint
@@ -84,6 +105,9 @@ class CardView: UIView {
         }
         // Data is not valid
         else {
+            // Remove hintView if there's any
+            hintView.removeFromSuperview()
+            // Animate indicator and hide imageView
             DispatchQueue.main.async {
                 self.indicator.startAnimating()
                 UIView.animate(withDuration: 0.2) {
@@ -97,6 +121,7 @@ class CardView: UIView {
     
     private func set(image: UIImage) {
         imageView.image = image
+        backgroundImageView.image = self.imageView.image
         setContentMode(image: image)
     }
     
@@ -113,13 +138,6 @@ class CardView: UIView {
         let aspectRatioDiff = abs(imageAspectRatio - imageViewAspectRatio)
         
         imageView.contentMode = (aspectRatioDiff >= K.ImageView.dynamicScaleThreshold) ? .scaleAspectFit : .scaleAspectFill
-        // To fill the empty place on the card
-        // if the current imageView is in scale aspect fit mode,
-        // add another imageView with the same image in .scaleAspectFill mode behind the current imageView
-        // and put a blur effect onto it
-        if imageView.contentMode == .scaleAspectFit {
-            fillEmptySpaceOnCardView()
-        }
     }
     
     func setAsTutorialCard(cardIndex index: Int) {
@@ -133,25 +151,6 @@ class CardView: UIView {
         hintView = HintView(frame: imageView.bounds)
         imageView.addSubview(hintView)
         hintView.addContentView(toCard: index)
-    }
-    
-    private func fillEmptySpaceOnCardView() {
-        // Add new imageView behind the current one
-        let secondImageView = UIImageView()
-        secondImageView.image = self.imageView.image
-        self.insertSubview(secondImageView, belowSubview: imageView)
-        secondImageView.frame = imageView.frame
-        secondImageView.contentMode = .scaleAspectFill
-        secondImageView.clipsToBounds = true
-        secondImageView.layer.cornerRadius = K.CardView.Style.cornerRadius
-        
-        // Add blur effect onto it
-        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-        blurEffectView.frame = secondImageView.frame
-        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        
-        secondImageView.addSubview(blurEffectView)
     }
     
 }

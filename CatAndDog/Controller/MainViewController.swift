@@ -490,8 +490,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         nextCard = (card == firstCard) ? .firstCard : .secondCard
         self.currentCard = (nextCard == .firstCard) ? .second : .first
         
-        card.data = nil
-        card.hintView.removeFromSuperview() // Remove label view on the card if there's any
+        card.data = nil // Trigger method reloadImageData in class CardView 
         let currentCard = (self.currentCard == .first) ? firstCard : secondCard
         attachGestureRecognizers(to: currentCard)
         
