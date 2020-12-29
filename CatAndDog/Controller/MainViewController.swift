@@ -615,11 +615,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         guard firstFingerLocation != nil else { return }
         // Card's rotation direction is based on the finger position on the card
         let cardRotationRadian = (firstFingerLocation! == .upper) ? rotationDegree : -rotationDegree
-        
         let velocity = sender.velocity(in: self.view) // points per second
+        
+        // Point of the card relative to the center point
         let releasePoint = CGPoint(x: card.frame.midX - cardViewAnchor.x,
                                    y: card.frame.midY - cardViewAnchor.y)
-        let travelDistance = hypot(releasePoint.x, releasePoint.y)
+        // Distance of card's center to its origin point
+        let panDistance = hypot(releasePoint.x, releasePoint.y)
         
         switch sender.state {
         case .began, .changed:
@@ -636,7 +638,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             card.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
             
             // Set next card's transform based on current card's travel distance
-            let distance = (travelDistance <= halfViewWidth) ? (travelDistance / halfViewWidth) : 1
+            let distance = (panDistance <= halfViewWidth) ? (panDistance / halfViewWidth) : 1
             let transform = K.CardView.Size.transform
             let cardToTransform = (nextCard == .firstCard) ? firstCard : secondCard
             
@@ -654,15 +656,33 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 gestureRecognizer.isEnabled = true
             }
             
-            // Card dismissing threshold: a. Current card's data availability b. Velocity c. Travel distance
-            let speed = hypot(velocity.x, velocity.y)
-            let speedThreshold = K.CardView.Animation.Threshold.speed
-            let distanceThreshold = K.CardView.Animation.Threshold.distance
+            let minTravelDistance = view.frame.height // minimum travel distance of the card
+            let minDragDistance = halfViewWidth // minimum dragging distance of the card
+            let momentum = CGPoint(x: velocity.x / 2, y: velocity.y / 2)
             
-            // The threshold to dismiss the current card view
-            if currentData != nil && speed > speedThreshold && travelDistance > distanceThreshold {
-                let endPoint = CGPoint(x: cardViewAnchor.x + velocity.x / 2, y: cardViewAnchor.y + velocity.y / 2)
-                animateCard(card, to: endPoint)
+            let projectedPoint = CGPoint(x: cardViewAnchor.x + momentum.x,
+                                           y: cardViewAnchor.y + momentum.y)
+            let projectedDistance = hypot(projectedPoint.x - cardViewAnchor.x,
+                                           projectedPoint.y - cardViewAnchor.y)
+            
+            let distanceDelta = minTravelDistance / panDistance
+            let pointDelta = CGPoint(x: releasePoint.x * distanceDelta,
+                                     y: releasePoint.y * distanceDelta)
+            let minimumVelocityEndpoint = CGPoint(
+                x: cardViewAnchor.x + pointDelta.x,
+                y: cardViewAnchor.y + pointDelta.y)
+            
+            if currentData != nil && projectedDistance >= minTravelDistance {
+                // Card dismissing threshold A: Data is available and
+                // the projected travel distance is greater than or equals minimum distance
+                animateCard(card, to: projectedPoint)
+                animateNextCardTransform()
+            }
+            else if currentData != nil && projectedDistance < minTravelDistance && panDistance > minDragDistance {
+                // Card dismissing thrshold B: Data is available and
+                // the projected travel distance is less than the minimum travel distance
+                // and the card dragged distance is greater than distance threshold
+                animateCard(card, to: minimumVelocityEndpoint)
                 animateNextCardTransform()
             }
             
