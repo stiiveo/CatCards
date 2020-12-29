@@ -63,22 +63,22 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private lazy var panCard: UIPanGestureRecognizer = {
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(handleCardPan))
+    private lazy var panGestureRecognizer: UIPanGestureRecognizer = {
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(panHandler))
         pan.delegate = self
         pan.minimumNumberOfTouches = 1
         pan.maximumNumberOfTouches = 1
         return pan
     }()
     
-    private lazy var zoomImage: UIPinchGestureRecognizer = {
-        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(handleImageZoom))
+    private lazy var zoomGestureRecognizer: UIPinchGestureRecognizer = {
+        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(zoomHandler))
         pinch.delegate = self
         return pinch
     }()
     
-    private lazy var panImage: UIPanGestureRecognizer = {
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(handleImagePan))
+    private lazy var twoFingerPanGestureRecognizer: UIPanGestureRecognizer = {
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(twoFingerPanHandler))
         pan.delegate = self
         pan.minimumNumberOfTouches = 2
         pan.maximumNumberOfTouches = 2
@@ -594,7 +594,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     /// Handling the cardView's panning effect which is responded to user's input via finger dragging on the cardView itself.
     /// - Parameter sender: A concrete subclass of UIGestureRecognizer that looks for panning (dragging) gestures.
-    @objc private func handleCardPan(_ sender: UIPanGestureRecognizer) {
+    @objc private func panHandler(_ sender: UIPanGestureRecognizer) {
         guard let card = sender.view as? CardView else { return }
         
         let halfViewWidth = view.frame.width / 2
@@ -604,7 +604,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let side: Side = fingerPosition.y < card.frame.midY ? .upper : .lower
         firstFingerLocation = (firstFingerLocation == nil) ? side : firstFingerLocation // variable can only be set once
         
-        let fingerMovement = sender.translation(in: view)
+        let translation = sender.translation(in: view)
         
         // Amount of x-axis offset the card moved from its original position
         let xAxisOffset = card.center.x - cardViewAnchor.x
@@ -625,14 +625,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         switch sender.state {
         case .began, .changed:
-            // Disable image's gesture recognizers
-            for gestureRecognizer in card.imageView.gestureRecognizers! {
-                gestureRecognizer.isEnabled = false
-            }
-            
             // Card move to where the user's finger is
-            card.center = CGPoint(x: cardViewAnchor.x + fingerMovement.x,
-                                  y: cardViewAnchor.y + fingerMovement.y)
+            card.center = CGPoint(
+                x: cardViewAnchor.x + translation.x,
+                y: cardViewAnchor.y + translation.y)
             
             // Card's rotation increase when it approaches the side edge of the screen
             card.transform = CGAffineTransform(rotationAngle: cardRotationRadian)
@@ -650,11 +646,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // When user's finger left the screen
         case .ended, .cancelled, .failed:
             firstFingerLocation = nil // Reset first finger location
-            
-            // Re-enable image's gesture recognizers
-            for gestureRecognizer in card.imageView.gestureRecognizers! {
-                gestureRecognizer.isEnabled = true
-            }
             
             let minTravelDistance = view.frame.height // minimum travel distance of the card
             let minDragDistance = halfViewWidth // minimum dragging distance of the card
@@ -750,7 +741,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Image Zooming and Panning Methods
     
-    @objc private func handleImagePan(sender: UIPanGestureRecognizer) {
+    @objc private func twoFingerPanHandler(sender: UIPanGestureRecognizer) {
         if let view = sender.view {
             switch sender.state {
             case .began, .changed:
@@ -766,9 +757,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 sender.setTranslation(.zero, in: view)
                 
             case .ended, .cancelled, .failed:
-                // Move imageView back to default position
-                UIView.animate(withDuration: 0.4, animations: {
-                    view.center = self.imageViewAnchor
+                // Move card back to original position
+                UIView.animate(withDuration: 0.3, animations: {
+                    view.center = self.cardViewAnchor
                 })
             default:
                 debugPrint("Error handling image panning")
@@ -776,7 +767,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    @objc private func handleImageZoom(sender: UIPinchGestureRecognizer) {
+    @objc private func zoomHandler(sender: UIPinchGestureRecognizer) {
         if let view = sender.view {
             switch sender.state {
             case .began, .changed:
@@ -792,7 +783,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 sender.scale = 1
             case .ended, .cancelled, .failed:
                 // Reset card's size
-                UIView.animate(withDuration: 0.4, animations: {
+                UIView.animate(withDuration: 0.3, animations: {
                     view.transform = .identity
                 })
             default:
@@ -814,15 +805,15 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     private func attachGestureRecognizers(to card: CardView) {
-        card.addGestureRecognizer(panCard)
-        card.imageView.addGestureRecognizer(zoomImage)
-        card.imageView.addGestureRecognizer(panImage)
+        card.addGestureRecognizer(panGestureRecognizer)
+        card.addGestureRecognizer(zoomGestureRecognizer)
+        card.addGestureRecognizer(twoFingerPanGestureRecognizer)
     }
     
     private func removeGestureRecognizers(from card: CardView) {
-        card.removeGestureRecognizer(panCard)
-        card.imageView.removeGestureRecognizer(zoomImage)
-        card.imageView.removeGestureRecognizer(panImage)
+        card.removeGestureRecognizer(panGestureRecognizer)
+        card.removeGestureRecognizer(zoomGestureRecognizer)
+        card.removeGestureRecognizer(twoFingerPanGestureRecognizer)
     }
     
     //MARK: - Error Handling Section
