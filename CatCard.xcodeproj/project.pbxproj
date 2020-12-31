@@ -30,6 +30,7 @@
 		F6C928202540678B00BAB89E /* ImageScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C9281F2540678B00BAB89E /* ImageScrollView.swift */; };
 		F6CE40AB2593063700B09008 /* OnboardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AA2593063700B09008 /* OnboardData.swift */; };
 		F6CE40AE2593231000B09008 /* HintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AD2593231000B09008 /* HintView.swift */; };
+		F6D09CCC259DD89600EAAE1C /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D09CCB259DD89600EAAE1C /* Secrets.swift */; };
 		F6EDE0AF254F998900513A98 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EDE0AE254F998900513A98 /* CardView.swift */; };
 /* End PBXBuildFile section */
 
@@ -64,6 +65,7 @@
 		F6C9281F2540678B00BAB89E /* ImageScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollView.swift; sourceTree = "<group>"; };
 		F6CE40AA2593063700B09008 /* OnboardData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardData.swift; sourceTree = "<group>"; };
 		F6CE40AD2593231000B09008 /* HintView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HintView.swift; sourceTree = "<group>"; };
+		F6D09CCB259DD89600EAAE1C /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		F6EDE0AE254F998900513A98 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -129,6 +131,7 @@
 				F6240AAC258B425C00217C2D /* InfoPlist.strings */,
 				F6746FF424C6DCF5006A2905 /* Info.plist */,
 				F6746FEF24C6DCF5006A2905 /* Assets.xcassets */,
+				F6D09CCB259DD89600EAAE1C /* Secrets.swift */,
 			);
 			path = CatAndDog;
 			sourceTree = "<group>";
@@ -295,6 +298,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6D09CCC259DD89600EAAE1C /* Secrets.swift in Sources */,
 				F6EDE0AF254F998900513A98 /* CardView.swift in Sources */,
 				F6CE40AE2593231000B09008 /* HintView.swift in Sources */,
 				F6746FFD24C6E02C006A2905 /* NetworkManager.swift in Sources */,

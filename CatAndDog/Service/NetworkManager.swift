@@ -26,13 +26,17 @@ class NetworkManager {
             return
         }
         for _ in 1...numberOfRequests {
-            // Create URL object using API's HTTP address string
+            // Create URL object
             guard let url = URL(string: K.API.urlString) else {
                 debugPrint("Error initiating an URL object from API's HTTP address string.")
                 return
             }
             
-            URLSession.shared.dataTask(with: url) { (data, response, error) in
+            // Pass in HTTP request header
+            var request = URLRequest(url: url)
+            request.addValue(Secrets.API.key, forHTTPHeaderField: Secrets.API.header)
+            
+            URLSession.shared.dataTask(with: request) { (data, response, error) in
                 // Transport error occured
                 if let error = error {
                     self.delegate?.networkErrorDidOccur() // Alert the main VC that an error occured in the data retrieving process.
