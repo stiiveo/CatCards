@@ -16,6 +16,7 @@
 "SHARE_BUTTON" = "Share the image";
 "UNDO_BUTTON" = "Retrieve the last card";
 "SAVE_BUTTON" = "Save the image";
+"VIEW_SAVED" = "Show downloaded images";
 "BLESS" = "Enjoy it!";
 "PROMPT" = "Swipe me to see the next card";
 "START_PROMPT" = "Swipe me to start";

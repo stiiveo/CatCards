@@ -16,6 +16,7 @@ struct Z {
         static let shareButton = NSLocalizedString("SHARE_BUTTON", comment: "Usage of all UI buttons")
         static let undoButton = NSLocalizedString("UNDO_BUTTON", comment: "Usage of all UI buttons")
         static let saveButton = NSLocalizedString("SAVE_BUTTON", comment: "Usage of all UI buttons")
+        static let showDownloadsButton = NSLocalizedString("VIEW_SAVED", comment: "View saved images")
         static let bless = NSLocalizedString("BLESS", comment: "Bless the user")
         static let prompt = NSLocalizedString("PROMPT", comment: "Prompt message")
         static let startPrompt = NSLocalizedString("START_PROMPT", comment: "Prompt message")

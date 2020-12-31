@@ -80,19 +80,16 @@ extension HintView: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
-        // Cell's text and image
+        // Cell's text
         cell.textLabel?.text = data[cardNumber].cellText[indexPath.row]
+        
+        // Cell's image
         if cardNumber == 1 {
-            // Second card
-            switch indexPath.row {
-            case 1:
-                cell.imageView?.image = data[1].cellImage?[0]
-            case 2:
-                cell.imageView?.image = data[1].cellImage?[1]
-            case 3:
-                cell.imageView?.image = data[1].cellImage?[2]
-            default:
-                debugPrint("No image for cell \(indexPath.row) in card \(cardNumber).")
+            // Second card's cell images
+            let lastCellIndex = data[1].cellText.count - 1
+            if indexPath.row > 0 && indexPath.row < lastCellIndex {
+                // Add image to each cell except the first and the last one
+                cell.imageView?.image = data[1].cellImage?[indexPath.row - 1]
             }
         }
         

@@ -24,7 +24,7 @@ struct K {
         static let testUnitID = "ca-app-pub-3940256099942544/2934735716" // test ad unit ID
         static let myTestDeviceIdentifier = "183f37d224cd0bdff5a8ee1b7b3b7daf" // Identifier of the test device
         static let obamaTestDeviceIdentifier = "cab86adbac7f339092f5151f051e3f84" // Identifier of the test device
-        static let mandyTestDeviceIdentifier = "1828f1e5516280de49d9d7b8ce165764" // Identifier of the test device
+        static let mandyTestDeviceIdentifier = "1a0dd40a508e376308ee9345f19b1e50" // Identifier of the test device
     }
     
     struct API {
@@ -110,9 +110,10 @@ struct K {
         static let contentMargin: CGFloat = 25
         static let maxTextSize: CGFloat = 30
         struct ButtonImage {
-            static let shareButton = UIImage(systemName: "square.and.arrow.up")!
-            static let undoButton = UIImage(systemName: "arrow.counterclockwise")!
-            static let saveButton = UIImage(systemName: "heart")!
+            static let share = UIImage(systemName: "square.and.arrow.up")!
+            static let undo = UIImage(systemName: "arrow.counterclockwise")!
+            static let save = UIImage(systemName: "heart")!
+            static let showDownloads = UIImage(systemName: "arrow.down.circle.fill")!
         }
         
         static let data = [
@@ -125,10 +126,12 @@ struct K {
                                    Z.InstructionText.shareButton,
                                    Z.InstructionText.undoButton,
                                    Z.InstructionText.saveButton,
+                                   Z.InstructionText.showDownloadsButton,
                                    Z.InstructionText.prompt],
-                        cellImage: [K.Onboard.ButtonImage.shareButton,
-                                    K.Onboard.ButtonImage.undoButton,
-                                    K.Onboard.ButtonImage.saveButton]),
+                        cellImage: [K.Onboard.ButtonImage.share,
+                                    K.Onboard.ButtonImage.undo,
+                                    K.Onboard.ButtonImage.save,
+                                    K.Onboard.ButtonImage.showDownloads]),
             OnboardData(cellText: [Z.InstructionText.bless,
                                    Z.InstructionText.startPrompt], cellImage: nil)
         ]

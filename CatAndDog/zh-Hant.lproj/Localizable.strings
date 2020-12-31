@@ -16,6 +16,7 @@
 "SHARE_BUTTON" = "分享圖片";
 "UNDO_BUTTON" = "召回上一張卡片";
 "SAVE_BUTTON" = "儲存圖片";
+"VIEW_SAVED" = "顯示已儲存的圖片";
 "BLESS" = "開始享受吧！";
 "PROMPT" = "將我滑開來看下一張卡片";
 "START_PROMPT" = "將我滑開後開始";
