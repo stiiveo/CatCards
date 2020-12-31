@@ -841,14 +841,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    // TEST USE
-    @IBAction func resetButtonPressed(_ sender: UIBarButtonItem) {
-        // Reset all default setting
-        defaults.setValue(false, forKey: K.UserDefaultsKeys.onboardCompleted)
-        defaults.setValue(false, forKey: K.UserDefaultsKeys.loadBannerAd)
-        defaults.setValue((0), forKey: K.UserDefaultsKeys.viewCount)
-    }
-    
 }
 
 extension MainViewController: UIGestureRecognizerDelegate {
