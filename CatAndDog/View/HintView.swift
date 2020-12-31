@@ -95,7 +95,7 @@ extension HintView: UITableViewDataSource {
         
         // Text style of cells in the middle
         cell.textLabel?.textColor = .label
-        cell.textLabel?.font = .preferredFont(withTextStyle: .title2, maxSize: K.Onboard.maxTextSize)
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 22, weight: .regular)
         cell.textLabel?.numberOfLines = 0
         cell.textLabel?.adjustsFontSizeToFitWidth = true
         cell.textLabel?.minimumScaleFactor = 0.5
@@ -106,12 +106,11 @@ extension HintView: UITableViewDataSource {
         // Text style of first and last cell
         if indexPath.row == 0 {
             // First cell
-            cell.textLabel?.font = .preferredFont(forTextStyle: .title1)
+            cell.textLabel?.font = UIFont.systemFont(ofSize: 24, weight: .medium)
             cell.textLabel?.numberOfLines = 1
         }
         if indexPath.row == data[cardNumber].cellText.count - 1 {
             // Last cell
-            cell.textLabel?.font = .preferredFont(forTextStyle: .title3)
             cell.textLabel?.textColor = .secondaryLabel
         }
         
@@ -119,16 +118,4 @@ extension HintView: UITableViewDataSource {
     }
     
     
-}
-
-extension UIFont {
-
-  static func preferredFont(withTextStyle textStyle: UIFont.TextStyle, maxSize: CGFloat) -> UIFont {
-    // Get the descriptor
-    let fontDescriptor = UIFontDescriptor.preferredFontDescriptor(withTextStyle: textStyle)
-
-    // Return a font with the minimum size
-    return UIFont(descriptor: fontDescriptor, size: min(fontDescriptor.pointSize, maxSize))
-  }
-
 }
