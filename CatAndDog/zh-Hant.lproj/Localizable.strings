@@ -10,24 +10,26 @@
 /// MainViewController
 
 // Instruction Text
-"GREETING" = "嗨！貓友🐾";
-"BRIEF" = "歡迎來到貓咪卡片\n這裡有無數個會讓你發出「噢～」聲音的貓圖";
+"GREET_TITLE" = "歡迎來到貓咪卡片";
+"GREET_1" = "這裡有無數個由全世界愛貓人士提供的貓圖";
+"GREET_2" = "我相信您會非常喜歡";
+"ZOOM_GESTURE_TITLE" = "再看仔細一點";
+"HOW_TO_ZOOM_IN" = "將兩指分開來放大卡片";
 "BUTTON_INSTRUCTION" = "按鈕的功能";
 "SHARE_BUTTON" = "分享圖片";
 "UNDO_BUTTON" = "召回上一張卡片";
 "SAVE_BUTTON" = "儲存圖片";
 "VIEW_SAVED" = "顯示已儲存的圖片";
-"BLESS" = "開始享受吧！";
-"PROMPT" = "將我滑開來看下一張卡片";
-"START_PROMPT" = "將我滑開後開始";
+"PROMPT" = "🐱 將我滑開來看下一張卡片";
+"START_PROMPT" = "😺 將我滑開後開始";
 
 // Network Error Alert
-"NETWORK_ERROR_ALERT_TITLE" = "無法連接至網路";
-"NETWORK_ERROR_ALERT_MESSAGE" = "來自貓星球的訊號太弱\n 請檢查您裝置的天線 📡";
+"NETWORK_ERROR_ALERT_TITLE" = "🙀 無法連接至網路";
+"NETWORK_ERROR_ALERT_MESSAGE" = "來自貓星球的訊號太弱\n 請檢查您的網路連線";
 "NETWORK_ERROR_ALERT_ACTION" = "再試一次";
 
 // Databse Error Alert
-"DATABASE_ERROR_ALERT_TITLE" = "已達到圖片儲存的上限";
+"DATABASE_ERROR_ALERT_TITLE" = "😿 已達到儲存數量的上限";
 "DATABASE_ERROR_ALERT_MESSAGE" = "目前你可以最多儲存24張圖片";
 "DATABASE_ERROR_ALERT_ACTION" = "了解";
 

@@ -11,11 +11,14 @@ import UIKit
 class HintView: UIView {
     
     var cardNumber: Int = 0
+    private lazy var blurEffectView = UIVisualEffectView()
+    private lazy var labelView = UILabel()
     private let data = K.Onboard.data
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         addBackgroundView()
+        addLabelView()
     }
     
     required init?(coder: NSCoder) {
@@ -30,7 +33,7 @@ class HintView: UIView {
             
             // Blur effect setting
             let blurEffect = UIBlurEffect(style: .systemChromeMaterial)
-            let blurEffectView = UIVisualEffectView(effect: blurEffect)
+            blurEffectView = UIVisualEffectView(effect: blurEffect)
             
             // Always fill the view
             blurEffectView.frame = self.frame
@@ -69,6 +72,21 @@ class HintView: UIView {
         tableView.backgroundColor = .clear
         tableView.isScrollEnabled = false
     }
+    
+    private func addLabelView() {
+        self.addSubview(self.labelView)
+        labelView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            labelView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            labelView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -40),
+        ])
+        
+        // Style
+        labelView.textColor = .label
+        labelView.font = .systemFont(ofSize: 18, weight: .regular)
+        labelView.adjustsFontSizeToFitWidth = true
+        labelView.minimumScaleFactor = 0.5
+    }
 }
 
 extension HintView: UITableViewDataSource {
@@ -83,19 +101,13 @@ extension HintView: UITableViewDataSource {
         // Cell's text
         cell.textLabel?.text = data[cardNumber].cellText[indexPath.row]
         
-        // Cell's image
-        if cardNumber == 1 {
-            // Second card's cell images
-            let lastCellIndex = data[1].cellText.count - 1
-            if indexPath.row > 0 && indexPath.row < lastCellIndex {
-                // Add image to each cell except the first and the last one
-                cell.imageView?.image = data[1].cellImage?[indexPath.row - 1]
-            }
-        }
+        // LabelView's text
+        labelView.text = Z.InstructionText.prompt
+        labelView.backgroundColor = .clear
         
-        // Text style of cells in the middle
+        // Text style of cells
         cell.textLabel?.textColor = .label
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 22, weight: .regular)
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 18, weight: .regular)
         cell.textLabel?.numberOfLines = 0
         cell.textLabel?.adjustsFontSizeToFitWidth = true
         cell.textLabel?.minimumScaleFactor = 0.5
@@ -103,15 +115,24 @@ extension HintView: UITableViewDataSource {
         cell.backgroundColor = .clear
         cell.isUserInteractionEnabled = false
         
-        // Text style of first and last cell
+        // Cell to instruct zooming gesture
+        if cardNumber == 1 {
+            self.blurEffectView.removeFromSuperview()
+        }
+        
+        if cardNumber == 2 {
+            // Last card's cell images
+            if indexPath.row != 0 {
+                // Add image to each cell except the first and the last one
+                cell.imageView?.image = data[2].cellImage?[indexPath.row - 1]
+            }
+            // Label view style
+            labelView.text = Z.InstructionText.startPrompt
+        }
+        
         if indexPath.row == 0 {
             // First cell
             cell.textLabel?.font = UIFont.systemFont(ofSize: 24, weight: .medium)
-            cell.textLabel?.numberOfLines = 1
-        }
-        if indexPath.row == data[cardNumber].cellText.count - 1 {
-            // Last cell
-            cell.textLabel?.textColor = .secondaryLabel
         }
         
         return cell

@@ -10,24 +10,26 @@
 /// MainViewController
 
 // Instruction Text
-"GREETING" = "Hey There! Cat Lover🐾";
-"BRIEF" = "Welcome to Cat Card.\nInfinite adorable cat images are right here to make you sound 'aww'";
-"BUTTON_INSTRUCTION" = "How these buttons work";
-"SHARE_BUTTON" = "Share the image";
+"GREET_TITLE" = "Welcome to Cat Cards";
+"GREET_1" = "Here we have countless cat pictures provided by cat lovers around the world.";
+"GREET_2" = "I'm sure you'd love them.";
+"ZOOM_GESTURE_TITLE" = "Look Closer";
+"HOW_TO_ZOOM_IN" = "Pinch two fingers apart to zoom in the card.";
+"BUTTON_INSTRUCTION" = "How buttons work";
+"SHARE_BUTTON" = "Share the picture";
 "UNDO_BUTTON" = "Retrieve the last card";
-"SAVE_BUTTON" = "Save the image";
-"VIEW_SAVED" = "Show downloaded images";
-"BLESS" = "Enjoy it!";
-"PROMPT" = "Swipe me to see the next card";
-"START_PROMPT" = "Swipe me to start";
+"SAVE_BUTTON" = "Save the picture";
+"VIEW_SAVED" = "Show downloaded pictures";
+"PROMPT" = "🐱 Swipe me to see the next card";
+"START_PROMPT" = "😺 Swipe me to start";
 
 // Network Error Alert
-"NETWORK_ERROR_ALERT_TITLE" = "Cannot connect to the Internet.";
-"NETWORK_ERROR_ALERT_MESSAGE" = "Signal from Cat Planet is too weak.\n Please check your antenna. 📡";
+"NETWORK_ERROR_ALERT_TITLE" = "🙀 Cannot connect to the Internet.";
+"NETWORK_ERROR_ALERT_MESSAGE" = "Signal from cat planet is too weak.\n Please check your internet connection";
 "NETWORK_ERROR_ALERT_ACTION" = "Try Again";
 
 // Databse Error Alert
-"DATABASE_ERROR_ALERT_TITLE" = "Maximum number of saved images is reached.";
+"DATABASE_ERROR_ALERT_TITLE" = "😿 Maximum number of saved images is reached.";
 "DATABASE_ERROR_ALERT_MESSAGE" = "Currently you can save 24 images at most.";
 "DATABASE_ERROR_ALERT_ACTION" = "OK";
 

@@ -120,20 +120,21 @@ struct K {
             // Text and images used for the onboarding card
             // Each data represents the data each card uses
             OnboardData(cellText: [Z.InstructionText.greeting,
-                                   Z.InstructionText.brief,
-                                   Z.InstructionText.prompt], cellImage: nil),
+                                   Z.InstructionText.greet_1,
+                                   Z.InstructionText.greet_2],
+                        cellImage: nil),
+            OnboardData(cellText: [Z.InstructionText.zoomGestureTitle,
+                                   Z.InstructionText.zoomInstruction],
+                        cellImage: nil),
             OnboardData(cellText: [Z.InstructionText.buttonInstruction,
                                    Z.InstructionText.shareButton,
                                    Z.InstructionText.undoButton,
                                    Z.InstructionText.saveButton,
-                                   Z.InstructionText.showDownloadsButton,
-                                   Z.InstructionText.prompt],
+                                   Z.InstructionText.showDownloadsButton],
                         cellImage: [K.Onboard.ButtonImage.share,
                                     K.Onboard.ButtonImage.undo,
                                     K.Onboard.ButtonImage.save,
-                                    K.Onboard.ButtonImage.showDownloads]),
-            OnboardData(cellText: [Z.InstructionText.bless,
-                                   Z.InstructionText.startPrompt], cellImage: nil)
+                                    K.Onboard.ButtonImage.showDownloads])
         ]
         
     }
