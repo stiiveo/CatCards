@@ -15,7 +15,7 @@
 "GREET_2" = "I'm sure you'd love them.";
 "ZOOM_GESTURE_TITLE" = "Look Closer";
 "HOW_TO_ZOOM_IN" = "Pinch two fingers apart to zoom in the card.";
-"BUTTON_INSTRUCTION" = "How buttons work";
+"BUTTON_TITLE" = "How buttons work";
 "SHARE_BUTTON" = "Share the picture";
 "UNDO_BUTTON" = "Retrieve the last card";
 "SAVE_BUTTON" = "Save the picture";

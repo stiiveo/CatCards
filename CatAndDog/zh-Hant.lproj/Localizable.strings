@@ -15,7 +15,7 @@
 "GREET_2" = "我相信您會非常喜歡";
 "ZOOM_GESTURE_TITLE" = "再看仔細一點";
 "HOW_TO_ZOOM_IN" = "將兩指分開來放大卡片";
-"BUTTON_INSTRUCTION" = "按鈕的功能";
+"BUTTON_TITLE" = "按鈕的功能";
 "SHARE_BUTTON" = "分享圖片";
 "UNDO_BUTTON" = "召回上一張卡片";
 "SAVE_BUTTON" = "儲存圖片";

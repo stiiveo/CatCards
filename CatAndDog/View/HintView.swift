@@ -98,25 +98,21 @@ extension HintView: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
-        // Cell's text
+        // Text messages
         cell.textLabel?.text = data[cardNumber].cellText[indexPath.row]
-        
-        // LabelView's text
         labelView.text = Z.InstructionText.prompt
-        labelView.backgroundColor = .clear
         
-        // Text style of cells
+        // Text style
         cell.textLabel?.textColor = .label
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 18, weight: .regular)
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 20, weight: .regular)
         cell.textLabel?.numberOfLines = 0
-        cell.textLabel?.adjustsFontSizeToFitWidth = true
-        cell.textLabel?.minimumScaleFactor = 0.5
         
+        // Cell style
         cell.backgroundColor = .clear
         cell.isUserInteractionEnabled = false
         
-        // Cell to instruct zooming gesture
         if cardNumber == 1 {
+            // Remove blur effect view of the card for zooming gesture instruction
             self.blurEffectView.removeFromSuperview()
         }
         
@@ -126,13 +122,13 @@ extension HintView: UITableViewDataSource {
                 // Add image to each cell except the first and the last one
                 cell.imageView?.image = data[2].cellImage?[indexPath.row - 1]
             }
-            // Label view style
+            // Label view text message
             labelView.text = Z.InstructionText.startPrompt
         }
         
         if indexPath.row == 0 {
-            // First cell
-            cell.textLabel?.font = UIFont.systemFont(ofSize: 24, weight: .medium)
+            // Title's text style
+            cell.textLabel?.font = UIFont.systemFont(ofSize: 28, weight: .medium)
         }
         
         return cell

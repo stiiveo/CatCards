@@ -119,7 +119,7 @@ struct K {
         static let data = [
             // Text and images used for the onboarding card
             // Each data represents the data each card uses
-            OnboardData(cellText: [Z.InstructionText.greeting,
+            OnboardData(cellText: [Z.InstructionText.greetTitle,
                                    Z.InstructionText.greet_1,
                                    Z.InstructionText.greet_2],
                         cellImage: nil),

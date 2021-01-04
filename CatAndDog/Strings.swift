@@ -10,12 +10,12 @@ import Foundation
 
 struct Z {
     struct InstructionText {
-        static let greeting = NSLocalizedString("GREET_TITLE", comment: "Greeting")
+        static let greetTitle = NSLocalizedString("GREET_TITLE", comment: "Greeting")
         static let greet_1 = NSLocalizedString("GREET_1", comment: "Greet message 1")
         static let greet_2 = NSLocalizedString("GREET_2", comment: "Greet message 2")
         static let zoomGestureTitle = NSLocalizedString("ZOOM_GESTURE_TITLE", comment: "Title of zooming gesture instruction")
         static let zoomInstruction = NSLocalizedString("HOW_TO_ZOOM_IN", comment: "Instruction of how to zoom in the picture")
-        static let buttonInstruction = NSLocalizedString("BUTTON_INSTRUCTION", comment: "Usage of all UI buttons")
+        static let buttonInstruction = NSLocalizedString("BUTTON_TITLE", comment: "Usage of all UI buttons")
         static let shareButton = NSLocalizedString("SHARE_BUTTON", comment: "Usage of all UI buttons")
         static let undoButton = NSLocalizedString("UNDO_BUTTON", comment: "Usage of all UI buttons")
         static let saveButton = NSLocalizedString("SAVE_BUTTON", comment: "Usage of all UI buttons")
