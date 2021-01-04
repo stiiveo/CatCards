@@ -635,7 +635,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 
             case .ended, .cancelled, .failed:
                 // Move card back to original position
-                UIView.animate(withDuration: 0.3, animations: {
+                UIView.animate(withDuration: 0.42, animations: {
                     view.center = self.cardViewAnchor
                 })
             default:
@@ -660,7 +660,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 sender.scale = 1
             case .ended, .cancelled, .failed:
                 // Reset card's size
-                UIView.animate(withDuration: 0.3, animations: {
+                UIView.animate(withDuration: 0.42, animations: {
                     view.transform = .identity
                 })
             default:
