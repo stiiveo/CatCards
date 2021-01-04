@@ -189,31 +189,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         navBar.tintColor = K.Color.tintColor
         toolbar.alpha = 1
     }
-     
-    private func animateFirstCard() {
-        let anchorPoint = self.firstCard.center
-        
-        // Shake the first card to hint the user how swiping gesture works
-        UIView.animate(withDuration: 0.25, delay: 1.0) {
-            // Move and rotate the first card to the right
-            self.firstCard.transform = CGAffineTransform(rotationAngle: 0.1)
-            self.firstCard.center = CGPoint(x: anchorPoint.x + 20, y: anchorPoint.y)
-        } completion: { _ in
-            // Move and rotate the first card to the left
-            UIView.animate(withDuration: 0.25) {
-                self.firstCard.transform = CGAffineTransform(rotationAngle: -0.1)
-                self.firstCard.center = CGPoint(x: anchorPoint.x - 20, y: anchorPoint.y)
-            } completion: { _ in
-                // Rotate the first card back to original position
-                UIView.animate(withDuration: 0.25) {
-                    self.firstCard.transform = .identity
-                    self.firstCard.center = anchorPoint
-                } completion: { _ in
-                    self.attachGestureRecognizers(to: self.firstCard)
-                }
-            }
-        }
-    }
     
     //MARK: - Advertisement Methods
     
@@ -451,17 +426,19 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             if let firstData = dataSet[dataIndex] {
                 firstCard.data = firstData
                 
-                if !onboardCompleted && dataIndex == 0 {
+                if !onboardCompleted {
+                    // Show onboarding tutorials if onboard procedure is not completed yet
                     firstCard.setAsTutorialCard(cardIndex: 0)
-                    DispatchQueue.main.async {
-                        self.animateFirstCard()
-                    }
                 } else {
+                    // User is not a new comer
                     viewCount += 1 // Increment the number of cat the user has seen
                     DispatchQueue.main.async {
                         self.refreshButtonState() // Refresh toolbar buttons' state
-                        self.attachGestureRecognizers(to: self.firstCard) // Add gesture recognizer to first card
                     }
+                }
+                
+                DispatchQueue.main.async {
+                    self.attachGestureRecognizers(to: self.firstCard)
                 }
                 
                 dataIndex += 1
@@ -471,13 +448,15 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 secondCard.data = secondData
                 
                 if !onboardCompleted {
+                    let demoData = CatData(id: "demo", image: UIImage(named: "zoom_demo_image")!)
+                    secondCard.data = demoData
                     secondCard.setAsTutorialCard(cardIndex: 1)
                 }
                 
                 dataIndex += 1
             }
         default:
-            // Update either cardView if its data is not available
+            // Update either cardView with the fetched data if it's current not available
             if firstCard.data == nil || secondCard.data == nil {
                 updateCardView()
             }
@@ -502,8 +481,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Shrink the size of the newly added card view
         card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         
-        // Show toolbar buttons after the first tutorial card is dismissed
-        if !onboardCompleted && dataIndex == 2 {
+        // Show toolbar buttons after the second tutorial card is dismissed
+        if !onboardCompleted && dataIndex == 3 {
             UIView.animate(withDuration: 0.5) {
                 self.showUIButtons()
             }
@@ -530,13 +509,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             // Load banner ad if user has viewed certain number of cat images and the ad has yet to be loaded.
             if viewCount >= K.Banner.cardViewedToLoadBannerAd && !adReceived {
-                addBannerToView(adBannerView)
+//                addBannerToBannerSpace(adBannerView) // TEST
                 if #available(iOS 14, *), ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
                     // This method is available in iOS 14 and later
                     // User's permission is required to get device's identifier for advertising
                     requestIDFA()
                 } else {
-                    loadBannerAd()
+//                    loadBannerAd() // TEST
                 }
                 defaults.setValue(true, forKey: K.UserDefaultsKeys.loadBannerAd) // Save default status to true
             }
