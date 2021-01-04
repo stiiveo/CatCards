@@ -200,7 +200,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     /// Place the banner at the center of the reserved ad space
-    private func addBannerToView(_ bannerView: GADBannerView) {
+    private func addBannerToBannerSpace(_ bannerView: GADBannerView) {
         bannerView.translatesAutoresizingMaskIntoConstraints = false
         bannerSpace.addSubview(bannerView)
         
@@ -376,8 +376,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         addCardViewConstraint(card: firstCard)
         addCardViewConstraint(card: secondCard)
-        secondCard.transform = CGAffineTransform(scaleX: K.CardView.Size.transform,
-                                                 y: K.CardView.Size.transform)
+        secondCard.transform = CGAffineTransform(
+            scaleX: K.CardView.Size.transform,
+            y: K.CardView.Size.transform
+        )
         
         cardsAreAddedToView = true
     }
@@ -405,7 +407,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         ])
     }
     
-    //MARK: - Data Fetching & Updating
+    //MARK: - Data Fetching & Handling
     
     private func fetchNewData(initialRequest: Bool) {
         switch initialRequest {
@@ -440,7 +442,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 DispatchQueue.main.async {
                     self.attachGestureRecognizers(to: self.firstCard)
                 }
-                
                 dataIndex += 1
             }
         case 1:
@@ -452,7 +453,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     secondCard.data = demoData
                     secondCard.setAsTutorialCard(cardIndex: 1)
                 }
-                
                 dataIndex += 1
             }
         default:
@@ -463,107 +463,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Cards Rotation Section
-    
-    private func rotateCard(_ card: CardView) {
-        nextCard = (card == firstCard) ? .firstCard : .secondCard
-        self.currentCard = (nextCard == .firstCard) ? .second : .first
-        
-        card.data = nil // Trigger method reloadImageData in class CardView 
-        let currentCard = (self.currentCard == .first) ? firstCard : secondCard
-        attachGestureRecognizers(to: currentCard)
-        
-        // Put the dismissed card behind the current card
-        self.view.insertSubview(card, belowSubview: currentCard)
-        card.center = cardViewAnchor
-        addCardViewConstraint(card: card)
-        
-        // Shrink the size of the newly added card view
-        card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-        
-        // Show toolbar buttons after the second tutorial card is dismissed
-        if !onboardCompleted && dataIndex == 3 {
-            UIView.animate(withDuration: 0.5) {
-                self.showUIButtons()
-            }
-        }
-        
-        // Enable all UI buttons after the last tutorial card is dismissed
-        if dataIndex > onboardData.count && !onboardCompleted {
-            onboardCompleted = true
-            goToCollectionViewBtn.isEnabled = true
-            
-            // Save onboardCompleted status to true in User Defaults
-            defaults.setValue(true, forKey: K.UserDefaultsKeys.onboardCompleted)
-        }
-        
-        // Update the count of view the user has seen if the current card's data is valid
-        if currentData != nil && onboardCompleted {
-            viewCount += 1
-        
-            // This method is put here to avoid the cardView dismissing issue where
-            // the card dismissing destination might be disrupted if the constraints on view changed when
-            // the dismissing animation is still executing at the same time.
-            // If this issue is solved in the future, consider move this method
-            // to a place which makes more sense.
-            
-            // Load banner ad if user has viewed certain number of cat images and the ad has yet to be loaded.
-            if viewCount >= K.Banner.cardViewedToLoadBannerAd && !adReceived {
-//                addBannerToBannerSpace(adBannerView) // TEST
-                if #available(iOS 14, *), ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
-                    // This method is available in iOS 14 and later
-                    // User's permission is required to get device's identifier for advertising
-                    requestIDFA()
-                } else {
-//                    loadBannerAd() // TEST
-                }
-                defaults.setValue(true, forKey: K.UserDefaultsKeys.loadBannerAd) // Save default status to true
-            }
-        }
-        
-        updateCardView()
-        fetchNewData(initialRequest: false)
-    }
-    
-    //MARK: - Update Image of imageView
-    
-    /// Update card's content if new data is available.
-    private func updateCardView() {
-        let dataSet = networkManager.serializedData
-        let dataAllocation: Card = ((self.dataIndex) % 2 == 1) ? .secondCard : .firstCard
-        
-        if let newData = dataSet[dataIndex] { // Make sure new data is available
-            switch dataAllocation { // Decide which card the data is to be allocated
-            case .firstCard:
-                firstCard.data = newData // Update card's data
-                
-                // Show tutorial text on this card if there's still tutorial to be shown
-                if !onboardCompleted && dataIndex < onboardData.count {
-                    firstCard.setAsTutorialCard(cardIndex: dataIndex)
-                }
-                dataIndex += 1
-            case .secondCard:
-                secondCard.data = newData  // Update card's data
-                
-                // Show tutorial text on this card if there's still tutorial to be shown
-                if !onboardCompleted && dataIndex < onboardData.count {
-                    secondCard.setAsTutorialCard(cardIndex: dataIndex)
-                }
-                dataIndex += 1
-            }
-            
-            // Increment the view count if card's data was invalid but updated
-            if currentData == nil {
-                self.viewCount += 1
-            }
-        }
-        
-        DispatchQueue.main.async {
-            self.refreshButtonState()
-        }
-    }
-    
-    //MARK: - Card Panning Methods
+    //MARK: - Card Panning and Zooming Methods
     
     private enum Side {
         case upper, lower
@@ -718,8 +618,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Image Zooming and Panning Methods
-    
     @objc private func twoFingerPanHandler(sender: UIPanGestureRecognizer) {
         if let view = sender.view {
             switch sender.state {
@@ -793,6 +691,104 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         card.removeGestureRecognizer(panGestureRecognizer)
         card.removeGestureRecognizer(zoomGestureRecognizer)
         card.removeGestureRecognizer(twoFingerPanGestureRecognizer)
+    }
+    
+    //MARK: - Cards Rotation & Image Updating
+    
+    private func rotateCard(_ card: CardView) {
+        nextCard = (card == firstCard) ? .firstCard : .secondCard
+        self.currentCard = (nextCard == .firstCard) ? .second : .first
+        
+        card.data = nil // Trigger method reloadImageData in class CardView
+        let currentCard = (self.currentCard == .first) ? firstCard : secondCard
+        attachGestureRecognizers(to: currentCard)
+        
+        // Put the dismissed card behind the current card
+        self.view.insertSubview(card, belowSubview: currentCard)
+        card.center = cardViewAnchor
+        addCardViewConstraint(card: card)
+        
+        // Shrink the size of the newly added card view
+        card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+        
+        // Show toolbar buttons after the second tutorial card is dismissed
+        if !onboardCompleted && dataIndex == 3 {
+            UIView.animate(withDuration: 0.5) {
+                self.showUIButtons()
+            }
+        }
+        
+        // Enable all UI buttons after the last tutorial card is dismissed
+        if dataIndex > onboardData.count && !onboardCompleted {
+            onboardCompleted = true
+            goToCollectionViewBtn.isEnabled = true
+            
+            // Save onboardCompleted status to true in User Defaults
+            defaults.setValue(true, forKey: K.UserDefaultsKeys.onboardCompleted)
+        }
+        
+        // Update the count of view the user has seen if the current card's data is valid
+        if currentData != nil && onboardCompleted {
+            viewCount += 1
+        
+            // This method is put here to avoid the cardView dismissing issue where
+            // the card dismissing destination might be disrupted if the constraints on view changed when
+            // the dismissing animation is still executing at the same time.
+            // If this issue is solved in the future, consider move this method
+            // to a place which makes more sense.
+            
+            // Load banner ad if user has viewed certain number of cat images and the ad has yet to be loaded.
+            if viewCount >= K.Banner.cardViewedToLoadBannerAd && !adReceived {
+                addBannerToBannerSpace(adBannerView) // TEST
+                if #available(iOS 14, *), ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
+                    // This method is available in iOS 14 and later
+                    // User's permission is required to get device's identifier for advertising
+                    requestIDFA()
+                } else {
+                    loadBannerAd() // TEST
+                }
+                defaults.setValue(true, forKey: K.UserDefaultsKeys.loadBannerAd) // Save default status to true
+            }
+        }
+        
+        updateCardView()
+        fetchNewData(initialRequest: false)
+    }
+    
+    /// Update card's content if new data is available.
+    private func updateCardView() {
+        let dataSet = networkManager.serializedData
+        let dataAllocation: Card = ((self.dataIndex) % 2 == 1) ? .secondCard : .firstCard
+        
+        if let newData = dataSet[dataIndex] { // Make sure new data is available
+            switch dataAllocation { // Decide which card the data is to be allocated
+            case .firstCard:
+                firstCard.data = newData // Update card's data
+                
+                // Show tutorial text on this card if there's still tutorial to be shown
+                if !onboardCompleted && dataIndex < onboardData.count {
+                    firstCard.setAsTutorialCard(cardIndex: dataIndex)
+                }
+                dataIndex += 1
+            case .secondCard:
+                secondCard.data = newData  // Update card's data
+                
+                // Show tutorial text on this card if there's still tutorial to be shown
+                if !onboardCompleted && dataIndex < onboardData.count {
+                    secondCard.setAsTutorialCard(cardIndex: dataIndex)
+                }
+                dataIndex += 1
+            }
+            
+            // Increment the view count if card's data was invalid but updated
+            if currentData == nil {
+                self.viewCount += 1
+            }
+        }
+        
+        DispatchQueue.main.async {
+            self.refreshButtonState()
+        }
     }
     
     //MARK: - Error Handling Section
