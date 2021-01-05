@@ -18,7 +18,7 @@ struct K {
     struct Banner {
         static let adMobAppID = "ca-app-pub-2421510056015407~5275025170"
         static let unitID = "ca-app-pub-2421510056015407/2067597276" // my real ad unit ID
-        static let cardViewedToLoadBannerAd: Int = 10
+        static let cardViewedToLoadBannerAd: Int = 10 // how many cards the user sees before loading the ad
         
         // TEST USE
         static let testUnitID = "ca-app-pub-3940256099942544/2934735716" // test ad unit ID
@@ -63,27 +63,12 @@ struct K {
     }
     
     struct Data {
-//        static let maxOfCachedData: Int = 3 // TEST USE
-        
-        // If this value is too small, the user could have to experience more loading time.
-        // However, the more the cache data, the more the memory usage is.
-        // After some testing, 10 is a pretty sweat spot between UX and memory usage.
-        static let maxOfCachedData: Int = 10
+        static let maxOfCachedData: Int = 20 // Maximum number of data cached in the device
         static let maxBufferImageNumber: Int = 4
         static let maxSavedImages: Int = 24
     }
     
-    struct ToolBar {
-        static let height: CGFloat = 44.0
-    }
-    
     struct CardView {
-        struct Animation {
-            struct Threshold {
-                static let distance: CGFloat = 80
-                static let speed: CGFloat = 1000
-            }
-        }
         struct Size {
             static let transform: CGFloat = 0.9
         }
@@ -108,7 +93,6 @@ struct K {
     
     struct Onboard {
         static let contentMargin: CGFloat = 25
-        static let maxTextSize: CGFloat = 30
         struct ButtonImage {
             static let share = UIImage(systemName: "square.and.arrow.up")!
             static let undo = UIImage(systemName: "arrow.counterclockwise")!
