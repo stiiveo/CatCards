@@ -88,7 +88,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private lazy var adBannerView: GADBannerView = {
         // Initialize ad banner
         let adBannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait) // Define ad banner's size
-        adBannerView.adUnitID = K.Banner.unitID
+        adBannerView.adUnitID = K.Banner.adUnitID
         adBannerView.rootViewController = self
         adBannerView.delegate = self
         
@@ -137,7 +137,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Load ad if status of loadBannerAd in user's device is true and no ad was received yet
         if defaults.bool(forKey: K.UserDefaultsKeys.loadBannerAd) && !adReceived {
-            addBannerToView(adBannerView)
             loadBannerAd()
         }
         
@@ -742,15 +741,15 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             // Load banner ad if user has viewed certain number of cat images and the ad has yet to be loaded.
             if viewCount >= K.Banner.cardViewedToLoadBannerAd && !adReceived {
-                addBannerToBannerSpace(adBannerView) // TEST
                 if #available(iOS 14, *), ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
                     // This method is available in iOS 14 and later
                     // User's permission is required to get device's identifier for advertising
                     requestIDFA()
                 } else {
-                    loadBannerAd() // TEST
+                    loadBannerAd()
                 }
-                defaults.setValue(true, forKey: K.UserDefaultsKeys.loadBannerAd) // Save default status to true
+                // Load banner ad automatically after the app is lauched next time
+                defaults.setValue(true, forKey: K.UserDefaultsKeys.loadBannerAd)
             }
         }
         
@@ -827,22 +826,6 @@ extension MainViewController: UIGestureRecognizerDelegate {
     }
 }
 
-extension MainViewController: GADBannerViewDelegate {
-    /// An ad request successfully receive an ad.
-    func adViewDidReceiveAd(_ bannerView: GADBannerView) {
-        bannerView.alpha = 0
-        UIView.animate(withDuration: 1.0) {
-            bannerView.alpha = 1
-        }
-        self.adReceived = true
-    }
-    
-    /// Failed to receive ad with error.
-    func adView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: GADRequestError) {
-        debugPrint("adView: didFailToReceiveAdWithError: \(error.localizedDescription)")
-    }
-}
-
 extension MainViewController: DatabaseManagerDelegate {
     /// Number of saved images has reached the limit.
     func savedImagesMaxReached() {
@@ -855,5 +838,23 @@ extension MainViewController: DatabaseManagerDelegate {
         alert.addAction(acknowledgeAction)
         
         present(alert, animated: true, completion: nil)
+    }
+}
+
+extension MainViewController: GADBannerViewDelegate {
+    /// An ad request successfully receive an ad.
+    func adViewDidReceiveAd(_ bannerView: GADBannerView) {
+        addBannerToBannerSpace(adBannerView)
+        
+        bannerView.alpha = 0
+        UIView.animate(withDuration: 1.0) {
+            bannerView.alpha = 1
+        }
+        self.adReceived = true
+    }
+    
+    /// Failed to receive ad with error.
+    func adView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: GADRequestError) {
+        debugPrint("adView: didFailToReceiveAdWithError: \(error.localizedDescription)")
     }
 }

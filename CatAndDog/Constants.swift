@@ -17,11 +17,11 @@ struct K {
     
     struct Banner {
         static let adMobAppID = "ca-app-pub-2421510056015407~5275025170"
-        static let unitID = "ca-app-pub-2421510056015407/2067597276" // my real ad unit ID
+        static let adUnitID = "ca-app-pub-2421510056015407/2067597276" // my real ad unit ID
         static let cardViewedToLoadBannerAd: Int = 10 // how many cards the user sees before loading the ad
         
         // TEST USE
-        static let testUnitID = "ca-app-pub-3940256099942544/2934735716" // test ad unit ID
+        static let testUnitID = "ca-app-pub-3940256099942544/2934735716" // Google test ad unit ID
         static let myTestDeviceIdentifier = "183f37d224cd0bdff5a8ee1b7b3b7daf" // Identifier of the test device
         static let obamaTestDeviceIdentifier = "cab86adbac7f339092f5151f051e3f84" // Identifier of the test device
         static let mandyTestDeviceIdentifier = "1a0dd40a508e376308ee9345f19b1e50" // Identifier of the test device
