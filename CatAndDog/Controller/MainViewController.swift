@@ -204,14 +204,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         bannerView.translatesAutoresizingMaskIntoConstraints = false
         bannerSpace.addSubview(bannerView)
         
-        // Note that the size of the adaptive ad banner is returned by Google,
-        // therefore defining height or width here is not necessary.
+        // Define center position only. Width and height is defined later.
         NSLayoutConstraint.activate([
             bannerView.centerYAnchor.constraint(equalTo: bannerSpace.centerYAnchor),
             bannerView.centerXAnchor.constraint(equalTo: bannerSpace.centerXAnchor)
         ])
         
-        // Determine the view width to use for the ad width.
+        // Banner's width equals the safe area's width
         let frame = { () -> CGRect in
             // Here safe area is taken into account, hence the view frame is used
             // after the view has been laid out.
@@ -223,6 +222,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }()
         let viewWidth = frame.size.width
         
+        // With adaptive banner, height of banner is based on the width of the banner itself
         // Get Adaptive GADAdSize and set the ad view.
         // Here the current interface orientation is used. If the ad is being preloaded
         // for a future orientation change or different orientation, the function for the
@@ -463,7 +463,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Card Panning and Zooming Methods
+    //MARK: - Card Animation Methods
     
     private enum Side {
         case upper, lower
@@ -542,16 +542,19 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 x: cardViewAnchor.x + pointDelta.x,
                 y: cardViewAnchor.y + pointDelta.y)
             
-            if currentData != nil && projectedDistance >= minTravelDistance {
+            if currentData != nil &&
+                projectedDistance >= minTravelDistance {
                 // Card dismissing threshold A: Data is available and
                 // the projected travel distance is greater than or equals minimum distance
                 animateCard(card, to: projectedPoint)
                 animateNextCardTransform()
             }
-            else if currentData != nil && projectedDistance < minTravelDistance && panDistance > minDragDistance {
+            else if currentData != nil &&
+                        projectedDistance < minTravelDistance &&
+                        panDistance >= minDragDistance {
                 // Card dismissing thrshold B: Data is available and
                 // the projected travel distance is less than the minimum travel distance
-                // and the card dragged distance is greater than distance threshold
+                // but the distance of card being dragged is greater than distance threshold
                 animateCard(card, to: minimumVelocityEndpoint)
                 animateNextCardTransform()
             }
@@ -758,7 +761,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     /// Update card's content if new data is available.
     private func updateCardView() {
         let dataSet = networkManager.serializedData
-        let dataAllocation: Card = ((self.dataIndex) % 2 == 1) ? .secondCard : .firstCard
+        let dataAllocation: Card = ((self.dataIndex) % 2 == 0) ? .firstCard : .secondCard
         
         if let newData = dataSet[dataIndex] { // Make sure new data is available
             switch dataAllocation { // Decide which card the data is to be allocated
@@ -780,7 +783,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 dataIndex += 1
             }
             
-            // Increment the view count if card's data was invalid but updated
+            // Increment the view count if card's data was unavailable but now updated
             if currentData == nil {
                 self.viewCount += 1
             }
