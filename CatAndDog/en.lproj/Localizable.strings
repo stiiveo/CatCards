@@ -37,7 +37,7 @@
 /// CollectionVC
 
 // Background view
-"NO_DATA_LABEL_TEXT" = "No Saved Images";
+"NO_DATA_LABEL_TEXT" = "No Saved Pictures";
 
 
 /// SingleImageVC

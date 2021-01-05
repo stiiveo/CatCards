@@ -49,8 +49,6 @@ class CollectionVC: UICollectionViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.collectionView.reloadData()
-        self.navigationController?.navigationBar.barTintColor = K.Color.backgroundColor
-        self.navigationController?.isToolbarHidden = true
         
         if DatabaseManager.imageFileURLs.count == 0 {
             let label = defaultLabel() // Display default message on the background
@@ -68,23 +66,26 @@ class CollectionVC: UICollectionViewController {
     }
 
     private func defaultLabel() -> UILabel {
-        let noDataLabel = UILabel()
-        self.collectionView.addSubview(noDataLabel)
+        let label = UILabel()
+        collectionView.addSubview(label)
+        
+        // Add padding to both sides of the label view
+        label.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            noDataLabel.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor, constant: 20),
-            noDataLabel.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor, constant: -20),
-            noDataLabel.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
+            label.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor, constant: 20),
+            label.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor, constant: -20),
+            label.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
         ])
         
-        noDataLabel.text = Z.BackgroundView.noDataLabel
-        noDataLabel.font = .boldSystemFont(ofSize: 20)
-        noDataLabel.adjustsFontSizeToFitWidth = true
-        noDataLabel.minimumScaleFactor = 0.7
-        noDataLabel.numberOfLines = 0
-        noDataLabel.textColor = UIColor.systemGray
-        noDataLabel.textAlignment = .center
+        // Style
+        label.text = Z.BackgroundView.noDataLabel
+        label.font = .boldSystemFont(ofSize: 20)
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.5
+        label.textColor = UIColor.secondaryLabel
+        label.textAlignment = .center
         
-        return noDataLabel
+        return label
     }
     
     // MARK: UICollectionViewDataSource
