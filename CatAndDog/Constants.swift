@@ -29,7 +29,6 @@ struct K {
     struct Color {
         static let backgroundColor = UIColor(named: "backgroundColor")
         static let tintColor = UIColor(named: "buttonColor")
-        static let hintViewBackground = UIColor(named: "hintView_background")
     }
     
     struct SegueIdentifiers {
