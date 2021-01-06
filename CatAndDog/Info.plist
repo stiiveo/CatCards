@@ -71,7 +71,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Cat images cannot be saved to your photo library without your permission.</string>
+	<string>Pictures cannot be saved to your photo library without your permission.</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>This device&apos;s identifier will be used to deliver personalized ads to you.</string>
 	<key>GADApplicationIdentifier</key>

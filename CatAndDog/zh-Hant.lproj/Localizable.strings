@@ -11,7 +11,7 @@
 
 // Instruction Text
 "GREET_TITLE" = "歡迎來到貓咪卡片";
-"GREET_1" = "這裡有無數個由全世界愛貓人士提供的貓圖";
+"GREET_1" = "這裡有數千張由全世界愛貓人士所提供的貓圖";
 "GREET_2" = "我相信您會非常喜歡";
 "ZOOM_GESTURE_TITLE" = "再看仔細一點";
 "HOW_TO_ZOOM_IN" = "將兩指分開來放大卡片";
