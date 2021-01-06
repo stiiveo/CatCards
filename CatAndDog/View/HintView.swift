@@ -134,5 +134,4 @@ extension HintView: UITableViewDataSource {
         return cell
     }
     
-    
 }

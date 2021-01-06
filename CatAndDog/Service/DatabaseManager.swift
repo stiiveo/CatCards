@@ -49,9 +49,6 @@ class DatabaseManager {
             
             DatabaseManager.imageFileURLs.append(newFilePath)
         }
-        
-        // TEST USE
-        print("Local Document Directory Path: \(url.path)")
     }
     
     //MARK: - Data Saving

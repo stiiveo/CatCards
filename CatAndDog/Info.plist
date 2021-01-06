@@ -70,8 +70,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<true/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Cat images cannot be saved to your photo library without your permission.</string>
 	<key>NSUserTrackingUsageDescription</key>
