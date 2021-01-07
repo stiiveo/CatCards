@@ -1,6 +1,6 @@
 //
 //  ImageScrollView.swift
-//  CatAndDog
+//  CatCards
 //
 //  Created by Jason Ou Yang on 2020/10/21.
 //  Copyright © 2020 Jason Ou Yang. All rights reserved.

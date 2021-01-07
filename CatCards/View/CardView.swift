@@ -1,6 +1,6 @@
 //
 //  CardView.swift
-//  CatAndDog
+//  CatCards
 //
 //  Created by Jason Ou Yang on 2020/11/2.
 //  Copyright © 2020 Jason Ou Yang. All rights reserved.

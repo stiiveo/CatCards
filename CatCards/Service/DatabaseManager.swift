@@ -1,6 +1,6 @@
 //
 //  DatabaseManager.swift
-//  CatAndDog
+//  CatCards
 //
 //  Created by Jason Ou Yang on 2020/8/14.
 //  Copyright © 2020 Jason Ou Yang. All rights reserved.
