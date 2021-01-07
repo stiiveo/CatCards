@@ -18,7 +18,7 @@ struct K {
     struct Banner {
         static let adMobAppID = "ca-app-pub-2421510056015407~5275025170"
         static let adUnitID = "ca-app-pub-2421510056015407/2067597276" // my real ad unit ID
-        static let cardViewedToLoadBannerAd: Int = 10 // how many cards the user sees before loading the ad
+        static let adLoadingThreshold: Int = 10 // how many cards the user sees before loading the ad
     }
     
     struct API {

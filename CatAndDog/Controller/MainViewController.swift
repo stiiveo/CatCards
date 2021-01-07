@@ -740,7 +740,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // to a place which makes more sense.
             
             // Load banner ad if user has viewed certain number of cat images and the ad has yet to be loaded.
-            if viewCount >= K.Banner.cardViewedToLoadBannerAd && !adReceived {
+            if viewCount >= K.Banner.adLoadingThreshold && !adReceived {
                 if #available(iOS 14, *), ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
                     // This method is available in iOS 14 and later
                     // User's permission is required to get device's identifier for advertising
