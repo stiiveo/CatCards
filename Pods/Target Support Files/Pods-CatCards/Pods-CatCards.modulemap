@@ -1,0 +1,6 @@
+framework module Pods_CatCards {
+  umbrella header "Pods-CatCards-umbrella.h"
+
+  export *
+  module * { export * }
+}

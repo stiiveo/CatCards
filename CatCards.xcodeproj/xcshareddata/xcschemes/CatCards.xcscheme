@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1220"
+   LastUpgradeVersion = "1230"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -16,8 +16,8 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "F6746FE024C6DCF2006A2905"
                BuildableName = "Cat Cards.app"
-               BlueprintName = "CatAndDog"
-               ReferencedContainer = "container:CatCard.xcodeproj">
+               BlueprintName = "CatCards"
+               ReferencedContainer = "container:CatCards.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -46,8 +46,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F6746FE024C6DCF2006A2905"
             BuildableName = "Cat Cards.app"
-            BlueprintName = "CatAndDog"
-            ReferencedContainer = "container:CatCard.xcodeproj">
+            BlueprintName = "CatCards"
+            ReferencedContainer = "container:CatCards.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -63,8 +63,8 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F6746FE024C6DCF2006A2905"
             BuildableName = "Cat Cards.app"
-            BlueprintName = "CatAndDog"
-            ReferencedContainer = "container:CatCard.xcodeproj">
+            BlueprintName = "CatCards"
+            ReferencedContainer = "container:CatCards.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
