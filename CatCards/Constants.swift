@@ -29,6 +29,13 @@ struct K {
     struct Color {
         static let backgroundColor = UIColor(named: "backgroundColor")
         static let tintColor = UIColor(named: "buttonColor")
+        
+        // Used by gradient layer on the background
+        static let lightModeColor1 = CGColor(red: 249/255, green: 228/255, blue: 192/255, alpha: 1)
+        static let lightModeColor2 = CGColor(red: 246/255, green: 215/255, blue: 161/255, alpha: 1)
+        static let darkModeColor1 = CGColor(red: 46/255, green: 54/255, blue: 66/255, alpha: 1)
+        static let darkModeColor2 = CGColor(red: 34/255, green: 40/255, blue: 49/255, alpha: 1)
+        
     }
     
     struct SegueIdentifiers {

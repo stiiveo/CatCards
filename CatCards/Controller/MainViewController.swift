@@ -41,6 +41,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private let secondCard = CardView()
     private let undoCard = CardView()
     private let onboardData = K.Onboard.data
+    private let backgroundLayer = CAGradientLayer()
     private var navBar: UINavigationBar!
     private lazy var cardViewAnchor = CGPoint()
     private lazy var imageViewAnchor = CGPoint()
@@ -110,10 +111,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         viewCount = (savedViewCount != 0) ? savedViewCount : 0
         
         // Notify this VC that if the app enters the background, save the cached view count value to UserDefaults.
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(saveViewCount),
-                                               name: UIApplication.didEnterBackgroundNotification,
-                                               object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(saveViewCount), name: UIApplication.didEnterBackgroundNotification, object: nil)
         
         // Show onboarding tutorial and hide toolbar if the user is a new comer
         onboardCompleted = defaults.bool(forKey: K.UserDefaultsKeys.onboardCompleted)
@@ -128,12 +126,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         fetchNewData(initialRequest: true) // initiate data downloading
         
         setDownsampleSize() // Prepare ImageProcess's operation parameter
+        
+        // Set and add gradient color layer to background
+        backgroundLayer.frame = view.bounds
+        setBackgroundColor()
+        view.layer.insertSublayer(backgroundLayer, at: 0)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refreshButtonState()
-        hideUIHairlines()
+        setBarStyle()
         
         // Load ad if status of loadBannerAd in user's device is true and no ad was received yet
         if defaults.bool(forKey: K.UserDefaultsKeys.loadBannerAd) && !adReceived {
@@ -154,12 +157,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         imageViewAnchor = (imageViewAnchor == CGPoint(x: 0.0, y: 0.0)) ? firstCard.imageView.center : imageViewAnchor
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        navBar.setBackgroundImage(nil, for: .default) // Un-hidden nav bar's hairline
-    }
-    
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         
@@ -167,6 +164,27 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         coordinator.animate { _ in
             self.loadBannerAd()
         }
+    }
+    
+    // Remove notif. observer to avoid sending notification to invalid obj.
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
+    }
+    
+    //MARK: - Background Color
+    
+    private func setBackgroundColor() {
+        let interfaceStyle = traitCollection.userInterfaceStyle
+        let lightModeColors = [K.Color.lightModeColor1, K.Color.lightModeColor2]
+        let darkModeColors = [K.Color.darkModeColor1, K.Color.darkModeColor2]
+        
+        backgroundLayer.colors = (interfaceStyle == .light) ? lightModeColors : darkModeColors
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        // Make background color respond to change of interface style
+        setBackgroundColor()
     }
     
     //MARK: - Onboarding Methods
@@ -274,17 +292,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     /// Hide navigation bar and toolbar's border line
-    private func hideUIHairlines() {
-        // Hide navigation bar's border line
-        navBar.isTranslucent = false
-        navBar.barTintColor = K.Color.backgroundColor
+    private func setBarStyle() {
+        // Make background of navBar and toolbar transparent
         navBar.setBackgroundImage(UIImage(), for: .default)
         navBar.shadowImage = UIImage()
-        
-        // Hide toolbar's hairline
-        self.toolbar.clipsToBounds = true
-        self.toolbar.barTintColor = K.Color.backgroundColor
-        self.toolbar.isTranslucent = false
+        toolbar.setBackgroundImage(UIImage(), forToolbarPosition: .any, barMetrics: .default)
+        toolbar.setShadowImage(UIImage(), forToolbarPosition: .bottom)
     }
     
     //MARK: - Toolbar Button Method and State Control
@@ -397,7 +410,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 constant: K.CardView.Constraint.trailing
             ),
             card.topAnchor.constraint(
-                equalTo: self.view.topAnchor,
+                equalTo: self.view.safeAreaLayoutGuide.topAnchor,
                 constant: K.CardView.Constraint.top
             ),
             card.bottomAnchor.constraint(

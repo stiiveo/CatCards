@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="jeA-7F-Qie">
-    <device id="retina5_9" orientation="portrait" appearance="light"/>
+    <device id="retina5_9" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
@@ -13,7 +13,7 @@
         <!--Main View Controller-->
         <scene sceneID="Fey-D6-ugN">
             <objects>
-                <viewController id="jpg-gr-ShF" customClass="MainViewController" customModule="Cat_Card" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="jpg-gr-ShF" customClass="MainViewController" customModule="Cat_Cards" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cSQ-ii-ZYK">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -91,7 +91,7 @@
         <!--CollectionVC-->
         <scene sceneID="GWV-aL-vGk">
             <objects>
-                <collectionViewController id="nfh-xn-jhC" customClass="CollectionVC" customModule="Cat_Card" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController id="nfh-xn-jhC" customClass="CollectionVC" customModule="Cat_Cards" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="s03-pl-d20">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -103,7 +103,7 @@
                             <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                         </collectionViewFlowLayout>
                         <cells>
-                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="Cell" id="6LJ-Hb-XQH" customClass="Cell" customModule="Cat_Card" customModuleProvider="target">
+                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="Cell" id="6LJ-Hb-XQH" customClass="Cell" customModule="Cat_Cards" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="d7M-7o-cuP">
@@ -143,7 +143,7 @@
         <!--Single ImageVC-->
         <scene sceneID="lxw-3u-W9X">
             <objects>
-                <viewController id="qlD-G6-Afc" customClass="SingleImageVC" customModule="Cat_Card" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="qlD-G6-Afc" customClass="SingleImageVC" customModule="Cat_Cards" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="qn6-hw-Gab">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

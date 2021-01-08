@@ -15,6 +15,11 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     @IBOutlet weak var toolbar: UIToolbar!
     
     var selectedCellIndex: Int = 0
+    private let backgroundLayer = CAGradientLayer()
+    private var bufferImageArray = [ImageScrollView()] // ImageViews cache used to populate stackView
+    private let bufferImageNumber: Int = K.Data.maxBufferImageNumber
+    private let defaultCacheImage = K.Image.defaultCacheImage
+    private var previousPage: Int = 0
     private var currentPage: Int = 0 {
         didSet(oldPage) {
             if currentPage > oldPage {
@@ -25,26 +30,28 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
             }
         }
     }
-    private var previousPage: Int = 0
-    private var bufferImageArray = [ImageScrollView()] // ImageViews cache used to populate stackView
-    private let bufferImageNumber: Int = K.Data.maxBufferImageNumber
-    private let defaultCacheImage = K.Image.defaultCacheImage
     
     private enum ScrollDirection {
         case forward, backward
     }
+    
+    //MARK: - View Overriding Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.scrollView.delegate = self
         disableTwoFingerScroll() // Prevent scrollView from responding to two-finger panning events
         removeImageView(atPage: 0) // Remove the template imageView set up in storyboard interface
-        setUpToolbar()
+        setToolbarStyle()
         
-        /// TEST AREA
+        // Add background layer
+        backgroundLayer.frame = view.bounds
+        view.layer.insertSublayer(backgroundLayer, at: 0)
+        setBackgroundColor()
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        setToolbarStyle()
         initiateImageBufferArray() // Create imageView cache
         loadDefaultImageView() // Populate cache array with default imageViews
         
@@ -247,10 +254,26 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     
     //MARK: - Stack View & Toolbar Preparation
     
-    private func setUpToolbar() {
-        toolbar.clipsToBounds = true // Remove hairline on top of the toolbar
-        toolbar.barTintColor = K.Color.backgroundColor // Set background color
-        toolbar.isTranslucent = false // Prevent the translucent effect from making background color not consistent with the view
+    private func setToolbarStyle() {
+        // Make toolbar's background transparent
+        toolbar.setBackgroundImage(UIImage(), forToolbarPosition: .any, barMetrics: .default)
+        toolbar.setShadowImage(UIImage(), forToolbarPosition: .any)
+    }
+    
+    //MARK: - Background Color
+    
+    private func setBackgroundColor() {
+        let interfaceStyle = traitCollection.userInterfaceStyle
+        let lightModeColors = [K.Color.lightModeColor1, K.Color.lightModeColor2]
+        let darkModeColors = [K.Color.darkModeColor1, K.Color.darkModeColor2]
+        
+        backgroundLayer.colors = (interfaceStyle == .light) ? lightModeColors : darkModeColors
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        // Make background color respond to change of interface style
+        setBackgroundColor()
     }
     
 }
