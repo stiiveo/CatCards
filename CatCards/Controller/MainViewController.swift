@@ -461,7 +461,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 secondCard.data = secondData
                 
                 if !onboardCompleted {
-                    let demoData = CatData(id: "demo", image: UIImage(named: "zoom_demo_image")!)
+                    let demoData = CatData(id: "zoomImage", image: K.Onboard.zoomImage)
                     secondCard.data = demoData
                     secondCard.setAsTutorialCard(cardIndex: 1)
                 }
