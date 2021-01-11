@@ -92,7 +92,8 @@ struct K {
     }
     
     struct Onboard {
-        static let contentMargin: CGFloat = 25
+        static let contentMargin: CGFloat = 15
+        static let zoomImage = UIImage(named: "onboard_zoom_image")!
         struct ButtonImage {
             static let share = UIImage(systemName: "square.and.arrow.up")!
             static let undo = UIImage(systemName: "arrow.counterclockwise")!
