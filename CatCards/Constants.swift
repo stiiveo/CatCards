@@ -98,7 +98,7 @@ struct K {
             static let share = UIImage(systemName: "square.and.arrow.up")!
             static let undo = UIImage(systemName: "arrow.counterclockwise")!
             static let save = UIImage(systemName: "heart")!
-            static let showDownloads = UIImage(systemName: "arrow.down.circle.fill")!
+            static let showDownloads = UIImage(systemName: "square.grid.2x2.fill")!
         }
         
         static let data = [
