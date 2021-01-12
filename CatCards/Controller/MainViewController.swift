@@ -28,9 +28,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @IBOutlet weak var saveButton: UIBarButtonItem!
     @IBOutlet weak var shareButton: UIBarButtonItem!
     @IBOutlet weak var undoButton: UIBarButtonItem!
+    @IBOutlet weak var collectionButton: UIBarButtonItem!
     @IBOutlet weak var bannerSpace: UIView!
     @IBOutlet weak var bannerSpaceHeight: NSLayoutConstraint!
-    @IBOutlet weak var goToCollectionViewBtn: UIBarButtonItem!
     
     //MARK: - Global Properties
     
@@ -205,7 +205,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private func hideUIButtons() {
         // Hide navBar button
         navBar.tintColor = .clear
-        goToCollectionViewBtn.isEnabled = false
+        collectionButton.isEnabled = false
         
         // Hide and disable toolbar buttons
         toolbar.alpha = 0
@@ -704,13 +704,20 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     
                 // Increase opacity of the overlay view as the card is enlarged
                 zoomOverlay.alpha = maxOpacity * min((cardWidthDelta / deltaToMaxOpacity), 1.0)
+                
+                // Hide navBar button
+                UIView.animate(withDuration: 0.3) {
+                    self.collectionButton.tintColor = .clear
+                }
             
             case .ended, .cancelled, .failed:
                 // Reset card's size
                 UIView.animate(withDuration: 0.35, animations: {
                     card.transform = .identity
                     self.zoomOverlay.alpha = 0
-                })
+                }) { _ in
+                    self.collectionButton.tintColor = K.Color.tintColor
+                }
             default:
                 debugPrint("Error handling image zooming")
             }
@@ -769,7 +776,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Enable all UI buttons after the last tutorial card is dismissed
         if dataIndex > onboardData.count && !onboardCompleted {
             onboardCompleted = true
-            goToCollectionViewBtn.isEnabled = true
+            collectionButton.isEnabled = true
             
             // Save onboardCompleted status to true in User Defaults
             defaults.setValue(true, forKey: K.UserDefaultsKeys.onboardCompleted)
