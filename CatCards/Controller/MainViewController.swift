@@ -41,7 +41,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private let secondCard = CardView()
     private let undoCard = CardView()
     private let onboardData = K.Onboard.data
-    private let backgroundLayer = CAGradientLayer()
     private var navBar: UINavigationBar!
     private lazy var cardViewAnchor = CGPoint()
     private lazy var imageViewAnchor = CGPoint()
@@ -52,6 +51,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var cardsAreAddedToView = false
     private var onboardCompleted = false
     private var adReceived = false
+    private var backgroundLayer: CAGradientLayer!
     private var zoomOverlay: UIView!
     
     private var currentData: CatData? {
@@ -127,17 +127,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         fetchNewData(initialRequest: true) // initiate data downloading
         
         setDownsampleSize() // Prepare ImageProcess's operation parameter
-        
-        // Set and add gradient color layer to background
-        backgroundLayer.frame = view.bounds
-        setBackgroundColor()
-        view.layer.insertSublayer(backgroundLayer, at: 0)
-        
-        // Add overlay view to be used when card is being zoomed in
-        zoomOverlay = UIView(frame: view.bounds)
-        zoomOverlay.backgroundColor = .black
-        zoomOverlay.alpha = 0
-        view.insertSubview(zoomOverlay, aboveSubview: view)
+        addGradientBackground() // Add gradient color layer to background
+        addShadeOverlay() // Add overlay view to be used when card is being zoomed in
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -178,7 +169,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
     
-    //MARK: - Background Color
+    //MARK: - Background & Shading Control
     
     private func setBackgroundColor() {
         let interfaceStyle = traitCollection.userInterfaceStyle
@@ -192,6 +183,20 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         super.traitCollectionDidChange(previousTraitCollection)
         // Make background color respond to change of interface style
         setBackgroundColor()
+    }
+    
+    private func addGradientBackground() {
+        backgroundLayer = CAGradientLayer()
+        backgroundLayer.frame = view.bounds
+        setBackgroundColor()
+        view.layer.insertSublayer(backgroundLayer, at: 0)
+    }
+    
+    private func addShadeOverlay() {
+        zoomOverlay = UIView(frame: view.bounds)
+        zoomOverlay.backgroundColor = .black
+        zoomOverlay.alpha = 0
+        view.insertSubview(zoomOverlay, aboveSubview: view)
     }
     
     //MARK: - Onboarding Methods
@@ -668,39 +673,42 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     @objc private func zoomHandler(sender: UIPinchGestureRecognizer) {
-        if let view = sender.view {
+        if let card = sender.view {
             switch sender.state {
             case .began, .changed:
                 // Coordinate of the pinch center where the view's center is (0, 0)
                 let pinchCenter = CGPoint(
-                    x: sender.location(in: view).x - view.bounds.midX,
-                    y: sender.location(in: view).y - view.bounds.midY)
-                let transform = view.transform.translatedBy(
+                    x: sender.location(in: card).x - card.bounds.midX,
+                    y: sender.location(in: card).y - card.bounds.midY)
+                
+                // Card transform behavior
+                // Move the card to the opposite point of the pinch center if the scale delta > 1, vice versa
+                let transform = card.transform.translatedBy(
                     x: pinchCenter.x, y: pinchCenter.y)
                     .scaledBy(x: sender.scale, y: sender.scale)
                     .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
                 
-                let originalWidth = view.bounds.width
-                let currentWidth = view.frame.width
+                // Limit the minimum size the card can be scaled
+                let newWidth = sender.scale * card.frame.width
+                let minimumWidth = card.bounds.width
+                if newWidth > minimumWidth {
+                    card.transform = transform
+                }
                 sender.scale = 1
                 
-                let cardWidthRatio = currentWidth / originalWidth
-                let maxOpacity: CGFloat = 0.75 // max opacity of the overlay view
-                let cardWidthRatioToMaxOpacity: CGFloat = 1.1 // the increase ratio of card width to which the opacity will be set to the max
-                
-                if cardWidthRatio >= 1 {
-                    // Enlarge the card view
-                    view.transform = transform
+                let originalWidth = card.bounds.width
+                let currentWidth = card.frame.width
+                let maxOpacity: CGFloat = 0.6 // max opacity of the overlay view
+                let cardWidthDelta = (currentWidth / originalWidth) - 1 // Percentage change of width
+                let deltaToMaxOpacity: CGFloat = 0.1 // number of width delta to get maximum opacity
                     
-                    // Increase opacity of the overlay view as the card is enlarged
-                    zoomOverlay.alpha =
-                        maxOpacity * min((cardWidthRatio - 1) / (cardWidthRatioToMaxOpacity - 1), 1.0)
-                }
+                // Increase opacity of the overlay view as the card is enlarged
+                zoomOverlay.alpha = maxOpacity * min((cardWidthDelta / deltaToMaxOpacity), 1.0)
             
             case .ended, .cancelled, .failed:
                 // Reset card's size
                 UIView.animate(withDuration: 0.35, animations: {
-                    view.transform = .identity
+                    card.transform = .identity
                     self.zoomOverlay.alpha = 0
                 })
             default:
