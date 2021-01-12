@@ -52,6 +52,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var cardsAreAddedToView = false
     private var onboardCompleted = false
     private var adReceived = false
+    private var zoomOverlay: UIView!
     
     private var currentData: CatData? {
         switch currentCard {
@@ -131,6 +132,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         backgroundLayer.frame = view.bounds
         setBackgroundColor()
         view.layer.insertSublayer(backgroundLayer, at: 0)
+        
+        // Add overlay view to be used when card is being zoomed in
+        zoomOverlay = UIView(frame: view.bounds)
+        zoomOverlay.backgroundColor = .black
+        zoomOverlay.alpha = 0
+        view.insertSubview(zoomOverlay, aboveSubview: view)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -192,10 +199,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     /// Disable and hide button items in nav-bar and toolbar
     private func hideUIButtons() {
         // Hide navBar button
-        navBar.tintColor = K.Color.backgroundColor
+        navBar.tintColor = .clear
         goToCollectionViewBtn.isEnabled = false
         
-        // Hide toolbar buttons
+        // Hide and disable toolbar buttons
         toolbar.alpha = 0
         shareButton.isEnabled = false
         undoButton.isEnabled = false
@@ -493,7 +500,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Point of the finger in the view's coordinate system
         let fingerPosition = sender.location(in: sender.view)
         let side: Side = fingerPosition.y < card.frame.midY ? .upper : .lower
-        firstFingerLocation = (firstFingerLocation == nil) ? side : firstFingerLocation // variable can only be set once
+        // Save which side of the card the finger is placed
+        firstFingerLocation = (firstFingerLocation == nil) ? side : firstFingerLocation
         
         let translation = sender.translation(in: view)
         
@@ -650,7 +658,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 
             case .ended, .cancelled, .failed:
                 // Move card back to original position
-                UIView.animate(withDuration: 0.42, animations: {
+                UIView.animate(withDuration: 0.35, animations: {
                     view.center = self.cardViewAnchor
                 })
             default:
@@ -664,19 +672,36 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             switch sender.state {
             case .began, .changed:
                 // Coordinate of the pinch center where the view's center is (0, 0)
-                let pinchCenter = CGPoint(x: sender.location(in: view).x - view.bounds.midX,
-                                          y: sender.location(in: view).y - view.bounds.midY)
-                let transform = view.transform.translatedBy(x: pinchCenter.x, y: pinchCenter.y)
+                let pinchCenter = CGPoint(
+                    x: sender.location(in: view).x - view.bounds.midX,
+                    y: sender.location(in: view).y - view.bounds.midY)
+                let transform = view.transform.translatedBy(
+                    x: pinchCenter.x, y: pinchCenter.y)
                     .scaledBy(x: sender.scale, y: sender.scale)
                     .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
                 
-                // Limit the minimum scale the card can be zoomed out
-                view.transform = (view.frame.width >= view.bounds.width) ? transform : CGAffineTransform.identity
+                let originalWidth = view.bounds.width
+                let currentWidth = view.frame.width
                 sender.scale = 1
+                
+                let cardWidthRatio = currentWidth / originalWidth
+                let maxOpacity: CGFloat = 0.75 // max opacity of the overlay view
+                let cardWidthRatioToMaxOpacity: CGFloat = 1.1 // the increase ratio of card width to which the opacity will be set to the max
+                
+                if cardWidthRatio >= 1 {
+                    // Enlarge the card view
+                    view.transform = transform
+                    
+                    // Increase opacity of the overlay view as the card is enlarged
+                    zoomOverlay.alpha =
+                        maxOpacity * min((cardWidthRatio - 1) / (cardWidthRatioToMaxOpacity - 1), 1.0)
+                }
+            
             case .ended, .cancelled, .failed:
                 // Reset card's size
-                UIView.animate(withDuration: 0.42, animations: {
+                UIView.animate(withDuration: 0.35, animations: {
                     view.transform = .identity
+                    self.zoomOverlay.alpha = 0
                 })
             default:
                 debugPrint("Error handling image zooming")
@@ -754,7 +779,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             // Load banner ad if user has viewed certain number of cat images and the ad has yet to be loaded.
             if viewCount >= K.Banner.adLoadingThreshold && !adReceived {
-                if #available(iOS 14, *), ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
+                if #available(iOS 14, *),
+                   ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
                     // This method is available in iOS 14 and later
                     // User's permission is required to get device's identifier for advertising
                     requestIDFA()
