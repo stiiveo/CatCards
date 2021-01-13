@@ -487,7 +487,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Card Animation Methods
+    //MARK: - Gesture Recognizers
     
     private enum Side {
         case upper, lower
@@ -613,39 +613,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func animateCard(_ card: CardView, to endPoint: CGPoint) {
-        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
-            card.center = endPoint
-            
-        } completion: { _ in
-            // Save spawn position and transform of undo card
-            self.undoCard.data = self.currentData!
-            self.undoCard.center = card.center
-            self.undoCard.transform = card.transform
-            
-            self.removeGestureRecognizers(from: card)
-            card.removeFromSuperview()
-            
-            switch self.currentCard {
-            case .first, .second:
-                self.rotateCard(card)
-            case .undo:
-                // Enable the next card's gesture recognizers and update card status
-                switch self.nextCard {
-                case .firstCard:
-                    self.attachGestureRecognizers(to: self.firstCard)
-                    self.currentCard = .first
-                    self.nextCard = .secondCard
-                case .secondCard:
-                    self.attachGestureRecognizers(to: self.secondCard)
-                    self.currentCard = .second
-                    self.nextCard = .firstCard
-                }
-            }
-            self.refreshButtonState()
-        }
-    }
-    
     @objc private func twoFingerPanHandler(sender: UIPanGestureRecognizer) {
         if let view = sender.view {
             switch sender.state {
@@ -700,7 +667,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 let currentWidth = card.frame.width
                 let maxOpacity: CGFloat = 0.6 // max opacity of the overlay view
                 let cardWidthDelta = (currentWidth / originalWidth) - 1 // Percentage change of width
-                let deltaToMaxOpacity: CGFloat = 0.1 // number of width delta to get maximum opacity
+                let deltaToMaxOpacity: CGFloat = 0.2 // number of width delta to get maximum opacity
                     
                 // Increase opacity of the overlay view as the card is enlarged
                 zoomOverlay.alpha = maxOpacity * min((cardWidthDelta / deltaToMaxOpacity), 1.0)
@@ -724,18 +691,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    /// Reset the next card's transform with animation
-    private func animateNextCardTransform() {
-        UIView.animate(withDuration: 0.1) {
-            switch self.nextCard {
-            case .firstCard:
-                self.firstCard.transform = .identity
-            case .secondCard:
-                self.secondCard.transform = .identity
-            }
-        }
-    }
-    
     private func attachGestureRecognizers(to card: CardView) {
         card.addGestureRecognizer(panGestureRecognizer)
         card.addGestureRecognizer(zoomGestureRecognizer)
@@ -746,6 +701,53 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         card.removeGestureRecognizer(panGestureRecognizer)
         card.removeGestureRecognizer(zoomGestureRecognizer)
         card.removeGestureRecognizer(twoFingerPanGestureRecognizer)
+    }
+    
+    //MARK: - Animation Methods
+    
+    private func animateCard(_ card: CardView, to endPoint: CGPoint) {
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
+            card.center = endPoint
+            
+        } completion: { _ in
+            // Save spawn position and transform of undo card
+            self.undoCard.data = self.currentData!
+            self.undoCard.center = card.center
+            self.undoCard.transform = card.transform
+            
+            self.removeGestureRecognizers(from: card)
+            card.removeFromSuperview()
+            
+            switch self.currentCard {
+            case .first, .second:
+                self.rotateCard(card)
+            case .undo:
+                // Enable the next card's gesture recognizers and update card status
+                switch self.nextCard {
+                case .firstCard:
+                    self.attachGestureRecognizers(to: self.firstCard)
+                    self.currentCard = .first
+                    self.nextCard = .secondCard
+                case .secondCard:
+                    self.attachGestureRecognizers(to: self.secondCard)
+                    self.currentCard = .second
+                    self.nextCard = .firstCard
+                }
+            }
+            self.refreshButtonState()
+        }
+    }
+    
+    /// Reset the next card's transform with animation
+    private func animateNextCardTransform() {
+        UIView.animate(withDuration: 0.1) {
+            switch self.nextCard {
+            case .firstCard:
+                self.firstCard.transform = .identity
+            case .secondCard:
+                self.secondCard.transform = .identity
+            }
+        }
     }
     
     //MARK: - Cards Rotation & Image Updating
