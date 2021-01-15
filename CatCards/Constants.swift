@@ -63,7 +63,8 @@ struct K {
     }
     
     struct Data {
-        static let maxOfCachedData: Int = 20 // Number of initial data request and cached data
+        static let requestNumber: Int = 20
+        static let maxOfCachedData: Int = 30 // Number of initial data request and cached data
         static let maxBufferImageNumber: Int = 4
         static let maxSavedImages: Int = 24
     }
