@@ -334,25 +334,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     // Undo Action
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
         guard undoCard.data != nil else { return }
-        // Update the content mode of the imageView in case the aspect ratio was changed by the addition of ad banner to the main view
-        undoCard.data = undoCard.data
-        self.undoButton.isEnabled = false
         
-        // Remove current card's gesture recognizer and save its reference
-        switch currentCard {
-        case .first:
-            removeGestureRecognizers(from: firstCard)
-            nextCard = .firstCard
-        case .second:
-            removeGestureRecognizers(from: secondCard)
-            nextCard = .secondCard
-        case .undo:
-            debugPrint("Error: Undo button should have not been enabled")
-        }
-        
-        // Place undo card in front of the current card
+        // Add undo card to view
         view.addSubview(undoCard)
         addCardViewConstraint(card: undoCard)
+        // Update the content mode of the imageView in case the aspect ratio was changed by the addition of ad banner to the main view
+        undoCard.data = undoCard.data
+        undoButton.isEnabled = false
         
         UIView.animate(withDuration: 0.5) { // Introduction of undo card
             self.undoCard.center = self.cardViewAnchor
@@ -365,6 +353,18 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 self.currentCard = .undo
                 self.refreshButtonState()
             }
+        }
+        
+        // Remove current card's gesture recognizer and save its reference
+        switch currentCard {
+        case .first:
+            removeGestureRecognizers(from: firstCard)
+            nextCard = .firstCard
+        case .second:
+            removeGestureRecognizers(from: secondCard)
+            nextCard = .secondCard
+        case .undo:
+            debugPrint("Error: Undo button should have not been enabled")
         }
     }
     
@@ -436,7 +436,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private func fetchNewData(initialRequest: Bool) {
         switch initialRequest {
         case true:
-            networkManager.performRequest(numberOfRequests: K.Data.maxOfCachedData)
+            networkManager.performRequest(numberOfRequests: K.Data.requestNumber)
         case false:
             networkManager.performRequest(numberOfRequests: 1)
         }
