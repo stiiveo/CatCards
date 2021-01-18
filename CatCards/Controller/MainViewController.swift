@@ -36,6 +36,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     static let databaseManager = DatabaseManager()
     private let networkManager = NetworkManager()
+    internal var cacheData: [Int: CatData] = [:]
     private let defaults = UserDefaults.standard
     private let firstCard = CardView()
     private let secondCard = CardView()
@@ -339,7 +340,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         view.addSubview(undoCard)
         addCardViewConstraint(card: undoCard)
         // Update the content mode of the imageView in case the aspect ratio was changed by the addition of ad banner to the main view
-        undoCard.data = undoCard.data
+        undoCard.data = cacheData[dataIndex - 3] // Fetch the latest dismissed card's data
         undoButton.isEnabled = false
         
         UIView.animate(withDuration: 0.5) { // Introduction of undo card
@@ -436,20 +437,21 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private func fetchNewData(initialRequest: Bool) {
         switch initialRequest {
         case true:
-            networkManager.performRequest(numberOfRequests: K.Data.requestNumber)
+            networkManager.performRequest(numberOfRequests: K.Data.cacheDataNumber)
         case false:
             networkManager.performRequest(numberOfRequests: 1)
         }
     }
     
     // Update UI when new data is downloaded succesfully
-    func dataDidFetch() {
-        let dataSet = networkManager.serializedData
+    func dataDidFetch(data: CatData, index: Int) {
+        // Store newly fetched data
+        cacheData[index] = data
         
         // Update image, buttons and attach gesture recognizers
         switch dataIndex {
         case 0:
-            if let firstData = dataSet[dataIndex] {
+            if let firstData = cacheData[dataIndex] {
                 firstCard.data = firstData
                 
                 if !onboardCompleted {
@@ -469,7 +471,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 dataIndex += 1
             }
         case 1:
-            if let secondData = dataSet[dataIndex] {
+            if let secondData = cacheData[dataIndex] {
                 secondCard.data = secondData
                 
                 if !onboardCompleted {
@@ -483,6 +485,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // Update either cardView with the fetched data if it's current not available
             if firstCard.data == nil || secondCard.data == nil {
                 updateCardView()
+            }
+        }
+        
+        // Maintain the maximum number of cache data
+        if cacheData.count > K.Data.cacheDataNumber {
+            if let cacheDataFirstKey = cacheData.keys.sorted().first {
+                cacheData[cacheDataFirstKey] = nil
             }
         }
     }
@@ -815,10 +824,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     /// Update card's content if new data is available.
     private func updateCardView() {
-        let dataSet = networkManager.serializedData
-        let dataAllocation: Card = ((self.dataIndex) % 2 == 0) ? .firstCard : .secondCard
+        let dataAllocation: Card = (dataIndex % 2 == 0) ? .firstCard : .secondCard
         
-        if let newData = dataSet[dataIndex] { // Make sure new data is available
+        if let newData = cacheData[dataIndex] { // Make sure new data is available
             switch dataAllocation { // Decide which card the data is to be allocated
             case .firstCard:
                 firstCard.data = newData // Update card's data
@@ -861,7 +869,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             // Retry button which send network request to the network manager
             let retryAction = UIAlertAction(title: Z.AlertMessage.NetworkError.actionTitle, style: .default) { _ in
-                self.networkManager.performRequest(numberOfRequests: K.Data.maxOfCachedData)
+                let requestNumber = K.Data.cacheDataNumber - self.cacheData.count
+                self.networkManager.performRequest(numberOfRequests: requestNumber)
             }
             
             // Add actions to alert controller

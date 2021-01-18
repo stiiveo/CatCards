@@ -9,14 +9,14 @@
 import UIKit
 
 protocol NetworkManagerDelegate {
-    func dataDidFetch()
+    var cacheData: [Int: CatData] { get }
+    func dataDidFetch(data: CatData, index: Int)
     func networkErrorDidOccur()
 }
 
 class NetworkManager {
     
     internal var delegate: NetworkManagerDelegate?
-    internal var serializedData: [Int: CatData] = [:]
     private var dataIndex: Int = 0
     private let imageProcesser = ImageProcess()
     
@@ -77,14 +77,8 @@ class NetworkManager {
             // Construct new CatData object and append to catDataArray
             let newData = CatData(id: newID, image: resizedImage)
             
-            serializedData[dataIndex] = newData // Save newly-initialized data to memory buffer
+            delegate?.dataDidFetch(data: newData, index: dataIndex) // Transfer newly fetched data to the delegate
             dataIndex += 1
-            
-            // Remove the first saved data in the array if numbers of data exceed threshold
-            if serializedData.count > K.Data.maxOfCachedData {
-                serializedData[dataIndex - K.Data.maxOfCachedData] = nil
-            }
-            delegate?.dataDidFetch() // Execute code at MainViewController
         } catch {
             debugPrint(error.localizedDescription)
         }

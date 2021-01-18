@@ -56,7 +56,6 @@ class DatabaseManager {
     internal func saveData(_ data: CatData) {
         guard favoriteArray.count < K.Data.maxSavedImages else {
             delegate?.savedImagesMaxReached() // Notify the error to the delegate.
-            
             return
         }
         
