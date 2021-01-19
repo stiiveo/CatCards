@@ -38,18 +38,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private let networkManager = NetworkManager()
     internal var cacheData: [Int: CatData] = [:]
     private let defaults = UserDefaults.standard
-    private let firstCard = CardView()
-    private let secondCard = CardView()
+    private var cardArray: [CardView] = []
     private let undoCard = CardView()
     private let onboardData = K.Onboard.data
     private var navBar: UINavigationBar!
     private lazy var cardViewAnchor = CGPoint()
     private lazy var imageViewAnchor = CGPoint()
-    private var dataIndex: Int = 0
+    private var cardIndex: Int = 0
     private var viewCount: Int = 0 // Number of cards with cat images the user has seen
     private var currentCard: CurrentView = .first
     private var nextCard: Card = .secondCard
-    private var cardsAreAddedToView = false
     private var onboardCompleted = false
     private var adReceived = false
     private var backgroundLayer: CAGradientLayer!
@@ -58,9 +56,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var currentData: CatData? {
         switch currentCard {
         case .first:
-            return firstCard.data
+            return cardArray.first?.data
         case .second:
-            return secondCard.data
+            if cardArray.count >= 2 {
+                return cardArray[1].data
+            } else {
+                return nil
+            }
         case .undo:
             return undoCard.data
         }
@@ -143,7 +145,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
         
         // * CardView can only be added to the view after the height of the ad banner is known.
-        if !cardsAreAddedToView {
+        if cardArray.count == 0 {
             addCardsToView()
         }
     }
@@ -152,8 +154,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         super.viewDidAppear(animated)
         
         // Get the default position of cardView and cardView's imageView after they're added to the view
-        cardViewAnchor = (cardViewAnchor == CGPoint(x: 0.0, y: 0.0)) ? firstCard.center : cardViewAnchor
-        imageViewAnchor = (imageViewAnchor == CGPoint(x: 0.0, y: 0.0)) ? firstCard.imageView.center : imageViewAnchor
+        guard cardArray.count != 0 else { return }
+        cardViewAnchor = (cardViewAnchor == CGPoint(x: 0.0, y: 0.0)) ? cardArray[0].center : cardViewAnchor
+        imageViewAnchor = (imageViewAnchor == CGPoint(x: 0.0, y: 0.0)) ? cardArray[0].imageView.center : imageViewAnchor
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -265,8 +268,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         UIView.animate(withDuration: 0.5) {
             self.view.layoutIfNeeded() // Animate the update of bannerSpace's height
         } completion: { _ in
-            self.cardViewAnchor = self.firstCard.center // Update the card anchor
-            self.imageViewAnchor = self.firstCard.imageView.center // Update the imageView anchor
+            self.cardViewAnchor = self.cardArray[0].center // Update the card anchor
+            self.imageViewAnchor = self.cardArray[0].imageView.center // Update the imageView anchor
         }
         
     }
@@ -323,14 +326,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         view.addSubview(undoCard)
         addCardViewConstraint(card: undoCard)
         // Update the content mode of the imageView in case the aspect ratio was changed by the addition of ad banner to the main view
-        undoCard.data = cacheData[dataIndex - 3] // Import the last dismissed card's data
+        undoCard.data = cacheData[cardIndex - 3] // Import the last dismissed card's data
         undoButton.isEnabled = false
         
         UIView.animate(withDuration: 0.5) { // Introduction of undo card
             self.undoCard.center = self.cardViewAnchor
             self.undoCard.transform = .identity
-            self.firstCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-            self.secondCard.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            self.cardArray[0].transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            self.cardArray[1].transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         } completion: { (true) in
             if true {
                 self.attachGestureRecognizers(to: self.undoCard)
@@ -342,10 +345,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Remove current card's gesture recognizer and save its reference
         switch currentCard {
         case .first:
-            removeGestureRecognizers(from: firstCard)
+            removeGestureRecognizers(from: cardArray[0])
             nextCard = .firstCard
         case .second:
-            removeGestureRecognizers(from: secondCard)
+            removeGestureRecognizers(from: cardArray[1])
             nextCard = .secondCard
         case .undo:
             debugPrint("Error: Undo button should have not been enabled")
@@ -396,17 +399,31 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     /// Add two cardViews to the view and shrink the second card's size.
     private func addCardsToView() {
-        view.addSubview(firstCard)
-        view.insertSubview(secondCard, belowSubview: firstCard)
+        if cardArray.isEmpty {
+            // Initialize by adding two cards to the view first
+            for index in 0...1 {
+                // Add the first two new cards to view
+                let newCard = CardView()
+                newCard.tag = index
+                cardArray.append(newCard)
+                view.addSubview(newCard)
+                addCardViewConstraint(card: newCard)
+            }
+            if let firstCard = cardArray.first {
+                // Bring the first card above the second card
+                view.bringSubviewToFront(firstCard)
+                attachGestureRecognizers(to: firstCard)
+            }
+            
+        } else {
+            // Card(s) had been added to the view already
+            
+        }
         
-        addCardViewConstraint(card: firstCard)
-        addCardViewConstraint(card: secondCard)
-        secondCard.transform = CGAffineTransform(
+        cardArray[1].transform = CGAffineTransform(
             scaleX: K.CardView.Size.transform,
             y: K.CardView.Size.transform
         )
-        
-        cardsAreAddedToView = true
     }
     
     /// Add constraints to cardView
@@ -449,41 +466,34 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         cacheData[index] = data
         
         // Update image, buttons and attach gesture recognizers
-        switch dataIndex {
-        case 0:
-            if let firstData = cacheData[dataIndex] {
-                firstCard.data = firstData
+        if cardIndex == 0 || cardIndex == 1 {
+            // Set up of first and second card
+            if let newData = cacheData[cardIndex] {
+                cardArray[cardIndex].data = newData // Set card's data
                 
                 if !onboardCompleted {
-                    // Show onboarding tutorials if onboard procedure is not completed yet
-                    firstCard.setAsTutorialCard(cardIndex: 0)
+                    // Show onboarding tutorials if the user is new timer
+                    cardArray[cardIndex].setAsTutorialCard(cardIndex: cardIndex)
+                    
+                    if cardIndex == 1 {
+                        // Replace the image with demo image if the user is new timer
+                        let demoData = CatData(id: "zoomImage", image: K.Onboard.zoomImage)
+                        cardArray[1].data = demoData
+                    }
                 } else {
-                    // User is not a new comer
-                    viewCount += 1 // Increment the number of cat the user has seen
-                    DispatchQueue.main.async {
-                        self.refreshButtonState() // Refresh toolbar buttons' state
+                    if cardIndex == 1 {
+                        viewCount += 1 // Increment the number of cat the user has seen
+                        DispatchQueue.main.async {
+                            self.refreshButtonState() // Refresh toolbar buttons' state
+                        }
                     }
                 }
-                
-                DispatchQueue.main.async {
-                    self.attachGestureRecognizers(to: self.firstCard)
-                }
-                dataIndex += 1
+                cardIndex += 1
             }
-        case 1:
-            if let secondData = cacheData[dataIndex] {
-                secondCard.data = secondData
-                
-                if !onboardCompleted {
-                    let demoData = CatData(id: "zoomImage", image: K.Onboard.zoomImage)
-                    secondCard.data = demoData
-                    secondCard.setAsTutorialCard(cardIndex: 1)
-                }
-                dataIndex += 1
-            }
-        default:
+        } else {
+            // card index > 1
             // Update either cardView with the fetched data if it's current not available
-            if firstCard.data == nil || secondCard.data == nil {
+            if cardArray[0].data == nil || cardArray[1].data == nil {
                 updateCardView()
             }
         }
@@ -552,7 +562,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // Set next card's transform based on current card's travel distance
             let distance = (panDistance <= halfViewWidth) ? (panDistance / halfViewWidth) : 1
             let transform = K.CardView.Size.transform
-            let cardToTransform = (nextCard == .firstCard) ? firstCard : secondCard
+            let cardToTransform = (nextCard == .firstCard) ? cardArray[0] : cardArray[1]
             
             cardToTransform.transform = CGAffineTransform(
                 scaleX: transform + (distance * (1 - transform)),
@@ -610,9 +620,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     let transform = K.CardView.Size.transform
                     switch self.nextCard {
                     case .firstCard:
-                        self.firstCard.transform = CGAffineTransform(scaleX: transform, y: transform)
+                        self.cardArray[0].transform = CGAffineTransform(scaleX: transform, y: transform)
                     case .secondCard:
-                        self.secondCard.transform = CGAffineTransform(scaleX: transform, y: transform)
+                        self.cardArray[1].transform = CGAffineTransform(scaleX: transform, y: transform)
                     }
                 } completion: { (bool) in
                     UIView.animate(withDuration: 0.1, delay: 0, options: .curveEaseIn) {
@@ -703,7 +713,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func attachGestureRecognizers(to card: CardView) {
+    private func attachGestureRecognizers(to card: UIView) {
         card.addGestureRecognizer(panGestureRecognizer)
         card.addGestureRecognizer(zoomGestureRecognizer)
         card.addGestureRecognizer(twoFingerPanGestureRecognizer)
@@ -737,11 +747,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 // Enable the next card's gesture recognizers and update card status
                 switch self.nextCard {
                 case .firstCard:
-                    self.attachGestureRecognizers(to: self.firstCard)
+                    self.attachGestureRecognizers(to: self.cardArray[0])
                     self.currentCard = .first
                     self.nextCard = .secondCard
                 case .secondCard:
-                    self.attachGestureRecognizers(to: self.secondCard)
+                    self.attachGestureRecognizers(to: self.cardArray[1])
                     self.currentCard = .second
                     self.nextCard = .firstCard
                 }
@@ -755,9 +765,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         UIView.animate(withDuration: 0.1) {
             switch self.nextCard {
             case .firstCard:
-                self.firstCard.transform = .identity
+                self.cardArray[0].transform = .identity
             case .secondCard:
-                self.secondCard.transform = .identity
+                self.cardArray[1].transform = .identity
             }
         }
     }
@@ -765,11 +775,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     //MARK: - Cards Rotation & Image Updating
     
     private func rotateCard(_ card: CardView) {
-        nextCard = (card == firstCard) ? .firstCard : .secondCard
+        nextCard = (card == cardArray[0]) ? .firstCard : .secondCard
         currentCard = (nextCard == .firstCard) ? .second : .first
         
         card.data = nil // Trigger method reloadImageData in class CardView
-        let currentCard = (self.currentCard == .first) ? firstCard : secondCard
+        let currentCard = (self.currentCard == .first) ? cardArray[0] : cardArray[1]
         attachGestureRecognizers(to: currentCard)
         
         // Put the dismissed card behind the current card
@@ -781,14 +791,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         
         // Show toolbar buttons after the second tutorial card is dismissed
-        if !onboardCompleted && dataIndex == 3 {
+        if !onboardCompleted && cardIndex == 3 {
             UIView.animate(withDuration: 0.5) {
                 self.showUIButtons()
             }
         }
         
         // Enable all UI buttons after the last tutorial card is dismissed
-        if dataIndex > onboardData.count && !onboardCompleted {
+        if cardIndex > onboardData.count && !onboardCompleted {
             onboardCompleted = true
             collectionButton.isEnabled = true
             
@@ -827,26 +837,26 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     /// Update card's content if new data is available.
     private func updateCardView() {
-        let dataAllocation: Card = (dataIndex % 2 == 0) ? .firstCard : .secondCard
+        let dataAllocation: Card = (cardIndex % 2 == 0) ? .firstCard : .secondCard
         
-        if let newData = cacheData[dataIndex] { // Make sure new data is available
+        if let newData = cacheData[cardIndex] { // Make sure new data is available
             switch dataAllocation { // Decide which card the data is to be allocated
             case .firstCard:
-                firstCard.data = newData // Update card's data
+                cardArray[0].data = newData // Update card's data
                 
                 // Show tutorial text on this card if there's still tutorial to be shown
-                if !onboardCompleted && dataIndex < onboardData.count {
-                    firstCard.setAsTutorialCard(cardIndex: dataIndex)
+                if !onboardCompleted && cardIndex < onboardData.count {
+                    cardArray[0].setAsTutorialCard(cardIndex: cardIndex)
                 }
-                dataIndex += 1
+                cardIndex += 1
             case .secondCard:
-                secondCard.data = newData  // Update card's data
+                cardArray[1].data = newData  // Update card's data
                 
                 // Show tutorial text on this card if there's still tutorial to be shown
-                if !onboardCompleted && dataIndex < onboardData.count {
-                    secondCard.setAsTutorialCard(cardIndex: dataIndex)
+                if !onboardCompleted && cardIndex < onboardData.count {
+                    cardArray[1].setAsTutorialCard(cardIndex: cardIndex)
                 }
-                dataIndex += 1
+                cardIndex += 1
             }
             
             // Increment the view count if card's data was unavailable but now updated
