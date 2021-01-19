@@ -64,6 +64,7 @@ struct K {
     
     struct Data {
         static let cacheDataNumber: Int = 20
+        static let undoCardNumber: Int = 10
         static let maxBufferImageNumber: Int = 4
         static let maxSavedImages: Int = 24
     }

@@ -315,23 +315,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Toolbar Button Method and State Control
     
-    /// Update the toolbar buttons' status
-    private func refreshButtonState() {
-        guard onboardCompleted else { return } // Make sure the onboarding tutorial is completed.
-        
-        // Toggle the availability of toolbar buttons
-        let dataIsLoaded = currentData != nil
-        saveButton.isEnabled = dataIsLoaded ? true : false
-        shareButton.isEnabled = dataIsLoaded ? true : false
-        undoButton.isEnabled = undoCard.data != nil && currentCard != .undo ? true : false
-        
-        // Toggle the status of favorite button
-        if let data = currentData {
-            let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
-            saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
-        }
-    }
-    
     // Undo Action
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
         guard undoCard.data != nil else { return }
@@ -340,7 +323,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         view.addSubview(undoCard)
         addCardViewConstraint(card: undoCard)
         // Update the content mode of the imageView in case the aspect ratio was changed by the addition of ad banner to the main view
-        undoCard.data = cacheData[dataIndex - 3] // Fetch the latest dismissed card's data
+        undoCard.data = cacheData[dataIndex - 3] // Import the last dismissed card's data
         undoButton.isEnabled = false
         
         UIView.animate(withDuration: 0.5) { // Introduction of undo card
@@ -389,6 +372,23 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if let imageToShare = currentData?.image {
             let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
             present(activityController, animated: true)
+        }
+    }
+    
+    /// Update the toolbar buttons' status
+    private func refreshButtonState() {
+        guard onboardCompleted else { return } // Make sure the onboarding tutorial is completed.
+        
+        // Toggle the availability of toolbar buttons
+        let dataIsLoaded = currentData != nil
+        saveButton.isEnabled = dataIsLoaded ? true : false
+        shareButton.isEnabled = dataIsLoaded ? true : false
+        undoButton.isEnabled = undoCard.data != nil && currentCard != .undo ? true : false
+        
+        // Toggle the status of favorite button
+        if let data = currentData {
+            let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
+            saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
         }
     }
     
@@ -489,7 +489,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
         
         // Maintain the maximum number of cache data
-        if cacheData.count > K.Data.cacheDataNumber {
+        let maxCacheNumber = K.Data.cacheDataNumber
+        let maxUndoNumber = K.Data.undoCardNumber
+        
+        if cacheData.count > maxCacheNumber + maxUndoNumber {
             if let cacheDataFirstKey = cacheData.keys.sorted().first {
                 cacheData[cacheDataFirstKey] = nil
             }
@@ -763,7 +766,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     private func rotateCard(_ card: CardView) {
         nextCard = (card == firstCard) ? .firstCard : .secondCard
-        self.currentCard = (nextCard == .firstCard) ? .second : .first
+        currentCard = (nextCard == .firstCard) ? .second : .first
         
         card.data = nil // Trigger method reloadImageData in class CardView
         let currentCard = (self.currentCard == .first) ? firstCard : secondCard
@@ -861,6 +864,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     /// Present error message to the user if any error occurs in the data fetching process
     func networkErrorDidOccur() {
+        // Make sure there's no existing alert controller being presented already.
+        guard self.presentedViewController == nil else { return }
+        
         DispatchQueue.main.async {
             let alert = UIAlertController(
                 title: Z.AlertMessage.NetworkError.alertTitle,
@@ -875,11 +881,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             // Add actions to alert controller
             alert.addAction(retryAction)
-            
-            // Before presenting the alert view controller, ensure there's no existing one being presented already.
-            if self.presentedViewController == nil {
-                self.present(alert, animated: true, completion: nil)
-            }
+            self.present(alert, animated: true, completion: nil)
         }
     }
     
