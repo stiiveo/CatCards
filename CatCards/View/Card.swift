@@ -1,5 +1,5 @@
 //
-//  CardView.swift
+//  Card.swift
 //  CatCards
 //
 //  Created by Jason Ou Yang on 2020/11/2.
@@ -8,12 +8,12 @@
 
 import UIKit
 
-class CardView: UIView {
+class Card: UIView {
 
-    var constraintLeading: NSLayoutConstraint!
-    var constraintTrailing: NSLayoutConstraint!
-    var constraintTop: NSLayoutConstraint!
-    var constraintBottom: NSLayoutConstraint!
+    var centerX: NSLayoutConstraint!
+    var centerY: NSLayoutConstraint!
+    var height: NSLayoutConstraint!
+    var width: NSLayoutConstraint!
     let imageView = UIImageView()
     private let backgroundImageView = UIImageView()
     private let indicator = UIActivityIndicatorView()
@@ -107,10 +107,12 @@ class CardView: UIView {
                 
             }
         }
-        // Data is not valid
+        // Data is NOT valid
         else {
-            // Remove hintView if there's any
-            hintView.removeFromSuperview()
+            hintView.removeFromSuperview() // Remove hintView if there's any
+            imageView.image = nil
+            backgroundImageView.image = nil
+            
             // Animate indicator and hide imageView
             DispatchQueue.main.async {
                 self.indicator.startAnimating()
@@ -145,6 +147,10 @@ class CardView: UIView {
     }
     
     func setAsTutorialCard(cardIndex index: Int) {
+        if index == 1 {
+            data = CatData(id: "zoomImage", image: K.Onboard.zoomImage)
+        }
+        
         DispatchQueue.main.async {
             self.addHintView(toCard: index)
         }

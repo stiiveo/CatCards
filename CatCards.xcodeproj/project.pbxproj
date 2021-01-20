@@ -31,7 +31,7 @@
 		F6CE40AB2593063700B09008 /* OnboardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AA2593063700B09008 /* OnboardData.swift */; };
 		F6CE40AE2593231000B09008 /* HintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AD2593231000B09008 /* HintView.swift */; };
 		F6D09CCC259DD89600EAAE1C /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D09CCB259DD89600EAAE1C /* Secrets.swift */; };
-		F6EDE0AF254F998900513A98 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EDE0AE254F998900513A98 /* CardView.swift */; };
+		F6EDE0AF254F998900513A98 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EDE0AE254F998900513A98 /* Card.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,7 +66,7 @@
 		F6CE40AA2593063700B09008 /* OnboardData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardData.swift; sourceTree = "<group>"; };
 		F6CE40AD2593231000B09008 /* HintView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HintView.swift; sourceTree = "<group>"; };
 		F6D09CCB259DD89600EAAE1C /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
-		F6EDE0AE254F998900513A98 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
+		F6EDE0AE254F998900513A98 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,7 +150,7 @@
 		F674700724C96330006A2905 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				F6EDE0AE254F998900513A98 /* CardView.swift */,
+				F6EDE0AE254F998900513A98 /* Card.swift */,
 				F6CE40AD2593231000B09008 /* HintView.swift */,
 				F6C9281F2540678B00BAB89E /* ImageScrollView.swift */,
 				F6746FEC24C6DCF2006A2905 /* Main.storyboard */,
@@ -299,7 +299,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F6D09CCC259DD89600EAAE1C /* Secrets.swift in Sources */,
-				F6EDE0AF254F998900513A98 /* CardView.swift in Sources */,
+				F6EDE0AF254F998900513A98 /* Card.swift in Sources */,
 				F6CE40AE2593231000B09008 /* HintView.swift in Sources */,
 				F6746FFD24C6E02C006A2905 /* NetworkManager.swift in Sources */,
 				F6240AA4258B2EB800217C2D /* Strings.swift in Sources */,

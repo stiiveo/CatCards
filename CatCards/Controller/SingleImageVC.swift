@@ -40,7 +40,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.scrollView.delegate = self
-        disableTwoFingerScroll() // Prevent scrollView from responding to two-finger panning events
+        attachPanGestureRecognizer() // Prevent scrollView from responding to two-finger panning events
         removeImageView(atPage: 0) // Remove the template imageView set up in storyboard interface
         setToolbarStyle()
         
@@ -94,7 +94,8 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     
     /// Load image from disk and reset buffered image.
     ///
-    /// When user scrolls to next / previous page, the image which index is within the buffer range is loaded from local disk and the one outside the buffer range is reset.
+    /// When user scrolls to next / previous page, the image which index is within the buffer range is loaded from local disk
+    /// while the one outside the buffer range is reset.
     /// - Parameter direction: User's scrolling direction: Either 'forward' or 'backward'
     private func updateImage(at direction: ScrollDirection) {
         let bufferImageEachSide = bufferImageNumber / 2 // Number of arranged subviews loaded with image on each side of current view
@@ -161,7 +162,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    private func disableTwoFingerScroll() {
+    private func attachPanGestureRecognizer() {
         let twoFingerPan = UIPanGestureRecognizer()
         twoFingerPan.minimumNumberOfTouches = 2
         twoFingerPan.maximumNumberOfTouches = 2
