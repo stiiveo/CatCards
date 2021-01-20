@@ -34,10 +34,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Global Properties
     
+    private let defaults = UserDefaults.standard
     static let databaseManager = DatabaseManager()
     private let networkManager = NetworkManager()
     internal var cacheData: [Int: CatData] = [:]
-    private let defaults = UserDefaults.standard
     private var cardArray: [CardView] = []
     private let undoCard = CardView()
     private let onboardData = K.Onboard.data
@@ -146,7 +146,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // * CardView can only be added to the view after the height of the ad banner is known.
         if cardArray.count == 0 {
-            addCardsToView()
+            createTwoCards()
         }
     }
     
@@ -261,7 +261,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // for a future orientation change or different orientation, the function for the
         // relevant orientation should be used.
         bannerView.adSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(viewWidth)
-        
         // Set the height of the reserved ad space the same as the adaptive banner's height
         bannerSpaceHeight.constant = bannerView.frame.height
         
@@ -398,54 +397,65 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     //MARK: - Card Creation and Style
     
     /// Add two cardViews to the view and shrink the second card's size.
-    private func addCardsToView() {
+    private func createTwoCards() {
         if cardArray.isEmpty {
             // Initialize by adding two cards to the view first
-            for index in 0...1 {
-                // Add the first two new cards to view
-                let newCard = CardView()
-                newCard.tag = index
-                cardArray.append(newCard)
-                view.addSubview(newCard)
-                addCardViewConstraint(card: newCard)
+            for _ in 0...1 {
+                createNewCard() // Add two new cards to the view
             }
             if let firstCard = cardArray.first {
                 // Bring the first card above the second card
-                view.bringSubviewToFront(firstCard)
                 attachGestureRecognizers(to: firstCard)
+                firstCard.transform = .identity
             }
-            
-        } else {
-            // Card(s) had been added to the view already
-            
         }
+    }
+    
+    private func createNewCard() {
+        let newCard = CardView()
+        newCard.tag = cardArray.count // Tag of card equals the index number of it in the card array
         
-        cardArray[1].transform = CGAffineTransform(
+        if cardArray.isEmpty {
+            view.addSubview(newCard)
+        } else {
+            view.insertSubview(newCard, belowSubview: cardArray.last!)
+        }
+        addCardViewConstraint(card: newCard)
+        cardArray.append(newCard)
+        
+        // Make the card smaller for it to reset the size when it's about to be shown to the user
+        newCard.transform = CGAffineTransform(
             scaleX: K.CardView.Size.transform,
             y: K.CardView.Size.transform
         )
     }
     
-    /// Add constraints to cardView
     private func addCardViewConstraint(card: CardView) {
-        // Constraint
+        let leading = card.leadingAnchor.constraint(
+            equalTo: view.safeAreaLayoutGuide.leadingAnchor,
+            constant: K.CardView.Constraint.leading)
+        
+        let trailing = card.trailingAnchor.constraint(
+            equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+            constant: -K.CardView.Constraint.trailing)
+        
+        let top = card.topAnchor.constraint(
+            equalTo: view.safeAreaLayoutGuide.topAnchor,
+            constant: K.CardView.Constraint.top)
+        
+        let bottom = card.bottomAnchor.constraint(
+            equalTo: toolbar.topAnchor,
+            constant: -K.CardView.Constraint.bottom)
+        
+        // Save constraints to the card's property for manipulation in the future
+        card.constraintLeading = leading
+        card.constraintTrailing = trailing
+        card.constraintTop = top
+        card.constraintBottom = bottom
+        
         card.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            card.leadingAnchor.constraint(
-                equalTo: self.view.leadingAnchor,
-                constant: K.CardView.Constraint.leading
-            ),
-            card.trailingAnchor.constraint(
-                equalTo: self.view.trailingAnchor,
-                constant: K.CardView.Constraint.trailing
-            ),
-            card.topAnchor.constraint(
-                equalTo: self.view.safeAreaLayoutGuide.topAnchor,
-                constant: K.CardView.Constraint.top
-            ),
-            card.bottomAnchor.constraint(
-                equalTo: self.toolbar.topAnchor,
-                constant: K.CardView.Constraint.bottom)
+            card.constraintLeading, card.constraintTrailing, card.constraintTop, card.constraintBottom
         ])
     }
     
@@ -493,9 +503,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         } else {
             // card index > 1
             // Update either cardView with the fetched data if it's current not available
-            if cardArray[0].data == nil || cardArray[1].data == nil {
-                updateCardView()
-            }
+//            if cardArray[0].data == nil || cardArray[1].data == nil {
+//                updateCardView()
+//            }
         }
         
         // Maintain the maximum number of cache data
@@ -543,7 +553,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let cardRotationRadian = (firstFingerLocation! == .upper) ? rotationDegree : -rotationDegree
         let velocity = sender.velocity(in: self.view) // points per second
         
-        // Point of the card relative to the center point
+        // Point of the card relative to the center of the card
         let releasePoint = CGPoint(x: card.frame.midX - cardViewAnchor.x,
                                    y: card.frame.midY - cardViewAnchor.y)
         // Distance of card's center to its origin point
@@ -575,26 +585,23 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             let minTravelDistance = view.frame.height // minimum travel distance of the card
             let minDragDistance = halfViewWidth // minimum dragging distance of the card
-            let momentum = CGPoint(x: velocity.x / 2, y: velocity.y / 2)
+            let vector = CGPoint(x: velocity.x / 2, y: velocity.y / 2)
             
-            let projectedPoint = CGPoint(x: cardViewAnchor.x + momentum.x,
-                                           y: cardViewAnchor.y + momentum.y)
+            let projectedPoint = CGPoint(x: cardViewAnchor.x + vector.x,
+                                           y: cardViewAnchor.y + vector.y)
             let projectedDistance = hypot(projectedPoint.x - cardViewAnchor.x,
                                            projectedPoint.y - cardViewAnchor.y)
             
             let distanceDelta = minTravelDistance / panDistance
-            let pointDelta = CGPoint(x: releasePoint.x * distanceDelta,
+            let minimumDelta = CGPoint(x: releasePoint.x * distanceDelta,
                                      y: releasePoint.y * distanceDelta)
-            let minimumVelocityEndpoint = CGPoint(
-                x: cardViewAnchor.x + pointDelta.x,
-                y: cardViewAnchor.y + pointDelta.y)
             
             if currentData != nil &&
                 projectedDistance >= minTravelDistance {
                 // Card dismissing threshold A: Data is available and
                 // the projected travel distance is greater than or equals minimum distance
-                animateCard(card, to: projectedPoint)
-                animateNextCardTransform()
+                animateCard(card, xDelta: vector.x, yDelta: vector.y)
+//                resetNextCardTransform()
             }
             else if currentData != nil &&
                         projectedDistance < minTravelDistance &&
@@ -602,8 +609,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 // Card dismissing thrshold B: Data is available and
                 // the projected travel distance is less than the minimum travel distance
                 // but the distance of card being dragged is greater than distance threshold
-                animateCard(card, to: minimumVelocityEndpoint)
-                animateNextCardTransform()
+                animateCard(card, xDelta: minimumDelta.x, yDelta: minimumDelta.y)
+//                resetNextCardTransform()
             }
             
             // Reset card's position and rotation state
@@ -613,7 +620,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     
                     // Bouncing effect
                     let offSet = CGPoint(x: -(releasePoint.x) / 8, y: -(releasePoint.y) / 8)
-                    let bouncePoint = CGPoint(x: self.cardViewAnchor.x + offSet.x, y: self.cardViewAnchor.y + offSet.y)
+                    let bouncePoint = CGPoint(x: self.cardViewAnchor.x + offSet.x,
+                                              y: self.cardViewAnchor.y + offSet.y)
                     card.center = bouncePoint
                     
                     // Reset the next card's transform
@@ -727,41 +735,49 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Animation Methods
     
-    private func animateCard(_ card: CardView, to endPoint: CGPoint) {
+    private func animateCard(_ card: CardView, xDelta: CGFloat, yDelta: CGFloat) {
+        // Update card's constraints
+        card.constraintLeading.constant += xDelta
+        card.constraintTrailing.constant += xDelta
+        card.constraintTop.constant += yDelta
+        card.constraintBottom.constant += yDelta
+        
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
-            card.center = endPoint
-            
+            self.view.layoutIfNeeded()
         } completion: { _ in
+//            card.data = nil
+            
+            self.createNewCard()
+            
             // Save spawn position and transform of undo card
-            self.undoCard.data = self.currentData!
-            self.undoCard.center = card.center
-            self.undoCard.transform = card.transform
+//            self.undoCard.data = self.currentData!
+//            self.undoCard.center = card.center
+//            self.undoCard.transform = card.transform
             
-            self.removeGestureRecognizers(from: card)
-            card.removeFromSuperview()
+//            card.removeFromSuperview()
             
-            switch self.currentCard {
-            case .first, .second:
-                self.rotateCard(card)
-            case .undo:
-                // Enable the next card's gesture recognizers and update card status
-                switch self.nextCard {
-                case .firstCard:
-                    self.attachGestureRecognizers(to: self.cardArray[0])
-                    self.currentCard = .first
-                    self.nextCard = .secondCard
-                case .secondCard:
-                    self.attachGestureRecognizers(to: self.cardArray[1])
-                    self.currentCard = .second
-                    self.nextCard = .firstCard
-                }
-            }
-            self.refreshButtonState()
+//            switch self.currentCard {
+//            case .first, .second:
+//                self.rotateCard(card)
+//            case .undo:
+//                // Attach gesture recognizers to the next card and update card's current position
+//                switch self.nextCard {
+//                case .firstCard:
+//                    self.attachGestureRecognizers(to: self.cardArray[0])
+//                    self.currentCard = .first
+//                    self.nextCard = .secondCard
+//                case .secondCard:
+//                    self.attachGestureRecognizers(to: self.cardArray[1])
+//                    self.currentCard = .second
+//                    self.nextCard = .firstCard
+//                }
+//            }
+//            self.refreshButtonState()
         }
     }
     
     /// Reset the next card's transform with animation
-    private func animateNextCardTransform() {
+    private func resetNextCardTransform() {
         UIView.animate(withDuration: 0.1) {
             switch self.nextCard {
             case .firstCard:

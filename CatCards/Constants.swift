@@ -79,9 +79,9 @@ struct K {
         }
         struct Constraint {
             static let leading: CGFloat = 15.0
-            static let trailing: CGFloat = -15.0
+            static let trailing: CGFloat = 15.0
             static let top: CGFloat = 10
-            static let bottom: CGFloat = -10
+            static let bottom: CGFloat = 10
         }
     }
     

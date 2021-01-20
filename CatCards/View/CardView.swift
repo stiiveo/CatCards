@@ -10,10 +10,14 @@ import UIKit
 
 class CardView: UIView {
 
-    internal let imageView = UIImageView()
+    var constraintLeading: NSLayoutConstraint!
+    var constraintTrailing: NSLayoutConstraint!
+    var constraintTop: NSLayoutConstraint!
+    var constraintBottom: NSLayoutConstraint!
+    let imageView = UIImageView()
     private let backgroundImageView = UIImageView()
     private let indicator = UIActivityIndicatorView()
-    internal var data: CatData? {
+    var data: CatData? {
         didSet {
             reloadImageData()
         }
