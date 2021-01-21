@@ -43,9 +43,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var backgroundLayer: CAGradientLayer!
     private var zoomOverlay: UIView!
     
-    private var currentData: CatData? {
+    private var currentCardData: CatData? {
+        if cacheData.count > cardIndex {
+            return cacheData[cardIndex]
+        } else {
+            return nil
+        }
+    }
+    
+    private var previousCardData: CatData? {
         if cardArray.count > cardIndex {
-            return cardArray[cardIndex].data
+            return cardArray[cardIndex - 1].data
         } else {
             return nil
         }
@@ -300,31 +308,55 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     // Undo Action
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
-        guard undoCard.data != nil else { return }
-        
-        // Add undo card to view
-        view.addSubview(undoCard)
-        addCardViewConstraint(card: undoCard)
-        // Update the content mode of the imageView in case the aspect ratio was changed by the addition of ad banner to the main view
-        undoCard.data = cacheData[cardIndex - 3] // Import the last dismissed card's data
         undoButton.isEnabled = false
-        
-        UIView.animate(withDuration: 0.5) { // Introduction of undo card
-//            self.undoCard.center = self.cardViewAnchor
-            self.undoCard.transform = .identity
-            self.cardArray[0].transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-            self.cardArray[1].transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-        } completion: { (true) in
-            if true {
-                self.attachGestureRecognizers(to: self.undoCard)
-                self.refreshButtonState()
+        let index = cardIndex - 1
+        guard cacheData[index] != nil else { return }
+        if (cardArray.count != 0) && (index >= 0) {
+            let undoCard = cardArray[index]
+            undoCard.data = cacheData[index]
+            undoCard.centerX.constant = 0
+            undoCard.centerY.constant = 0
+            
+            UIView.animate(withDuration: 0.6) {
+                self.cardArray[self.cardIndex].transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
+                self.updateLayout()
+                undoCard.transform = .identity
+            } completion: { _ in
+                // Clear data of the card two cards below
+                self.cardArray[self.cardIndex + 1].data = nil
+                self.attachGestureRecognizers(to: undoCard)
+                self.cardIndex -= 1
+                
+                DispatchQueue.main.async {
+                    self.refreshButtonState()
+                }
             }
+
         }
+        
+//        // Add undo card to view
+//        view.addSubview(undoCard)
+//        addCardViewConstraint(card: undoCard)
+//        // Update the content mode of the imageView in case the aspect ratio was changed by the addition of ad banner to the main view
+//        undoCard.data = cacheData[cardIndex - 3] // Import the last dismissed card's data
+//        undoButton.isEnabled = false
+//
+//        UIView.animate(withDuration: 0.5) { // Introduction of undo card
+////            self.undoCard.center = self.cardViewAnchor
+//            self.undoCard.transform = .identity
+//            self.cardArray[0].transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+//            self.cardArray[1].transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+//        } completion: { (true) in
+//            if true {
+//                self.attachGestureRecognizers(to: self.undoCard)
+//                self.refreshButtonState()
+//            }
+//        }
     }
     
     // Data Saving Method
     @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
-        if let data = currentData {
+        if let data = currentCardData {
             // Save data if it's absent in database, otherwise delete it.
             let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
             switch isDataSaved {
@@ -339,7 +371,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     // Image Sharing Method
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
-        if let imageToShare = currentData?.image {
+        if let imageToShare = currentCardData?.image {
             let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
             present(activityController, animated: true)
         }
@@ -348,15 +380,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     /// Update the toolbar buttons' status
     private func refreshButtonState() {
         guard onboardCompleted else { return } // Make sure the onboarding tutorial is completed.
-        
         // Toggle the availability of toolbar buttons
-        let dataIsLoaded = currentData != nil
-        saveButton.isEnabled = dataIsLoaded ? true : false
-        shareButton.isEnabled = dataIsLoaded ? true : false
-//        undoButton.isEnabled = undoCard.data != nil && currentCard != .undo ? true : false
+        saveButton.isEnabled = (currentCardData != nil) ? true : false
+        shareButton.isEnabled = (currentCardData != nil) ? true : false
+        undoButton.isEnabled = (cacheData[cardIndex - 1] != nil) ? true : false
         
         // Toggle the status of favorite button
-        if let data = currentData {
+        if let data = currentCardData {
             let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
             saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
         }
@@ -443,6 +473,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if index == cardIndex || index == cardIndex + 1 {
             // Update the current and the next card's data
             cardArray[index].data = data
+        }
+        
+        if index == 0 {
+            DispatchQueue.main.async {
+                self.refreshButtonState()
+            }
         }
         
         // Maintain the maximum number of cache data
@@ -537,13 +573,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             let minimumDelta = CGPoint(x: offset.x * distanceDelta,
                                      y: offset.y * distanceDelta)
             
-            if currentData != nil &&
+            if currentCardData != nil &&
                 vectorDistance >= minTravelDistance {
                 // Card dismissing threshold A: Data is available and
                 // the projected travel distance is greater than or equals minimum distance
                 animateCard(card, deltaX: vector.x, deltaY: vector.y)
             }
-            else if currentData != nil &&
+            else if currentCardData != nil &&
                         vectorDistance < minTravelDistance &&
                         panDistance >= minDragDistance {
                 // Card dismissing thrshold B: Data is available and
@@ -700,9 +736,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
 //            card.removeFromSuperview()
             
             card.data = nil // Clear the memory used by the imageViews of the card
+            DispatchQueue.main.async {
+                self.refreshButtonState()
+            }
             
             print("card array counts: \(self.cardArray.count)")
-//            self.refreshButtonState()
         }
     }
     

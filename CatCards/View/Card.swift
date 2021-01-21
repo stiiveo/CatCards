@@ -23,6 +23,7 @@ class Card: UIView {
         }
     }
     var hintView = HintView()
+    var isShown = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
