@@ -35,12 +35,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private let undoCard = Card()
     private let onboardData = K.Onboard.data
     private var navBar: UINavigationBar!
-    private lazy var cardViewAnchor = CGPoint()
-//    private lazy var imageViewAnchor = CGPoint()
+//    private lazy var cardViewAnchor = CGPoint()
     private var cardIndex: Int = 0
     private var viewCount: Int = 0 // Number of cards with cat images the user has seen
-//    private var currentCard: CurrentView = .first
-//    private var nextCard: Card = .secondCard
     private var onboardCompleted = false
     private var adReceived = false
     private var backgroundLayer: CAGradientLayer!
@@ -62,7 +59,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         return pan
     }()
     
-    private lazy var zoomGestureRecognizer: UIPinchGestureRecognizer = {
+    private lazy var pinchGestureRecognizer: UIPinchGestureRecognizer = {
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(zoomHandler))
         pinch.delegate = self
         return pinch
@@ -94,7 +91,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         navBar = self.navigationController?.navigationBar // Save the reference of the built-in navigation bar
         MainViewController.databaseManager.delegate = self
         networkManager.delegate = self
-//        currentCard = .first
         
         // Load viewCount value from UserDefaults if there's any
         let savedViewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
@@ -141,8 +137,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Get the default position of cardView and cardView's imageView after they're added to the view
         guard cardArray.count != 0 else { return }
-        cardViewAnchor = (cardViewAnchor == CGPoint(x: 0.0, y: 0.0)) ? cardArray[0].center : cardViewAnchor
-//        imageViewAnchor = (imageViewAnchor == CGPoint(x: 0.0, y: 0.0)) ? cardArray[0].imageView.center : imageViewAnchor
+//        cardViewAnchor = (cardViewAnchor == CGPoint(x: 0.0, y: 0.0)) ? cardArray[0].center : cardViewAnchor
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -252,10 +247,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         UIView.animate(withDuration: 0.5) {
             self.updateLayout() // Animate the update of bannerSpace's height
-        } completion: { _ in
-//            self.cardViewAnchor = self.cardView.center // Update the card anchor
-//            self.imageViewAnchor = self.cardView.center // Update the imageView anchor
         }
+//        completion: { _ in
+//            self.cardViewAnchor = self.cardView.center // Update the card anchor
+//        }
         
     }
     
@@ -315,29 +310,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         undoButton.isEnabled = false
         
         UIView.animate(withDuration: 0.5) { // Introduction of undo card
-            self.undoCard.center = self.cardViewAnchor
+//            self.undoCard.center = self.cardViewAnchor
             self.undoCard.transform = .identity
             self.cardArray[0].transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
             self.cardArray[1].transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         } completion: { (true) in
             if true {
                 self.attachGestureRecognizers(to: self.undoCard)
-//                self.currentCard = .undo
                 self.refreshButtonState()
             }
         }
-        
-//        // Remove current card's gesture recognizer and save its reference
-//        switch currentCard {
-//        case .first:
-//            removeGestureRecognizers(from: cardArray[0])
-//            nextCard = .firstCard
-//        case .second:
-//            removeGestureRecognizers(from: cardArray[1])
-//            nextCard = .secondCard
-//        case .undo:
-//            debugPrint("Error: Undo button should have not been enabled")
-//        }
     }
     
     // Data Saving Method
@@ -404,7 +386,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             cardView.addSubview(newCard)
         } else {
             // Place new card behind the last card in the array
-//            cardView.insertSubview(newCard, belowSubview: cardArray.last!)
             cardView.addSubview(newCard)
             cardView.sendSubviewToBack(newCard)
         }
@@ -473,7 +454,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 cacheData[cacheDataFirstKey] = nil
             }
         }
-        print("cacheData count: \(cacheData.count)")
     }
     
     //MARK: - Gesture Recognizers
@@ -610,8 +590,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 // Get the touch position
                 let translation = sender.translation(in: card)
                 
-                // Card move to where the user's finger is
-                let zoomRatio = view.frame.width / view.bounds.width
+                // Card move to where the user's finger position is
+                let zoomRatio = card.frame.width / card.bounds.width
                 card.centerX.constant = startingCenterX + translation.x * zoomRatio
                 card.centerY.constant = startingCenterY + translation.y * zoomRatio
                 updateLayout()
@@ -646,6 +626,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     y: sender.location(in: card).y - card.bounds.midY)
                 
                 // Card transform behavior
+                
                 // Move the card to the opposite point of the pinch center if the scale delta > 1, vice versa
                 let transform = card.transform.translatedBy(
                     x: pinchCenter.x, y: pinchCenter.y)
@@ -691,13 +672,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     private func attachGestureRecognizers(to card: UIView) {
         card.addGestureRecognizer(panGestureRecognizer)
-        card.addGestureRecognizer(zoomGestureRecognizer)
+        card.addGestureRecognizer(pinchGestureRecognizer)
         card.addGestureRecognizer(twoFingerPanGestureRecognizer)
     }
     
     private func removeGestureRecognizers(from card: Card) {
         card.removeGestureRecognizer(panGestureRecognizer)
-        card.removeGestureRecognizer(zoomGestureRecognizer)
+        card.removeGestureRecognizer(pinchGestureRecognizer)
         card.removeGestureRecognizer(twoFingerPanGestureRecognizer)
     }
     
@@ -873,6 +854,19 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
 extension MainViewController: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
+    }
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        // Recognizing pinch gesture only after the failure of a pan gesture
+        if gestureRecognizer == pinchGestureRecognizer && otherGestureRecognizer == panGestureRecognizer {
+            return true
+        }
+        
+        // Recognizing two-finger pan gesture only after the failure of single-finger pan gesture
+        if gestureRecognizer == twoFingerPanGestureRecognizer && otherGestureRecognizer == panGestureRecognizer {
+            return true
+        }
+        return false
     }
 }
 
