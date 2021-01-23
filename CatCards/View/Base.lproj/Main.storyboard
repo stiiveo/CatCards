@@ -59,6 +59,15 @@
                             </stackView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bts-7g-pnA" userLabel="CardView">
                                 <rect key="frame" x="0.0" y="44" width="375" height="559"/>
+                                <subviews>
+                                    <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="o9H-d8-u3v">
+                                        <rect key="frame" x="169" y="261" width="37" height="37"/>
+                                    </activityIndicatorView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="o9H-d8-u3v" firstAttribute="centerY" secondItem="Bts-7g-pnA" secondAttribute="centerY" id="G7U-59-yhN"/>
+                                    <constraint firstItem="o9H-d8-u3v" firstAttribute="centerX" secondItem="Bts-7g-pnA" secondAttribute="centerX" id="b2A-ns-s9h"/>
+                                </constraints>
                             </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="E8D-Zx-PRV"/>
@@ -85,6 +94,7 @@
                         <outlet property="bannerSpaceHeight" destination="xKe-58-e39" id="s4l-IN-9xV"/>
                         <outlet property="cardView" destination="Bts-7g-pnA" id="Wk6-gt-kz9"/>
                         <outlet property="collectionButton" destination="sSu-jw-cTH" id="auR-gH-DQd"/>
+                        <outlet property="indicator" destination="o9H-d8-u3v" id="Qpo-fS-xOZ"/>
                         <outlet property="saveButton" destination="eix-IU-TsW" id="kOq-j5-OQe"/>
                         <outlet property="shareButton" destination="qHs-X8-xcv" id="LC9-zj-rUj"/>
                         <outlet property="toolbar" destination="ZI0-C0-QUe" id="1E1-XT-9aH"/>

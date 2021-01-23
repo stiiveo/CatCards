@@ -63,15 +63,16 @@ struct K {
     }
     
     struct Data {
-        static let cacheDataNumber: Int = 10
-        static let undoCardNumber: Int = 9
+        static let cacheDataNumber: Int = 10 // MUST be more than 2
+        static let undoCardNumber: Int = 9 // Number of cards the user can undo
         static let maxBufferImageNumber: Int = 4
         static let maxSavedImages: Int = 24
     }
     
-    struct CardView {
-        struct Size {
-            static let transform: CGFloat = 0.9
+    struct Card {
+        struct Transform {
+            static let scale: CGFloat = 0.9
+            static let defaultSize = CGAffineTransform(scaleX: scale, y: scale)
         }
         struct Style {
             static let cornerRadius: CGFloat = 30

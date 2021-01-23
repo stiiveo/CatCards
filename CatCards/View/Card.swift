@@ -23,7 +23,6 @@ class Card: UIView {
         }
     }
     var hintView = HintView()
-    var isShown = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -40,8 +39,8 @@ class Card: UIView {
     
     private func setCardViewStyle() {
         // Card Style
-        self.backgroundColor = K.CardView.Style.backgroundColor
-        self.layer.cornerRadius = K.CardView.Style.cornerRadius
+        self.backgroundColor = K.Card.Style.backgroundColor
+        self.layer.cornerRadius = K.Card.Style.cornerRadius
         
         // Card Shadow
         self.layer.shadowColor = UIColor.black.cgColor
@@ -59,7 +58,7 @@ class Card: UIView {
         imageView.isUserInteractionEnabled = true
         imageView.alpha = 0 // Default status
         imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = K.CardView.Style.cornerRadius
+        imageView.layer.cornerRadius = K.Card.Style.cornerRadius
     }
     
     /// Add duplicated imageView with blur effect behind the primary one as the background
@@ -69,7 +68,7 @@ class Card: UIView {
         backgroundImageView.frame = imageView.frame
         backgroundImageView.contentMode = .scaleAspectFill
         backgroundImageView.clipsToBounds = true
-        backgroundImageView.layer.cornerRadius = K.CardView.Style.cornerRadius
+        backgroundImageView.layer.cornerRadius = K.Card.Style.cornerRadius
         backgroundImageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
         // Add blur effect onto it
@@ -158,7 +157,7 @@ class Card: UIView {
     }
     
     private func addHintView(toCard index: Int) {
-        // Create an HintView instance and add it to CardView
+        // Create an HintView instance and add it to Card
         hintView = HintView(frame: imageView.bounds)
         imageView.addSubview(hintView)
         hintView.addContentView(toCard: index)

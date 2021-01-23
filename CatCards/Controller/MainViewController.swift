@@ -24,19 +24,18 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @IBOutlet weak var bannerSpace: UIView!
     @IBOutlet weak var bannerSpaceHeight: NSLayoutConstraint!
     @IBOutlet weak var cardView: UIView!
+    @IBOutlet weak var indicator: UIActivityIndicatorView!
     
     //MARK: - Global Properties
     
     private let defaults = UserDefaults.standard
     static let databaseManager = DatabaseManager()
     private let networkManager = NetworkManager()
-    internal var cacheData: [Int: CatData] = [:]
     private var cardArray: [Card] = []
-    private let undoCard = Card()
     private let onboardData = K.Onboard.data
     private var navBar: UINavigationBar!
-//    private lazy var cardViewAnchor = CGPoint()
     private var cardIndex: Int = 0
+    private var maxCardIndex: Int = 0
     private var viewCount: Int = 0 // Number of cards with cat images the user has seen
     private var onboardCompleted = false
     private var adReceived = false
@@ -44,15 +43,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var zoomOverlay: UIView!
     
     private var currentCardData: CatData? {
-        if cacheData.count > cardIndex {
-            return cacheData[cardIndex]
+        if !cardArray.isEmpty && cardIndex < cardArray.count {
+            indicator.stopAnimating()
+            return cardArray[cardIndex].data
         } else {
+            indicator.startAnimating()
             return nil
         }
     }
     
     private var previousCardData: CatData? {
-        if cardArray.count > cardIndex {
+        if cardIndex > 0 && cardArray.count > cardIndex - 1 {
             return cardArray[cardIndex - 1].data
         } else {
             return nil
@@ -121,7 +122,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         setDownsampleSize() // Prepare ImageProcess's operation parameter
         addGradientBackground() // Add gradient color layer to background
-//        addShadeOverlay() // Add overlay view to be used when card is being zoomed in
+        addShadeOverlay() // Add overlay view to be used when card is being zoomed in
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -132,11 +133,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Load ad if status of loadBannerAd in user's device is true and no ad was received yet
         if defaults.bool(forKey: K.UserDefaultsKeys.loadBannerAd) && !adReceived {
             loadBannerAd()
-        }
-        
-        // * CardView can only be added to the view after the height of the ad banner is known.
-        if cardArray.count == 0 {
-            createTwoCards()
         }
     }
     
@@ -185,11 +181,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         view.layer.insertSublayer(backgroundLayer, at: 0)
     }
     
-    private func addShadeOverlay(below card: Card) {
+    private func addShadeOverlay() {
         zoomOverlay = UIView(frame: view.bounds)
         zoomOverlay.backgroundColor = .black
         zoomOverlay.alpha = 0
-        view.insertSubview(zoomOverlay, belowSubview: card)
+        view.insertSubview(zoomOverlay, belowSubview: cardView)
     }
     
     //MARK: - Onboarding Methods
@@ -256,9 +252,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         UIView.animate(withDuration: 0.5) {
             self.updateLayout() // Animate the update of bannerSpace's height
         }
-//        completion: { _ in
-//            self.cardViewAnchor = self.cardView.center // Update the card anchor
-//        }
         
     }
     
@@ -308,50 +301,33 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     // Undo Action
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
-        undoButton.isEnabled = false
-        let index = cardIndex - 1
-        guard cacheData[index] != nil else { return }
-        if (cardArray.count != 0) && (index >= 0) {
-            let undoCard = cardArray[index]
-            undoCard.data = cacheData[index]
-            undoCard.centerX.constant = 0
-            undoCard.centerY.constant = 0
-            
-            UIView.animate(withDuration: 0.6) {
-                self.cardArray[self.cardIndex].transform = CGAffineTransform(scaleX: K.CardView.Size.transform, y: K.CardView.Size.transform)
-                self.updateLayout()
-                undoCard.transform = .identity
-            } completion: { _ in
-                // Clear data of the card two cards below
-                self.cardArray[self.cardIndex + 1].data = nil
-                self.attachGestureRecognizers(to: undoCard)
-                self.cardIndex -= 1
-                
-                DispatchQueue.main.async {
-                    self.refreshButtonState()
-                }
-            }
-
-        }
+        // Make sure data is available for the undo card
+        guard previousCardData != nil else { return }
         
-//        // Add undo card to view
-//        view.addSubview(undoCard)
-//        addCardViewConstraint(card: undoCard)
-//        // Update the content mode of the imageView in case the aspect ratio was changed by the addition of ad banner to the main view
-//        undoCard.data = cacheData[cardIndex - 3] // Import the last dismissed card's data
-//        undoButton.isEnabled = false
-//
-//        UIView.animate(withDuration: 0.5) { // Introduction of undo card
-////            self.undoCard.center = self.cardViewAnchor
-//            self.undoCard.transform = .identity
-//            self.cardArray[0].transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-//            self.cardArray[1].transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-//        } completion: { (true) in
-//            if true {
-//                self.attachGestureRecognizers(to: self.undoCard)
-//                self.refreshButtonState()
-//            }
-//        }
+        maxCardIndex = cardIndex // Save the current index
+        undoButton.isEnabled = false
+        
+        // Remove the next card's data and from the superview
+        let nextCard = cardArray[cardIndex + 1]
+        nextCard.removeFromSuperview()
+        
+        let undoCard = cardArray[cardIndex - 1]
+        addCardToView(card: undoCard, atBottom: false)
+        undoCard.centerX.constant = 0
+        undoCard.centerY.constant = 0
+        
+        UIView.animate(withDuration: 0.6) {
+            self.cardArray[self.cardIndex].transform = K.Card.Transform.defaultSize
+            self.updateLayout()
+            undoCard.transform = .identity
+        } completion: { _ in
+            self.attachGestureRecognizers(to: undoCard)
+            self.cardIndex -= 1
+            
+            DispatchQueue.main.async {
+                self.refreshButtonState()
+            }
+        }
     }
     
     // Data Saving Method
@@ -383,7 +359,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Toggle the availability of toolbar buttons
         saveButton.isEnabled = (currentCardData != nil) ? true : false
         shareButton.isEnabled = (currentCardData != nil) ? true : false
-        undoButton.isEnabled = (cacheData[cardIndex - 1] != nil) ? true : false
+        undoButton.isEnabled = (previousCardData != nil) ? true : false
         
         // Toggle the status of favorite button
         if let data = currentCardData {
@@ -392,55 +368,48 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    //MARK: - Card Creation and Style
+    //MARK: - Card Creation & Constraint Manipulation
     
     /// Add two cardViews to the view and shrink the second card's size.
     private func createTwoCards() {
         if cardArray.isEmpty {
             // Initialize by adding two cards to the view first
             for _ in 0...1 {
-                createNewCard() // Add two new cards to the view
+                createNewCard(withData: nil) // Add two new cards to the view
             }
             if let firstCard = cardArray.first {
-                attachGestureRecognizers(to: firstCard) // Bring the first card above the second card
-                firstCard.transform = .identity // Reset transform
+                attachGestureRecognizers(to: firstCard)
+                firstCard.transform = .identity // Reset the first card's transform
             }
         }
     }
     
-    private func createNewCard() {
+    private func createNewCard(withData data: CatData?) {
+        // Add card to view
         let newCard = Card()
-        newCard.tag = cardArray.count // Tag of card equals the index number of it in the card array
-        
         if cardArray.isEmpty {
             cardView.addSubview(newCard)
         } else {
             // Place new card behind the last card in the array
             cardView.addSubview(newCard)
             cardView.sendSubviewToBack(newCard)
+            newCard.transform = K.Card.Transform.defaultSize
         }
+        
         addCardViewConstraint(card: newCard)
-        
-        if !onboardCompleted {
-            newCard.setAsTutorialCard(cardIndex: newCard.tag)
-        }
-        
-        newCard.data = cacheData[newCard.tag]
+        newCard.data = data
         cardArray.append(newCard)
         
-        
-        // Make the card smaller for it to reset the size when it's about to be shown to the user
-        newCard.transform = CGAffineTransform(
-            scaleX: K.CardView.Size.transform,
-            y: K.CardView.Size.transform
-        )
+        //        if !onboardCompleted {
+        //            newCard.setAsTutorialCard(cardIndex: data)
+        //        }
     }
     
     private func addCardViewConstraint(card: Card) {
         let centerXAnchor = card.centerXAnchor.constraint(equalTo: cardView.centerXAnchor)
         let centerYAnchor = card.centerYAnchor.constraint(equalTo: cardView.centerYAnchor)
-        let heightAnchor = card.heightAnchor.constraint(equalTo: cardView.heightAnchor, multiplier: 0.95)
-        let widthAnchor = card.widthAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: 0.95)
+        let heightAnchor = card.heightAnchor.constraint(equalTo: cardView.heightAnchor, multiplier: 0.90)
+        let widthAnchor = card.widthAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: 0.90)
         
         // Save constraints to the card's property for manipulation in the future
         card.centerX = centerXAnchor
@@ -454,6 +423,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         ])
     }
     
+    private func addCardToView(card: Card, atBottom: Bool) {
+        cardView.addSubview(card)
+        addCardViewConstraint(card: card)
+        
+        if atBottom {
+            cardView.sendSubviewToBack(card)
+            card.transform = K.Card.Transform.defaultSize
+        }
+    }
+    
     //MARK: - Data Fetching & Handling
     
     private func fetchNewData(initialRequest: Bool) {
@@ -465,29 +444,20 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    // Update UI when new data is downloaded succesfully
+    // Create and add a new card to the card array
     func dataDidFetch(data: CatData, index: Int) {
-        // Store newly fetched data
-        cacheData[index] = data
-        
-        if index == cardIndex || index == cardIndex + 1 {
-            // Update the current and the next card's data
-            cardArray[index].data = data
-        }
-        
-        if index == 0 {
-            DispatchQueue.main.async {
+        DispatchQueue.main.async {
+            let newCard = Card()
+            newCard.data = data
+            self.cardArray.append(newCard)
+            
+            if index == 0 {
+                self.addCardToView(card: newCard, atBottom: false)
+                self.attachGestureRecognizers(to: newCard)
                 self.refreshButtonState()
             }
-        }
-        
-        // Maintain the maximum number of cache data
-        let maxCacheNumber = K.Data.cacheDataNumber
-        let maxUndoNumber = K.Data.undoCardNumber
-        
-        if cacheData.count > maxCacheNumber + maxUndoNumber {
-            if let cacheDataFirstKey = cacheData.keys.sorted().first {
-                cacheData[cacheDataFirstKey] = nil
+            if index == 1 {
+                self.addCardToView(card: newCard, atBottom: true)
             }
         }
     }
@@ -508,8 +478,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     /// - Parameter sender: A concrete subclass of UIGestureRecognizer that looks for panning (dragging) gestures.
     @objc private func panHandler(_ sender: UIPanGestureRecognizer) {
         guard let card = sender.view as? Card else { return }
-        let nextCard = cardArray[cardIndex + 1]
         
+        let nextCard = cardArray[cardIndex + 1]
         let halfViewWidth = view.frame.width / 2
         
         // Point of the finger in the view's coordinate system
@@ -553,11 +523,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             // Set next card's transform based on current card's travel distance
             let distance = (panDistance <= halfViewWidth) ? (panDistance / halfViewWidth) : 1
-            let transform = K.CardView.Size.transform
+            let defaultScale = K.Card.Transform.scale
             
             nextCard.transform = CGAffineTransform(
-                scaleX: transform + (distance * (1 - transform)),
-                y: transform + (distance * (1 - transform))
+                scaleX: defaultScale + (distance * (1 - defaultScale)),
+                y: defaultScale + (distance * (1 - defaultScale))
             )
             
         // When user's finger left the screen
@@ -581,7 +551,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             }
             else if currentCardData != nil &&
                         vectorDistance < minTravelDistance &&
-                        panDistance >= minDragDistance {
+                            panDistance >= minDragDistance {
                 // Card dismissing thrshold B: Data is available and
                 // the projected travel distance is less than the minimum travel distance
                 // but the distance of card being dragged is greater than distance threshold
@@ -600,8 +570,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     card.transform = self.startingTransform
                     
                     // Reset the next card's transform
-                    let transformScale = K.CardView.Size.transform
-                    nextCard.transform = CGAffineTransform(scaleX: transformScale, y: transformScale)
+                    nextCard.transform = K.Card.Transform.defaultSize
                 } completion: { (bool) in
                     card.centerX.constant = self.startingCenterX
                     card.centerY.constant = self.startingCenterY
@@ -652,9 +621,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 startingCenterX = card.centerX.constant
                 startingCenterY = card.centerY.constant
                 startingTransform = card.transform
-                
-                // Create and place overlay behind current card
-//                addShadeOverlay(below: card)
             case .changed:
                 // Coordinate of the pinch center where the view's center is (0, 0)
                 let pinchCenter = CGPoint(
@@ -677,28 +643,27 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 }
                 sender.scale = 1
                 
-//                // Increase opacity of the overlay view as the card is enlarged
-//                let originalWidth = card.bounds.width
-//                let currentWidth = card.frame.width
-//                let maxOpacity: CGFloat = 0.6 // max opacity of the overlay view
-//                let cardWidthDelta = (currentWidth / originalWidth) - 1 // Percentage change of width
-//                let deltaToMaxOpacity: CGFloat = 0.2 // number of width delta to get maximum opacity
+                // Increase opacity of the overlay view as the card is enlarged
+                let originalWidth = card.bounds.width
+                let currentWidth = card.frame.width
+                let maxOpacity: CGFloat = 0.6 // max opacity of the overlay view
+                let cardWidthDelta = (currentWidth / originalWidth) - 1 // Percentage change of width
+                let deltaToMaxOpacity: CGFloat = 0.2 // number of width delta to get maximum opacity
                     
-//                zoomOverlay.alpha = maxOpacity * min((cardWidthDelta / deltaToMaxOpacity), 1.0)
+                zoomOverlay.alpha = maxOpacity * min((cardWidthDelta / deltaToMaxOpacity), 1.0)
                 
-//                // Hide navBar button
-//                UIView.animate(withDuration: 0.3) {
-//                    self.collectionButton.tintColor = .clear
-//                }
+                // Hide navBar button
+                UIView.animate(withDuration: 0.3) {
+                    self.collectionButton.tintColor = .clear
+                }
             
             case .ended, .cancelled, .failed:
                 // Reset card's size
                 UIView.animate(withDuration: 0.35, animations: {
                     card.transform = self.startingTransform
-//                    self.zoomOverlay.alpha = 0
+                    self.zoomOverlay.alpha = 0
                 }) { _ in
-//                    self.collectionButton.tintColor = K.Color.tintColor
-//                    self.zoomOverlay.removeFromSuperview()
+                    self.collectionButton.tintColor = K.Color.tintColor
                 }
             default:
                 debugPrint("Error handling image zooming")
@@ -730,23 +695,20 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             self.cardIndex += 1
             self.attachGestureRecognizers(to: self.cardArray[self.cardIndex])
             
-            self.createNewCard()
-            self.fetchNewData(initialRequest: false)
+            if (self.cardIndex + 1) < self.cardArray.count {
+                self.addCardToView(card: self.cardArray[self.cardIndex + 1], atBottom: true)
+            }
             
-//            card.removeFromSuperview()
+            if self.cardIndex > self.maxCardIndex {
+                self.fetchNewData(initialRequest: false)
+            }
             
-            card.data = nil // Clear the memory used by the imageViews of the card
+            card.removeFromSuperview()
             DispatchQueue.main.async {
                 self.refreshButtonState()
             }
             
-            print("card array counts: \(self.cardArray.count)")
-        }
-    }
-    
-    private func removeDismissedCard() {
-        if cardArray.count > 2 + K.Data.undoCardNumber {
-            cardArray.first?.removeFromSuperview()
+            self.removeOldCacheData()
         }
     }
     
@@ -764,103 +726,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         self.view.layoutIfNeeded()
     }
     
-    //MARK: - Cards Rotation & Image Updating
-    
-//    private func rotateCard(_ card: Card) {
-//        nextCard = (card == cardArray[0]) ? .firstCard : .secondCard
-//        currentCard = (nextCard == .firstCard) ? .second : .first
-//
-//        card.data = nil // Trigger method reloadImageData in class CardView
-//        let currentCard = (self.currentCard == .first) ? cardArray[0] : cardArray[1]
-//        attachGestureRecognizers(to: currentCard)
-//
-//        // Put the dismissed card behind the current card
-//        self.view.insertSubview(card, belowSubview: currentCard)
-//        card.center = cardViewAnchor
-//        addCardViewConstraint(card: card)
-//
-//        // Shrink the size of the newly added card view
-//        card.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
-//
-//        // Show toolbar buttons after the second tutorial card is dismissed
-//        if !onboardCompleted && cardIndex == 3 {
-//            UIView.animate(withDuration: 0.5) {
-//                self.showUIButtons()
-//            }
-//        }
-//
-//        // Enable all UI buttons after the last tutorial card is dismissed
-//        if cardIndex > onboardData.count && !onboardCompleted {
-//            onboardCompleted = true
-//            collectionButton.isEnabled = true
-//
-//            // Save onboardCompleted status to true in User Defaults
-//            defaults.setValue(true, forKey: K.UserDefaultsKeys.onboardCompleted)
-//        }
-//
-//        // Update the count of view the user has seen if the current card's data is valid
-//        if currentData != nil && onboardCompleted {
-//            viewCount += 1
-//
-//            // This method is put here to avoid the cardView dismissing issue where
-//            // the card dismissing destination might be disrupted if the constraints on view changed when
-//            // the dismissing animation is still executing at the same time.
-//            // If this issue is solved in the future, consider move this method
-//            // to a place which makes more sense.
-//
-//            // Load banner ad if user has viewed certain number of cat images and the ad has yet to be loaded.
-//            if viewCount >= K.Banner.adLoadingThreshold && !adReceived {
-//                if #available(iOS 14, *),
-//                   ATTrackingManager.trackingAuthorizationStatus == .notDetermined {
-//                    // This method is available in iOS 14 and later
-//                    // User's permission is required to get device's identifier for advertising
-//                    requestIDFA()
-//                } else {
-//                    loadBannerAd()
-//                }
-//                // Load banner ad automatically after the app is lauched next time
-//                defaults.setValue(true, forKey: K.UserDefaultsKeys.loadBannerAd)
-//            }
-//        }
-//
-//        updateCardView()
-//        fetchNewData(initialRequest: false)
-//    }
-    
-    /// Update card's content if new data is available.
-//    private func updateCardView() {
-//        let dataAllocation: Card = (cardIndex % 2 == 0) ? .firstCard : .secondCard
-//
-//        if let newData = cacheData[cardIndex] { // Make sure new data is available
-//            switch dataAllocation { // Decide which card the data is to be allocated
-//            case .firstCard:
-//                cardArray[0].data = newData // Update card's data
-//
-//                // Show tutorial text on this card if there's still tutorial to be shown
-//                if !onboardCompleted && cardIndex < onboardData.count {
-//                    cardArray[0].setAsTutorialCard(cardIndex: cardIndex)
-//                }
-//                cardIndex += 1
-//            case .secondCard:
-//                cardArray[1].data = newData  // Update card's data
-//
-//                // Show tutorial text on this card if there's still tutorial to be shown
-//                if !onboardCompleted && cardIndex < onboardData.count {
-//                    cardArray[1].setAsTutorialCard(cardIndex: cardIndex)
-//                }
-//                cardIndex += 1
-//            }
-//
-//            // Increment the view count if card's data was unavailable but now updated
-//            if currentData == nil {
-//                self.viewCount += 1
-//            }
-//        }
-//
-//        DispatchQueue.main.async {
-//            self.refreshButtonState()
-//        }
-//    }
+    // Maintain the maximum number of cache data
+    private func removeOldCacheData() {
+        let maxUndoNumber = K.Data.undoCardNumber
+        let oldCardIndex = cardIndex - (maxUndoNumber + 1)
+        if oldCardIndex >= 0 && oldCardIndex < cardArray.count {
+            cardArray[oldCardIndex].data = nil
+        }
+    }
     
     //MARK: - Error Handling Section
     
@@ -877,7 +750,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             // Retry button which send network request to the network manager
             let retryAction = UIAlertAction(title: Z.AlertMessage.NetworkError.actionTitle, style: .default) { _ in
-                let requestNumber = K.Data.cacheDataNumber - self.cacheData.count
+                let requestNumber = K.Data.cacheDataNumber - self.cardArray.count
                 self.networkManager.performRequest(numberOfRequests: requestNumber)
             }
             

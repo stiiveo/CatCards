@@ -9,7 +9,6 @@
 import UIKit
 
 protocol NetworkManagerDelegate {
-    var cacheData: [Int: CatData] { get }
     func dataDidFetch(data: CatData, index: Int)
     func networkErrorDidOccur()
 }
