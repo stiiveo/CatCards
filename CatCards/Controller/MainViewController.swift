@@ -487,6 +487,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             startingCenterX = card.centerX.constant
             startingCenterY = card.centerY.constant
             startingTransform = card.transform
+            
+            undoButton.isEnabled = false
         case .changed:
             // Card move to where the user's finger is
             card.centerX.constant = startingCenterX + translation.x
@@ -546,12 +548,16 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     
                     // Reset the next card's transform
                     nextCard.transform = K.Card.Transform.defaultSize
-                } completion: { (bool) in
+                } completion: { _ in
                     card.centerX.constant = self.startingCenterX
                     card.centerY.constant = self.startingCenterY
                     
                     UIView.animate(withDuration: 0.1, delay: 0, options: .curveEaseIn) {
                         self.updateLayout()
+                    } completion: { _ in
+                        if self.cardIndex != 0 && self.onboardCompleted {
+                            self.undoButton.isEnabled = true
+                        }
                     }
                 }
             }
@@ -675,6 +681,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             self.cardIndex += 1
             self.attachGestureRecognizers(to: self.cardArray[self.cardIndex])
+            self.undoButton.isEnabled = self.onboardCompleted ? true : false
             
             let nextIndex = self.cardIndex + 1
             if nextIndex < self.cardArray.count {
