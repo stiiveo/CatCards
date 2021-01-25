@@ -19,7 +19,7 @@ class DatabaseManager {
     private let fileManager = FileManager.default
     private let imageFolderName = K.Image.FolderName.fullImage
     private let thumbFolderName = K.Image.FolderName.thumbnail
-    internal let imageProcess = ImageProcess()
+    internal let imageProcess = ImageProcessor()
     private var favoriteArray: [Favorite]!
     static var imageFileURLs = [FilePath]()
     internal var delegate: DatabaseManagerDelegate?

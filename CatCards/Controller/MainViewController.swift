@@ -37,7 +37,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var cardIndex: Int = 0
     private var maxCardIndex: Int = 0
     private var viewCount: Int = 0 // Number of cards with cat images the user has seen
-    private var onboardCompleted = false
+    private var onboardCompleted = false {
+        didSet {
+            defaults.setValue(onboardCompleted, forKey: K.UserDefaultsKeys.onboardCompleted)
+        }
+    }
     private var adReceived = false
     private var backgroundLayer: CAGradientLayer!
     private var zoomOverlay: UIView!
@@ -158,6 +162,71 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
     
+    //MARK: - Data Fetch & Cache Methods
+    
+    private func fetchNewData(initialRequest: Bool) {
+        switch initialRequest {
+        case true:
+            networkManager.performRequest(numberOfRequests: K.Data.cacheDataNumber)
+        case false:
+            networkManager.performRequest(numberOfRequests: 1)
+        }
+    }
+    
+    // Create and add a new card to the card array
+    func dataDidFetch(data: CatData, dataIndex: Int) {
+        DispatchQueue.main.async {
+            let newCard = Card()
+            newCard.data = data
+            self.cardArray.append(newCard)
+            
+            // Add the first two cards to view
+            if dataIndex == 0 {
+                self.addCardToView(newCard, atBottom: false)
+                self.attachGestureRecognizers(to: newCard)
+                self.refreshButtonState()
+            }
+            if dataIndex == 1 {
+                self.addCardToView(newCard, atBottom: true)
+            }
+            
+            // Place tutorial message onto the card if onboarding process is not completed
+            if !self.onboardCompleted && dataIndex < 2 {
+                newCard.setAsTutorialCard(cardIndex: dataIndex)
+            }
+        }
+    }
+    
+    //MARK: - Card Creation & Constraint Manipulation
+    
+    private func addCardToView(_ card: Card, atBottom: Bool) {
+        cardView.addSubview(card)
+        addCardViewConstraint(card: card)
+        
+        if atBottom {
+            cardView.sendSubviewToBack(card)
+            card.transform = K.Card.Transform.defaultSize
+        }
+    }
+    
+    private func addCardViewConstraint(card: Card) {
+        let centerXAnchor = card.centerXAnchor.constraint(equalTo: cardView.centerXAnchor)
+        let centerYAnchor = card.centerYAnchor.constraint(equalTo: cardView.centerYAnchor)
+        let heightAnchor = card.heightAnchor.constraint(equalTo: cardView.heightAnchor, multiplier: 0.90)
+        let widthAnchor = card.widthAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: 0.90)
+        
+        // Save constraints to the card's property for manipulation in the future
+        card.centerX = centerXAnchor
+        card.centerY = centerYAnchor
+        card.height = heightAnchor
+        card.width = widthAnchor
+        
+        card.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            card.centerX, card.centerY, card.height, card.width
+        ])
+    }
+    
     //MARK: - Background & Shading Control
     
     private func setBackgroundColor() {
@@ -188,7 +257,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         view.insertSubview(zoomOverlay, belowSubview: cardView)
     }
     
-    //MARK: - Onboarding Methods
+    //MARK: - Button Status
     
     /// Disable and hide button items in nav-bar and toolbar
     private func hideUIButtons() {
@@ -312,7 +381,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         nextCard.removeFromSuperview()
         
         let undoCard = cardArray[cardIndex - 1]
-        addCardToView(card: undoCard, atBottom: false)
+        addCardToView(undoCard, atBottom: false)
         undoCard.centerX.constant = 0
         undoCard.centerY.constant = 0
         
@@ -365,100 +434,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if let data = currentCardData {
             let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
             saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
-        }
-    }
-    
-    //MARK: - Card Creation & Constraint Manipulation
-    
-    /// Add two cardViews to the view and shrink the second card's size.
-    private func createTwoCards() {
-        if cardArray.isEmpty {
-            // Initialize by adding two cards to the view first
-            for _ in 0...1 {
-                createNewCard(withData: nil) // Add two new cards to the view
-            }
-            if let firstCard = cardArray.first {
-                attachGestureRecognizers(to: firstCard)
-                firstCard.transform = .identity // Reset the first card's transform
-            }
-        }
-    }
-    
-    private func createNewCard(withData data: CatData?) {
-        // Add card to view
-        let newCard = Card()
-        if cardArray.isEmpty {
-            cardView.addSubview(newCard)
-        } else {
-            // Place new card behind the last card in the array
-            cardView.addSubview(newCard)
-            cardView.sendSubviewToBack(newCard)
-            newCard.transform = K.Card.Transform.defaultSize
-        }
-        
-        addCardViewConstraint(card: newCard)
-        newCard.data = data
-        cardArray.append(newCard)
-        
-        //        if !onboardCompleted {
-        //            newCard.setAsTutorialCard(cardIndex: data)
-        //        }
-    }
-    
-    private func addCardViewConstraint(card: Card) {
-        let centerXAnchor = card.centerXAnchor.constraint(equalTo: cardView.centerXAnchor)
-        let centerYAnchor = card.centerYAnchor.constraint(equalTo: cardView.centerYAnchor)
-        let heightAnchor = card.heightAnchor.constraint(equalTo: cardView.heightAnchor, multiplier: 0.90)
-        let widthAnchor = card.widthAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: 0.90)
-        
-        // Save constraints to the card's property for manipulation in the future
-        card.centerX = centerXAnchor
-        card.centerY = centerYAnchor
-        card.height = heightAnchor
-        card.width = widthAnchor
-        
-        card.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            card.centerX, card.centerY, card.height, card.width
-        ])
-    }
-    
-    private func addCardToView(card: Card, atBottom: Bool) {
-        cardView.addSubview(card)
-        addCardViewConstraint(card: card)
-        
-        if atBottom {
-            cardView.sendSubviewToBack(card)
-            card.transform = K.Card.Transform.defaultSize
-        }
-    }
-    
-    //MARK: - Data Fetching & Handling
-    
-    private func fetchNewData(initialRequest: Bool) {
-        switch initialRequest {
-        case true:
-            networkManager.performRequest(numberOfRequests: K.Data.cacheDataNumber)
-        case false:
-            networkManager.performRequest(numberOfRequests: 1)
-        }
-    }
-    
-    // Create and add a new card to the card array
-    func dataDidFetch(data: CatData, index: Int) {
-        DispatchQueue.main.async {
-            let newCard = Card()
-            newCard.data = data
-            self.cardArray.append(newCard)
-            
-            if index == 0 {
-                self.addCardToView(card: newCard, atBottom: false)
-                self.attachGestureRecognizers(to: newCard)
-                self.refreshButtonState()
-            }
-            if index == 1 {
-                self.addCardToView(card: newCard, atBottom: true)
-            }
         }
     }
     
@@ -654,7 +629,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 
                 // Hide navBar button
                 UIView.animate(withDuration: 0.3) {
-                    self.collectionButton.tintColor = .clear
+                    if self.onboardCompleted {
+                        self.collectionButton.tintColor = .clear
+                    }
                 }
             
             case .ended, .cancelled, .failed:
@@ -663,7 +640,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     card.transform = self.startingTransform
                     self.zoomOverlay.alpha = 0
                 }) { _ in
-                    self.collectionButton.tintColor = K.Color.tintColor
+                    if self.onboardCompleted {
+                        self.collectionButton.tintColor = K.Color.tintColor
+                    }
                 }
             default:
                 debugPrint("Error handling image zooming")
@@ -692,18 +671,38 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             self.updateLayout()
             self.resetNextCardTransform()
         } completion: { _ in
+            card.removeFromSuperview()
+            
             self.cardIndex += 1
             self.attachGestureRecognizers(to: self.cardArray[self.cardIndex])
             
-            if (self.cardIndex + 1) < self.cardArray.count {
-                self.addCardToView(card: self.cardArray[self.cardIndex + 1], atBottom: true)
+            let nextIndex = self.cardIndex + 1
+            if nextIndex < self.cardArray.count {
+                // Place another card below the current one
+                let nextCard = self.cardArray[nextIndex]
+                self.addCardToView(nextCard, atBottom: true)
+                
+                // Place tutorial message onto the card if onboarding process is not completed
+                if !self.onboardCompleted && nextIndex < self.onboardData.count {
+                    nextCard.setAsTutorialCard(cardIndex: nextIndex)
+                }
+                
+                // Show UI buttons when the last onboarding card is showned to user
+                if !self.onboardCompleted && self.cardIndex == self.onboardData.count - 1 {
+                    self.showUIButtons()
+                }
             }
             
             if self.cardIndex > self.maxCardIndex {
                 self.fetchNewData(initialRequest: false)
             }
             
-            card.removeFromSuperview()
+            // Toggle the status of onboard completion
+            if !self.onboardCompleted && self.cardIndex >= self.onboardData.count {
+                self.onboardCompleted = true
+                self.collectionButton.isEnabled = true
+            }
+            
             DispatchQueue.main.async {
                 self.refreshButtonState()
             }

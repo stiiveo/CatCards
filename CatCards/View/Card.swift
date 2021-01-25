@@ -17,12 +17,12 @@ class Card: UIView {
     let imageView = UIImageView()
     private let backgroundImageView = UIImageView()
     private let indicator = UIActivityIndicatorView()
+    var hintView = HintView()
     var data: CatData? {
         didSet {
             reloadImageData()
         }
     }
-    var hintView = HintView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -96,7 +96,7 @@ class Card: UIView {
         // Data is valid
         if data != nil {
             DispatchQueue.main.async {
-                self.set(image: self.data!.image)
+                self.setImage(self.data!.image)
                 
                 UIView.animate(withDuration: 0.2) {
                     self.indicator.alpha = 0
@@ -125,7 +125,7 @@ class Card: UIView {
         
     }
     
-    private func set(image: UIImage) {
+    private func setImage(_ image: UIImage) {
         imageView.image = image
         backgroundImageView.image = self.imageView.image
         setContentMode(image: image)

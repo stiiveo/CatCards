@@ -9,7 +9,7 @@
 import UIKit
 
 protocol NetworkManagerDelegate {
-    func dataDidFetch(data: CatData, index: Int)
+    func dataDidFetch(data: CatData, dataIndex: Int)
     func networkErrorDidOccur()
 }
 
@@ -17,7 +17,7 @@ class NetworkManager {
     
     internal var delegate: NetworkManagerDelegate?
     private var dataIndex: Int = 0
-    private let imageProcesser = ImageProcess()
+    private let imageProcesser = ImageProcessor()
     
     internal func performRequest(numberOfRequests: Int) {
         guard numberOfRequests > 0 else {
@@ -76,7 +76,7 @@ class NetworkManager {
             // Construct new CatData object and append to catDataArray
             let newData = CatData(id: newID, image: resizedImage)
             
-            delegate?.dataDidFetch(data: newData, index: dataIndex) // Transfer newly fetched data to the delegate
+            delegate?.dataDidFetch(data: newData, dataIndex: dataIndex) // Transfer newly fetched data to the delegate
             dataIndex += 1
         } catch {
             debugPrint(error.localizedDescription)

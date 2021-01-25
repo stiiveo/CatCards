@@ -1,5 +1,5 @@
 //
-//  ImageProcess.swift
+//  ImageProcessor.swift
 //  CatCards
 //
 //  Created by Jason Ou Yang on 2020/11/6.
@@ -9,7 +9,7 @@
 import UIKit
 import ImageIO
 
-class ImageProcess {
+class ImageProcessor {
     
     let screenScale = UIScreen.main.scale
     var cellSize = CGSize()
