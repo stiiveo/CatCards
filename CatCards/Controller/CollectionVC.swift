@@ -14,6 +14,7 @@ class CollectionVC: UICollectionViewController {
     private var selectedCellIndex: Int = 0
     private let screenWidth = UIScreen.main.bounds.width
     private let backgroundLayer = CAGradientLayer()
+    private var navBar: UINavigationBar!
     private lazy var noSavedPicturesHint: UILabel = {
         let label = UILabel()
         label.text = Z.BackgroundView.noDataLabel
@@ -39,8 +40,9 @@ class CollectionVC: UICollectionViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        /// Set up cell's size and spacing
+        navBar = self.navigationController?.navigationBar
         
+        /// Set up cell's size and spacing
         let interCellSpacing: CGFloat = 1.5
         let cellWidth = (screenWidth - (interCellSpacing * (cellNumberPerRow - 1))) / cellNumberPerRow
         
@@ -60,11 +62,18 @@ class CollectionVC: UICollectionViewController {
     // Refresh the collection view every time the view is about to be shown to the user
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navBar.setBackgroundImage(nil, for: .default)
+        
         self.collectionView.reloadData()
         
         addBackgroundView()
         setBackgroundColor()
         noSavedPicturesHint.alpha = (DatabaseManager.imageFileURLs.count == 0) ? 1 : 0
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navBar.setBackgroundImage(UIImage(), for: .default)
     }
     
     // Send the selected cell index to the SingleImageVC
