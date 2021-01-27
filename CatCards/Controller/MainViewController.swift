@@ -619,8 +619,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 
                 // Limit the minimum size the card can be scaled
                 let newWidth = sender.scale * card.frame.width
-                let minimumWidth = card.bounds.width
-                if newWidth > minimumWidth {
+                let minWidth = card.bounds.width
+                let maxWidth = minWidth * K.ImageView.maximumScaleFactor
+                if newWidth > minWidth && newWidth < maxWidth {
                     card.transform = startingTransform.concatenating(transform)
                 }
                 sender.scale = 1

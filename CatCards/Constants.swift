@@ -91,6 +91,7 @@ struct K {
         // If the difference is bigger than this value, the imageView's content
         // mode is set to aspect fill scale, otherwise aspect fit scale.
         static let dynamicScaleThreshold: CGFloat = 0.1
+        static let maximumScaleFactor: CGFloat = 3
     }
     
     struct Onboard {
