@@ -10,27 +10,21 @@ import UIKit
 
 class Card: UIView {
 
-    var centerX: NSLayoutConstraint!
-    var centerY: NSLayoutConstraint!
-    var height: NSLayoutConstraint!
-    var width: NSLayoutConstraint!
-    let imageView = UIImageView()
+    var centerXConstraint: NSLayoutConstraint!
+    var centerYConstraint: NSLayoutConstraint!
+    var heightConstraint: NSLayoutConstraint!
+    var widthConstraint: NSLayoutConstraint!
+    var data: CatData?
+    private let imageView = UIImageView()
     private let backgroundImageView = UIImageView()
-    private let indicator = UIActivityIndicatorView()
-    var hintView = HintView()
-    var data: CatData? {
-        didSet {
-            reloadImageData()
-        }
-    }
+    private var hintView = HintView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         setCardViewStyle()
         addImageView()
-        addBackgroundImageView()
-        addIndicator()
+        addBluredImageBackground()
     }
     
     required init?(coder: NSCoder) {
@@ -63,7 +57,7 @@ class Card: UIView {
     
     /// Add duplicated imageView with blur effect behind the primary one as the background
     /// and fill the empty space in the cardView.
-    private func addBackgroundImageView() {
+    private func addBluredImageBackground() {
         self.insertSubview(backgroundImageView, belowSubview: imageView)
         backgroundImageView.frame = imageView.frame
         backgroundImageView.contentMode = .scaleAspectFill
@@ -80,31 +74,16 @@ class Card: UIView {
         backgroundImageView.addSubview(blurEffectView)
     }
     
-    private func addIndicator() {
-        self.addSubview(indicator)
-        // constraint
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        indicator.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        indicator.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        // style
-        indicator.style = .large
-        indicator.hidesWhenStopped = true
-        indicator.startAnimating()
-    }
-    
-    private func reloadImageData() {
+    func updateImage() {
         // Data is valid
         if data != nil {
             DispatchQueue.main.async {
+                // Set imageView's image
                 self.setImage(self.data!.image)
                 
                 UIView.animate(withDuration: 0.2) {
-                    self.indicator.alpha = 0
                     self.imageView.alpha = 1
-                } completion: { _ in
-                    self.indicator.stopAnimating()
                 }
-                
             }
         }
         // Data is NOT valid
@@ -115,10 +94,8 @@ class Card: UIView {
             
             // Animate indicator and hide imageView
             DispatchQueue.main.async {
-                self.indicator.startAnimating()
                 UIView.animate(withDuration: 0.2) {
                     self.imageView.alpha = 0
-                    self.indicator.alpha = 1
                 }
             }
         }
@@ -128,22 +105,23 @@ class Card: UIView {
     private func setImage(_ image: UIImage) {
         imageView.image = image
         backgroundImageView.image = self.imageView.image
-        setContentMode(image: image)
+        optimizeContentMode()
     }
     
-    private func setContentMode(image: UIImage) {
-        let imageAspectRatio = image.size.width / image.size.height
-        var imageViewAspectRatio = imageView.bounds.width / imageView.bounds.height
-        // When the first undo card's image is set, the bounds of the imageView is yet to be defined (width = 0, height = 0),
-        // Which makes the value of 'imageViewAspectRatio' to be 'Not a Number'.
-        // If this happens, forcely set aspect ratio to 1 to prevent unwanted result.
-        if imageViewAspectRatio.isNaN == true {
-            imageViewAspectRatio = 1
-        }
-        // Determine the content mode by comparing the aspect ratio of the image and image view
-        let aspectRatioDiff = abs(imageAspectRatio - imageViewAspectRatio)
+    /// If the aspect ratio of the image and the imageView is close enough,
+    /// set the imageView's content mode to 'scale aspect fill' mode to remove the margins around the image and
+    /// improve the viewing experience
+    func optimizeContentMode() {
+        guard let image = imageView.image else { return }
         
-        imageView.contentMode = (aspectRatioDiff >= K.ImageView.dynamicScaleThreshold) ? .scaleAspectFit : .scaleAspectFill
+        let imageRatio = image.size.width / image.size.height
+        let imageViewRatio = imageView.bounds.width / imageView.bounds.height
+        
+        // Calculate the difference of the aspect ratio between the image and image view
+        let ratioDifference = abs(imageRatio - imageViewRatio)
+        let ratioThreshold = K.ImageView.dynamicScaleThreshold
+        
+        imageView.contentMode = (ratioDifference > ratioThreshold) ? .scaleAspectFit : .scaleAspectFill
     }
     
     func setAsTutorialCard(cardIndex index: Int) {

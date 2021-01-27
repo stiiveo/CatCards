@@ -201,7 +201,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     private func addCardToView(_ card: Card, atBottom: Bool) {
         cardView.addSubview(card)
-        addCardViewConstraint(card: card)
+        addCardConstraint(card)
+        card.updateImage()
         
         if atBottom {
             cardView.sendSubviewToBack(card)
@@ -209,21 +210,21 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func addCardViewConstraint(card: Card) {
+    private func addCardConstraint(_ card: Card) {
         let centerXAnchor = card.centerXAnchor.constraint(equalTo: cardView.centerXAnchor)
         let centerYAnchor = card.centerYAnchor.constraint(equalTo: cardView.centerYAnchor)
         let heightAnchor = card.heightAnchor.constraint(equalTo: cardView.heightAnchor, multiplier: 0.90)
         let widthAnchor = card.widthAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: 0.90)
         
         // Save constraints to the card's property for manipulation in the future
-        card.centerX = centerXAnchor
-        card.centerY = centerYAnchor
-        card.height = heightAnchor
-        card.width = widthAnchor
+        card.centerXConstraint = centerXAnchor
+        card.centerYConstraint = centerYAnchor
+        card.heightConstraint = heightAnchor
+        card.widthConstraint = widthAnchor
         
         card.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            card.centerX, card.centerY, card.height, card.width
+            card.centerXConstraint, card.centerYConstraint, card.heightConstraint, card.widthConstraint
         ])
     }
     
@@ -382,8 +383,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         let undoCard = cardArray[cardIndex - 1]
         addCardToView(undoCard, atBottom: false)
-        undoCard.centerX.constant = 0
-        undoCard.centerY.constant = 0
+        undoCard.centerXConstraint.constant = 0
+        undoCard.centerYConstraint.constant = 0
         
         UIView.animate(withDuration: 0.6) {
             self.cardArray[self.cardIndex].transform = K.Card.Transform.defaultSize
@@ -466,7 +467,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let translation = sender.translation(in: view)
         
         // Amount of x-axis offset the card moved from its original position
-        let xAxisOffset = card.centerX.constant
+        let xAxisOffset = card.centerXConstraint.constant
         
         // 1.0 Radian = 180º
         let rotationAtMax: CGFloat = 1.0
@@ -477,22 +478,22 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let velocity = sender.velocity(in: self.view) // points per second
         
         // Card's offset of x and y position
-        let offset = CGPoint(x: card.centerX.constant, y: card.centerY.constant)
+        let offset = CGPoint(x: card.centerXConstraint.constant, y: card.centerYConstraint.constant)
         
         // Distance of card's center to its origin point
         let panDistance = hypot(offset.x, offset.y)
         
         switch sender.state {
         case .began:
-            startingCenterX = card.centerX.constant
-            startingCenterY = card.centerY.constant
+            startingCenterX = card.centerXConstraint.constant
+            startingCenterY = card.centerYConstraint.constant
             startingTransform = card.transform
             
             undoButton.isEnabled = false
         case .changed:
             // Card move to where the user's finger is
-            card.centerX.constant = startingCenterX + translation.x
-            card.centerY.constant = startingCenterY + translation.y
+            card.centerXConstraint.constant = startingCenterX + translation.x
+            card.centerYConstraint.constant = startingCenterY + translation.y
             updateLayout()
             
             // Card's rotation increase when it approaches the side edge of the screen
@@ -539,8 +540,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             else {
                 // Bouncing effect
                 let bounceVector = CGPoint(x: -(offset.x) / 8, y: -(offset.y) / 8)
-                card.centerX.constant = startingCenterX + bounceVector.x
-                card.centerY.constant = startingCenterY + bounceVector.y
+                card.centerXConstraint.constant = startingCenterX + bounceVector.x
+                card.centerYConstraint.constant = startingCenterY + bounceVector.y
                 
                 UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseOut) {
                     self.updateLayout()
@@ -549,8 +550,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     // Reset the next card's transform
                     nextCard.transform = K.Card.Transform.defaultSize
                 } completion: { _ in
-                    card.centerX.constant = self.startingCenterX
-                    card.centerY.constant = self.startingCenterY
+                    card.centerXConstraint.constant = self.startingCenterX
+                    card.centerYConstraint.constant = self.startingCenterY
                     
                     UIView.animate(withDuration: 0.1, delay: 0, options: .curveEaseIn) {
                         self.updateLayout()
@@ -570,22 +571,22 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if let card = sender.view as? Card {
             switch sender.state {
             case .began:
-                startingCenterX = card.centerX.constant
-                startingCenterY = card.centerY.constant
+                startingCenterX = card.centerXConstraint.constant
+                startingCenterY = card.centerYConstraint.constant
             case .changed:
                 // Get the touch position
                 let translation = sender.translation(in: card)
                 
                 // Card move to where the user's finger position is
                 let zoomRatio = card.frame.width / card.bounds.width
-                card.centerX.constant = startingCenterX + translation.x * zoomRatio
-                card.centerY.constant = startingCenterY + translation.y * zoomRatio
+                card.centerXConstraint.constant = startingCenterX + translation.x * zoomRatio
+                card.centerYConstraint.constant = startingCenterY + translation.y * zoomRatio
                 updateLayout()
                 
             case .ended, .cancelled, .failed:
                 // Move card back to original position
-                card.centerX.constant = startingCenterX
-                card.centerY.constant = startingCenterY
+                card.centerXConstraint.constant = startingCenterX
+                card.centerYConstraint.constant = startingCenterY
                 UIView.animate(withDuration: 0.35, animations: {
                     self.updateLayout()
                 })
@@ -599,8 +600,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if let card = sender.view as? Card {
             switch sender.state {
             case .began:
-                startingCenterX = card.centerX.constant
-                startingCenterY = card.centerY.constant
+                startingCenterX = card.centerXConstraint.constant
+                startingCenterY = card.centerYConstraint.constant
                 startingTransform = card.transform
             case .changed:
                 // Coordinate of the pinch center where the view's center is (0, 0)
@@ -724,8 +725,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     private func updateCardConstraints(card: Card, deltaX: CGFloat, deltaY: CGFloat) {
-        card.centerX.constant += deltaX
-        card.centerY.constant += deltaY
+        card.centerXConstraint.constant += deltaX
+        card.centerYConstraint.constant += deltaY
     }
     
     private func updateLayout() {

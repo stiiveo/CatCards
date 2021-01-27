@@ -90,7 +90,7 @@ struct K {
         // The difference of aspect ratio of downloaded image and the imageView
         // If the difference is bigger than this value, the imageView's content
         // mode is set to aspect fill scale, otherwise aspect fit scale.
-        static let dynamicScaleThreshold: CGFloat = 0.15
+        static let dynamicScaleThreshold: CGFloat = 0.1
     }
     
     struct Onboard {
