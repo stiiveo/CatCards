@@ -17,7 +17,7 @@ class Card: UIView {
     var data: CatData?
     private let imageView = UIImageView()
     private let backgroundImageView = UIImageView()
-    private var hintView = HintView()
+    var hintView: HintView?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -75,7 +75,7 @@ class Card: UIView {
         }
         // Data is NOT valid
         else {
-            hintView.removeFromSuperview() // Remove hintView if there's any
+            hintView?.removeFromSuperview() // Remove hintView if there's any
             imageView.image = nil
             backgroundImageView.image = nil
             
@@ -124,8 +124,8 @@ class Card: UIView {
     private func addHintView(toCard index: Int) {
         // Create an HintView instance and add it to Card
         hintView = HintView(frame: imageView.bounds)
-        imageView.addSubview(hintView)
-        hintView.addContentView(toCard: index)
+        imageView.addSubview(hintView!)
+        hintView!.addContentView(toCard: index)
     }
     
     func clearCache() {

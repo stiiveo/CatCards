@@ -39,6 +39,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var adReceived = false
     private var backgroundLayer: CAGradientLayer!
     private var zoomOverlay: UIView!
+    private var cardIsBeingPanned = false
     
     // Number of cards with cat images the user has seen
     private var viewCount: Int = 0 {
@@ -145,14 +146,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if defaults.bool(forKey: K.UserDefaultsKeys.loadBannerAd) && !adReceived {
             loadBannerAd()
         }
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        // Get the default position of cardView and cardView's imageView after they're added to the view
-        guard cardArray.count != 0 else { return }
-//        cardViewAnchor = (cardViewAnchor == CGPoint(x: 0.0, y: 0.0)) ? cardArray[0].center : cardViewAnchor
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -393,6 +386,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     // Undo Action
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
+        guard !cardIsBeingPanned else { return }
+        
         // Make sure data is available for the undo card
         guard previousCardData != nil else { return }
         
@@ -424,6 +419,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     // Data Saving Method
     @IBAction func saveButtonPressed(_ sender: UIBarButtonItem) {
+        guard !cardIsBeingPanned else { return }
+        
         if let data = currentCardData {
             // Save data if it's absent in database, otherwise delete it.
             let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
@@ -439,21 +436,29 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     // Image Sharing Method
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
+        guard !cardIsBeingPanned else { return }
+        
         if let imageToShare = currentCardData?.image {
             let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
             present(activityController, animated: true)
         }
     }
     
-    /// Update the toolbar buttons' status
+    /// Update the toolbar buttons' state
     private func refreshButtonState() {
-        guard onboardCompleted else { return } // Make sure the onboarding tutorial is completed.
-        // Toggle the availability of toolbar buttons
-        saveButton.isEnabled = (currentCardData != nil) ? true : false
-        shareButton.isEnabled = (currentCardData != nil) ? true : false
-        undoButton.isEnabled = (previousCardData != nil) ? true : false
+        guard onboardCompleted && !cardArray.isEmpty else { return }
         
-        // Toggle the status of favorite button
+        if currentCardData != nil && cardArray[cardIndex].hintView == nil {
+            saveButton.isEnabled = true
+            shareButton.isEnabled = true
+        } else {
+            saveButton.isEnabled = false
+            shareButton.isEnabled = false
+        }
+        
+        undoButton.isEnabled = (cardIndex > 0 && previousCardData != nil) ? true : false
+        
+        // Toggle the status of save button
         if let data = currentCardData {
             let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
             saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
@@ -511,7 +516,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             startingCenterY = card.centerYConstraint.constant
             startingTransform = card.transform
             
-            undoButton.isEnabled = false
+            cardIsBeingPanned = true
         case .changed:
             // Card move to where the user's finger is
             card.centerXConstraint.constant = startingCenterX + translation.x
@@ -578,9 +583,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     UIView.animate(withDuration: 0.1, delay: 0, options: .curveEaseIn) {
                         self.updateLayout()
                     } completion: { _ in
-                        if self.cardIndex != 0 && self.onboardCompleted {
-                            self.undoButton.isEnabled = true
-                        }
+                        self.cardIsBeingPanned = false
                     }
                 }
             }
@@ -701,11 +704,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             self.updateLayout()
             self.resetNextCardTransform()
         } completion: { _ in
-            card.removeFromSuperview()
-            
+            self.cardIsBeingPanned = false
             self.cardIndex += 1
             self.attachGestureRecognizers(to: self.cardArray[self.cardIndex])
-            self.undoButton.isEnabled = self.onboardCompleted ? true : false
+            card.removeFromSuperview()
             
             let nextIndex = self.cardIndex + 1
             if nextIndex < self.cardArray.count {
