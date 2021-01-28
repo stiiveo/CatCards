@@ -22,25 +22,12 @@ class Card: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        setCardViewStyle()
         addImageView()
         addBluredImageBackground()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    private func setCardViewStyle() {
-        // Card Style
-        self.backgroundColor = K.Card.Style.backgroundColor
-        self.layer.cornerRadius = K.Card.Style.cornerRadius
-        
-        // Card Shadow
-        self.layer.shadowColor = UIColor.black.cgColor
-        self.layer.shadowOpacity = 0.5
-        self.layer.shadowOffset = CGSize(width: 0.0, height: 0.5)
-        self.layer.shadowRadius = 5
     }
     
     private func addImageView() {
@@ -145,6 +132,22 @@ class Card: UIView {
         data = nil
         imageView.image = nil
         backgroundImageView.image = nil
+    }
+    
+    // Customize the card's style
+    override func layoutSubviews() {
+        self.layer.cornerRadius = K.Card.Style.cornerRadius
+        
+        // Shadow
+        self.layer.shadowColor = UIColor.black.cgColor
+        self.layer.shadowOpacity = 0.5
+        self.layer.shadowOffset = .zero
+        self.layer.shadowRadius = 5
+        
+        /// Decrease the performance impact of drawing the shadow by specifying the shape and render it as a bitmap before compositing.
+        self.layer.shadowPath = UIBezierPath(roundedRect: self.bounds, cornerRadius: K.Card.Style.cornerRadius).cgPath
+        self.layer.shouldRasterize = true
+        self.layer.rasterizationScale = UIScreen.main.scale
     }
     
 }
