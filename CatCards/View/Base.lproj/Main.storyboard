@@ -42,7 +42,7 @@
                                             <barButtonItem style="plain" systemItem="flexibleSpace" id="L2G-v4-WQZ"/>
                                             <barButtonItem title="Save" image="heart" catalog="system" id="eix-IU-TsW">
                                                 <connections>
-                                                    <action selector="favoriteButtonPressed:" destination="jpg-gr-ShF" id="BKN-yk-8P5"/>
+                                                    <action selector="saveButtonPressed:" destination="jpg-gr-ShF" id="BKN-yk-8P5"/>
                                                 </connections>
                                             </barButtonItem>
                                             <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="lks-lI-KVw"/>

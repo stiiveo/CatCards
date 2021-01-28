@@ -15,9 +15,14 @@ class ImageProcessor {
     var cellSize = CGSize()
     let screenSize = UIScreen.main.bounds.size
     
-    internal func resizeImage(_ image: UIImage) -> UIImage {
+    internal func processImage(_ image: UIImage) -> UIImage? {
         let imageSize = image.size
         let maxSize = K.Image.maxImageSize
+        
+        // Filter any image matching the grumpy cat image's size
+        if imageSize == K.Image.grumpyCatImageSize {
+            return nil
+        }
         
         // Return original image if its height or width is smaller than threshold
         guard imageSize.height > maxSize.height && imageSize.width > maxSize.width else { return image }

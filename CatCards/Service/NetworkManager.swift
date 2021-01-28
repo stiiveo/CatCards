@@ -69,14 +69,18 @@ class NetworkManager {
                 debugPrint("Error creating image URL object from decoded json data.")
                 return
             }
-            let newImage = imageFromURL(url: imageURL)
-            let resizedImage = imageProcesser.resizeImage(newImage) // Resize image if its size is bigger than set threshold
-            let newID = jsonData.id
+            let id = jsonData.id
+            let image = imageFromURL(url: imageURL)
+            guard let processedImage = imageProcesser.processImage(image) else {
+                // Call another fetch request if the processed image is not valid
+                performRequest(numberOfRequests: 1)
+                return
+            }
             
-            // Construct new CatData object and append to catDataArray
-            let newData = CatData(id: newID, image: resizedImage)
+            let newData = CatData(id: id, image: processedImage)
+            // Transfer newly fetched data to the delegate
+            delegate?.dataDidFetch(data: newData, dataIndex: dataIndex)
             
-            delegate?.dataDidFetch(data: newData, dataIndex: dataIndex) // Transfer newly fetched data to the delegate
             dataIndex += 1
         } catch {
             debugPrint(error.localizedDescription)

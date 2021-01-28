@@ -401,7 +401,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     // Data Saving Method
-    @IBAction func favoriteButtonPressed(_ sender: UIBarButtonItem) {
+    @IBAction func saveButtonPressed(_ sender: UIBarButtonItem) {
         if let data = currentCardData {
             // Save data if it's absent in database, otherwise delete it.
             let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
@@ -617,7 +617,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     .scaledBy(x: sender.scale, y: sender.scale)
                     .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
                 
-                // Limit the minimum size the card can be scaled
+                // Limit the scale at which a card can be zoom in/out
                 let newWidth = sender.scale * card.frame.width
                 let minWidth = card.bounds.width
                 let maxWidth = minWidth * K.ImageView.maximumScaleFactor
