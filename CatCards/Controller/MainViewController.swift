@@ -36,15 +36,22 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var navBar: UINavigationBar!
     private var cardIndex: Int = 0
     private var maxCardIndex: Int = 0
-    private var viewCount: Int = 0 // Number of cards with cat images the user has seen
+    private var adReceived = false
+    private var backgroundLayer: CAGradientLayer!
+    private var zoomOverlay: UIView!
+    
+    // Number of cards with cat images the user has seen
+    private var viewCount: Int = 0 {
+        didSet {
+            saveViewCount()
+        }
+    }
+    
     private var onboardCompleted = false {
         didSet {
             defaults.setValue(onboardCompleted, forKey: K.UserDefaultsKeys.onboardCompleted)
         }
     }
-    private var adReceived = false
-    private var backgroundLayer: CAGradientLayer!
-    private var zoomOverlay: UIView!
     
     private var currentCardData: CatData? {
         if !cardArray.isEmpty && cardIndex < cardArray.count {
@@ -185,6 +192,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 self.addCardToView(newCard, atBottom: false)
                 self.attachGestureRecognizers(to: newCard)
                 self.refreshButtonState()
+                
+                // Update the number of cards viewed by the user
+                if self.onboardCompleted {
+                    self.viewCount += 1
+                    self.requestBannerAd()
+                }
             }
             if dataIndex == 1 {
                 self.addCardToView(newCard, atBottom: true)
@@ -287,6 +300,26 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
+    /// Google recommend waiting for the completion callback prior to loading ads,
+    /// so that if the user grants the App Tracking Transparency permission,
+    /// the Google Mobile Ads SDK can use the IDFA in ad requests.
+    @available(iOS 14, *)
+    private func requestIDFA() {
+        ATTrackingManager.requestTrackingAuthorization { (status) in
+            // Tracking authorization completed. Start loading ads here.
+            self.loadBannerAd()
+        }
+    }
+    
+    private func requestBannerAd() {
+        guard onboardCompleted && viewCount > 9 && !adReceived else { return }
+        if #available(iOS 14, *) {
+            requestIDFA()
+        } else {
+            loadBannerAd()
+        }
+    }
+    
     /// Place the banner at the center of the reserved ad space
     private func addBannerToBannerSpace(_ bannerView: GADBannerView) {
         bannerView.translatesAutoresizingMaskIntoConstraints = false
@@ -323,17 +356,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             self.updateLayout() // Animate the update of bannerSpace's height
         }
         
-    }
-    
-    /// Google recommend waiting for the completion callback prior to loading ads,
-    /// so that if the user grants the App Tracking Transparency permission,
-    /// the Google Mobile Ads SDK can use the IDFA in ad requests.
-    @available(iOS 14, *)
-    private func requestIDFA() {
-        ATTrackingManager.requestTrackingAuthorization { (status) in
-            // Tracking authorization completed. Start loading ads here.
-            self.loadBannerAd()
-        }
     }
     
     //MARK: - Support Methods
@@ -710,6 +732,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             if !self.onboardCompleted && self.cardIndex >= self.onboardData.count {
                 self.onboardCompleted = true
                 self.collectionButton.isEnabled = true
+            }
+            
+            // Update the number of cards viewed by the user
+            if self.onboardCompleted && self.cardIndex > self.maxCardIndex {
+                self.viewCount += 1
+                self.requestBannerAd()
             }
             
             DispatchQueue.main.async {
