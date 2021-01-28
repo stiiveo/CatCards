@@ -739,7 +739,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let maxUndoNumber = K.Data.undoCardNumber
         let oldCardIndex = cardIndex - (maxUndoNumber + 1)
         if oldCardIndex >= 0 && oldCardIndex < cardArray.count {
-            cardArray[oldCardIndex].data = nil
+            let oldCard = cardArray[oldCardIndex]
+            oldCard.clearCache()
         }
     }
     

@@ -141,5 +141,11 @@ class Card: UIView {
         hintView.addContentView(toCard: index)
     }
     
+    func clearCache() {
+        data = nil
+        imageView.image = nil
+        backgroundImageView.image = nil
+    }
+    
 }
 
