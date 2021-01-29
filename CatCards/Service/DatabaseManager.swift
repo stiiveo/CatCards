@@ -19,10 +19,13 @@ class DatabaseManager {
     private let fileManager = FileManager.default
     private let imageFolderName = K.Image.FolderName.fullImage
     private let thumbFolderName = K.Image.FolderName.thumbnail
+    private let cacheFolderName = K.Image.FolderName.cacheImage
     internal let imageProcess = ImageProcessor()
     private var favoriteArray: [Favorite]!
     static var imageFileURLs = [FilePath]()
     internal var delegate: DatabaseManagerDelegate?
+    private let jpegCompression = K.Image.jpegCompressionQuality
+    private let fileExtension = "." + K.API.imageType
     
     struct FilePath {
         let image: URL
@@ -42,9 +45,8 @@ class DatabaseManager {
         // Load image file path to cache
         let fileList = listOfSavedFileNames() // Get list of image file IDs from local database
         for fileName in fileList {
-            let fileExtension = K.API.imageType
-            let imageURL = imageFolderURL.appendingPathComponent(fileName + "." + fileExtension)
-            let thumbnailURL = thumbnailFolderURL.appendingPathComponent(fileName + "." + fileExtension)
+            let imageURL = imageFolderURL.appendingPathComponent(fileName + fileExtension)
+            let thumbnailURL = thumbnailFolderURL.appendingPathComponent(fileName + fileExtension)
             let newFilePath = FilePath(image: imageURL, thumbnail: thumbnailURL)
             
             DatabaseManager.imageFileURLs.append(newFilePath)
@@ -81,9 +83,9 @@ class DatabaseManager {
     ///   - fileName: The name used to be saved in local file system, both image and thumbnail image.
     private func saveImageToLocalSystem(image: UIImage, fileName: String) {
         // Compress image to JPG data and save it in local disk
-        guard let compressedJPG = image.jpegData(compressionQuality: K.Image.jpegCompressionQuality) else {
+        guard let compressedJPG = image.jpegData(compressionQuality: jpegCompression) else {
             debugPrint("Unable to convert UIImage to JPG data."); return }
-        writeFileTo(folder: imageFolderName, withData: compressedJPG, withName: "\(fileName).jpg")
+        writeFileTo(folder: imageFolderName, withData: compressedJPG, withName: fileName + fileExtension)
         
         // Downsample the downloaded image
         guard let imageData = image.pngData() else {
@@ -91,9 +93,9 @@ class DatabaseManager {
         let downsampledImage = imageProcess.downsample(dataAt: imageData)
         
         // Convert downsampled image to JPG data and save it to local disk
-        guard let JpegData = downsampledImage.jpegData(compressionQuality: K.Image.jpegCompressionQuality) else {
+        guard let jpegData = downsampledImage.jpegData(compressionQuality: jpegCompression) else {
             debugPrint("Error: Unable to convert downsampled image data to JPG data."); return }
-        writeFileTo(folder: thumbFolderName, withData: JpegData, withName: "\(fileName).jpg")
+        writeFileTo(folder: thumbFolderName, withData: jpegData, withName: fileName + fileExtension)
         
         // Refresh image file url cache
         getSavedImageFileURLs()
@@ -135,26 +137,9 @@ class DatabaseManager {
             debugPrint("Error fetching result from container: \(error)")
         }
         
-        // Delete image file in local file system
-        let fileName = "\(id).jpg"
-        let imageURL = folderURL(name: imageFolderName).appendingPathComponent(fileName)
-        if fileManager.fileExists(atPath: imageURL.path) {
-            do {
-                try fileManager.removeItem(at: imageURL)
-            } catch {
-                debugPrint("Error removing image from file system: \(error)")
-            }
-        }
-        
-        // Delete thumbnail file in local file system
-        let thumbnailURL = folderURL(name: thumbFolderName).appendingPathComponent(fileName)
-        if fileManager.fileExists(atPath: thumbnailURL.path) {
-            do {
-                try fileManager.removeItem(at: thumbnailURL)
-            } catch {
-                debugPrint("Error removing thumbnail image from file system: \(error)")
-            }
-        }
+        // Remove full and thumbnail image file from local file system
+        removeFile(atDirectory: .documentDirectory, withinFolder: imageFolderName, fileName: id)
+        removeFile(atDirectory: .documentDirectory, withinFolder: thumbFolderName, fileName: id)
         
         // Refresh the image file URL cache
         getSavedImageFileURLs()
@@ -167,43 +152,73 @@ class DatabaseManager {
         }
     }
     
-    //MARK: - Creation of Directory / sub-Directory
-    
-    // Create image and thumbnail folder in application document directory
-    internal func createDirectory() {
+    func removeFile(atDirectory directory: FileManager.SearchPathDirectory, withinFolder folderName: String, fileName: String) {
+        let url = getFolderURL(folderName: folderName, at: directory).appendingPathComponent(fileName + fileExtension)
         
-        // Create image folder
-        let imageURL = folderURL(name: imageFolderName)
-        if !fileManager.fileExists(atPath: imageURL.path) {
+        if fileManager.fileExists(atPath: url.path) {
             do {
-                try fileManager.createDirectory(at: imageURL, withIntermediateDirectories: true, attributes: nil)
+                try fileManager.removeItem(at: url)
             } catch {
-                fatalError("Failed to create image folder within app's document folder.\n Make sure file path \(imageURL.path) is correct.")
-            }
-        }
-        
-        // Create thumbnail image folder
-        let thumbnailURL = folderURL(name: thumbFolderName)
-        if !fileManager.fileExists(atPath: thumbnailURL.path) {
-            do {
-                try fileManager.createDirectory(at: thumbnailURL, withIntermediateDirectories: true, attributes: nil)
-            } catch {
-                fatalError("Failed to create thumbnail image folder within app's document folder.\n Make sure file path \(thumbnailURL.path) is correct.")
+                debugPrint("Failed to remove file `\(fileName)` from the file system:\n\(error)")
             }
         }
     }
     
-    private func folderURL(name: String) -> URL {
-        let documentURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        return documentURL.appendingPathComponent(name, isDirectory: true)
+    //MARK: - Cache Creation & Removal
+    
+    /// Get an image's temporary URL object for share sheet's preview usage
+    func getImageTempURL(catData: CatData) -> URL? {
+        // Convert image to jpeg file and write it to cache directory folder
+        guard let imageData = catData.image.jpegData(compressionQuality: jpegCompression) else { return nil }
+        
+        let cacheURL = try? fileManager.url(for: .cachesDirectory,
+                                       in: .userDomainMask,
+                                       appropriateFor: nil,
+                                       create: true)
+        let fileName = catData.id + fileExtension
+        
+        if let fileURL = cacheURL?.appendingPathComponent(cacheFolderName, isDirectory: true).appendingPathComponent(fileName) {
+            do {
+                try imageData.write(to: fileURL)
+                // Return file's url
+                return fileURL
+            } catch {
+                debugPrint("Error writing data into cache directory: \(error)")
+            }
+        } 
+        return nil
+    }
+    
+    //MARK: - Creation of Directory / sub-Directory
+    
+    private func createDirectory(withName name: String, at directory: FileManager.SearchPathDirectory) {
+        let url = getFolderURL(folderName: name, at: directory)
+        if !fileManager.fileExists(atPath: url.path) {
+            do {
+                try fileManager.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                fatalError("Failed to create folder `\(name)`.\n Please make sure this file path `\(url.path)` is correct.")
+            }
+        }
+    }
+    
+    private func getFolderURL(folderName: String, at directory: FileManager.SearchPathDirectory) -> URL {
+        let documentURL = fileManager.urls(for: directory, in: .userDomainMask).first!
+        return documentURL.appendingPathComponent(folderName, isDirectory: true)
+    }
+    
+    func createNecessaryFolders() {
+        createDirectory(withName: imageFolderName, at: .documentDirectory)
+        createDirectory(withName: thumbFolderName, at: .documentDirectory)
+        createDirectory(withName: cacheFolderName, at: .cachesDirectory)
     }
     
     //MARK: - CoreData and File Manager Tools
     
     internal func isDataSaved(data: CatData) -> Bool {
-        let url = folderURL(name: imageFolderName)
-        let newDataId = data.id
-        let newFileURL = url.appendingPathComponent("\(newDataId).jpg")
+        let url = getFolderURL(folderName: imageFolderName, at: .documentDirectory)
+        let dataId = data.id
+        let newFileURL = url.appendingPathComponent(dataId + fileExtension)
         return fileManager.fileExists(atPath: newFileURL.path)
     }
     

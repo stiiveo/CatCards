@@ -127,7 +127,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
         
         // Create local image folder in file system and/or load data from it
-        MainViewController.databaseManager.createDirectory()
+        MainViewController.databaseManager.createNecessaryFolders()
         MainViewController.databaseManager.getSavedImageFileURLs()
         
         fetchNewData(initialRequest: true) // initiate data downloading
@@ -436,11 +436,18 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     // Image Sharing Method
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
-        guard !cardIsBeingPanned else { return }
+        let catData = currentCardData
+        guard !cardIsBeingPanned, catData != nil else { return }
         
-        if let imageToShare = currentCardData?.image {
-            let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
-            present(activityController, animated: true)
+        // Create and save the cache image file to cache folder
+        guard let imageURL = MainViewController.databaseManager.getImageTempURL(catData: currentCardData!) else { return }
+
+        let activityVC = UIActivityViewController(activityItems: [imageURL], applicationActivities: nil)
+        self.present(activityVC, animated: true)
+        
+        // Delete the cache image file after the activityVC is dismissed
+        activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
+            MainViewController.databaseManager.removeFile(atDirectory: .cachesDirectory, withinFolder: K.Image.FolderName.cacheImage, fileName: catData!.id)
         }
     }
     

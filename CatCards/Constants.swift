@@ -60,6 +60,7 @@ struct K {
         struct FolderName {
             static let fullImage = "Cat_Pictures"
             static let thumbnail = "Thumbnails"
+            static let cacheImage = "Cache Images"
         }
     }
     

@@ -219,12 +219,12 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     //MARK: - Toolbar Button Methods
     
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
-        let imageFileURL = DatabaseManager.imageFileURLs[currentPage].image
-        if let imageToShare = UIImage(contentsOfFile: imageFileURL.path) {
-            // present activity controller
-            let activityController = UIActivityViewController(activityItems: [imageToShare], applicationActivities: nil)
-            self.present(activityController, animated: true)
-        }
+        let imageFileURLs = DatabaseManager.imageFileURLs
+        guard currentPage >= 0 && currentPage < imageFileURLs.count else { return }
+        
+        let imageURL = DatabaseManager.imageFileURLs[currentPage].image
+        let activityVC = UIActivityViewController(activityItems: [imageURL], applicationActivities: nil)
+        self.present(activityVC, animated: true)
     }
     
     @IBAction func deleteButtonPressed(_ sender: UIBarButtonItem) {
