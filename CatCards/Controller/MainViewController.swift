@@ -187,7 +187,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             if self.cardIndex == self.cardArray.count - 1 {
                 self.addCardToView(newCard, atBottom: false)
                 newCard.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
-                UIView.animate(withDuration: 0.5) {
+                UIView.animate(withDuration: 0.3) {
                     newCard.transform = .identity
                 } completion: { _ in
                     self.attachGestureRecognizers(to: newCard)
