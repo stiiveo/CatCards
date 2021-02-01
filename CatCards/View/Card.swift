@@ -18,6 +18,7 @@ class Card: UIView {
     private let imageView = UIImageView()
     private let backgroundImageView = UIImageView()
     var hintView: HintView?
+    var index: Int = 0
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -112,6 +113,11 @@ class Card: UIView {
     }
     
     func setAsTutorialCard(cardIndex index: Int) {
+        guard index < K.Onboard.data.count else {
+            debugPrint("Index(\(index)) of onboard data is unavailable for onboard card")
+            return
+        }
+        
         if index == 1 {
             data = CatData(id: "zoomImage", image: K.Onboard.zoomImage)
         }

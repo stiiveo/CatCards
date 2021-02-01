@@ -24,7 +24,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @IBOutlet weak var bannerSpace: UIView!
     @IBOutlet weak var bannerSpaceHeight: NSLayoutConstraint!
     @IBOutlet weak var cardView: UIView!
-    @IBOutlet weak var indicator: UIActivityIndicatorView!
     
     //MARK: - Global Properties
     
@@ -54,19 +53,27 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private var currentCardData: CatData? {
+    private var currentCard: Card? {
         if !cardArray.isEmpty && cardIndex < cardArray.count {
-            indicator.stopAnimating()
-            return cardArray[cardIndex].data
+            return cardArray[cardIndex]
         } else {
-            indicator.startAnimating()
             return nil
         }
     }
     
-    private var previousCardData: CatData? {
-        if cardIndex > 0 && cardArray.count > cardIndex - 1 {
-            return cardArray[cardIndex - 1].data
+    private var previousCard: Card? {
+        let previoudCardIndex = cardIndex - 1
+        if previoudCardIndex >= 0 && previoudCardIndex < cardArray.count {
+            return cardArray[cardIndex - 1]
+        } else {
+            return nil
+        }
+    }
+    
+    private var nextCard: Card? {
+        let nextCardIndex = cardIndex + 1
+        if nextCardIndex > 0 && nextCardIndex < cardArray.count {
+            return cardArray[nextCardIndex]
         } else {
             return nil
         }
@@ -141,11 +148,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         super.viewWillAppear(animated)
         refreshButtonState()
         setBarStyle()
-        
-        // Load ad if status of loadBannerAd in user's device is true and no ad was received yet
-        if defaults.bool(forKey: K.UserDefaultsKeys.loadBannerAd) && !adReceived {
-            loadBannerAd()
-        }
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -153,7 +155,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Reload the banner's ad if the orientation of the screen is about to change
         coordinator.animate { _ in
-            self.loadBannerAd()
+            self.requestBannerAd()
         }
     }
     
@@ -178,10 +180,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         DispatchQueue.main.async {
             let newCard = Card()
             newCard.data = data
+            newCard.index = dataIndex
             self.cardArray.append(newCard)
             
-            // Add the first two cards to view
-            if dataIndex == 0 {
+            // Add the card to the view if it's the last card in the card array
+            if self.cardIndex == self.cardArray.count - 1 {
                 self.addCardToView(newCard, atBottom: false)
                 self.attachGestureRecognizers(to: newCard)
                 self.refreshButtonState()
@@ -189,16 +192,12 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 // Update the number of cards viewed by the user
                 if self.onboardCompleted {
                     self.viewCount += 1
-                    self.requestBannerAd()
                 }
             }
-            if dataIndex == 1 {
-                self.addCardToView(newCard, atBottom: true)
-            }
             
-            // Place tutorial message onto the card if onboarding process is not completed
-            if !self.onboardCompleted && dataIndex < 2 {
-                newCard.setAsTutorialCard(cardIndex: dataIndex)
+            // Add the card to the view if it's the next card
+            if newCard.index == self.cardIndex + 1 {
+                self.addCardToView(newCard, atBottom: true)
             }
         }
     }
@@ -213,6 +212,18 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if atBottom {
             cardView.sendSubviewToBack(card)
             card.transform = K.Card.Transform.defaultSize
+        }
+        
+        // Place tutorial message onto the card if onboarding process is not completed
+        if !onboardCompleted {
+            if card.index < onboardData.count {
+                card.setAsTutorialCard(cardIndex: card.index)
+            }
+            
+            // Show UI buttons when the last onboarding card is showned to user
+            if card.index == onboardData.count {
+                showUIButtons()
+            }
         }
     }
     
@@ -305,7 +316,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     private func requestBannerAd() {
-        guard onboardCompleted && viewCount > 9 && !adReceived else { return }
+        guard onboardCompleted &&
+                !adReceived &&
+                viewCount > K.Banner.adLoadingThreshold &&
+                cardIndex % 5 == 0 else {
+            return
+        }
+            
         if #available(iOS 14, *) {
             requestIDFA()
         } else {
@@ -389,14 +406,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         guard !cardIsBeingPanned else { return }
         
         // Make sure data is available for the undo card
-        guard previousCardData != nil else { return }
+        guard previousCard?.data != nil else { return }
         
         maxCardIndex = cardIndex // Save the current index
         undoButton.isEnabled = false
         
         // Remove the next card's data and from the superview
-        let nextCard = cardArray[cardIndex + 1]
-        nextCard.removeFromSuperview()
+        nextCard?.removeFromSuperview()
         
         let undoCard = cardArray[cardIndex - 1]
         addCardToView(undoCard, atBottom: false)
@@ -404,7 +420,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         undoCard.centerYConstraint.constant = 0
         
         UIView.animate(withDuration: 0.6) {
-            self.cardArray[self.cardIndex].transform = K.Card.Transform.defaultSize
+            self.currentCard?.transform = K.Card.Transform.defaultSize
             self.updateLayout()
             undoCard.transform = .identity
         } completion: { _ in
@@ -421,7 +437,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @IBAction func saveButtonPressed(_ sender: UIBarButtonItem) {
         guard !cardIsBeingPanned else { return }
         
-        if let data = currentCardData {
+        if let data = currentCard?.data {
             // Save data if it's absent in database, otherwise delete it.
             let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
             switch isDataSaved {
@@ -436,11 +452,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
     // Image Sharing Method
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
-        let catData = currentCardData
+        let catData = currentCard?.data
         guard !cardIsBeingPanned, catData != nil else { return }
         
         // Create and save the cache image file to cache folder
-        guard let imageURL = MainViewController.databaseManager.getImageTempURL(catData: currentCardData!) else { return }
+        guard let imageURL = MainViewController.databaseManager.getImageTempURL(catData: catData!) else { return }
 
         let activityVC = UIActivityViewController(activityItems: [imageURL], applicationActivities: nil)
         self.present(activityVC, animated: true)
@@ -455,7 +471,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private func refreshButtonState() {
         guard onboardCompleted && !cardArray.isEmpty else { return }
         
-        if currentCardData != nil && cardArray[cardIndex].hintView == nil {
+        if currentCard?.data != nil && currentCard?.hintView == nil {
             saveButton.isEnabled = true
             shareButton.isEnabled = true
         } else {
@@ -463,10 +479,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             shareButton.isEnabled = false
         }
         
-        undoButton.isEnabled = (cardIndex > 0 && previousCardData != nil) ? true : false
+        undoButton.isEnabled = (cardIndex > 0 && previousCard?.data != nil) ? true : false
         
         // Toggle the status of save button
-        if let data = currentCardData {
+        if let data = currentCard?.data {
             let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
             saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
         }
@@ -489,7 +505,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     @objc private func panHandler(_ sender: UIPanGestureRecognizer) {
         guard let card = sender.view as? Card else { return }
         
-        let nextCard = cardArray[cardIndex + 1]
         let halfViewWidth = view.frame.width / 2
         
         // Point of the finger in the view's coordinate system
@@ -537,7 +552,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             let distance = (panDistance <= halfViewWidth) ? (panDistance / halfViewWidth) : 1
             let defaultScale = K.Card.Transform.scale
             
-            nextCard.transform = CGAffineTransform(
+            nextCard?.transform = CGAffineTransform(
                 scaleX: defaultScale + (distance * (1 - defaultScale)),
                 y: defaultScale + (distance * (1 - defaultScale))
             )
@@ -555,13 +570,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             let minimumDelta = CGPoint(x: offset.x * distanceDelta,
                                      y: offset.y * distanceDelta)
             
-            if currentCardData != nil &&
+            if currentCard?.data != nil &&
                 vectorDistance >= minTravelDistance {
                 // Card dismissing threshold A: Data is available and
                 // the projected travel distance is greater than or equals minimum distance
                 animateCard(card, deltaX: vector.x, deltaY: vector.y)
             }
-            else if currentCardData != nil &&
+            else if currentCard?.data != nil &&
                         vectorDistance < minTravelDistance &&
                             panDistance >= minDragDistance {
                 // Card dismissing thrshold B: Data is available and
@@ -582,7 +597,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     card.transform = self.startingTransform
                     
                     // Reset the next card's transform
-                    nextCard.transform = K.Card.Transform.defaultSize
+                    self.nextCard?.transform = K.Card.Transform.defaultSize
                 } completion: { _ in
                     card.centerXConstraint.constant = self.startingCenterX
                     card.centerYConstraint.constant = self.startingCenterY
@@ -711,26 +726,15 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             self.updateLayout()
             self.resetNextCardTransform()
         } completion: { _ in
+            card.removeFromSuperview()
             self.cardIsBeingPanned = false
             self.cardIndex += 1
-            self.attachGestureRecognizers(to: self.cardArray[self.cardIndex])
-            card.removeFromSuperview()
+            if self.currentCard?.data != nil {
+                self.attachGestureRecognizers(to: self.currentCard!)
+            }
             
-            let nextIndex = self.cardIndex + 1
-            if nextIndex < self.cardArray.count {
-                // Place another card below the current one
-                let nextCard = self.cardArray[nextIndex]
-                self.addCardToView(nextCard, atBottom: true)
-                
-                // Place tutorial message onto the card if onboarding process is not completed
-                if !self.onboardCompleted && nextIndex < self.onboardData.count {
-                    nextCard.setAsTutorialCard(cardIndex: nextIndex)
-                }
-                
-                // Show UI buttons when the last onboarding card is showned to user
-                if !self.onboardCompleted && self.cardIndex == self.onboardData.count - 1 {
-                    self.showUIButtons()
-                }
+            if self.nextCard != nil {
+                self.addCardToView(self.nextCard!, atBottom: true)
             }
             
             if self.cardIndex > self.maxCardIndex {
@@ -746,7 +750,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // Update the number of cards viewed by the user
             if self.onboardCompleted && self.cardIndex > self.maxCardIndex {
                 self.viewCount += 1
-                self.requestBannerAd()
             }
             
             DispatchQueue.main.async {
@@ -754,12 +757,15 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             }
             
             self.removeOldCacheData()
+            
+            // Request banner ad if conditions are met
+            self.requestBannerAd()
         }
     }
     
     /// Reset the next card's transform with animation
     private func resetNextCardTransform() {
-        cardArray[cardIndex + 1].transform = .identity
+        nextCard?.transform = .identity
     }
     
     private func updateCardConstraints(card: Card, deltaX: CGFloat, deltaY: CGFloat) {

@@ -57,29 +57,25 @@
                                     </view>
                                 </subviews>
                             </stackView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="o9H-d8-u3v">
+                                <rect key="frame" x="169" y="315" width="37" height="37"/>
+                            </activityIndicatorView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bts-7g-pnA" userLabel="CardView">
                                 <rect key="frame" x="0.0" y="44" width="375" height="559"/>
-                                <subviews>
-                                    <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="o9H-d8-u3v">
-                                        <rect key="frame" x="169" y="261" width="37" height="37"/>
-                                    </activityIndicatorView>
-                                </subviews>
-                                <constraints>
-                                    <constraint firstItem="o9H-d8-u3v" firstAttribute="centerY" secondItem="Bts-7g-pnA" secondAttribute="centerY" id="G7U-59-yhN"/>
-                                    <constraint firstItem="o9H-d8-u3v" firstAttribute="centerX" secondItem="Bts-7g-pnA" secondAttribute="centerX" id="b2A-ns-s9h"/>
-                                </constraints>
                             </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="E8D-Zx-PRV"/>
                         <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="Bts-7g-pnA" firstAttribute="leading" secondItem="E8D-Zx-PRV" secondAttribute="leading" id="9Ab-Si-ngn"/>
+                            <constraint firstItem="o9H-d8-u3v" firstAttribute="centerX" secondItem="cSQ-ii-ZYK" secondAttribute="centerX" id="9ix-Lg-xiM"/>
                             <constraint firstItem="Bts-7g-pnA" firstAttribute="top" secondItem="E8D-Zx-PRV" secondAttribute="top" id="DMG-ot-Z16"/>
                             <constraint firstItem="E8D-Zx-PRV" firstAttribute="bottom" secondItem="3kd-kf-SGh" secondAttribute="bottom" id="H5L-JM-olq"/>
                             <constraint firstItem="3kd-kf-SGh" firstAttribute="leading" secondItem="E8D-Zx-PRV" secondAttribute="leading" id="VNV-69-CzF"/>
                             <constraint firstItem="3kd-kf-SGh" firstAttribute="trailing" secondItem="E8D-Zx-PRV" secondAttribute="trailing" id="Xja-7q-dhw"/>
                             <constraint firstItem="E8D-Zx-PRV" firstAttribute="trailing" secondItem="Bts-7g-pnA" secondAttribute="trailing" id="c7u-Rk-R2B"/>
                             <constraint firstItem="3kd-kf-SGh" firstAttribute="top" secondItem="Bts-7g-pnA" secondAttribute="bottom" id="rRf-9H-wbu"/>
+                            <constraint firstItem="o9H-d8-u3v" firstAttribute="centerY" secondItem="cSQ-ii-ZYK" secondAttribute="centerY" id="uH5-XJ-9dO"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="mlT-4e-zaz">
@@ -94,7 +90,6 @@
                         <outlet property="bannerSpaceHeight" destination="xKe-58-e39" id="s4l-IN-9xV"/>
                         <outlet property="cardView" destination="Bts-7g-pnA" id="Wk6-gt-kz9"/>
                         <outlet property="collectionButton" destination="sSu-jw-cTH" id="auR-gH-DQd"/>
-                        <outlet property="indicator" destination="o9H-d8-u3v" id="Qpo-fS-xOZ"/>
                         <outlet property="saveButton" destination="eix-IU-TsW" id="kOq-j5-OQe"/>
                         <outlet property="shareButton" destination="qHs-X8-xcv" id="LC9-zj-rUj"/>
                         <outlet property="toolbar" destination="ZI0-C0-QUe" id="1E1-XT-9aH"/>

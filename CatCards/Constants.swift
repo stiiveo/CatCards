@@ -12,13 +12,12 @@ struct K {
     struct UserDefaultsKeys {
         static let viewCount = "viewCount"
         static let onboardCompleted = "onboardCompleted"
-        static let loadBannerAd = "loadBannerAd"
     }
     
     struct Banner {
         static let adMobAppID = "ca-app-pub-2421510056015407~5275025170"
         static let adUnitID = "ca-app-pub-2421510056015407/2067597276" // my real ad unit ID
-        static let adLoadingThreshold: Int = 10 // how many cards the user sees before loading the ad
+        static let adLoadingThreshold: Int = 9 // how many cards the user sees before loading the ad
     }
     
     struct API {
@@ -65,7 +64,7 @@ struct K {
     }
     
     struct Data {
-        static let cacheDataNumber: Int = 10 // MUST be more than 2
+        static let cacheDataNumber: Int = 15 // Smaller this number is, bigger the chance the user experiences the loading process
         static let undoCardNumber: Int = 9 // Number of cards the user can undo
         static let maxBufferImageNumber: Int = 4
         static let maxSavedImages: Int = 24
@@ -93,7 +92,7 @@ struct K {
         // If the difference is bigger than this value, the imageView's content
         // mode is set to aspect fill scale, otherwise aspect fit scale.
         static let dynamicScaleThreshold: CGFloat = 0.1
-        static let maximumScaleFactor: CGFloat = 3
+        static let maximumScaleFactor: CGFloat = 4
     }
     
     struct Onboard {
