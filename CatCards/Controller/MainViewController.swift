@@ -657,8 +657,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         if let card = sender.view as? Card {
             switch sender.state {
             case .began:
-                startingCenterX = card.centerXConstraint.constant
-                startingCenterY = card.centerYConstraint.constant
                 startingTransform = card.transform
             case .changed:
                 // Coordinate of the pinch center where the view's center is (0, 0)
