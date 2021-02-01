@@ -162,13 +162,13 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" directionalLockEnabled="YES" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Ze-wL-vlY">
-                                <rect key="frame" x="0.0" y="44" width="375" height="579"/>
+                                <rect key="frame" x="0.0" y="44" width="375" height="569"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="eiQ-d0-gPU">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="579"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="569"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="default_image" translatesAutoresizingMaskIntoConstraints="NO" id="Tno-z9-hkl">
-                                                <rect key="frame" x="0.0" y="0.0" width="375" height="579"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="375" height="569"/>
                                             </imageView>
                                         </subviews>
                                     </stackView>
@@ -185,9 +185,9 @@
                                 <viewLayoutGuide key="frameLayoutGuide" id="S4A-Fj-ePw"/>
                             </scrollView>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="naK-xz-Kcm">
-                                <rect key="frame" x="0.0" y="623" width="375" height="44"/>
+                                <rect key="frame" x="0.0" y="613" width="375" height="54"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="PRy-aC-7Jr"/>
+                                    <constraint firstAttribute="height" constant="54" id="PRy-aC-7Jr"/>
                                 </constraints>
                                 <items>
                                     <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="00h-JF-pss"/>
