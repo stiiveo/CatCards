@@ -186,18 +186,28 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // Add the card to the view if it's the last card in the card array
             if self.cardIndex == self.cardArray.count - 1 {
                 self.addCardToView(newCard, atBottom: false)
-                self.attachGestureRecognizers(to: newCard)
-                self.refreshButtonState()
-                
-                // Update the number of cards viewed by the user
-                if self.onboardCompleted {
-                    self.viewCount += 1
+                newCard.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+                UIView.animate(withDuration: 0.5) {
+                    newCard.transform = .identity
+                } completion: { _ in
+                    self.attachGestureRecognizers(to: newCard)
+                    self.refreshButtonState()
+                    
+                    // Update the number of cards viewed by the user
+                    if self.onboardCompleted {
+                        self.viewCount += 1
+                    }
                 }
             }
             
             // Add the card to the view if it's the next card
             if newCard.index == self.cardIndex + 1 {
                 self.addCardToView(newCard, atBottom: true)
+                
+                newCard.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+                UIView.animate(withDuration: 0.5) {
+                    newCard.transform = K.Card.Transform.defaultSize
+                }
             }
         }
     }
