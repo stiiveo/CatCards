@@ -63,6 +63,7 @@ class CollectionVC: UICollectionViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navBar.setBackgroundImage(nil, for: .default)
+        navBar.barTintColor = K.Color.backgroundColor
         
         self.collectionView.reloadData()
         
