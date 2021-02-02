@@ -449,13 +449,22 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         if let data = currentCard?.data {
             // Save data if it's absent in database, otherwise delete it.
-            let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
-            switch isDataSaved {
+            let isSaved = MainViewController.databaseManager.isDataSaved(data: data)
+            
+            switch isSaved {
             case false:
-                MainViewController.databaseManager.saveData(data)
+                MainViewController.databaseManager.saveData(data) { success in
+                    if success {
+                        // Show feedback view if data is saved successfully
+                        DispatchQueue.main.async {
+                            self.showFeedback()
+                        }
+                    }
+                }
             case true:
                 MainViewController.databaseManager.deleteData(id: data.id)
             }
+            
             refreshButtonState()
         }
     }
@@ -496,6 +505,51 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
             saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
         }
+    }
+    
+    private func showFeedback() {
+        guard let card = currentCard else { return }
+        
+        // Add feedback image to view
+        let image = K.Image.savedFeedbackImage
+        let feedBackView = UIImageView(image: image)
+        feedBackView.contentMode = .scaleAspectFit
+        card.addSubview(feedBackView)
+        feedBackView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            feedBackView.centerXAnchor.constraint(equalTo: card.centerXAnchor),
+            feedBackView.centerYAnchor.constraint(equalTo: card.centerYAnchor),
+            feedBackView.widthAnchor.constraint(equalTo: card.widthAnchor, multiplier: 0.5),
+            feedBackView.heightAnchor.constraint(equalTo: card.heightAnchor, multiplier: 0.5)
+        ])
+        feedBackView.alpha = 0
+        
+        guard card.subviews.contains(feedBackView) else { return }
+        
+        // Animation
+        let introAnimator = UIViewPropertyAnimator(duration: 0.1, curve: .linear) {
+            feedBackView.alpha = 0.95
+            feedBackView.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
+        }
+        let normalStateAnimator = UIViewPropertyAnimator(duration: 0.1, curve: .linear) {
+            feedBackView.transform = .identity
+        }
+        let dismissAnimator = UIViewPropertyAnimator(duration: 0.2, curve: .linear) {
+            feedBackView.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
+            feedBackView.alpha = 0
+        }
+        
+        introAnimator.addCompletion { _ in
+            normalStateAnimator.startAnimation()
+        }
+        normalStateAnimator.addCompletion { _ in
+            dismissAnimator.startAnimation(afterDelay: 0.5)
+        }
+        dismissAnimator.addCompletion { _ in
+            feedBackView.removeFromSuperview()
+        }
+        
+        introAnimator.startAnimation()
     }
     
     //MARK: - Gesture Recognizers
