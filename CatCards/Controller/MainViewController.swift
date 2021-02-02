@@ -463,7 +463,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     if success {
                         // Data is saved successfully
                         DispatchQueue.main.async {
-                            self.showFeedback()
+                            self.showFeedbackImage()
                         }
                         hapticManager.notificationHaptic?.notificationOccurred(.success)
                     } else {
@@ -525,28 +525,32 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func showFeedback() {
+    private func showFeedbackImage() {
         guard let card = currentCard else { return }
         
         // Add feedback image to view
         let image = K.Image.savedFeedbackImage
         let feedBackView = UIImageView(image: image)
-        feedBackView.contentMode = .scaleAspectFit
+        
         card.addSubview(feedBackView)
         feedBackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let feedBackViewSize = CGSize(
+            width: card.frame.width * 0.4,
+            height: card.frame.width * 0.4)
+        
         NSLayoutConstraint.activate([
             feedBackView.centerXAnchor.constraint(equalTo: card.centerXAnchor),
             feedBackView.centerYAnchor.constraint(equalTo: card.centerYAnchor),
-            feedBackView.widthAnchor.constraint(equalTo: card.widthAnchor, multiplier: 0.5),
-            feedBackView.heightAnchor.constraint(equalTo: card.heightAnchor, multiplier: 0.5)
+            feedBackView.widthAnchor.constraint(equalToConstant: feedBackViewSize.width),
+            feedBackView.heightAnchor.constraint(equalToConstant: feedBackViewSize.height)
         ])
-        feedBackView.alpha = 0
         
         guard card.subviews.contains(feedBackView) else { return }
         
         // Animation
         let introAnimator = UIViewPropertyAnimator(duration: 0.1, curve: .linear) {
-            feedBackView.alpha = 0.95
+            feedBackView.alpha = 1.0
             feedBackView.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
         }
         let normalStateAnimator = UIViewPropertyAnimator(duration: 0.1, curve: .linear) {
