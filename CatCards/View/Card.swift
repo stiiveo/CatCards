@@ -17,7 +17,7 @@ class Card: UIView {
     var data: CatData?
     private let imageView = UIImageView()
     private let backgroundImageView = UIImageView()
-    var hintView: HintView?
+    var onboardOverlay: OnboardOverlay?
     var index: Int = 0
     
     override init(frame: CGRect) {
@@ -76,7 +76,7 @@ class Card: UIView {
         }
         // Data is NOT valid
         else {
-            hintView?.removeFromSuperview() // Remove hintView if there's any
+            onboardOverlay?.removeFromSuperview() // Remove onboardOverlay if there's any
             imageView.image = nil
             backgroundImageView.image = nil
             
@@ -123,15 +123,15 @@ class Card: UIView {
         }
         
         DispatchQueue.main.async {
-            self.addHintView(toCard: index)
+            self.addOnboardOverlay(toCard: index)
         }
     }
     
-    private func addHintView(toCard index: Int) {
-        // Create an HintView instance and add it to Card
-        hintView = HintView(frame: imageView.bounds)
-        imageView.addSubview(hintView!)
-        hintView!.addContentView(toCard: index)
+    private func addOnboardOverlay(toCard index: Int) {
+        // Create an onboard overlay instance and add it to Card
+        onboardOverlay = OnboardOverlay(frame: imageView.bounds)
+        imageView.addSubview(onboardOverlay!)
+        onboardOverlay!.addTableView(toCard: index)
     }
     
     func clearCache() {

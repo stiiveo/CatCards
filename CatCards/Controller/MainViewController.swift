@@ -39,6 +39,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private var backgroundLayer: CAGradientLayer!
     private var zoomOverlay: UIView!
     private var cardIsBeingPanned = false
+    private let hapticManager = HapticManager()
     
     // Number of cards with cat images the user has seen
     private var viewCount: Int = 0 {
@@ -418,8 +419,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Make sure data is available for the undo card
         guard previousCard?.data != nil else { return }
         
+        hapticManager.prepareImpactGenerator(style: .medium)
         maxCardIndex = cardIndex // Save the current index
         undoButton.isEnabled = false
+        hapticManager.impactHaptic?.impactOccurred()
         
         // Remove the next card's data and from the superview
         nextCard?.removeFromSuperview()
@@ -436,10 +439,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         } completion: { _ in
             self.attachGestureRecognizers(to: undoCard)
             self.cardIndex -= 1
-            
             DispatchQueue.main.async {
                 self.refreshButtonState()
             }
+            self.hapticManager.releaseImpactGenerator()
         }
     }
     
@@ -448,6 +451,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         guard !cardIsBeingPanned else { return }
         
         if let data = currentCard?.data {
+            hapticManager.prepareImpactGenerator(style: .soft)
+            hapticManager.prepareNotificationGenerator()
+            
             // Save data if it's absent in database, otherwise delete it.
             let isSaved = MainViewController.databaseManager.isDataSaved(data: data)
             
@@ -455,17 +461,24 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             case false:
                 MainViewController.databaseManager.saveData(data) { success in
                     if success {
-                        // Show feedback view if data is saved successfully
+                        // Data is saved successfully
                         DispatchQueue.main.async {
                             self.showFeedback()
                         }
+                        hapticManager.notificationHaptic?.notificationOccurred(.success)
+                    } else {
+                        // Data is not saved successfully
+                        hapticManager.notificationHaptic?.notificationOccurred(.error)
                     }
                 }
             case true:
                 MainViewController.databaseManager.deleteData(id: data.id)
+                hapticManager.impactHaptic?.impactOccurred()
             }
             
             refreshButtonState()
+            hapticManager.releaseImpactGenerator()
+            hapticManager.releaseNotificationGenerator()
         }
     }
     
@@ -476,13 +489,18 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Create and save the cache image file to cache folder
         guard let imageURL = MainViewController.databaseManager.getImageTempURL(catData: catData!) else { return }
+        
+        hapticManager.prepareImpactGenerator(style: .soft)
 
         let activityVC = UIActivityViewController(activityItems: [imageURL], applicationActivities: nil)
         self.present(activityVC, animated: true)
+        hapticManager.impactHaptic?.impactOccurred()
         
         // Delete the cache image file after the activityVC is dismissed
         activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
             MainViewController.databaseManager.removeFile(atDirectory: .cachesDirectory, withinFolder: K.Image.FolderName.cacheImage, fileName: catData!.id)
+            
+            self.hapticManager.releaseImpactGenerator()
         }
     }
     
@@ -490,7 +508,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private func refreshButtonState() {
         guard onboardCompleted && !cardArray.isEmpty else { return }
         
-        if currentCard?.data != nil && currentCard?.hintView == nil {
+        if currentCard?.data != nil && currentCard?.onboardOverlay == nil {
             saveButton.isEnabled = true
             shareButton.isEnabled = true
         } else {
@@ -856,6 +874,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Make sure there's no existing alert controller being presented already.
         guard self.presentedViewController == nil else { return }
         
+        hapticManager.prepareNotificationGenerator()
         DispatchQueue.main.async {
             let alert = UIAlertController(
                 title: Z.AlertMessage.NetworkError.alertTitle,
@@ -871,6 +890,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // Add actions to alert controller
             alert.addAction(retryAction)
             self.present(alert, animated: true, completion: nil)
+            self.hapticManager.notificationHaptic?.notificationOccurred(.error)
         }
     }
     

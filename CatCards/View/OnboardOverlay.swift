@@ -1,5 +1,5 @@
 //
-//  HintView.swift
+//  OnboardOverlay.swift
 //  CatCards
 //
 //  Created by Jason Ou Yang on 2020/12/23.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class HintView: UIView {
+class OnboardOverlay: UIView {
     
     var cardNumber: Int = 0
     private lazy var blurEffectView = UIVisualEffectView()
@@ -45,10 +45,10 @@ class HintView: UIView {
         }
     }
     
-    func addContentView(toCard index: Int) {
+    func addTableView(toCard index: Int) {
         self.cardNumber = index
         
-        // Add tableView to HintView
+        // Add tableView to onboard overlay
         let tableView = UITableView()
         self.addSubview(tableView)
         
@@ -89,7 +89,7 @@ class HintView: UIView {
     }
 }
 
-extension HintView: UITableViewDataSource {
+extension OnboardOverlay: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // Return rows for title and prompt message only if body's value is nil
         return data[cardNumber].cellText.count

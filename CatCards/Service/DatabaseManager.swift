@@ -55,10 +55,10 @@ class DatabaseManager {
     
     //MARK: - Data Saving
     
-    internal func saveData(_ data: CatData, success: (Bool) -> Void) {
+    internal func saveData(_ data: CatData, completion: K.CompletionHandler) {
         guard favoriteArray.count < K.Data.maxSavedImages else {
             delegate?.savedImagesMaxReached() // Notify the error to the delegate.
-            success(false)
+            completion(false)
             return
         }
         
@@ -73,7 +73,7 @@ class DatabaseManager {
         
         // Save image to local file system with ID as the file name
         saveImageToLocalSystem(image: data.image, fileName: data.id)
-        success(true)
+        completion(true)
     }
     
     /// Save downloaded image and downsampled image to user's local disk.

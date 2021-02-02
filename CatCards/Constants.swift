@@ -9,6 +9,8 @@
 import UIKit
 
 struct K {
+    typealias CompletionHandler = (Bool) -> Void
+    
     struct UserDefaultsKeys {
         static let viewCount = "viewCount"
         static let onboardCompleted = "onboardCompleted"

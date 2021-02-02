@@ -20,6 +20,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     private let bufferImageNumber: Int = K.Data.maxBufferImageNumber
     private let defaultCacheImage = K.Image.defaultCacheImage
     private var previousPage: Int = 0
+    private let hapticManager = HapticManager()
     private var currentPage: Int = 0 {
         didSet(oldPage) {
             if currentPage > oldPage {
@@ -222,12 +223,17 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let imageFileURLs = DatabaseManager.imageFileURLs
         guard currentPage >= 0 && currentPage < imageFileURLs.count else { return }
         
+        hapticManager.prepareImpactGenerator(style: .soft)
         let imageURL = DatabaseManager.imageFileURLs[currentPage].image
         let activityVC = UIActivityViewController(activityItems: [imageURL], applicationActivities: nil)
         self.present(activityVC, animated: true)
+        hapticManager.impactHaptic?.impactOccurred()
     }
     
     @IBAction func deleteButtonPressed(_ sender: UIBarButtonItem) {
+        hapticManager.prepareNotificationGenerator()
+        hapticManager.notificationHaptic?.notificationOccurred(.warning)
+        
         let alert = UIAlertController(title: Z.AlertMessage.DeleteWarning.alertTitle, message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: Z.AlertMessage.DeleteWarning.actionTitle, style: .destructive) { (action) in
             
