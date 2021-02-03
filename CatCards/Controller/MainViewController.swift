@@ -528,22 +528,24 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private func showFeedbackImage() {
         guard let card = currentCard else { return }
         
-        // Add feedback image to view
+        // Add feedback image to card
         let image = K.Image.savedFeedbackImage
         let feedBackView = UIImageView(image: image)
         
         card.addSubview(feedBackView)
         feedBackView.translatesAutoresizingMaskIntoConstraints = false
         
-        let feedBackViewSize = CGSize(
+        // Size of the feedback view
+        // Note: In order to make corner radius work, width and height must be the same 
+        let feedbackViewSize = CGSize(
             width: card.frame.width * 0.3,
             height: card.frame.width * 0.3)
         
         NSLayoutConstraint.activate([
             feedBackView.centerXAnchor.constraint(equalTo: card.centerXAnchor),
             feedBackView.centerYAnchor.constraint(equalTo: card.centerYAnchor),
-            feedBackView.widthAnchor.constraint(equalToConstant: feedBackViewSize.width),
-            feedBackView.heightAnchor.constraint(equalToConstant: feedBackViewSize.height)
+            feedBackView.widthAnchor.constraint(equalToConstant: feedbackViewSize.width),
+            feedBackView.heightAnchor.constraint(equalToConstant: feedbackViewSize.height)
         ])
         
         guard card.subviews.contains(feedBackView) else { return }
