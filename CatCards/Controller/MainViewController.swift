@@ -536,8 +536,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         feedBackView.translatesAutoresizingMaskIntoConstraints = false
         
         let feedBackViewSize = CGSize(
-            width: card.frame.width * 0.4,
-            height: card.frame.width * 0.4)
+            width: card.frame.width * 0.3,
+            height: card.frame.width * 0.3)
         
         NSLayoutConstraint.activate([
             feedBackView.centerXAnchor.constraint(equalTo: card.centerXAnchor),
