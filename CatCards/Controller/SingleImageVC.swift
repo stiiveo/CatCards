@@ -71,6 +71,10 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         }
     }
     
+    override var prefersHomeIndicatorAutoHidden: Bool {
+        return true
+    }
+    
     //MARK: - Image Loading & Zoom Scale Control
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {

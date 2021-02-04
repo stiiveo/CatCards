@@ -160,6 +160,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
+    override var prefersHomeIndicatorAutoHidden: Bool {
+        return true
+    }
+    
     // Remove notif. observer to avoid sending notification to invalid obj.
     deinit {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)

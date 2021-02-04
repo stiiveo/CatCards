@@ -111,6 +111,10 @@ class CollectionVC: UICollectionViewController {
         performSegue(withIdentifier: K.SegueIdentifiers.collectionToSingle, sender: self)
     }
     
+    override var prefersHomeIndicatorAutoHidden: Bool {
+        return true
+    }
+    
     //MARK: - Background View & Color
     
     private func setBackgroundColor() {
