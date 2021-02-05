@@ -436,7 +436,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         undoCard.centerXConstraint.constant = 0
         undoCard.centerYConstraint.constant = 0
         
-        UIView.animate(withDuration: 0.6) {
+        UIView.animate(withDuration: 0.5) {
             self.currentCard?.transform = K.Card.Transform.defaultSize
             self.updateLayout()
             undoCard.transform = .identity
