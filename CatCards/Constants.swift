@@ -70,7 +70,7 @@ struct K {
         static let cacheDataNumber: Int = 15 // Smaller this number is, bigger the chance the user experiences the loading process
         static let undoCardNumber: Int = 9 // Number of cards the user can undo
         static let maxBufferImageNumber: Int = 4
-        static let maxSavedImages: Int = 24
+        static let maxSavedImages: Int = 36
     }
     
     struct Card {

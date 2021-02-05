@@ -11,4 +11,4 @@ CFBundleName = "貓咪卡片";
 
 NSPhotoLibraryAddUsageDescription = "需要您的權限才能儲存圖片至您的照片資料庫";
 
-NSUserTrackingUsageDescription = "這個裝置的識別碼會被用來發送個人化的廣告給您";
+NSUserTrackingUsageDescription = "藉由取得裝置識別碼，推送給您的廣告會對您更有吸引力。點擊廣告也是對我的小小支持呦🙏";

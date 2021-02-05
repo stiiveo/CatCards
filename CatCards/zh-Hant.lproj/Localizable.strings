@@ -20,7 +20,7 @@
 "UNDO_BUTTON" = "召回上一張卡片";
 "SAVE_BUTTON" = "儲存圖片";
 "VIEW_SAVED" = "顯示已儲存的圖片";
-"PROMPT" = "🐱 將我滑開來看下一張卡片";
+"PROMPT" = "🐈 將我滑開來看下一張卡片";
 "START_PROMPT" = "😺 將我滑開後開始";
 
 // Network Error Alert
@@ -29,8 +29,8 @@
 "NETWORK_ERROR_ALERT_ACTION" = "再試一次";
 
 // Databse Error Alert
-"DATABASE_ERROR_ALERT_TITLE" = "😿 已達到儲存數量的上限";
-"DATABASE_ERROR_ALERT_MESSAGE" = "目前你可以最多儲存24張圖片";
+"DATABASE_ERROR_ALERT_TITLE" = "儲存數量已達上限";
+"DATABASE_ERROR_ALERT_MESSAGE" = "目前你可以最多儲存36張圖片";
 "DATABASE_ERROR_ALERT_ACTION" = "了解";
 
 

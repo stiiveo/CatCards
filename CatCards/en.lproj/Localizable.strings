@@ -20,7 +20,7 @@
 "UNDO_BUTTON" = "Retrieve the last card";
 "SAVE_BUTTON" = "Save the picture";
 "VIEW_SAVED" = "Show downloaded pictures";
-"PROMPT" = "🐱 Swipe me to see the next card";
+"PROMPT" = "🐈 Swipe me to see the next card";
 "START_PROMPT" = "😺 Swipe me to start";
 
 // Network Error Alert
@@ -29,8 +29,8 @@
 "NETWORK_ERROR_ALERT_ACTION" = "Try Again";
 
 // Databse Error Alert
-"DATABASE_ERROR_ALERT_TITLE" = "😿 Maximum number of saved images is reached.";
-"DATABASE_ERROR_ALERT_MESSAGE" = "Currently you can save 24 images at most.";
+"DATABASE_ERROR_ALERT_TITLE" = "Storage is full.";
+"DATABASE_ERROR_ALERT_MESSAGE" = "Currently you can save up to 36 images";
 "DATABASE_ERROR_ALERT_ACTION" = "OK";
 
 
