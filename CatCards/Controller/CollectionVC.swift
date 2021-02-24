@@ -12,7 +12,6 @@ import ImageIO
 class CollectionVC: UICollectionViewController {
     
     private var selectedCellIndex: Int = 0
-    private let screenWidth = UIScreen.main.bounds.width
     private let backgroundLayer = CAGradientLayer()
     private var navBar: UINavigationBar!
     private lazy var noSavedPicturesHint: UILabel = {
@@ -27,12 +26,21 @@ class CollectionVC: UICollectionViewController {
         return label
     }()
     
-    // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
-    private var cellNumberPerRow: CGFloat {
-        if screenWidth >= 414 {
-            return 4.0
-        } else {
-            return 3.0
+    private var screenWidth: CGFloat {
+        return UIScreen.main.bounds.width
+    }
+    
+    // To maximize the usage of screen real estate, the wider the screen width, the more cell numbers per row of the collection view
+    private var numberOfCellsPerRow: CGFloat {
+        switch screenWidth {
+        case 0..<414:
+            return 3
+        case 414..<768:
+            return 4
+        case 768..<1024:
+            return 5
+        default:
+            return 6
         }
     }
     
@@ -41,22 +49,6 @@ class CollectionVC: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navBar = self.navigationController?.navigationBar
-        
-        /// Set up cell's size and spacing
-        let interCellSpacing: CGFloat = 1.5
-        let cellWidth = (screenWidth - (interCellSpacing * (cellNumberPerRow - 1))) / cellNumberPerRow
-        
-        // Floor the calculated width to remove any decimal number
-        let flooredCellWidth = floor(cellWidth)
-        
-        // Set up width and spacing of each cell
-        let viewLayout = self.collectionViewLayout
-        let flowLayout = viewLayout as! UICollectionViewFlowLayout
-        
-        // Remove auto layout constraint
-        flowLayout.estimatedItemSize = .zero
-        flowLayout.itemSize = CGSize(width: flooredCellWidth, height: flooredCellWidth)
-        flowLayout.minimumLineSpacing = interCellSpacing
     }
     
     // Refresh the collection view every time the view is about to be shown to the user
@@ -65,11 +57,28 @@ class CollectionVC: UICollectionViewController {
         navBar.setBackgroundImage(nil, for: .default)
         navBar.barTintColor = K.Color.backgroundColor
         
-        self.collectionView.reloadData()
+        collectionView.reloadData()
         
         addBackgroundView()
         setBackgroundColor()
         noSavedPicturesHint.alpha = (DatabaseManager.imageFileURLs.count == 0) ? 1 : 0
+    }
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        updateCollectionViewItemSize()
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate(alongsideTransition: { _ in
+            // Update the item size of the collection view when the view's size is changing
+            self.updateCollectionViewItemSize()
+            
+            // Update the frame of the background layer
+            self.backgroundLayer.frame = self.view.bounds
+        }, completion: nil)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -82,6 +91,26 @@ class CollectionVC: UICollectionViewController {
         if let destination = segue.destination as? SingleImageVC {
             destination.selectedCellIndex = self.selectedCellIndex
         }
+    }
+    
+    //MARK: - Collection View Item Size
+    
+    private func updateCollectionViewItemSize() {
+        /// Set up cell's size and spacing
+        let interCellSpacing: CGFloat = 1.5
+        let cellWidth = (screenWidth - (interCellSpacing * (numberOfCellsPerRow - 1))) / numberOfCellsPerRow
+        
+        // Floor the calculated width to remove any decimal number
+        let flooredCellWidth = floor(cellWidth)
+        
+        // Set up width and spacing of each cell
+        let viewLayout = self.collectionViewLayout
+        let flowLayout = viewLayout as! UICollectionViewFlowLayout
+        
+        // Remove auto layout constraint
+        flowLayout.estimatedItemSize = .zero
+        flowLayout.itemSize = CGSize(width: flooredCellWidth, height: flooredCellWidth)
+        flowLayout.minimumLineSpacing = interCellSpacing
     }
     
     // MARK: UICollectionViewDataSource
