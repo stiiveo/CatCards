@@ -27,7 +27,7 @@
                                             <constraint firstAttribute="height" constant="44" id="7qg-j3-968"/>
                                         </constraints>
                                         <items>
-                                            <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="eX6-Tv-xPR"/>
+                                            <barButtonItem style="plain" systemItem="flexibleSpace" id="Cua-Dr-cbH"/>
                                             <barButtonItem title="Share" image="square.and.arrow.up" catalog="system" id="qHs-X8-xcv">
                                                 <connections>
                                                     <action selector="shareButtonPressed:" destination="jpg-gr-ShF" id="BgI-cb-uF8"/>
@@ -45,7 +45,7 @@
                                                     <action selector="saveButtonPressed:" destination="jpg-gr-ShF" id="BKN-yk-8P5"/>
                                                 </connections>
                                             </barButtonItem>
-                                            <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="lks-lI-KVw"/>
+                                            <barButtonItem style="plain" systemItem="flexibleSpace" id="ICy-PD-LIi"/>
                                         </items>
                                     </toolbar>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cGb-6Z-c2Z" userLabel="Ad Fixed Space">
