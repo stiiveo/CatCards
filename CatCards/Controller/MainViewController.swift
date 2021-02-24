@@ -949,7 +949,7 @@ extension MainViewController: GADBannerViewDelegate {
         UIView.animate(withDuration: 1.0) {
             bannerView.alpha = 1
         }
-        self.adReceived = true
+        adReceived = true
     }
     
     /// Failed to receive ad with error.

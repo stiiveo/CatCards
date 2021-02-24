@@ -47,7 +47,7 @@ class NetworkManager {
                 let response = response as! HTTPURLResponse
                 let status = response.statusCode
                 guard (200...299).contains(status) else {
-                    debugPrint("Server-side error response is received from API's server. (HTTP status code: \(status)")
+                    debugPrint("Server-side error response is received from API's server. (HTTP status code: \(status))")
                     return
                 }
                 
@@ -62,8 +62,12 @@ class NetworkManager {
     private func parseJSON(data: Data) {
         let jsonDecoder = JSONDecoder()
         do {
-            // The returned json data is wrapped in an array
             let decodedData = try jsonDecoder.decode([JSONModel].self, from: data) // Decoded data type: [JSONModel]
+            guard !decodedData.isEmpty else {
+                debugPrint("Decoded JSON data is invalid.")
+                return
+            }
+            
             let jsonData = decodedData[0] // [JSONModel] -> JSONModel
             guard let imageURL = URL(string: jsonData.url) else {
                 debugPrint("Error creating image URL object from decoded json data.")
@@ -94,7 +98,7 @@ class NetworkManager {
                 return image
             }
         } catch {
-            debugPrint("Error initializing image data from image URL object. Error: \(error)")
+            debugPrint("Failed to initialize new image data from fetched URL object. Error: \(error)")
         }
         return K.Image.defaultImage // Return default image if any error occured.
     }

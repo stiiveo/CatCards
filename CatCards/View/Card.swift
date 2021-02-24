@@ -92,14 +92,14 @@ class Card: UIView {
     
     private func setImage(_ image: UIImage) {
         imageView.image = image
-        backgroundImageView.image = self.imageView.image
+        backgroundImageView.image = imageView.image
         optimizeContentMode()
     }
     
     /// If the aspect ratio of the image and the imageView is close enough,
     /// set the imageView's content mode to 'scale aspect fill' mode to remove the margins around the image and
     /// improve the viewing experience
-    func optimizeContentMode() {
+    private func optimizeContentMode() {
         guard let image = imageView.image else { return }
         
         let imageRatio = image.size.width / image.size.height

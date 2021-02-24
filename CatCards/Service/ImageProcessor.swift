@@ -24,18 +24,19 @@ class ImageProcessor {
             return nil
         }
         
-        // Return original image if its height or width is smaller than threshold
-        guard imageSize.height > maxSize.height && imageSize.width > maxSize.width else { return image }
+        // Continue the resizing process if image's height and width is bigger than the resizing threshold, return original image otherwise.
+        guard imageSize.height > maxSize.height && imageSize.width > maxSize.width else { return image
+        }
         
-        let widthRatio  = maxSize.width  / imageSize.width
-        let heightRatio = maxSize.height / imageSize.height
+        let widthDiff  = maxSize.width  / imageSize.width
+        let heightDiff = maxSize.height / imageSize.height
         
-        // Figure out image's orientation and use that to form new rectangle
+        // Figure out image's orientation and use that to form a target rectangle
         var newSize: CGSize
-        if widthRatio > heightRatio {
-            newSize = CGSize(width: imageSize.width * heightRatio, height: imageSize.height * heightRatio)
+        if widthDiff > heightDiff {
+            newSize = CGSize(width: imageSize.width * heightDiff, height: imageSize.height * heightDiff)
         } else {
-            newSize = CGSize(width: imageSize.width * widthRatio,  height: imageSize.height * widthRatio)
+            newSize = CGSize(width: imageSize.width * widthDiff,  height: imageSize.height * widthDiff)
         }
         
         // This is the rect that we've calculated out and this is what is actually used below
