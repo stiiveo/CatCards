@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="jeA-7F-Qie">
-    <device id="retina4_7" orientation="portrait" appearance="light"/>
+    <device id="ipad9_7" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
@@ -15,14 +15,14 @@
             <objects>
                 <viewController id="jpg-gr-ShF" customClass="MainViewController" customModule="Cat_Cards" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cSQ-ii-ZYK">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="3kd-kf-SGh">
-                                <rect key="frame" x="0.0" y="603" width="375" height="64"/>
+                                <rect key="frame" x="0.0" y="960" width="768" height="64"/>
                                 <subviews>
                                     <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZI0-C0-QUe">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="768" height="44"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="44" id="7qg-j3-968"/>
                                         </constraints>
@@ -33,6 +33,7 @@
                                                     <action selector="shareButtonPressed:" destination="jpg-gr-ShF" id="BgI-cb-uF8"/>
                                                 </connections>
                                             </barButtonItem>
+                                            <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="MLV-P8-u3F"/>
                                             <barButtonItem style="plain" systemItem="flexibleSpace" id="fXc-Jq-dVN"/>
                                             <barButtonItem title="Undo" image="arrow.counterclockwise" catalog="system" id="c3g-fk-JM1">
                                                 <connections>
@@ -40,6 +41,7 @@
                                                 </connections>
                                             </barButtonItem>
                                             <barButtonItem style="plain" systemItem="flexibleSpace" id="L2G-v4-WQZ"/>
+                                            <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="fKo-3D-8BN"/>
                                             <barButtonItem title="Save" image="heart" catalog="system" id="eix-IU-TsW">
                                                 <connections>
                                                     <action selector="saveButtonPressed:" destination="jpg-gr-ShF" id="BKN-yk-8P5"/>
@@ -49,7 +51,7 @@
                                         </items>
                                     </toolbar>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cGb-6Z-c2Z" userLabel="Ad Fixed Space">
-                                        <rect key="frame" x="0.0" y="64" width="375" height="0.0"/>
+                                        <rect key="frame" x="0.0" y="64" width="768" height="0.0"/>
                                         <color key="backgroundColor" name="backgroundColor"/>
                                         <constraints>
                                             <constraint firstAttribute="height" id="xKe-58-e39"/>
@@ -58,10 +60,10 @@
                                 </subviews>
                             </stackView>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="o9H-d8-u3v">
-                                <rect key="frame" x="169" y="315" width="37" height="37"/>
+                                <rect key="frame" x="365.5" y="493.5" width="37" height="37"/>
                             </activityIndicatorView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bts-7g-pnA" userLabel="CardView">
-                                <rect key="frame" x="0.0" y="44" width="375" height="559"/>
+                                <rect key="frame" x="0.0" y="50" width="768" height="910"/>
                             </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="E8D-Zx-PRV"/>
@@ -106,7 +108,7 @@
             <objects>
                 <collectionViewController id="nfh-xn-jhC" customClass="CollectionVC" customModule="Cat_Cards" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="s03-pl-d20">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" name="backgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="q4y-nE-Wkn">
@@ -158,17 +160,17 @@
             <objects>
                 <viewController id="qlD-G6-Afc" customClass="SingleImageVC" customModule="Cat_Cards" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="qn6-hw-Gab">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" directionalLockEnabled="YES" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Ze-wL-vlY">
-                                <rect key="frame" x="0.0" y="44" width="375" height="569"/>
+                                <rect key="frame" x="0.0" y="50" width="768" height="920"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="eiQ-d0-gPU">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="569"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="768" height="920"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="default_image" translatesAutoresizingMaskIntoConstraints="NO" id="Tno-z9-hkl">
-                                                <rect key="frame" x="0.0" y="0.0" width="375" height="569"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="768" height="920"/>
                                             </imageView>
                                         </subviews>
                                     </stackView>
@@ -185,24 +187,26 @@
                                 <viewLayoutGuide key="frameLayoutGuide" id="S4A-Fj-ePw"/>
                             </scrollView>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="naK-xz-Kcm">
-                                <rect key="frame" x="0.0" y="613" width="375" height="54"/>
+                                <rect key="frame" x="0.0" y="970" width="768" height="54"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="54" id="PRy-aC-7Jr"/>
                                 </constraints>
                                 <items>
-                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="00h-JF-pss"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="UvV-Zb-nPE"/>
                                     <barButtonItem title="Share" image="square.and.arrow.up" catalog="system" id="6Ck-bA-J7B">
                                         <connections>
                                             <action selector="shareButtonPressed:" destination="qlD-G6-Afc" id="S8V-oG-6zS"/>
                                         </connections>
                                     </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="VI7-oI-Q4c"/>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="xf7-8S-kW2"/>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="Twv-HY-V3J"/>
                                     <barButtonItem title="Delete" image="trash" catalog="system" id="QaQ-75-ktH">
                                         <connections>
                                             <action selector="deleteButtonPressed:" destination="qlD-G6-Afc" id="Nq8-41-7j3"/>
                                         </connections>
                                     </barButtonItem>
-                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="ccR-Ny-csb"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="SVW-EN-b8j"/>
                                 </items>
                             </toolbar>
                         </subviews>
@@ -235,7 +239,7 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="jeA-7F-Qie" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="YCN-F7-b1W">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
