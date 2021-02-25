@@ -547,8 +547,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         // Size of the feedback view
         // Note: In order to make corner radius work, width and height must be the same 
         let feedbackViewSize = CGSize(
-            width: card.frame.width * 0.3,
-            height: card.frame.width * 0.3)
+            width: min(100, card.frame.width * 0.3),
+            height: min(100, card.frame.width * 0.3))
         
         NSLayoutConstraint.activate([
             feedBackView.centerXAnchor.constraint(equalTo: card.centerXAnchor),
