@@ -149,6 +149,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         super.viewWillAppear(animated)
         refreshButtonState()
         setBarStyle()
+        backgroundLayer.frame = view.bounds
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {

@@ -52,6 +52,7 @@ class CollectionVC: UICollectionViewController {
         super.viewDidLoad()
         navBar = self.navigationController?.navigationBar
         flowLayout = self.collectionViewLayout as? UICollectionViewFlowLayout
+        addBackgroundView()
     }
     
     // Refresh the collection view every time the view is about to be shown to the user
@@ -59,11 +60,11 @@ class CollectionVC: UICollectionViewController {
         super.viewWillAppear(animated)
         navBar.setBackgroundImage(nil, for: .default)
         navBar.barTintColor = K.Color.backgroundColor
+        backgroundLayer.frame = view.bounds
         
         collectionView.reloadData()
         
-        addBackgroundView()
-        setBackgroundColor()
+        // Display background view if no picture is saved yet
         noSavedPicturesHint.alpha = (DatabaseManager.imageFileURLs.count == 0) ? 1 : 0
     }
     
@@ -86,8 +87,6 @@ class CollectionVC: UICollectionViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navBar.setBackgroundImage(UIImage(), for: .default)
-        backgroundLayer.removeFromSuperlayer()
-        backgroundView.removeFromSuperview()
     }
     
     // Send the selected cell index to the SingleImageVC
@@ -147,7 +146,7 @@ class CollectionVC: UICollectionViewController {
     
     //MARK: - Background View & Color
     
-    private func setBackgroundColor() {
+    private func setBackgroundLayerColor() {
         let interfaceStyle = traitCollection.userInterfaceStyle
         let lightModeColors = [K.Color.lightModeColor1, K.Color.lightModeColor2]
         let darkModeColors = [K.Color.darkModeColor1, K.Color.darkModeColor2]
@@ -158,27 +157,34 @@ class CollectionVC: UICollectionViewController {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         // Make background color respond to change of interface style
-        setBackgroundColor()
+        setBackgroundLayerColor()
     }
     
+    // Background view is composed with a UIView at the bottom with a gradient–color layer on top
     private func addBackgroundView() {
         backgroundView = UIView(frame: view.bounds)
         backgroundLayer.frame = view.bounds
         
         // Add a gradient color layer
+        setBackgroundLayerColor()
         backgroundView.layer.insertSublayer(backgroundLayer, at: 0)
         
         // Add no-saved-pictures label to background view
-        backgroundView.addSubview(noSavedPicturesHint)
+        addHintLabel(to: backgroundView)
+        
+        collectionView.backgroundView = backgroundView
+    }
+    
+    private func addHintLabel(to view: UIView) {
+        view.addSubview(noSavedPicturesHint)
         noSavedPicturesHint.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             // Leave some margin on both sides
-            noSavedPicturesHint.leadingAnchor.constraint(equalTo: backgroundView.leadingAnchor, constant: 20),
-            noSavedPicturesHint.trailingAnchor.constraint(equalTo: backgroundView.trailingAnchor, constant: -20),
-            noSavedPicturesHint.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor),
+            noSavedPicturesHint.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            noSavedPicturesHint.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            noSavedPicturesHint.centerYAnchor.constraint(equalTo: view.centerYAnchor),
         ])
         
-        collectionView.backgroundView = backgroundView
     }
 
 }
