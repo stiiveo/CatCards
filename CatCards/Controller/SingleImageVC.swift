@@ -230,6 +230,12 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         hapticManager.prepareImpactGenerator(style: .soft)
         let imageURL = DatabaseManager.imageFileURLs[currentPage].image
         let activityVC = UIActivityViewController(activityItems: [imageURL], applicationActivities: nil)
+        
+        // Set up Popover Presentation Controller's barButtonItem for iPad
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            activityVC.popoverPresentationController?.barButtonItem = sender
+        }
+        
         self.present(activityVC, animated: true)
         hapticManager.impactHaptic?.impactOccurred()
     }
@@ -260,6 +266,12 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         }
         alert.addAction(deleteAction)
         alert.addAction(cancelAction)
+        
+        // Set up Popover Presentation Controller's barButtonItem for iPad
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            alert.popoverPresentationController?.barButtonItem = sender
+        }
+        
         self.present(alert, animated: true, completion: nil)
     }
     

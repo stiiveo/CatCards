@@ -495,7 +495,14 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         hapticManager.prepareImpactGenerator(style: .soft)
 
         let activityVC = UIActivityViewController(activityItems: [imageURL], applicationActivities: nil)
+        
+        // Set up Popover Presentation Controller's barButtonItem for iPad
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            activityVC.popoverPresentationController?.barButtonItem = sender
+        }
+        
         self.present(activityVC, animated: true)
+        
         hapticManager.impactHaptic?.impactOccurred()
         
         // Delete the cache image file after the activityVC is dismissed
