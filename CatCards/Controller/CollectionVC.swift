@@ -184,7 +184,6 @@ class CollectionVC: UICollectionViewController {
             noSavedPicturesHint.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             noSavedPicturesHint.centerYAnchor.constraint(equalTo: view.centerYAnchor),
         ])
-        
     }
 
 }
