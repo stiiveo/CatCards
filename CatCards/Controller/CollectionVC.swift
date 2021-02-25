@@ -13,7 +13,9 @@ class CollectionVC: UICollectionViewController {
     
     private var selectedCellIndex: Int = 0
     private let backgroundLayer = CAGradientLayer()
+    private var backgroundView: UIView!
     private var navBar: UINavigationBar!
+    private var flowLayout: UICollectionViewFlowLayout!
     private lazy var noSavedPicturesHint: UILabel = {
         let label = UILabel()
         label.text = Z.BackgroundView.noDataLabel
@@ -49,6 +51,7 @@ class CollectionVC: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navBar = self.navigationController?.navigationBar
+        flowLayout = self.collectionViewLayout as? UICollectionViewFlowLayout
     }
     
     // Refresh the collection view every time the view is about to be shown to the user
@@ -73,17 +76,18 @@ class CollectionVC: UICollectionViewController {
         super.viewWillTransition(to: size, with: coordinator)
         
         coordinator.animate(alongsideTransition: { _ in
-            // Update the item size of the collection view when the view's size is changing
-            self.updateCollectionViewItemSize()
-            
             // Update the frame of the background layer
             self.backgroundLayer.frame = self.view.bounds
         }, completion: nil)
+        
+        flowLayout.invalidateLayout()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navBar.setBackgroundImage(UIImage(), for: .default)
+        backgroundLayer.removeFromSuperlayer()
+        backgroundView.removeFromSuperview()
     }
     
     // Send the selected cell index to the SingleImageVC
@@ -98,19 +102,16 @@ class CollectionVC: UICollectionViewController {
     private func updateCollectionViewItemSize() {
         /// Set up cell's size and spacing
         let interCellSpacing: CGFloat = 1.5
-        let cellWidth = (screenWidth - (interCellSpacing * (numberOfCellsPerRow - 1))) / numberOfCellsPerRow
-        
-        // Floor the calculated width to remove any decimal number
-        let flooredCellWidth = floor(cellWidth)
+        let width = (screenWidth - (interCellSpacing * (numberOfCellsPerRow - 1))) / numberOfCellsPerRow
+        let height = width
         
         // Set up width and spacing of each cell
-        let viewLayout = self.collectionViewLayout
-        let flowLayout = viewLayout as! UICollectionViewFlowLayout
         
         // Remove auto layout constraint
         flowLayout.estimatedItemSize = .zero
-        flowLayout.itemSize = CGSize(width: flooredCellWidth, height: flooredCellWidth)
+        flowLayout.itemSize = CGSize(width: width, height: height)
         flowLayout.minimumLineSpacing = interCellSpacing
+        flowLayout.minimumInteritemSpacing = interCellSpacing
     }
     
     // MARK: UICollectionViewDataSource
@@ -161,13 +162,13 @@ class CollectionVC: UICollectionViewController {
     }
     
     private func addBackgroundView() {
-        let backgroundView = UIView(frame: view.bounds)
+        backgroundView = UIView(frame: view.bounds)
         backgroundLayer.frame = view.bounds
         
         // Add a gradient color layer
         backgroundView.layer.insertSublayer(backgroundLayer, at: 0)
         
-        // Add No-pictures-saved hint
+        // Add no-saved-pictures label to background view
         backgroundView.addSubview(noSavedPicturesHint)
         noSavedPicturesHint.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
