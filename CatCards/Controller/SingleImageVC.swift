@@ -64,6 +64,12 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         setScrollViewOffset() // Scroll to show the user selected image
     }
     
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        coordinator.animate(alongsideTransition: { _ in
+            self.backgroundLayer.frame = self.view.bounds
+        }, completion: nil)
+    }
+    
     override func viewDidDisappear(_ animated: Bool) {
         // Clear the memory buffer of stackView's arranged subviews
         for arrangedSubview in stackView.arrangedSubviews {
