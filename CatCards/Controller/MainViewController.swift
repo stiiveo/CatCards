@@ -141,7 +141,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         fetchNewData(initialRequest: true) // initiate data downloading
         
         setDownsampleSize() // Prepare ImageProcess's operation parameter
-        addGradientBackground() // Add gradient color layer to background
+        addBackgroundLayer() // Add gradient color layer to background
         addShadeOverlay() // Add overlay view to be used when card is being zoomed in
     }
     
@@ -154,9 +154,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         
-        // Reload the banner's ad if the orientation of the screen is about to change
         coordinator.animate { _ in
-            self.requestBannerAd()
+            self.backgroundLayer.frame = self.view.bounds
+            if self.adReceived {
+                // Request another banner ad if the orientation of the screen is changing
+                self.updateBannerViewSize(bannerView: self.adBannerView)
+                self.requestBannerAd()
+            }
         }
     }
     
@@ -276,7 +280,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         setBackgroundColor()
     }
     
-    private func addGradientBackground() {
+    private func addBackgroundLayer() {
         backgroundLayer = CAGradientLayer()
         backgroundLayer.frame = view.bounds
         setBackgroundColor()
@@ -331,13 +335,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     }
     
     private func requestBannerAd() {
-        guard onboardCompleted &&
-                !adReceived &&
-                viewCount > K.Banner.adLoadingThreshold &&
-                cardIndex % 5 == 0 else {
-            return
-        }
-            
         if #available(iOS 14, *) {
             requestIDFA()
         } else {
@@ -355,7 +352,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             bannerView.centerYAnchor.constraint(equalTo: bannerSpace.centerYAnchor),
             bannerView.centerXAnchor.constraint(equalTo: bannerSpace.centerXAnchor)
         ])
-        
+    }
+    
+    private func updateBannerViewSize(bannerView: GADBannerView) {
         // Banner's width equals the safe area's width
         let frame = { () -> CGRect in
             // Here safe area is taken into account, hence the view frame is used
@@ -380,7 +379,6 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         UIView.animate(withDuration: 0.5) {
             self.updateLayout() // Animate the update of bannerSpace's height
         }
-        
     }
     
     //MARK: - Support Methods
@@ -849,7 +847,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             self.removeOldCacheData()
             
             // Request banner ad if conditions are met
-            self.requestBannerAd()
+            if self.onboardCompleted && !self.adReceived && self.viewCount > K.Banner.adLoadingThreshold {
+                self.requestBannerAd()
+            }
         }
     }
     
@@ -943,13 +943,18 @@ extension MainViewController: DatabaseManagerDelegate {
 extension MainViewController: GADBannerViewDelegate {
     /// An ad request successfully receive an ad.
     func adViewDidReceiveAd(_ bannerView: GADBannerView) {
-        addBannerToBannerSpace(adBannerView)
+        if !adReceived {
+            addBannerToBannerSpace(adBannerView)
+            updateBannerViewSize(bannerView: bannerView)
+            
+            adReceived = true
+        }
         
+        // Animate the appearence of the banner view
         bannerView.alpha = 0
         UIView.animate(withDuration: 1.0) {
             bannerView.alpha = 1
         }
-        adReceived = true
     }
     
     /// Failed to receive ad with error.
