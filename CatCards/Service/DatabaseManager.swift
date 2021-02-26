@@ -20,10 +20,10 @@ class DatabaseManager {
     private let imageFolderName = K.Image.FolderName.fullImage
     private let thumbFolderName = K.Image.FolderName.thumbnail
     private let cacheFolderName = K.Image.FolderName.cacheImage
-    internal let imageProcess = ImageProcessor()
+    let imageProcess = ImageProcessor()
     private var favoriteArray: [Favorite]!
     static var imageFileURLs = [FilePath]()
-    internal var delegate: DatabaseManagerDelegate?
+    var delegate: DatabaseManagerDelegate?
     private let jpegCompression = K.Image.jpegCompressionQuality
     private let fileExtension = "." + K.API.imageType
     

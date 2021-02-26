@@ -52,7 +52,6 @@ struct K {
     }
     
     struct Image {
-        static let maxImageSize = CGSize(width: 1024, height: 1024)
         static let defaultCacheImage = UIColor.systemGray5.image(CGSize(width: 400, height: 400)) // Default image for stackView
         static let defaultImage = UIImage(named: "default_image")! // Default image to be used if something went wrong
         static let jpegCompressionQuality: CGFloat = 0.7 // 0: lowest quality; 1: highest quality
