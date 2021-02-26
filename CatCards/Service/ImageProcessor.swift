@@ -13,11 +13,11 @@ class ImageProcessor {
     
     let screenScale = UIScreen.main.scale
     var cellSize = CGSize()
-    let screenSize = UIScreen.main.bounds.size
+    let screenSize = UIScreen.main.nativeBounds.size
     
-    internal func processImage(_ image: UIImage) -> UIImage? {
+    /// Resize the image so its size is within the bounds of the device's native resolution
+    func resizeImage(_ image: UIImage) -> UIImage? {
         let imageSize = image.size
-        let maxSize = K.Image.maxImageSize
         
         // Filter any image matching the grumpy cat image's size
         if imageSize == K.Image.grumpyCatImageSize {
@@ -25,25 +25,20 @@ class ImageProcessor {
         }
         
         // Continue the resizing process if image's height and width is bigger than the resizing threshold, return original image otherwise.
-        guard imageSize.height > maxSize.height && imageSize.width > maxSize.width else { return image
+        guard imageSize.height > screenSize.height || imageSize.width > screenSize.width else { return image
         }
         
-        let widthDiff  = maxSize.width  / imageSize.width
-        let heightDiff = maxSize.height / imageSize.height
-        
-        // Figure out image's orientation and use that to form a target rectangle
-        var newSize: CGSize
-        if widthDiff > heightDiff {
-            newSize = CGSize(width: imageSize.width * heightDiff, height: imageSize.height * heightDiff)
-        } else {
-            newSize = CGSize(width: imageSize.width * widthDiff,  height: imageSize.height * widthDiff)
-        }
+        // The new image size's width and height is limited to the device's native resolution
+        let widthDiff = imageSize.width / screenSize.width
+        let heightDiff = imageSize.height / screenSize.height
+        let newImageSize = CGSize(width: imageSize.width / max(widthDiff, heightDiff),
+                                  height: imageSize.height / max(widthDiff, heightDiff))
         
         // This is the rect that we've calculated out and this is what is actually used below
-        let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
+        let rect = CGRect(x: 0, y: 0, width: newImageSize.width, height: newImageSize.height)
         
         // Actually do the resizing to the rect using the ImageContext stuff
-        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+        UIGraphicsBeginImageContextWithOptions(newImageSize, false, 1.0)
         image.draw(in: rect)
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
@@ -51,7 +46,7 @@ class ImageProcessor {
         return newImage ?? image
     }
     
-    internal func downsample(dataAt data: Data) -> UIImage {
+    func downsample(dataAt data: Data) -> UIImage {
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         let imageSource = CGImageSourceCreateWithData(data as CFData, imageSourceOptions)!
         
