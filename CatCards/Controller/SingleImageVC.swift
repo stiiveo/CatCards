@@ -17,7 +17,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     var selectedCellIndex: Int = 0
     private let backgroundLayer = CAGradientLayer()
     private var bufferImageArray = [ImageScrollView()] // ImageViews cache used to populate stackView
-    private let bufferImageNumber: Int = K.Data.maxBufferImageNumber
+    private let bufferImageNumber: Int = K.Data.prefetchNumberOfImageAtEachSide
     private let defaultCacheImage = K.Image.defaultCacheImage
     private var previousPage: Int = 0
     private let hapticManager = HapticManager()
@@ -43,30 +43,27 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         self.scrollView.delegate = self
         attachPanGestureRecognizer() // Prevent scrollView from responding to two-finger panning events
         removeImageView(atPage: 0) // Remove the template imageView set up in storyboard interface
-        setToolbarStyle()
         
         // Add background layer
         backgroundLayer.frame = view.bounds
-        view.layer.insertSublayer(backgroundLayer, at: 0)
         setBackgroundColor()
+        view.layer.insertSublayer(backgroundLayer, at: 0)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         setToolbarStyle()
         initiateImageBufferArray() // Create imageView cache
         loadDefaultImageView() // Populate cache array with default imageViews
-        
-        // Load images to selected imageView and nearby ones
-        for index in (selectedCellIndex - (bufferImageNumber / 2))...(selectedCellIndex + (bufferImageNumber / 2)) {
-            setImage(at: index)
-        }
-        
-        setScrollViewOffset() // Scroll to show the user selected image
+        loadImagesToStackView(atIndex: selectedCellIndex)
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         coordinator.animate(alongsideTransition: { _ in
+            // Update background layer's frame
             self.backgroundLayer.frame = self.view.bounds
+            
+            // By reloading the images again, each ImageScrollView's frame will be updated according to the frame of the view it's going to be.
+            self.loadImagesToStackView(atIndex: self.currentPage)
         }, completion: nil)
     }
     
@@ -82,6 +79,18 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     }
     
     //MARK: - Image Loading & Zoom Scale Control
+    
+    private func loadImagesToStackView(atIndex index: Int) {
+        // Load images to selected imageView and nearby ones
+        let startIndex = selectedCellIndex - bufferImageNumber
+        let endIndex = selectedCellIndex + bufferImageNumber
+        
+        for index in startIndex...endIndex {
+            setImage(at: index)
+        }
+        
+        setScrollViewOffset(toIndex: index) // Scroll to show the user selected image
+    }
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         previousPage = currentPage // Save the index of scrollView's page before it's changed by the user
@@ -109,24 +118,23 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     /// while the one outside the buffer range is reset.
     /// - Parameter direction: User's scrolling direction: Either 'forward' or 'backward'
     private func updateImage(at direction: ScrollDirection) {
-        let bufferImageEachSide = bufferImageNumber / 2 // Number of arranged subviews loaded with image on each side of current view
         switch direction {
         case .forward:
             // Update imageView ahead of current page
-            setImage(at: currentPage + bufferImageEachSide)
+            setImage(at: currentPage + bufferImageNumber)
             
             // Reset image out of the buffer range
-            let bufferToRemoveIndex = currentPage - bufferImageEachSide - 1
+            let bufferToRemoveIndex = currentPage - bufferImageNumber - 1
             guard bufferToRemoveIndex >= 0 && bufferToRemoveIndex < bufferImageArray.count else { return }
             if let imageToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
                 imageToReset.set(image: defaultCacheImage)
             }
         case .backward:
             // Update imageView before the current page
-            setImage(at: currentPage - bufferImageEachSide)
+            setImage(at: currentPage - bufferImageNumber)
             
             // Reset image out of the buffer range
-            let bufferToRemoveIndex = currentPage + bufferImageEachSide + 1
+            let bufferToRemoveIndex = currentPage + bufferImageNumber + 1
             guard bufferToRemoveIndex >= 0 && bufferToRemoveIndex < bufferImageArray.count else { return }
             if let imageToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
                 imageToReset.set(image: defaultCacheImage)
@@ -142,8 +150,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         
         let imageFileURL = DatabaseManager.imageFileURLs[index].image
         guard let imageAtDisk = UIImage(contentsOfFile: imageFileURL.path) else { return }
-            
-        bufferImageArray[index].set(image: imageAtDisk) // Set image to imageView at valid index value
+        bufferImageArray[index].set(image: imageAtDisk)
     }
     
     /// Create an `ImageScrollView` array with same item number as local saved image number and set each object's image property the default image defined in this class
@@ -166,10 +173,10 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     
     //MARK: - ScrollView Behavior Setting
     
-    private func setScrollViewOffset() {
+    private func setScrollViewOffset(toIndex index: Int) {
         DispatchQueue.main.async {
             let frameWidth = self.scrollView.frame.width
-            self.scrollView.setContentOffset(CGPoint(x: CGFloat(self.selectedCellIndex) * frameWidth, y: 0), animated: false)
+            self.scrollView.setContentOffset(CGPoint(x: CGFloat(index) * frameWidth, y: 0), animated: false)
         }
     }
     
@@ -214,8 +221,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
                     
                     // After reverting to original page, the 'auto buffer updating' method will move the buffer image (2 images after the current image) out of buffer range, which causes it to be reset and not being updated when user scrolls to the next page.
                     // Therefore, it's neccesary to update the image which was reset due to the compensation of page number change.
-                    let bufferNumberAtEachSide = self.bufferImageNumber / 2
-                    self.setImage(at: originalPage + bufferNumberAtEachSide)
+                    self.setImage(at: originalPage + self.bufferImageNumber)
                 }
             }
         }
