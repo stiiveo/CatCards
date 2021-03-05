@@ -8,22 +8,27 @@
 
 import UIKit
 
-class OnboardOverlay: UIView {
+class OverlayView: UIView {
     
     var cardNumber: Int = 0
     private lazy var blurEffectView = UIVisualEffectView()
     private lazy var labelView = UILabel()
     private let data = K.Onboard.data
     
+    //MARK: - Init Methods
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         addBackgroundView()
         addLabelView()
+        self.alpha = 0
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    //MARK: - Overlay Background
     
     /// Add background view and blur effect to the label view
     private func addBackgroundView() {
@@ -44,6 +49,8 @@ class OnboardOverlay: UIView {
             self.backgroundColor = UIColor(named: "onboardBackground")
         }
     }
+    
+    //MARK: - Addition of Text Info
     
     func addTableView(toCard index: Int) {
         self.cardNumber = index
@@ -89,7 +96,9 @@ class OnboardOverlay: UIView {
     }
 }
 
-extension OnboardOverlay: UITableViewDataSource {
+//MARK: - TableView Data Source
+
+extension OverlayView: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // Return rows for title and prompt message only if body's value is nil
         return data[cardNumber].cellText.count

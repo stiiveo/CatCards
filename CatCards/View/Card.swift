@@ -17,19 +17,40 @@ class Card: UIView {
     var data: CatData?
     private let imageView = UIImageView()
     private let backgroundImageView = UIImageView()
-    var onboardOverlay: OnboardOverlay?
+    var overlayView: OverlayView?
     var index: Int = 0
+    
+    //MARK: - Overriding Methods
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         addImageView()
         addBluredImageBackground()
+        addOverlay()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // Customize the card's style
+    override func layoutSubviews() {
+        self.layer.cornerRadius = K.Card.Style.cornerRadius
+        
+        // Shadow
+        self.layer.shadowColor = UIColor.black.cgColor
+        self.layer.shadowOpacity = 0.5
+        self.layer.shadowOffset = .zero
+        self.layer.shadowRadius = 5
+        
+        /// Decrease the performance impact of drawing the shadow by specifying the shape and render it as a bitmap before compositing.
+        self.layer.shadowPath = UIBezierPath(roundedRect: self.bounds, cornerRadius: K.Card.Style.cornerRadius).cgPath
+        self.layer.shouldRasterize = true
+        self.layer.rasterizationScale = UIScreen.main.scale
+    }
+    
+    //MARK: - ImageView & Background
     
     private func addImageView() {
         self.addSubview(imageView)
@@ -43,8 +64,7 @@ class Card: UIView {
         imageView.layer.cornerRadius = K.Card.Style.cornerRadius
     }
     
-    /// Add duplicated imageView with blur effect behind the primary one as the background
-    /// and fill the empty space in the cardView.
+    /// Insert duplicated imageView with blur effect on top of it as a filter below the primary imageView as the card's background.
     private func addBluredImageBackground() {
         self.insertSubview(backgroundImageView, belowSubview: imageView)
         backgroundImageView.frame = imageView.frame
@@ -62,6 +82,33 @@ class Card: UIView {
         backgroundImageView.addSubview(blurEffectView)
     }
     
+    //MARK: - Overlay Methods
+    
+    private func addOverlay() {
+        // Create an onboard overlay instance and add it to Card
+        overlayView = OverlayView(frame: imageView.bounds)
+        imageView.addSubview(overlayView!)
+        overlayView!.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+    }
+    
+    func setAsTutorialCard(cardIndex index: Int) {
+        guard index < K.Onboard.data.count else {
+            debugPrint("Index(\(index)) of onboard data is unavailable for onboard card")
+            return
+        }
+        
+        if index == 1 {
+            data = CatData(id: "zoomImage", image: K.Onboard.zoomImage)
+        }
+        
+        DispatchQueue.main.async {
+            self.overlayView?.addTableView(toCard: index)
+            self.overlayView?.alpha = 1
+        }
+    }
+    
+    //MARK: - Image Updating
+    
     func updateImage() {
         // Data is valid
         if data != nil {
@@ -76,7 +123,7 @@ class Card: UIView {
         }
         // Data is NOT valid
         else {
-            onboardOverlay?.removeFromSuperview() // Remove onboardOverlay if there's any
+            overlayView?.removeFromSuperview() // Remove onboardOverlay if there's any
             imageView.image = nil
             backgroundImageView.image = nil
             
@@ -112,48 +159,12 @@ class Card: UIView {
         imageView.contentMode = (ratioDifference > ratioThreshold) ? .scaleAspectFit : .scaleAspectFill
     }
     
-    func setAsTutorialCard(cardIndex index: Int) {
-        guard index < K.Onboard.data.count else {
-            debugPrint("Index(\(index)) of onboard data is unavailable for onboard card")
-            return
-        }
-        
-        if index == 1 {
-            data = CatData(id: "zoomImage", image: K.Onboard.zoomImage)
-        }
-        
-        DispatchQueue.main.async {
-            self.addOnboardOverlay(toCard: index)
-        }
-    }
-    
-    private func addOnboardOverlay(toCard index: Int) {
-        // Create an onboard overlay instance and add it to Card
-        onboardOverlay = OnboardOverlay(frame: imageView.bounds)
-        imageView.addSubview(onboardOverlay!)
-        onboardOverlay!.addTableView(toCard: index)
-    }
+    //MARK: - Memory Management
     
     func clearCache() {
         data = nil
         imageView.image = nil
         backgroundImageView.image = nil
-    }
-    
-    // Customize the card's style
-    override func layoutSubviews() {
-        self.layer.cornerRadius = K.Card.Style.cornerRadius
-        
-        // Shadow
-        self.layer.shadowColor = UIColor.black.cgColor
-        self.layer.shadowOpacity = 0.5
-        self.layer.shadowOffset = .zero
-        self.layer.shadowRadius = 5
-        
-        /// Decrease the performance impact of drawing the shadow by specifying the shape and render it as a bitmap before compositing.
-        self.layer.shadowPath = UIBezierPath(roundedRect: self.bounds, cornerRadius: K.Card.Style.cornerRadius).cgPath
-        self.layer.shouldRasterize = true
-        self.layer.rasterizationScale = UIScreen.main.scale
     }
     
 }
