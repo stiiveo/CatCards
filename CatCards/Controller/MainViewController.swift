@@ -466,7 +466,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     if success {
                         // Data is saved successfully
                         DispatchQueue.main.async {
-                            self.showFeedbackImage()
+                            self.showConfirmIcon()
                         }
                         hapticManager.notificationHaptic?.notificationOccurred(.success)
                     } else {
@@ -535,55 +535,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func showFeedbackImage() {
+    private func showConfirmIcon() {
         guard let card = currentCard else { return }
-        
-        // Add feedback image to card
-        let image = K.Image.savedFeedbackImage
-        let feedBackView = UIImageView(image: image)
-        
-        card.addSubview(feedBackView)
-        feedBackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Size of the feedback view
-        // Note: In order to make corner radius work, width and height must be the same 
-        let feedbackViewSize = CGSize(
-            width: min(100, card.frame.width * 0.3),
-            height: min(100, card.frame.width * 0.3))
-        
-        NSLayoutConstraint.activate([
-            feedBackView.centerXAnchor.constraint(equalTo: card.centerXAnchor),
-            feedBackView.centerYAnchor.constraint(equalTo: card.centerYAnchor),
-            feedBackView.widthAnchor.constraint(equalToConstant: feedbackViewSize.width),
-            feedBackView.heightAnchor.constraint(equalToConstant: feedbackViewSize.height)
-        ])
-        
-        guard card.subviews.contains(feedBackView) else { return }
-        
-        // Animation
-        let introAnimator = UIViewPropertyAnimator(duration: 0.1, curve: .linear) {
-            feedBackView.alpha = 1.0
-            feedBackView.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
-        }
-        let normalStateAnimator = UIViewPropertyAnimator(duration: 0.1, curve: .linear) {
-            feedBackView.transform = .identity
-        }
-        let dismissAnimator = UIViewPropertyAnimator(duration: 0.2, curve: .linear) {
-            feedBackView.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
-            feedBackView.alpha = 0
-        }
-        
-        introAnimator.addCompletion { _ in
-            normalStateAnimator.startAnimation()
-        }
-        normalStateAnimator.addCompletion { _ in
-            dismissAnimator.startAnimation(afterDelay: 0.5)
-        }
-        dismissAnimator.addCompletion { _ in
-            feedBackView.removeFromSuperview()
-        }
-        
-        introAnimator.startAnimation()
+        let confirmView = ConfirmationView(parentView: card, confirmImage: K.Image.savedFeedbackImage)
+        confirmView.startAnimation(withDelay: nil, duration: 0.4)
     }
     
     //MARK: - Gesture Recognizers
