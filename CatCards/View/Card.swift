@@ -17,7 +17,7 @@ class Card: UIView {
     var data: CatData?
     private let imageView = UIImageView()
     private let backgroundImageView = UIImageView()
-    var overlayView: OverlayView?
+    var overlayView: OverlayView!
     var index: Int = 0
     
     //MARK: - Overriding Methods
@@ -87,8 +87,8 @@ class Card: UIView {
     private func addOverlay() {
         // Create an onboard overlay instance and add it to Card
         overlayView = OverlayView(frame: imageView.bounds)
-        imageView.addSubview(overlayView!)
-        overlayView!.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        imageView.addSubview(overlayView)
+        overlayView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     }
     
     func setAsTutorialCard(cardIndex index: Int) {
@@ -123,7 +123,6 @@ class Card: UIView {
         }
         // Data is NOT valid
         else {
-            overlayView?.removeFromSuperview() // Remove onboardOverlay if there's any
             imageView.image = nil
             backgroundImageView.image = nil
             

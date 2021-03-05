@@ -102,6 +102,13 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         return pan
     }()
     
+    private lazy var tapGestureRecognizer: UITapGestureRecognizer = {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
+        tap.delegate = self
+        
+        return tap
+    }()
+    
     private lazy var adBannerView: GADBannerView = {
         // Initialize ad banner
         let adBannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait) // Define ad banner's size
@@ -512,7 +519,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     private func refreshButtonState() {
         guard onboardCompleted && !cardArray.isEmpty else { return }
         
-        if currentCard?.data != nil && currentCard?.onboardOverlay == nil {
+        if currentCard?.data != nil {
             saveButton.isEnabled = true
             shareButton.isEnabled = true
         } else {
@@ -795,16 +802,35 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func attachGestureRecognizers(to card: UIView) {
+    /// Tap the card to show / hidden the card's overlay view after onboard session is completed.
+    /// - Parameter sender: The tap gesture recognizer attached to the card.
+    @objc private func tapHandler(sender: UITapGestureRecognizer) {
+        guard let card = sender.view as? Card else { return }
+        guard onboardCompleted else { return }
+        
+        switch sender.state {
+        case .ended:
+            UIView.animate(withDuration: 0.3) {
+                card.overlayView?.alpha = card.overlayView?.alpha == 1 ? 0 : 1
+            }
+            
+        default:
+            debugPrint("Error handling tap gesture.")
+        }
+    }
+    
+    private func attachGestureRecognizers(to card: Card) {
         card.addGestureRecognizer(panGestureRecognizer)
         card.addGestureRecognizer(pinchGestureRecognizer)
         card.addGestureRecognizer(twoFingerPanGestureRecognizer)
+        card.addGestureRecognizer(tapGestureRecognizer)
     }
     
     private func removeGestureRecognizers(from card: Card) {
         card.removeGestureRecognizer(panGestureRecognizer)
         card.removeGestureRecognizer(pinchGestureRecognizer)
         card.removeGestureRecognizer(twoFingerPanGestureRecognizer)
+        card.removeGestureRecognizer(tapGestureRecognizer)
     }
     
     //MARK: - Animation Methods
