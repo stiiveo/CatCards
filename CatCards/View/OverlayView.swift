@@ -37,7 +37,7 @@ class OverlayView: UIView {
             self.backgroundColor = .clear
             
             // Blur effect setting
-            let blurEffect = UIBlurEffect(style: .systemChromeMaterial)
+            let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
             blurEffectView = UIVisualEffectView(effect: blurEffect)
             
             // Always fill the view

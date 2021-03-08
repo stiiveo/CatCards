@@ -810,10 +810,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         switch sender.state {
         case .ended:
-            UIView.animate(withDuration: 0.3) {
-                card.overlayView?.alpha = card.overlayView?.alpha == 1 ? 0 : 1
-            }
-            
+            card.toggleOverlay()
         default:
             debugPrint("Error handling tap gesture.")
         }

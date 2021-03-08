@@ -102,8 +102,14 @@ class Card: UIView {
         }
         
         DispatchQueue.main.async {
-            self.overlayView?.addTableView(toCard: index)
-            self.overlayView?.alpha = 1
+            self.overlayView.addTableView(toCard: index)
+            self.toggleOverlay()
+        }
+    }
+    
+    func toggleOverlay() {
+        UIView.animate(withDuration: 0.3) {
+            self.overlayView.alpha = self.overlayView.alpha == 1 ? 0 : 1
         }
     }
     
