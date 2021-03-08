@@ -74,9 +74,9 @@ struct K {
     }
     
     struct Card {
-        struct Transform {
-            static let scale: CGFloat = 0.9
-            static let defaultSize = CGAffineTransform(scaleX: scale, y: scale)
+        struct SizeScale {
+            static let intro: CGFloat = 0.1
+            static let standby: CGFloat = 0.9
         }
         struct Style {
             static let cornerRadius: CGFloat = 30

@@ -50,6 +50,23 @@ class Card: UIView {
         self.layer.rasterizationScale = UIScreen.main.scale
     }
     
+    //MARK: - Card Size Control
+    
+    enum Status {
+        case intro, standby, shown
+    }
+    
+    func setSize(status: Status) {
+        switch status {
+        case .intro:
+            self.transform = CGAffineTransform(scaleX: K.Card.SizeScale.intro, y: K.Card.SizeScale.intro)
+        case .standby:
+            self.transform = CGAffineTransform(scaleX: K.Card.SizeScale.standby, y: K.Card.SizeScale.standby)
+        case .shown:
+            self.transform = .identity
+        }
+    }
+    
     //MARK: - ImageView & Background
     
     private func addImageView() {

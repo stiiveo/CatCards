@@ -198,7 +198,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             // Add the card to the view if it's the last card in the card array
             if self.cardIndex == self.cardArray.count - 1 {
                 self.addCardToView(newCard, atBottom: false)
-                newCard.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+                
+                // Introduce the card by animating the change of the card size
+                newCard.setSize(status: .shown)
                 UIView.animate(withDuration: 0.3) {
                     newCard.transform = .identity
                 } completion: { _ in
@@ -214,17 +216,17 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             // Add the card to the view if it's the next card
             if newCard.index == self.cardIndex + 1 {
+                // Introduce the card by animating the change of the card size
                 self.addCardToView(newCard, atBottom: true)
-                
-                newCard.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
-                UIView.animate(withDuration: 0.5) {
-                    newCard.transform = K.Card.Transform.defaultSize
+                newCard.setSize(status: .intro)
+                UIView.animate(withDuration: 0.3) {
+                    newCard.setSize(status: .standby)
                 }
             }
         }
     }
     
-    //MARK: - Card Creation & Constraint Manipulation
+    //MARK: - Card Introduction & Constraint
     
     private func addCardToView(_ card: Card, atBottom: Bool) {
         cardView.addSubview(card)
@@ -233,7 +235,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         if atBottom {
             cardView.sendSubviewToBack(card)
-            card.transform = K.Card.Transform.defaultSize
+            card.setSize(status: .standby)
         }
         
         // Place tutorial message onto the card if onboarding process is not completed
@@ -444,7 +446,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         undoCard.centerYConstraint.constant = 0
         
         UIView.animate(withDuration: 0.5) {
-            self.currentCard?.transform = K.Card.Transform.defaultSize
+            self.currentCard?.setSize(status: .standby)
             self.updateLayout()
             undoCard.transform = .identity
         } completion: { _ in
@@ -649,7 +651,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             
             // Set next card's transform based on current card's travel distance
             let distance = (panDistance <= halfViewWidth) ? (panDistance / halfViewWidth) : 1
-            let defaultScale = K.Card.Transform.scale
+            let defaultScale = K.Card.SizeScale.standby
             
             nextCard?.transform = CGAffineTransform(
                 scaleX: defaultScale + (distance * (1 - defaultScale)),
@@ -696,7 +698,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     card.transform = self.startingTransform
                     
                     // Reset the next card's transform
-                    self.nextCard?.transform = K.Card.Transform.defaultSize
+                    self.nextCard?.setSize(status: .standby)
                 } completion: { _ in
                     card.centerXConstraint.constant = self.startingCenterX
                     card.centerYConstraint.constant = self.startingCenterY
