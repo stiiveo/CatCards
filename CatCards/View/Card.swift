@@ -17,21 +17,45 @@ class Card: UIView {
     var data: CatData?
     private let imageView = UIImageView()
     private let backgroundImageView = UIImageView()
-    var overlayView: OnboardOverlay!
+    var onboardOverlay: OnboardOverlay!
+    var triviaOverlay: TriviaOverlay!
     var index: Int = 0
     
-    //MARK: - Overriding Methods
+    //MARK: - Initialization
+    
+    enum CardType {
+        case onboard, regular
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
-        addBluredImageBackground()
-        addImageView()
+        cardDidLoad()
+    }
+    
+    convenience init(type cardType: CardType) {
+        self.init(frame: .zero)
+        addOverlay(cardType: cardType)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    private func cardDidLoad() {
+        addBluredImageBackground()
+        addImageView()
+    }
+    
+    private func addOverlay(cardType: CardType) {
+        switch cardType {
+        case .regular:
+            addTriviaOverlay()
+        case .onboard:
+            setAsTutorialCard(cardIndex: index)
+        }
+    }
+    
+    //MARK: - Style & Shadow
     
     // Customize the card's style
     override func layoutSubviews() {
