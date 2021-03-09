@@ -102,10 +102,10 @@ class Card: UIView {
     
     private func addOnboardOverlay() {
         // Create an onboard overlay instance and add it to Card
-        overlayView = OnboardOverlay(frame: imageView.bounds)
-        imageView.addSubview(overlayView)
-        overlayView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        overlayView.addTableView(toCard: index)
+        onboardOverlay = OnboardOverlay(frame: imageView.bounds)
+        imageView.addSubview(onboardOverlay)
+        onboardOverlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        onboardOverlay.addTableView(toCard: index)
     }
     
     func setAsTutorialCard(cardIndex index: Int) {
@@ -126,9 +126,23 @@ class Card: UIView {
         }
     }
     
+    //MARK: - Trivia Overlay
+    
+    private func addTriviaOverlay() {
+        triviaOverlay = TriviaOverlay()
+        self.addSubview(triviaOverlay)
+        triviaOverlay.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            triviaOverlay.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            triviaOverlay.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            triviaOverlay.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            // Height is determined by the intrinsic size of the trivia label
+        ])
+    }
+    
     func toggleOverlay() {
         UIView.animate(withDuration: 0.3) {
-            self.overlayView.alpha = self.overlayView.alpha == 1 ? 0 : 1
+            self.triviaOverlay.alpha = self.triviaOverlay.alpha == 1 ? 0 : 1
         }
     }
     
