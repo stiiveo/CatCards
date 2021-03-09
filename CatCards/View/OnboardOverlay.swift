@@ -45,7 +45,7 @@ class OnboardOverlay: UIView {
             
             self.addSubview(blurEffectView)
         } else {
-            self.backgroundColor = UIColor(named: "onboardBackground")
+            self.backgroundColor = K.Color.onboardBackground
         }
     }
     
