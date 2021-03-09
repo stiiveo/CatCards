@@ -15,19 +15,23 @@ class OnboardOverlay: UIView {
     private lazy var labelView = UILabel()
     private let data = K.Onboard.data
     
-    //MARK: - Init Methods
+    //MARK: - Initialization
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        addBackgroundView()
-        addLabelView()
+        cardDidLoad()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    //MARK: - Overlay Background
+    private func cardDidLoad() {
+        addBackgroundView()
+        addLabelView()
+    }
+    
+    //MARK: - Background & Text Info
     
     /// Add background view and blur effect to the label view
     private func addBackgroundView() {
@@ -48,8 +52,6 @@ class OnboardOverlay: UIView {
             self.backgroundColor = K.Color.onboardBackground
         }
     }
-    
-    //MARK: - Addition of Text Info
     
     func addTableView(toCard index: Int) {
         self.cardNumber = index
