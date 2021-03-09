@@ -46,3 +46,6 @@
 "DELETE_WARNING_ALERT_TITLE" = "This action can not be reverted.";
 "DELETE_WARNING_ALERT_ACTION" = "Delete Picture";
 "DELETE_WARNING_ALERT_CANCEL" = "Cancel";
+
+// Trivia
+"TRIVIA_0" = "Cats use their whiskers to navigate through the world. They use them to help determine if they can fit in a small space because their whiskers are approximately the same width as their body. This is why you shouldn’t cut your cat’s whiskers.";

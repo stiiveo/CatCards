@@ -47,4 +47,8 @@ struct Z {
     struct BackgroundView {
         static let noDataLabel = NSLocalizedString("NO_DATA_LABEL_TEXT", comment: "")
     }
+    
+    struct Trivia {
+        static let trivia_0 = NSLocalizedString("TRIVIA_0", comment: "Trivia text content.")
+    }
 }

@@ -46,3 +46,6 @@
 "DELETE_WARNING_ALERT_TITLE" = "這個動作無法回復";
 "DELETE_WARNING_ALERT_ACTION" = "刪除圖片";
 "DELETE_WARNING_ALERT_CANCEL" = "取消";
+
+// Trivia
+"TRIVIA_0" = "貓一天通常睡12～16個小時。";
