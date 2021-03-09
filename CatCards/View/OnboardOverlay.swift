@@ -8,7 +8,7 @@
 
 import UIKit
 
-class OverlayView: UIView {
+class OnboardOverlay: UIView {
     
     var cardNumber: Int = 0
     private lazy var blurEffectView = UIVisualEffectView()
@@ -21,7 +21,6 @@ class OverlayView: UIView {
         super.init(frame: frame)
         addBackgroundView()
         addLabelView()
-        self.alpha = 0
     }
     
     required init?(coder: NSCoder) {
@@ -98,7 +97,7 @@ class OverlayView: UIView {
 
 //MARK: - TableView Data Source
 
-extension OverlayView: UITableViewDataSource {
+extension OnboardOverlay: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // Return rows for title and prompt message only if body's value is nil
         return data[cardNumber].cellText.count

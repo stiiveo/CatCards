@@ -30,7 +30,7 @@
 		F67E4E3224D3C571006DDE96 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67E4E3124D3C571006DDE96 /* Constants.swift */; };
 		F6C928202540678B00BAB89E /* ImageScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C9281F2540678B00BAB89E /* ImageScrollView.swift */; };
 		F6CE40AB2593063700B09008 /* OnboardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AA2593063700B09008 /* OnboardData.swift */; };
-		F6CE40AE2593231000B09008 /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AD2593231000B09008 /* OverlayView.swift */; };
+		F6CE40AE2593231000B09008 /* OnboardOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AD2593231000B09008 /* OnboardOverlay.swift */; };
 		F6D09CCC259DD89600EAAE1C /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D09CCB259DD89600EAAE1C /* Secrets.swift */; };
 		F6EDE0AF254F998900513A98 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EDE0AE254F998900513A98 /* Card.swift */; };
 /* End PBXBuildFile section */
@@ -66,7 +66,7 @@
 		F67E4E3124D3C571006DDE96 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		F6C9281F2540678B00BAB89E /* ImageScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollView.swift; sourceTree = "<group>"; };
 		F6CE40AA2593063700B09008 /* OnboardData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardData.swift; sourceTree = "<group>"; };
-		F6CE40AD2593231000B09008 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
+		F6CE40AD2593231000B09008 /* OnboardOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardOverlay.swift; sourceTree = "<group>"; };
 		F6D09CCB259DD89600EAAE1C /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		F6EDE0AE254F998900513A98 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -153,7 +153,7 @@
 			isa = PBXGroup;
 			children = (
 				F6EDE0AE254F998900513A98 /* Card.swift */,
-				F6CE40AD2593231000B09008 /* OverlayView.swift */,
+				F6CE40AD2593231000B09008 /* OnboardOverlay.swift */,
 				F6C9281F2540678B00BAB89E /* ImageScrollView.swift */,
 				F6746FEC24C6DCF2006A2905 /* Main.storyboard */,
 				F6746FF124C6DCF5006A2905 /* LaunchScreen.storyboard */,
@@ -303,7 +303,7 @@
 			files = (
 				F6D09CCC259DD89600EAAE1C /* Secrets.swift in Sources */,
 				F6EDE0AF254F998900513A98 /* Card.swift in Sources */,
-				F6CE40AE2593231000B09008 /* OverlayView.swift in Sources */,
+				F6CE40AE2593231000B09008 /* OnboardOverlay.swift in Sources */,
 				F6746FFD24C6E02C006A2905 /* NetworkManager.swift in Sources */,
 				F6240AA4258B2EB800217C2D /* Strings.swift in Sources */,
 				F67B192024E6672E003E5A83 /* DatabaseManager.swift in Sources */,

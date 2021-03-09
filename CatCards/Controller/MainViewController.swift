@@ -200,7 +200,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                 self.addCardToView(newCard, atBottom: false)
                 
                 // Introduce the card by animating the change of the card size
-                newCard.setSize(status: .shown)
+                newCard.setSize(status: .intro)
                 UIView.animate(withDuration: 0.3) {
                     newCard.transform = .identity
                 } completion: { _ in
@@ -238,8 +238,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             card.setSize(status: .standby)
         }
         
-        // Place tutorial message onto the card if onboarding process is not completed
         if !onboardCompleted {
+            // Place onboard overlay onto the card if onboard session is not completed
             if card.index < onboardData.count {
                 card.setAsTutorialCard(cardIndex: card.index)
             }

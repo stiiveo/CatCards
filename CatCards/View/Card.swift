@@ -17,7 +17,7 @@ class Card: UIView {
     var data: CatData?
     private let imageView = UIImageView()
     private let backgroundImageView = UIImageView()
-    var overlayView: OverlayView!
+    var overlayView: OnboardOverlay!
     var index: Int = 0
     
     //MARK: - Overriding Methods
@@ -25,9 +25,8 @@ class Card: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        addImageView()
         addBluredImageBackground()
-        addOverlay()
+        addImageView()
     }
     
     required init?(coder: NSCoder) {
@@ -50,7 +49,7 @@ class Card: UIView {
         self.layer.rasterizationScale = UIScreen.main.scale
     }
     
-    //MARK: - Card Size Control
+    //MARK: - Size Control
     
     enum Status {
         case intro, standby, shown
@@ -99,28 +98,31 @@ class Card: UIView {
         backgroundImageView.addSubview(blurEffectView)
     }
     
-    //MARK: - Overlay Methods
+    //MARK: - Onboard Overlay
     
-    private func addOverlay() {
+    private func addOnboardOverlay() {
         // Create an onboard overlay instance and add it to Card
-        overlayView = OverlayView(frame: imageView.bounds)
+        overlayView = OnboardOverlay(frame: imageView.bounds)
         imageView.addSubview(overlayView)
         overlayView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        overlayView.addTableView(toCard: index)
     }
     
     func setAsTutorialCard(cardIndex index: Int) {
-        guard index < K.Onboard.data.count else {
+        // Make the index is within the bound of onboard data array
+        let onboardArray = K.Onboard.data
+        guard index < onboardArray.count else {
             debugPrint("Index(\(index)) of onboard data is unavailable for onboard card")
             return
         }
         
         if index == 1 {
+            // Use built–in image for the second onboard card
             data = CatData(id: "zoomImage", image: K.Onboard.zoomImage)
         }
         
         DispatchQueue.main.async {
-            self.overlayView.addTableView(toCard: index)
-            self.toggleOverlay()
+            self.addOnboardOverlay()
         }
     }
     
