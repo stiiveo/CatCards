@@ -30,6 +30,7 @@ struct K {
     struct Color {
         static let backgroundColor = UIColor(named: "backgroundColor")
         static let tintColor = UIColor(named: "buttonColor")
+        static let onboardBackground = UIColor.systemBackground
         
         // Used by gradient layer on the background
         static let lightModeColor1 = CGColor(red: 249/255, green: 228/255, blue: 192/255, alpha: 1)
