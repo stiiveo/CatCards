@@ -10,7 +10,7 @@ import UIKit
 
 class OnboardOverlay: UIView {
     
-    var cardNumber: Int = 0
+    var index: Int = 0
     private lazy var blurEffectView = UIVisualEffectView()
     private lazy var labelView = UILabel()
     private let data = K.Onboard.data
@@ -19,6 +19,11 @@ class OnboardOverlay: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+    }
+    
+    convenience init(cardIndex: Int) {
+        self.init()
+        self.index = cardIndex
         cardDidLoad()
     }
     
@@ -29,6 +34,7 @@ class OnboardOverlay: UIView {
     private func cardDidLoad() {
         addBackgroundView()
         addLabelView()
+        addTableView()
     }
     
     //MARK: - Background & Text Info
@@ -53,23 +59,17 @@ class OnboardOverlay: UIView {
         }
     }
     
-    func addTableView(toCard index: Int) {
-        self.cardNumber = index
-        
+    func addTableView() {
         // Add tableView to onboard overlay
         let tableView = UITableView()
         self.addSubview(tableView)
-        
-        // Set the origin and size of the tableView
-        let margin = K.Onboard.contentMargin
-        let tableViewFrame = CGRect(
-            x: self.frame.origin.x + margin,
-            y: self.frame.origin.y + margin,
-            width: self.frame.width - margin * 2,
-            height: self.frame.height - margin * 2
-        )
-        tableView.frame = tableViewFrame
-        tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            tableView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10),
+            tableView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -10),
+            tableView.topAnchor.constraint(equalTo: self.topAnchor, constant: 10),
+            tableView.bottomAnchor.constraint(equalTo: labelView.topAnchor, constant: -10)
+        ])
         
         // Delegate
         tableView.dataSource = self
@@ -102,14 +102,14 @@ class OnboardOverlay: UIView {
 extension OnboardOverlay: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // Return rows for title and prompt message only if body's value is nil
-        return data[cardNumber].cellText.count
+        return data[index].cellText.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
         // Text messages
-        cell.textLabel?.text = data[cardNumber].cellText[indexPath.row]
+        cell.textLabel?.text = data[index].cellText[indexPath.row]
         labelView.text = Z.InstructionText.prompt
         
         // Text style
@@ -121,12 +121,12 @@ extension OnboardOverlay: UITableViewDataSource {
         cell.backgroundColor = .clear
         cell.isUserInteractionEnabled = false
         
-        if cardNumber == 1 {
+        if index == 1 {
             // Remove blur effect view of the card for zooming gesture instruction
             self.blurEffectView.removeFromSuperview()
         }
         
-        if cardNumber == 2 {
+        if index == 2 {
             // Last card's cell images
             if indexPath.row != 0 {
                 // Add image to each cell except the first and the last one
