@@ -31,7 +31,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     static let databaseManager = DatabaseManager()
     private let networkManager = NetworkManager()
     private var cardArray: [Card] = []
-    private let onboardData = K.Onboard.data
+    private let onboardData = K.OnboardOverlay.data
     private var navBar: UINavigationBar!
     private var cardIndex: Int = 0
     private var maxCardIndex: Int = 0

@@ -13,7 +13,7 @@ class OnboardOverlay: UIView {
     var index: Int = 0
     private lazy var blurEffectView = UIVisualEffectView()
     private lazy var labelView = UILabel()
-    private let data = K.Onboard.data
+    private let data = K.OnboardOverlay.data
     
     //MARK: - Initialization
     

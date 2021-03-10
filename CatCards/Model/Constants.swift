@@ -99,8 +99,7 @@ struct K {
         static let maximumScaleFactor: CGFloat = 4
     }
     
-    struct Onboard {
-        static let contentMargin: CGFloat = 15
+    struct OnboardOverlay {
         static let zoomImage = UIImage(named: "onboard_zoom_image")!
         struct ButtonImage {
             static let share = UIImage(systemName: "square.and.arrow.up")!
@@ -109,10 +108,10 @@ struct K {
             static let showDownloads = UIImage(systemName: "square.grid.2x2.fill")!
         }
         
-        static let data = [
-            // Text and images used for the onboarding card
-            // Each data represents the data each card uses
-            OnboardData(cellText: [Z.InstructionText.greetTitle,
+        // Text and images used for the onboarding card
+        // Each data represents the data each card uses
+        static let data =
+            [OnboardData(cellText: [Z.InstructionText.greetTitle,
                                    Z.InstructionText.greet_1,
                                    Z.InstructionText.greet_2],
                         cellImage: nil),
@@ -124,12 +123,11 @@ struct K {
                                    Z.InstructionText.undoButton,
                                    Z.InstructionText.saveButton,
                                    Z.InstructionText.showDownloadsButton],
-                        cellImage: [K.Onboard.ButtonImage.share,
-                                    K.Onboard.ButtonImage.undo,
-                                    K.Onboard.ButtonImage.save,
-                                    K.Onboard.ButtonImage.showDownloads])
-        ]
-        
+                        cellImage: [K.OnboardOverlay.ButtonImage.share,
+                                    K.OnboardOverlay.ButtonImage.undo,
+                                    K.OnboardOverlay.ButtonImage.save,
+                                    K.OnboardOverlay.ButtonImage.showDownloads])
+            ]
     }
     
     // Note: Remember to sync this value with the real number of trivia string contents

@@ -130,7 +130,7 @@ class Card: UIView {
     
     private func addOnboardOverlay() {
         // Make sure the index is within the bound of onboard data array
-        let onboardArray = K.Onboard.data
+        let onboardArray = K.OnboardOverlay.data
         guard index! >= 0 && index! < onboardArray.count else {
             debugPrint("Index(\(index!)) of onboard data is unavailable for onboard card")
             return
@@ -138,7 +138,7 @@ class Card: UIView {
         
         if index == 1 {
             // Use built–in image for the second onboard card
-            data = CatData(id: "zoomImage", image: K.Onboard.zoomImage)
+            data = CatData(id: "zoomImage", image: K.OnboardOverlay.zoomImage)
             setImage(data!.image)
         }
         
