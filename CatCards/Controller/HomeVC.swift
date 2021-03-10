@@ -1,5 +1,5 @@
 //
-//  MainViewController.swift
+//  HomeVC.swift
 //  CatCards
 //
 //  Created by Jason Ou Yang on 2020/7/21.
@@ -11,7 +11,7 @@ import GoogleMobileAds
 import UserNotifications
 import AppTrackingTransparency
 
-class MainViewController: UIViewController, NetworkManagerDelegate {
+class HomeVC: UIViewController, NetworkManagerDelegate {
     
     //MARK: - IBOutlet
     
@@ -125,7 +125,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         super.viewDidLoad()
         
         navBar = self.navigationController?.navigationBar // Save the reference of the built-in navigation bar
-        MainViewController.databaseManager.delegate = self
+        HomeVC.databaseManager.delegate = self
         networkManager.delegate = self
         
         // Load viewCount value from UserDefaults if there's any
@@ -142,8 +142,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
         
         // Create local image folder in file system and/or load data from it
-        MainViewController.databaseManager.createNecessaryFolders()
-        MainViewController.databaseManager.getSavedImageFileURLs()
+        HomeVC.databaseManager.createNecessaryFolders()
+        HomeVC.databaseManager.getSavedImageFileURLs()
         
         fetchNewData(initialRequest: true) // initiate data downloading
         
@@ -190,9 +190,8 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     // Create and add a new card to the card array
     func dataDidFetch(data: CatData, dataIndex: Int) {
         DispatchQueue.main.async {
-            let newCard = Card()
-            newCard.data = data
-            newCard.index = dataIndex
+            let cardType: Card.CardType = !self.onboardCompleted && dataIndex < self.onboardData.count ? .onboard : .regular
+            let newCard = Card(data: data, index: dataIndex, type: cardType)
             self.cardArray.append(newCard)
             
             // Add the card to the view if it's the last card in the card array
@@ -238,16 +237,9 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             card.setSize(status: .standby)
         }
         
-        if !onboardCompleted {
-            // Place onboard overlay onto the card if onboard session is not completed
-            if card.index < onboardData.count {
-                card.setAsTutorialCard(cardIndex: card.index)
-            }
-            
+        if !onboardCompleted && card.index == onboardData.count {
             // Show UI buttons when the last onboarding card is showned to user
-            if card.index == onboardData.count {
-                showUIButtons()
-            }
+            showUIButtons()
         }
     }
     
@@ -411,7 +403,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         let cellWidth = floor((screenWidth - (cellSpacing * (cellsPerRow - 1))) / cellsPerRow)
         
         let cellSize = CGSize(width: cellWidth, height: cellWidth)
-        MainViewController.databaseManager.imageProcess.cellSize = cellSize
+        HomeVC.databaseManager.imageProcess.cellSize = cellSize
     }
     
     /// Hide navigation bar and toolbar's border line
@@ -468,11 +460,11 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             hapticManager.prepareNotificationGenerator()
             
             // Save data if it's absent in database, otherwise delete it.
-            let isSaved = MainViewController.databaseManager.isDataSaved(data: data)
+            let isSaved = HomeVC.databaseManager.isDataSaved(data: data)
             
             switch isSaved {
             case false:
-                MainViewController.databaseManager.saveData(data) { success in
+                HomeVC.databaseManager.saveData(data) { success in
                     if success {
                         // Data is saved successfully
                         DispatchQueue.main.async {
@@ -485,7 +477,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
                     }
                 }
             case true:
-                MainViewController.databaseManager.deleteData(id: data.id)
+                HomeVC.databaseManager.deleteData(id: data.id)
                 hapticManager.impactHaptic?.impactOccurred()
             }
             
@@ -501,7 +493,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         guard !cardIsBeingPanned, catData != nil else { return }
         
         // Create and save the cache image file to cache folder
-        guard let imageURL = MainViewController.databaseManager.getImageTempURL(catData: catData!) else { return }
+        guard let imageURL = HomeVC.databaseManager.getImageTempURL(catData: catData!) else { return }
         
         hapticManager.prepareImpactGenerator(style: .soft)
 
@@ -511,7 +503,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Delete the cache image file after the activityVC is dismissed
         activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
-            MainViewController.databaseManager.removeFile(atDirectory: .cachesDirectory, withinFolder: K.Image.FolderName.cacheImage, fileName: catData!.id)
+            HomeVC.databaseManager.removeFile(atDirectory: .cachesDirectory, withinFolder: K.Image.FolderName.cacheImage, fileName: catData!.id)
             
             self.hapticManager.releaseImpactGenerator()
         }
@@ -533,7 +525,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         
         // Toggle the status of save button
         if let data = currentCard?.data {
-            let isDataSaved = MainViewController.databaseManager.isDataSaved(data: data)
+            let isDataSaved = HomeVC.databaseManager.isDataSaved(data: data)
             saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
         }
     }
@@ -804,12 +796,10 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    /// Tap the card to show / hidden the card's overlay view after onboard session is completed.
+    /// Show / Hidden the card's overlay view when tap gesture is detected.
     /// - Parameter sender: The tap gesture recognizer attached to the card.
     @objc private func tapHandler(sender: UITapGestureRecognizer) {
         guard let card = sender.view as? Card else { return }
-        guard onboardCompleted else { return }
-        
         switch sender.state {
         case .ended:
             card.toggleOverlay()
@@ -844,6 +834,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
             card.removeFromSuperview()
             self.cardIsBeingPanned = false
             self.cardIndex += 1
+            
             if self.currentCard?.data != nil {
                 self.attachGestureRecognizers(to: self.currentCard!)
             }
@@ -931,7 +922,7 @@ class MainViewController: UIViewController, NetworkManagerDelegate {
     
 }
 
-extension MainViewController: UIGestureRecognizerDelegate {
+extension HomeVC: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
     }
@@ -950,7 +941,7 @@ extension MainViewController: UIGestureRecognizerDelegate {
     }
 }
 
-extension MainViewController: DatabaseManagerDelegate {
+extension HomeVC: DatabaseManagerDelegate {
     /// Number of saved images has reached the limit.
     func savedImagesMaxReached() {
         // Show alert to the user
@@ -965,7 +956,7 @@ extension MainViewController: DatabaseManagerDelegate {
     }
 }
 
-extension MainViewController: GADBannerViewDelegate {
+extension HomeVC: GADBannerViewDelegate {
     /// An ad request successfully receive an ad.
     func adViewDidReceiveAd(_ bannerView: GADBannerView) {
         addBannerToBannerSpace(adBannerView)
