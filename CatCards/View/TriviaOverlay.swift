@@ -66,8 +66,7 @@ class TriviaOverlay: UIView {
 
 extension UILabel {
     func setContent() {
-        let randomNum = Int.random(in: 1...K.numberOfTrivia)
-        let key = "TRIVIA_" + "\(randomNum)"
+        let key = "TRIVIA_" + "\(HomeVC.triviaShuffledIndex())"
         self.text = NSLocalizedString(key, comment: "Trivia text content.")
     }
     
