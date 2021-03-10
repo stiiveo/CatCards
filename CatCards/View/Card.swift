@@ -15,11 +15,12 @@ class Card: UIView {
     var heightConstraint: NSLayoutConstraint!
     var widthConstraint: NSLayoutConstraint!
     var data: CatData?
+    var index: Int?
     private let imageView = UIImageView()
     private let backgroundImageView = UIImageView()
-    var onboardOverlay: OnboardOverlay!
-    var triviaOverlay: TriviaOverlay!
-    var index: Int = 0
+    var onboardOverlay: OnboardOverlay?
+    var triviaOverlay: TriviaOverlay?
+    var cardType: CardType = .regular
     
     //MARK: - Initialization
     
@@ -32,8 +33,11 @@ class Card: UIView {
         cardDidLoad()
     }
     
-    convenience init(type cardType: CardType) {
-        self.init(frame: .zero)
+    convenience init(data: CatData, index: Int, type cardType: CardType) {
+        self.init()
+        self.data = data
+        self.index = index
+        self.cardType = cardType
         addOverlay(cardType: cardType)
     }
     
@@ -51,7 +55,7 @@ class Card: UIView {
         case .regular:
             addTriviaOverlay()
         case .onboard:
-            setAsTutorialCard(cardIndex: index)
+            addOnboardOverlay()
         }
     }
     
@@ -122,44 +126,37 @@ class Card: UIView {
         backgroundImageView.addSubview(blurEffectView)
     }
     
-    //MARK: - Onboard Overlay
+    //MARK: - Overlay
     
     private func addOnboardOverlay() {
-        // Create an onboard overlay instance and add it to Card
-        onboardOverlay = OnboardOverlay(frame: imageView.bounds)
-        imageView.addSubview(onboardOverlay)
-        onboardOverlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        onboardOverlay.addTableView(toCard: index)
-    }
-    
-    func setAsTutorialCard(cardIndex index: Int) {
-        // Make the index is within the bound of onboard data array
+        // Make sure the index is within the bound of onboard data array
         let onboardArray = K.Onboard.data
-        guard index < onboardArray.count else {
-            debugPrint("Index(\(index)) of onboard data is unavailable for onboard card")
+        guard index! >= 0 && index! < onboardArray.count else {
+            debugPrint("Index(\(index!)) of onboard data is unavailable for onboard card")
             return
         }
         
         if index == 1 {
             // Use built–in image for the second onboard card
             data = CatData(id: "zoomImage", image: K.Onboard.zoomImage)
+            setImage(data!.image)
         }
         
-        DispatchQueue.main.async {
-            self.addOnboardOverlay()
-        }
+        // Create an onboard overlay instance and add it to Card
+        onboardOverlay = OnboardOverlay(cardIndex: self.index!)
+        self.addSubview(onboardOverlay!)
+        onboardOverlay!.frame = self.bounds
+        onboardOverlay!.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     }
-    
-    //MARK: - Trivia Overlay
     
     private func addTriviaOverlay() {
         triviaOverlay = TriviaOverlay()
-        self.addSubview(triviaOverlay)
-        triviaOverlay.translatesAutoresizingMaskIntoConstraints = false
+        self.addSubview(triviaOverlay!)
+        triviaOverlay!.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            triviaOverlay.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            triviaOverlay.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            triviaOverlay.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            triviaOverlay!.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            triviaOverlay!.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            triviaOverlay!.bottomAnchor.constraint(equalTo: self.bottomAnchor),
             // Height is determined by the intrinsic size of the trivia label
         ])
     }
