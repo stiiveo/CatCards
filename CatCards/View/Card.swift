@@ -163,7 +163,13 @@ class Card: UIView {
     
     func toggleOverlay() {
         UIView.animate(withDuration: 0.3) {
-            self.triviaOverlay.alpha = self.triviaOverlay.alpha == 1 ? 0 : 1
+            switch self.cardType {
+            case .regular:
+                self.triviaOverlay?.alpha = self.triviaOverlay?.alpha == 1 ? 0 : 1
+            case .onboard:
+                self.onboardOverlay?.alpha = self.onboardOverlay?.alpha == 1 ? 0 : 1
+            }
+            
         }
     }
     
