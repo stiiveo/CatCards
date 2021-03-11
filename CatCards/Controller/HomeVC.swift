@@ -40,6 +40,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     private var zoomOverlay: UIView!
     private var cardIsBeingPanned = false
     private let hapticManager = HapticManager()
+    static var showOverlay = true
     
     // Number of cards with cat images the user has seen
     private var viewCount: Int = 0 {
@@ -821,13 +822,16 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    /// Show / Hidden the card's overlay view when tap gesture is detected.
+    /// Show / Hidden every card's overlay view every time the current card is tapped onto.
     /// - Parameter sender: The tap gesture recognizer attached to the card.
     @objc private func tapHandler(sender: UITapGestureRecognizer) {
-        guard let card = sender.view as? Card else { return }
         switch sender.state {
         case .ended:
-            card.toggleOverlay()
+            for card in cardArray {
+                // The method `toggleOverlay` in Card.swift toggles every card's visibility
+                // and the global variable `showOverlay` in this class.
+                card.toggleOverlay()
+            }
         default:
             debugPrint("Error handling tap gesture.")
         }
