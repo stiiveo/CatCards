@@ -234,6 +234,8 @@ class Card: UIView {
         data = nil
         imageView.image = nil
         backgroundImageView.image = nil
+        onboardOverlay = nil
+        triviaOverlay = nil
     }
     
 }
