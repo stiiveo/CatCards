@@ -767,6 +767,15 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             switch sender.state {
             case .began:
                 startingTransform = card.transform
+                
+                // Hide navBar button
+                if self.onboardCompleted {
+                    self.collectionButton.tintColor = .clear
+                }
+                
+                // Hide card's trivia overlay
+                card.hideTriviaOverlay()
+                
             case .changed:
                 // Coordinate of the pinch center where the view's center is (0, 0)
                 let pinchCenter = CGPoint(
@@ -798,13 +807,6 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
                 let deltaToMaxOpacity: CGFloat = 0.2 // number of width delta to get maximum opacity
                     
                 zoomOverlay.alpha = maxOpacity * min((cardWidthDelta / deltaToMaxOpacity), 1.0)
-                
-                // Hide navBar button
-                UIView.animate(withDuration: 0.3) {
-                    if self.onboardCompleted {
-                        self.collectionButton.tintColor = .clear
-                    }
-                }
             
             case .ended, .cancelled, .failed:
                 // Reset card's size
@@ -815,6 +817,11 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
                     if self.onboardCompleted {
                         self.collectionButton.tintColor = K.Color.tintColor
                     }
+                }
+                
+                // Re-show trivia overlay if showOverlay is true
+                if HomeVC.showOverlay == true {
+                    card.showTriviaOverlay()
                 }
             default:
                 debugPrint("Error handling image zooming")

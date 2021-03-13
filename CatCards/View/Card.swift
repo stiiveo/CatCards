@@ -177,6 +177,18 @@ class Card: UIView {
         }
     }
     
+    func hideTriviaOverlay() {
+        UIViewPropertyAnimator(duration: 0.3, curve: .linear) {
+            self.triviaOverlay?.alpha = 0
+        }.startAnimation()
+    }
+    
+    func showTriviaOverlay() {
+        UIViewPropertyAnimator(duration: 0.3, curve: .linear) {
+            self.triviaOverlay?.alpha = 1
+        }.startAnimation()
+    }
+    
     //MARK: - Image Updating
     
     func updateImage() {
