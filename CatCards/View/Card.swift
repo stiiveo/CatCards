@@ -144,14 +144,14 @@ class Card: UIView {
         
         // Create an onboard overlay instance and add it to Card
         onboardOverlay = OnboardOverlay(cardIndex: self.index!)
-        self.addSubview(onboardOverlay!)
+        imageView.addSubview(onboardOverlay!)
         onboardOverlay!.frame = self.bounds
         onboardOverlay!.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     }
     
     private func addTriviaOverlay() {
         triviaOverlay = TriviaOverlay()
-        self.addSubview(triviaOverlay!)
+        imageView.addSubview(triviaOverlay!)
         triviaOverlay!.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             triviaOverlay!.leadingAnchor.constraint(equalTo: self.leadingAnchor),
