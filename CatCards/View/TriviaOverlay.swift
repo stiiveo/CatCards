@@ -32,7 +32,7 @@ class TriviaOverlay: UIView {
             self.backgroundColor = .clear
             
             // Blur effect setting
-            let blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+            let blurEffect = UIBlurEffect(style: .systemMaterial)
             blurEffectView = UIVisualEffectView(effect: blurEffect)
             
             // Always fill the view
