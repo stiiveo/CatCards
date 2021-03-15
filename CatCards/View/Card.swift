@@ -67,9 +67,9 @@ class Card: UIView {
         
         // Shadow
         self.layer.shadowColor = UIColor.black.cgColor
-        self.layer.shadowOpacity = 0.5
+        self.layer.shadowOpacity = 0.2
         self.layer.shadowOffset = .zero
-        self.layer.shadowRadius = 5
+        self.layer.shadowRadius = 3.0
         
         /// Decrease the performance impact of drawing the shadow by specifying the shape and render it as a bitmap before compositing.
         self.layer.shadowPath = UIBezierPath(roundedRect: self.bounds, cornerRadius: K.Card.Style.cornerRadius).cgPath
