@@ -27,7 +27,7 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Pictures cannot be saved to your photo library without your permission.</string>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>By accessing your device's identifier, Ad could be more personalized and attractive to you. You can support me by clicking the Ad. 🙏</string>
+	<string>By accessing your device&apos;s identifier, Ad could be more personalized and attractive to you. You can support me by clicking the Ad. 🙏</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
@@ -79,16 +79,10 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 </dict>
 </plist>
