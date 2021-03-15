@@ -64,7 +64,6 @@ class Card: UIView {
     // Customize the card's style
     override func layoutSubviews() {
         self.layer.cornerRadius = K.Card.Style.cornerRadius
-        self.clipsToBounds = true
         
         // Shadow
         self.layer.shadowColor = UIColor.black.cgColor
@@ -101,6 +100,7 @@ class Card: UIView {
         self.addSubview(imageView)
         imageView.frame = self.bounds
         imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        imageView.clipsToBounds = true
         
         // Style
         imageView.isUserInteractionEnabled = true
