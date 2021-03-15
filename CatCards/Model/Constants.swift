@@ -130,6 +130,6 @@ struct K {
             ]
     }
     
-    // Note: Remember to sync this value with the real number of trivia string contents
-    static let numberOfTrivia: Int = 10
+    // Note: Sync this value to the real number of trivia content
+    static let numberOfTrivia: Int = 34
 }
