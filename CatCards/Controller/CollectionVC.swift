@@ -12,9 +12,10 @@ import ImageIO
 class CollectionVC: UICollectionViewController {
     
     private var selectedCellIndex: Int = 0
-    private let screenWidth = UIScreen.main.bounds.width
     private let backgroundLayer = CAGradientLayer()
+    private var backgroundView: UIView!
     private var navBar: UINavigationBar!
+    private var flowLayout: UICollectionViewFlowLayout!
     private lazy var noSavedPicturesHint: UILabel = {
         let label = UILabel()
         label.text = Z.BackgroundView.noDataLabel
@@ -27,12 +28,21 @@ class CollectionVC: UICollectionViewController {
         return label
     }()
     
-    // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
-    private var cellNumberPerRow: CGFloat {
-        if screenWidth >= 414 {
-            return 4.0
-        } else {
-            return 3.0
+    private var screenWidth: CGFloat {
+        return UIScreen.main.bounds.width
+    }
+    
+    // To maximize the usage of screen real estate, the wider the screen width, the more cell numbers per row of the collection view
+    private var numberOfCellsPerRow: CGFloat {
+        switch screenWidth {
+        case 0..<414:
+            return 3
+        case 414..<768:
+            return 4
+        case 768..<1024:
+            return 5
+        default:
+            return 6
         }
     }
     
@@ -41,22 +51,8 @@ class CollectionVC: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navBar = self.navigationController?.navigationBar
-        
-        /// Set up cell's size and spacing
-        let interCellSpacing: CGFloat = 1.5
-        let cellWidth = (screenWidth - (interCellSpacing * (cellNumberPerRow - 1))) / cellNumberPerRow
-        
-        // Floor the calculated width to remove any decimal number
-        let flooredCellWidth = floor(cellWidth)
-        
-        // Set up width and spacing of each cell
-        let viewLayout = self.collectionViewLayout
-        let flowLayout = viewLayout as! UICollectionViewFlowLayout
-        
-        // Remove auto layout constraint
-        flowLayout.estimatedItemSize = .zero
-        flowLayout.itemSize = CGSize(width: flooredCellWidth, height: flooredCellWidth)
-        flowLayout.minimumLineSpacing = interCellSpacing
+        flowLayout = self.collectionViewLayout as? UICollectionViewFlowLayout
+        addBackgroundView()
     }
     
     // Refresh the collection view every time the view is about to be shown to the user
@@ -64,12 +60,28 @@ class CollectionVC: UICollectionViewController {
         super.viewWillAppear(animated)
         navBar.setBackgroundImage(nil, for: .default)
         navBar.barTintColor = K.Color.backgroundColor
+        backgroundLayer.frame = view.bounds
         
-        self.collectionView.reloadData()
+        collectionView.reloadData()
         
-        addBackgroundView()
-        setBackgroundColor()
+        // Display background view if no picture is saved yet
         noSavedPicturesHint.alpha = (DatabaseManager.imageFileURLs.count == 0) ? 1 : 0
+    }
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        updateCollectionViewItemSize()
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate(alongsideTransition: { _ in
+            // Update the frame of the background layer
+            self.backgroundLayer.frame = self.view.bounds
+        }, completion: nil)
+        
+        flowLayout.invalidateLayout()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -82,6 +94,23 @@ class CollectionVC: UICollectionViewController {
         if let destination = segue.destination as? SingleImageVC {
             destination.selectedCellIndex = self.selectedCellIndex
         }
+    }
+    
+    //MARK: - Collection View Item Size
+    
+    private func updateCollectionViewItemSize() {
+        /// Set up cell's size and spacing
+        let interCellSpacing: CGFloat = 1.5
+        let width = (screenWidth - (interCellSpacing * (numberOfCellsPerRow - 1))) / numberOfCellsPerRow
+        let height = width
+        
+        // Set up width and spacing of each cell
+        
+        // Remove auto layout constraint
+        flowLayout.estimatedItemSize = .zero
+        flowLayout.itemSize = CGSize(width: width, height: height)
+        flowLayout.minimumLineSpacing = interCellSpacing
+        flowLayout.minimumInteritemSpacing = interCellSpacing
     }
     
     // MARK: UICollectionViewDataSource
@@ -117,7 +146,7 @@ class CollectionVC: UICollectionViewController {
     
     //MARK: - Background View & Color
     
-    private func setBackgroundColor() {
+    private func setBackgroundLayerColor() {
         let interfaceStyle = traitCollection.userInterfaceStyle
         let lightModeColors = [K.Color.lightModeColor1, K.Color.lightModeColor2]
         let darkModeColors = [K.Color.darkModeColor1, K.Color.darkModeColor2]
@@ -128,27 +157,33 @@ class CollectionVC: UICollectionViewController {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         // Make background color respond to change of interface style
-        setBackgroundColor()
+        setBackgroundLayerColor()
     }
     
+    // Background view is composed with a UIView at the bottom with a gradient–color layer on top
     private func addBackgroundView() {
-        let backgroundView = UIView(frame: view.bounds)
+        backgroundView = UIView(frame: view.bounds)
         backgroundLayer.frame = view.bounds
         
         // Add a gradient color layer
+        setBackgroundLayerColor()
         backgroundView.layer.insertSublayer(backgroundLayer, at: 0)
         
-        // Add No-pictures-saved hint
-        backgroundView.addSubview(noSavedPicturesHint)
+        // Add no-saved-pictures label to background view
+        addHintLabel(to: backgroundView)
+        
+        collectionView.backgroundView = backgroundView
+    }
+    
+    private func addHintLabel(to view: UIView) {
+        view.addSubview(noSavedPicturesHint)
         noSavedPicturesHint.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             // Leave some margin on both sides
-            noSavedPicturesHint.leadingAnchor.constraint(equalTo: backgroundView.leadingAnchor, constant: 20),
-            noSavedPicturesHint.trailingAnchor.constraint(equalTo: backgroundView.trailingAnchor, constant: -20),
-            noSavedPicturesHint.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor),
+            noSavedPicturesHint.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            noSavedPicturesHint.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            noSavedPicturesHint.centerYAnchor.constraint(equalTo: view.centerYAnchor),
         ])
-        
-        collectionView.backgroundView = backgroundView
     }
 
 }

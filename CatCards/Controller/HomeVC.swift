@@ -149,7 +149,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         fetchNewData(initialRequest: true) // initiate data downloading
         
         setDownsampleSize() // Prepare ImageProcess's operation parameter
-        addGradientBackground() // Add gradient color layer to background
+        addBackgroundLayer() // Add gradient color layer to background
         addShadeOverlay() // Add overlay view to be used when card is being zoomed in
     }
     
@@ -157,14 +157,19 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         super.viewWillAppear(animated)
         refreshButtonState()
         setBarStyle()
+        backgroundLayer.frame = view.bounds
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         
-        // Reload the banner's ad if the orientation of the screen is about to change
         coordinator.animate { _ in
-            self.requestBannerAd()
+            self.backgroundLayer.frame = self.view.bounds
+            if self.adReceived {
+                // Request another banner ad if the orientation of the screen is changing
+                self.updateBannerViewSize(bannerView: self.adBannerView)
+                self.requestBannerAd()
+            }
         }
     }
     
@@ -278,7 +283,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         setBackgroundColor()
     }
     
-    private func addGradientBackground() {
+    private func addBackgroundLayer() {
         backgroundLayer = CAGradientLayer()
         backgroundLayer.frame = view.bounds
         setBackgroundColor()
@@ -333,13 +338,6 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     }
     
     private func requestBannerAd() {
-        guard onboardCompleted &&
-                !adReceived &&
-                viewCount > K.Banner.adLoadingThreshold &&
-                cardIndex % 5 == 0 else {
-            return
-        }
-            
         if #available(iOS 14, *) {
             requestIDFA()
         } else {
@@ -357,7 +355,9 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             bannerView.centerYAnchor.constraint(equalTo: bannerSpace.centerYAnchor),
             bannerView.centerXAnchor.constraint(equalTo: bannerSpace.centerXAnchor)
         ])
-        
+    }
+    
+    private func updateBannerViewSize(bannerView: GADBannerView) {
         // Banner's width equals the safe area's width
         let frame = { () -> CGRect in
             // Here safe area is taken into account, hence the view frame is used
@@ -382,7 +382,6 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         UIView.animate(withDuration: 0.5) {
             self.updateLayout() // Animate the update of bannerSpace's height
         }
-        
     }
     
     //MARK: - Support Methods
@@ -494,7 +493,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
                     if success {
                         // Data is saved successfully
                         DispatchQueue.main.async {
-                            self.showFeedbackImage()
+                            self.showConfirmIcon()
                         }
                         hapticManager.notificationHaptic?.notificationOccurred(.success)
                     } else {
@@ -524,7 +523,14 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         hapticManager.prepareImpactGenerator(style: .soft)
 
         let activityVC = UIActivityViewController(activityItems: [imageURL], applicationActivities: nil)
+        
+        // Set up Popover Presentation Controller's barButtonItem for iPad
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            activityVC.popoverPresentationController?.barButtonItem = sender
+        }
+        
         self.present(activityVC, animated: true)
+        
         hapticManager.impactHaptic?.impactOccurred()
         
         // Delete the cache image file after the activityVC is dismissed
@@ -556,55 +562,10 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    private func showFeedbackImage() {
+    private func showConfirmIcon() {
         guard let card = currentCard else { return }
-        
-        // Add feedback image to card
-        let image = K.Image.savedFeedbackImage
-        let feedBackView = UIImageView(image: image)
-        
-        card.addSubview(feedBackView)
-        feedBackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Size of the feedback view
-        // Note: In order to make corner radius work, width and height must be the same 
-        let feedbackViewSize = CGSize(
-            width: card.frame.width * 0.3,
-            height: card.frame.width * 0.3)
-        
-        NSLayoutConstraint.activate([
-            feedBackView.centerXAnchor.constraint(equalTo: card.centerXAnchor),
-            feedBackView.centerYAnchor.constraint(equalTo: card.centerYAnchor),
-            feedBackView.widthAnchor.constraint(equalToConstant: feedbackViewSize.width),
-            feedBackView.heightAnchor.constraint(equalToConstant: feedbackViewSize.height)
-        ])
-        
-        guard card.subviews.contains(feedBackView) else { return }
-        
-        // Animation
-        let introAnimator = UIViewPropertyAnimator(duration: 0.1, curve: .linear) {
-            feedBackView.alpha = 1.0
-            feedBackView.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
-        }
-        let normalStateAnimator = UIViewPropertyAnimator(duration: 0.1, curve: .linear) {
-            feedBackView.transform = .identity
-        }
-        let dismissAnimator = UIViewPropertyAnimator(duration: 0.2, curve: .linear) {
-            feedBackView.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
-            feedBackView.alpha = 0
-        }
-        
-        introAnimator.addCompletion { _ in
-            normalStateAnimator.startAnimation()
-        }
-        normalStateAnimator.addCompletion { _ in
-            dismissAnimator.startAnimation(afterDelay: 0.5)
-        }
-        dismissAnimator.addCompletion { _ in
-            feedBackView.removeFromSuperview()
-        }
-        
-        introAnimator.startAnimation()
+        let confirmView = ConfirmationView(parentView: card, confirmImage: K.Image.savedFeedbackImage)
+        confirmView.startAnimation(withDelay: nil, duration: 0.4)
     }
     
     //MARK: - Gesture Recognizers
@@ -901,7 +862,9 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             self.removeOldCacheData()
             
             // Request banner ad if conditions are met
-            self.requestBannerAd()
+            if self.onboardCompleted && !self.adReceived && self.viewCount > K.Banner.adLoadingThreshold {
+                self.requestBannerAd()
+            }
         }
     }
     
@@ -995,13 +958,18 @@ extension HomeVC: DatabaseManagerDelegate {
 extension HomeVC: GADBannerViewDelegate {
     /// An ad request successfully receive an ad.
     func adViewDidReceiveAd(_ bannerView: GADBannerView) {
-        addBannerToBannerSpace(adBannerView)
+        if !adReceived {
+            addBannerToBannerSpace(adBannerView)
+            updateBannerViewSize(bannerView: bannerView)
+            
+            adReceived = true
+        }
         
+        // Animate the appearence of the banner view
         bannerView.alpha = 0
         UIView.animate(withDuration: 1.0) {
             bannerView.alpha = 1
         }
-        adReceived = true
     }
     
     /// Failed to receive ad with error.

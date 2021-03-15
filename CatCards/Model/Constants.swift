@@ -53,7 +53,6 @@ struct K {
     }
     
     struct Image {
-        static let maxImageSize = CGSize(width: 1024, height: 1024)
         static let defaultCacheImage = UIColor.systemGray5.image(CGSize(width: 400, height: 400)) // Default image for stackView
         static let defaultImage = UIImage(named: "default_image")! // Default image to be used if something went wrong
         static let jpegCompressionQuality: CGFloat = 0.7 // 0: lowest quality; 1: highest quality
@@ -70,8 +69,8 @@ struct K {
     struct Data {
         static let cacheDataNumber: Int = 15 // Smaller this number is, bigger the chance the user experiences the loading process
         static let undoCardNumber: Int = 9 // Number of cards the user can undo
-        static let maxBufferImageNumber: Int = 4
-        static let maxSavedImages: Int = 36
+        static let prefetchNumberOfImageAtEachSide: Int = 2 // Number of prefetched images in the stackView's arranged subviews. The value must be positive. The larger the value, the more the memory consumption will be.
+        static let maxSavedImages: Int = 36 // Maximum number of pictures which can be saved to user's device
     }
     
     struct Card {

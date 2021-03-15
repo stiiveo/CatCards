@@ -15,11 +15,11 @@ protocol NetworkManagerDelegate {
 
 class NetworkManager {
     
-    internal var delegate: NetworkManagerDelegate?
+    var delegate: NetworkManagerDelegate?
     private var dataIndex: Int = 0
     private let imageProcesser = ImageProcessor()
     
-    internal func performRequest(numberOfRequests: Int) {
+    func performRequest(numberOfRequests: Int) {
         guard numberOfRequests > 0 else {
             debugPrint("Error: Number of network request equals 0 or less.")
             return
@@ -75,7 +75,7 @@ class NetworkManager {
             }
             let id = jsonData.id
             let image = imageFromURL(url: imageURL)
-            guard let processedImage = imageProcesser.processImage(image) else {
+            guard let processedImage = imageProcesser.resizeImage(image) else {
                 // Call another fetch request if the processed image is not valid
                 performRequest(numberOfRequests: 1)
                 return
