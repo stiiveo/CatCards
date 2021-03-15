@@ -27,12 +27,13 @@
                                             <constraint firstAttribute="height" constant="44" id="7qg-j3-968"/>
                                         </constraints>
                                         <items>
-                                            <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="eX6-Tv-xPR"/>
+                                            <barButtonItem style="plain" systemItem="flexibleSpace" id="M9g-41-Rrj"/>
                                             <barButtonItem title="Share" image="square.and.arrow.up" catalog="system" id="qHs-X8-xcv">
                                                 <connections>
                                                     <action selector="shareButtonPressed:" destination="jpg-gr-ShF" id="BgI-cb-uF8"/>
                                                 </connections>
                                             </barButtonItem>
+                                            <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="eX6-Tv-xPR"/>
                                             <barButtonItem style="plain" systemItem="flexibleSpace" id="fXc-Jq-dVN"/>
                                             <barButtonItem title="Undo" image="arrow.counterclockwise" catalog="system" id="c3g-fk-JM1">
                                                 <connections>
@@ -40,12 +41,13 @@
                                                 </connections>
                                             </barButtonItem>
                                             <barButtonItem style="plain" systemItem="flexibleSpace" id="L2G-v4-WQZ"/>
+                                            <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="lks-lI-KVw"/>
                                             <barButtonItem title="Save" image="heart" catalog="system" id="eix-IU-TsW">
                                                 <connections>
                                                     <action selector="saveButtonPressed:" destination="jpg-gr-ShF" id="BKN-yk-8P5"/>
                                                 </connections>
                                             </barButtonItem>
-                                            <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="lks-lI-KVw"/>
+                                            <barButtonItem style="plain" systemItem="flexibleSpace" id="m7o-fo-Gpu"/>
                                         </items>
                                     </toolbar>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cGb-6Z-c2Z" userLabel="Ad Fixed Space">
@@ -190,19 +192,21 @@
                                     <constraint firstAttribute="height" constant="44" id="PRy-aC-7Jr"/>
                                 </constraints>
                                 <items>
-                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="00h-JF-pss"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="ikV-2A-UAn"/>
                                     <barButtonItem title="Share" image="square.and.arrow.up" catalog="system" id="6Ck-bA-J7B">
                                         <connections>
                                             <action selector="shareButtonPressed:" destination="qlD-G6-Afc" id="S8V-oG-6zS"/>
                                         </connections>
                                     </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="00h-JF-pss"/>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="xf7-8S-kW2"/>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="ccR-Ny-csb"/>
                                     <barButtonItem title="Delete" image="trash" catalog="system" id="QaQ-75-ktH">
                                         <connections>
                                             <action selector="deleteButtonPressed:" destination="qlD-G6-Afc" id="Nq8-41-7j3"/>
                                         </connections>
                                     </barButtonItem>
-                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="ccR-Ny-csb"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="LoU-vL-GaG"/>
                                 </items>
                             </toolbar>
                         </subviews>
