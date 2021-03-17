@@ -34,6 +34,7 @@
 		F6CE40AB2593063700B09008 /* OnboardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AA2593063700B09008 /* OnboardData.swift */; };
 		F6CE40AE2593231000B09008 /* OnboardOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AD2593231000B09008 /* OnboardOverlay.swift */; };
 		F6D09CCC259DD89600EAAE1C /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D09CCB259DD89600EAAE1C /* Secrets.swift */; };
+		F6D5C13D2600E6D800429C82 /* OverlayContentPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D5C13C2600E6D800429C82 /* OverlayContentPicker.swift */; };
 		F6EDE0AF254F998900513A98 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EDE0AE254F998900513A98 /* Card.swift */; };
 /* End PBXBuildFile section */
 
@@ -72,6 +73,7 @@
 		F6CE40AA2593063700B09008 /* OnboardData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardData.swift; sourceTree = "<group>"; };
 		F6CE40AD2593231000B09008 /* OnboardOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardOverlay.swift; sourceTree = "<group>"; };
 		F6D09CCB259DD89600EAAE1C /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
+		F6D5C13C2600E6D800429C82 /* OverlayContentPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayContentPicker.swift; sourceTree = "<group>"; };
 		F6EDE0AE254F998900513A98 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -185,6 +187,7 @@
 				F67B191F24E6672E003E5A83 /* DatabaseManager.swift */,
 				F612B5F52554F304008BBCDC /* ImageProcessor.swift */,
 				F675B41A25C9927300698291 /* HapticManager.swift */,
+				F6D5C13C2600E6D800429C82 /* OverlayContentPicker.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -334,6 +337,7 @@
 				F639A17D24E29FB600FB6C0A /* CollectionVC.swift in Sources */,
 				F6AB3F2125F1E1CF005400DD /* ConfirmationView.swift in Sources */,
 				F64FFF0D2518A10900E80DE2 /* SingleImageVC.swift in Sources */,
+				F6D5C13D2600E6D800429C82 /* OverlayContentPicker.swift in Sources */,
 				F6746FE724C6DCF2006A2905 /* SceneDelegate.swift in Sources */,
 				F6746FFF24C6E245006A2905 /* HomeVC.swift in Sources */,
 				F67E4DEE24CE80A7006DDE96 /* CatData.swift in Sources */,

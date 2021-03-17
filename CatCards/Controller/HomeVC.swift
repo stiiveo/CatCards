@@ -415,31 +415,6 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         toolbar.setShadowImage(UIImage(), forToolbarPosition: .bottom)
     }
     
-    //MARK: - Trivia Pointer Generator
-    
-    static private var shuffleCounter: Int = 0
-    static private let triviaCount = K.numberOfTrivia
-    static private var triviaIndex: [Int] = {
-        let indexArray = (0..<triviaCount).map { index in
-            return index
-        }
-        return indexArray.shuffled()
-    }()
-    
-    
-    static func triviaShuffledIndex() -> Int {
-        guard shuffleCounter < triviaCount else {
-            triviaIndex.shuffle()
-            shuffleCounter = 1
-            return triviaIndex[0]
-        }
-        
-        var shuffledIndex: Int!
-        shuffledIndex = triviaIndex[shuffleCounter]
-        shuffleCounter += 1
-        return shuffledIndex
-    }
-    
     //MARK: - Toolbar Button Method and State Control
     
     // Undo Action

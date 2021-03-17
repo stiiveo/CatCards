@@ -66,8 +66,7 @@ class TriviaOverlay: UIView {
 
 extension UILabel {
     func setContent() {
-        let key = "TRIVIA_" + "\(HomeVC.triviaShuffledIndex())"
-        self.text = NSLocalizedString(key, comment: "Trivia text content.")
+        self.text = OverlayContentPicker.shared.randomCatTriviaOrQuote()
     }
     
     func setStyle() {
