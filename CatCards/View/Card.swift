@@ -161,7 +161,7 @@ class Card: UIView {
         ])
         
         // Show/Hidden the overlay depends on the value of `showOverlay` in HomeVC.
-        triviaOverlay?.alpha = HomeVC.showOverlay ? 1 : 0
+        triviaOverlay?.alpha = HomeVC.shared.showOverlay ? 1 : 0
     }
     
     func toggleOverlay() {
@@ -169,7 +169,7 @@ class Card: UIView {
             switch self.cardType {
             case .regular:
                 self.triviaOverlay?.alpha = self.triviaOverlay?.alpha == 1 ? 0 : 1
-                HomeVC.showOverlay = self.triviaOverlay?.alpha == 1 ? true : false
+                HomeVC.shared.showOverlay = self.triviaOverlay?.alpha == 1 ? true : false
             case .onboard:
                 self.onboardOverlay?.alpha = self.onboardOverlay?.alpha == 1 ? 0 : 1
             }

@@ -25,10 +25,11 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     @IBOutlet weak var bannerSpaceHeight: NSLayoutConstraint!
     @IBOutlet weak var cardView: UIView!
     
-    //MARK: - Global Properties
+    //MARK: - Local Properties
     
+    static let shared = HomeVC()
     private let defaults = UserDefaults.standard
-    static let databaseManager = DatabaseManager()
+    let databaseManager = DatabaseManager()
     private let networkManager = NetworkManager()
     private var cardArray: [Card] = []
     private let onboardData = K.OnboardOverlay.data
@@ -40,7 +41,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     private var zoomOverlay: UIView!
     private var cardIsBeingPanned = false
     private let hapticManager = HapticManager()
-    static var showOverlay = true
+    var showOverlay = true
     
     // Number of cards with cat images the user has seen
     private var viewCount: Int = 0 {
@@ -126,7 +127,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         super.viewDidLoad()
         
         navBar = self.navigationController?.navigationBar // Save the reference of the built-in navigation bar
-        HomeVC.databaseManager.delegate = self
+        databaseManager.delegate = self
         networkManager.delegate = self
         
         // Load viewCount value from UserDefaults if there's any
@@ -143,8 +144,8 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         }
         
         // Create local image folder in file system and/or load data from it
-        HomeVC.databaseManager.createNecessaryFolders()
-        HomeVC.databaseManager.getSavedImageFileURLs()
+        databaseManager.createNecessaryFolders()
+        databaseManager.getSavedImageFileURLs()
         
         fetchNewData(initialRequest: true) // initiate data downloading
         
@@ -403,7 +404,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         let cellWidth = floor((screenWidth - (cellSpacing * (cellsPerRow - 1))) / cellsPerRow)
         
         let cellSize = CGSize(width: cellWidth, height: cellWidth)
-        HomeVC.databaseManager.imageProcess.cellSize = cellSize
+        databaseManager.imageProcess.cellSize = cellSize
     }
     
     /// Hide navigation bar and toolbar's border line
@@ -460,11 +461,11 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             hapticManager.prepareNotificationGenerator()
             
             // Save data if it's absent in database, otherwise delete it.
-            let isSaved = HomeVC.databaseManager.isDataSaved(data: data)
+            let isSaved = databaseManager.isDataSaved(data: data)
             
             switch isSaved {
             case false:
-                HomeVC.databaseManager.saveData(data) { success in
+                databaseManager.saveData(data) { success in
                     if success {
                         // Data is saved successfully
                         DispatchQueue.main.async {
@@ -477,7 +478,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
                     }
                 }
             case true:
-                HomeVC.databaseManager.deleteData(id: data.id)
+                databaseManager.deleteData(id: data.id)
                 hapticManager.impactHaptic?.impactOccurred()
             }
             
@@ -493,7 +494,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         guard !cardIsBeingPanned, catData != nil else { return }
         
         // Create and save the cache image file to cache folder
-        guard let imageURL = HomeVC.databaseManager.getImageTempURL(catData: catData!) else { return }
+        guard let imageURL = databaseManager.getImageTempURL(catData: catData!) else { return }
         
         hapticManager.prepareImpactGenerator(style: .soft)
 
@@ -510,7 +511,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         
         // Delete the cache image file after the activityVC is dismissed
         activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
-            HomeVC.databaseManager.removeFile(atDirectory: .cachesDirectory, withinFolder: K.Image.FolderName.cacheImage, fileName: catData!.id)
+            self.databaseManager.removeFile(atDirectory: .cachesDirectory, withinFolder: K.Image.FolderName.cacheImage, fileName: catData!.id)
             
             self.hapticManager.releaseImpactGenerator()
         }
@@ -532,7 +533,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         
         // Toggle the status of save button
         if let data = currentCard?.data {
-            let isDataSaved = HomeVC.databaseManager.isDataSaved(data: data)
+            let isDataSaved = databaseManager.isDataSaved(data: data)
             saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
         }
     }
@@ -756,7 +757,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
                 }
                 
                 // Re-show trivia overlay if showOverlay is true
-                if HomeVC.showOverlay == true {
+                if showOverlay == true {
                     card.showTriviaOverlay()
                 }
             default:
