@@ -11,16 +11,18 @@ import Foundation
 /// This class contains a method which can be used to randomly pick one of the trivia or quote localized string values, which are stored in the folder [Localizable.strings].
 class OverlayContentPicker {
     
-    private enum ContentType {
+    enum ContentType {
         case trivia, quote
     }
     
     static let shared = OverlayContentPicker()
     private var triviaCounter: Int = 0
     private var quoteCounter: Int = 0
+    let triviaKey = "TRIVIA_"
+    let quoteKey = "QUOTE_"
     
     // Initiate an shuffled array which contains incrementing integer starting from 0 to the last number of the trivia content.
-    private var triviaShuffledIndex: [Int] = {
+    private var triviaPickingOrder: [Int] = {
         let indexArray = (0..<K.numberOfTrivia).map { index in
             return index
         }
@@ -28,7 +30,7 @@ class OverlayContentPicker {
     }()
     
     // Initiate an shuffled array which contains incrementing integer starting from 0 to the last number of the quote content.
-    private var quoteShuffledIndex: [Int] = {
+    private var quotePickingOrder: [Int] = {
         let indexArray = (0..<K.numberOfQuotes).map { index in
             return index
         }
@@ -37,61 +39,66 @@ class OverlayContentPicker {
     
     /// Return seemingly randomized localized trivia or quote string from the bundle's folder Localizable.strings where the returned string will be different the next time this method is called if the same class is referenced again.
     /// - Returns: Randomly picked trivia or quote where if the method is called again via the same class, the returned string value will Not be the same as the previous returned one.
-    func randomCatTriviaOrQuote() -> String {
-        let contentType: ContentType = (0...1).randomElement()! % 2 == 0 ? .trivia : .quote
-        let index = shuffledIndex(contentType: contentType)
+    func randomContent(contentTypes: [ContentType]) -> String {
+        let contentType = contentTypes.randomElement()!
+        
+        var pickIndex: Int!
         switch contentType {
-        case .quote:
-            let key = "QUOTE_" + "\(index)"
-            let localizedQuote = NSLocalizedString(key, comment: "A cat quote.")
-            return localizedQuote
         case .trivia:
-            let key = "TRIVIA_" + "\(index)"
+            if triviaCounter < K.numberOfTrivia {
+                pickIndex = triviaCounter
+                triviaCounter += 1
+            } else {
+                shufflePickingOrder(of: .trivia)
+                triviaCounter = 0
+                pickIndex = triviaCounter
+                triviaCounter += 1
+            }
+            
+            let key = "TRIVIA_" + "\(pickIndex!)"
             let localizedTrivia = NSLocalizedString(key, comment: "A cat trivia.")
             return localizedTrivia
+        case .quote:
+            if quoteCounter < K.numberOfQuotes {
+                pickIndex = quoteCounter
+                quoteCounter += 1
+            } else {
+                shufflePickingOrder(of: .quote)
+                quoteCounter = 0
+                pickIndex = quoteCounter
+                quoteCounter += 1
+            }
+            
+            let key = "QUOTE_" + "\(pickIndex!)"
+            let localizedQuote = NSLocalizedString(key, comment: "A cat quote.")
+            return localizedQuote
         }
     }
     
-    /// Return a subscript index from the beginning of the already shuffled trivia / quote shuffled index array accordingly.
-    /// If the last subscript index had already been returned, re–shuffle the index array and return the subscript index from the start again, until the last subscript index is return again. So on and so forth.
-    /// - Parameter type: From which type of shuffled index array to return the subscript index.
-    /// - Returns: The picked subscript index which can be used to get the localized overlay string content.
-    private func shuffledIndex(contentType type: ContentType) -> Int {
-        let counter = type == .trivia ? triviaCounter : quoteCounter
-        let numberOfContent = type == .trivia ? K.numberOfTrivia : K.numberOfQuotes
-        
-        guard counter < numberOfContent else {
-            switch type {
-            case .trivia:
+    /// Shuffle previously shuffled content picking order.
+    /// This method makes sure that the same content will not be picked after the order is shuffled. E.g. if the last picking index is 2, the first picking index of the re–shuffled picking order will not be 2.
+    /// - Parameter contentType: Which content type's picking order to shuffle.
+    private func shufflePickingOrder(of contentType: ContentType) {
+        switch contentType {
+        case .trivia:
+            let oldOrder = triviaPickingOrder
+            while oldOrder == triviaPickingOrder {
                 // Remove the last element from the array and put it back to the center position of the re–shuffled array.
-                let lastIndex = triviaShuffledIndex.last!
-                triviaShuffledIndex.removeLast()
-                triviaShuffledIndex.shuffle()
-                triviaShuffledIndex.insert(lastIndex, at: triviaShuffledIndex.count / 2)
-                triviaCounter = 1
+                let lastPick = triviaPickingOrder.last!
+                triviaPickingOrder.removeLast()
                 
-                return triviaShuffledIndex[0]
-            case .quote:
+                triviaPickingOrder.shuffle()
+                triviaPickingOrder.insert(lastPick, at: triviaPickingOrder.count / 2)
+            }
+        case .quote:
+            let oldOrder = quotePickingOrder
+            while oldOrder == quotePickingOrder {
                 // Remove the last element from the array and put it back to the center position of the re–shuffled array.
-                let lastIndex = quoteShuffledIndex.last!
-                quoteShuffledIndex.removeLast()
-                quoteShuffledIndex.shuffle()
-                quoteShuffledIndex.insert(lastIndex, at: quoteShuffledIndex.count / 2)
-                quoteCounter = 1
-                
-                return quoteShuffledIndex[0]
+                let lastIndex = quotePickingOrder.last!
+                quotePickingOrder.removeLast()
+                quotePickingOrder.shuffle()
+                quotePickingOrder.insert(lastIndex, at: quotePickingOrder.count / 2)
             }
         }
-        
-        var pickedIndex: Int!
-        switch type {
-        case .trivia:
-            pickedIndex = triviaCounter
-            triviaCounter += 1
-        case .quote:
-            pickedIndex = quoteCounter
-            quoteCounter += 1
-        }
-        return pickedIndex
     }
 }
