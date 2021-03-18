@@ -39,6 +39,16 @@
                ReferencedContainer = "container:CatCards.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "F6BAF00826037C8F004D5A50"
+               BuildableName = "Cat Cards UITests.xctest"
+               BlueprintName = "Cat Cards UITests"
+               ReferencedContainer = "container:CatCards.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

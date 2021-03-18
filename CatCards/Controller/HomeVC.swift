@@ -152,6 +152,13 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         setDownsampleSize() // Prepare ImageProcess's operation parameter
         addBackgroundLayer() // Add gradient color layer to background
         addShadeOverlay() // Add overlay view to be used when card is being zoomed in
+        
+        
+        // For UI Testing
+        shareButton.accessibilityIdentifier = "shareButton"
+        undoButton.accessibilityIdentifier = "undoButton"
+        saveButton.accessibilityIdentifier = "saveButton"
+        collectionButton.accessibilityIdentifier = "collectionButton"
     }
     
     override func viewWillAppear(_ animated: Bool) {

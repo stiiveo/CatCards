@@ -30,6 +30,7 @@
 		F67E4E3224D3C571006DDE96 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67E4E3124D3C571006DDE96 /* Constants.swift */; };
 		F6AB3F2125F1E1CF005400DD /* ConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB3F2025F1E1CF005400DD /* ConfirmationView.swift */; };
 		F6BAEFFA26022E34004D5A50 /* OverlayContentPickerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BAEFF926022E34004D5A50 /* OverlayContentPickerTest.swift */; };
+		F6BAF00C26037C8F004D5A50 /* Cat_Cards_UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BAF00B26037C8F004D5A50 /* Cat_Cards_UITests.swift */; };
 		F6C1AAF325F76C7A00C03215 /* TriviaOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C1AAF225F76C7A00C03215 /* TriviaOverlay.swift */; };
 		F6C928202540678B00BAB89E /* ImageScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C9281F2540678B00BAB89E /* ImageScrollView.swift */; };
 		F6CE40AB2593063700B09008 /* OnboardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AA2593063700B09008 /* OnboardData.swift */; };
@@ -41,6 +42,13 @@
 
 /* Begin PBXContainerItemProxy section */
 		F6BAEFF226022D8C004D5A50 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F6746FD924C6DCF2006A2905 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F6746FE024C6DCF2006A2905;
+			remoteInfo = CatCards;
+		};
+		F6BAF00E26037C8F004D5A50 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F6746FD924C6DCF2006A2905 /* Project object */;
 			proxyType = 1;
@@ -82,6 +90,9 @@
 		F6BAEFED26022D8C004D5A50 /* Cat Cards Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Cat Cards Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6BAEFF126022D8C004D5A50 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F6BAEFF926022E34004D5A50 /* OverlayContentPickerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayContentPickerTest.swift; sourceTree = "<group>"; };
+		F6BAF00926037C8F004D5A50 /* Cat Cards UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Cat Cards UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6BAF00B26037C8F004D5A50 /* Cat_Cards_UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cat_Cards_UITests.swift; sourceTree = "<group>"; };
+		F6BAF00D26037C8F004D5A50 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F6C1AAF225F76C7A00C03215 /* TriviaOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriviaOverlay.swift; sourceTree = "<group>"; };
 		F6C9281F2540678B00BAB89E /* ImageScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollView.swift; sourceTree = "<group>"; };
 		F6CE40AA2593063700B09008 /* OnboardData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardData.swift; sourceTree = "<group>"; };
@@ -101,6 +112,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F6BAEFEA26022D8C004D5A50 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F6BAF00626037C8F004D5A50 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -132,6 +150,7 @@
 			children = (
 				F6746FE324C6DCF2006A2905 /* CatCards */,
 				F6BAEFEE26022D8C004D5A50 /* Cat Cards Tests */,
+				F6BAF00A26037C8F004D5A50 /* Cat Cards UITests */,
 				F6746FE224C6DCF2006A2905 /* Products */,
 				08D6B19F07BC6817AED59A2A /* Pods */,
 				123A2E7C1E4920CB427642D2 /* Frameworks */,
@@ -143,6 +162,7 @@
 			children = (
 				F6746FE124C6DCF2006A2905 /* Cat Cards.app */,
 				F6BAEFED26022D8C004D5A50 /* Cat Cards Tests.xctest */,
+				F6BAF00926037C8F004D5A50 /* Cat Cards UITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -224,6 +244,15 @@
 			path = "Cat Cards Tests";
 			sourceTree = "<group>";
 		};
+		F6BAF00A26037C8F004D5A50 /* Cat Cards UITests */ = {
+			isa = PBXGroup;
+			children = (
+				F6BAF00B26037C8F004D5A50 /* Cat_Cards_UITests.swift */,
+				F6BAF00D26037C8F004D5A50 /* Info.plist */,
+			);
+			path = "Cat Cards UITests";
+			sourceTree = "<group>";
+		};
 		F6E18FD225E8B2C90014A9A6 /* Resource */ = {
 			isa = PBXGroup;
 			children = (
@@ -272,6 +301,24 @@
 			productReference = F6BAEFED26022D8C004D5A50 /* Cat Cards Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		F6BAF00826037C8F004D5A50 /* Cat Cards UITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F6BAF01026037C8F004D5A50 /* Build configuration list for PBXNativeTarget "Cat Cards UITests" */;
+			buildPhases = (
+				F6BAF00526037C8F004D5A50 /* Sources */,
+				F6BAF00626037C8F004D5A50 /* Frameworks */,
+				F6BAF00726037C8F004D5A50 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F6BAF00F26037C8F004D5A50 /* PBXTargetDependency */,
+			);
+			name = "Cat Cards UITests";
+			productName = "Cat Cards UITests";
+			productReference = F6BAF00926037C8F004D5A50 /* Cat Cards UITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -286,6 +333,10 @@
 						CreatedOnToolsVersion = 11.6;
 					};
 					F6BAEFEC26022D8C004D5A50 = {
+						CreatedOnToolsVersion = 12.4;
+						TestTargetID = F6746FE024C6DCF2006A2905;
+					};
+					F6BAF00826037C8F004D5A50 = {
 						CreatedOnToolsVersion = 12.4;
 						TestTargetID = F6746FE024C6DCF2006A2905;
 					};
@@ -307,6 +358,7 @@
 			targets = (
 				F6746FE024C6DCF2006A2905 /* CatCards */,
 				F6BAEFEC26022D8C004D5A50 /* Cat Cards Tests */,
+				F6BAF00826037C8F004D5A50 /* Cat Cards UITests */,
 			);
 		};
 /* End PBXProject section */
@@ -325,6 +377,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F6BAEFEB26022D8C004D5A50 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F6BAF00726037C8F004D5A50 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -414,6 +473,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F6BAF00526037C8F004D5A50 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F6BAF00C26037C8F004D5A50 /* Cat_Cards_UITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -421,6 +488,11 @@
 			isa = PBXTargetDependency;
 			target = F6746FE024C6DCF2006A2905 /* CatCards */;
 			targetProxy = F6BAEFF226022D8C004D5A50 /* PBXContainerItemProxy */;
+		};
+		F6BAF00F26037C8F004D5A50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F6746FE024C6DCF2006A2905 /* CatCards */;
+			targetProxy = F6BAF00E26037C8F004D5A50 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -657,6 +729,46 @@
 			};
 			name = Release;
 		};
+		F6BAF01126037C8F004D5A50 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 94WY3HPZ4Q;
+				INFOPLIST_FILE = "Cat Cards UITests/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ouyangapps.Cat-Cards-UITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = CatCards;
+			};
+			name = Debug;
+		};
+		F6BAF01226037C8F004D5A50 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 94WY3HPZ4Q;
+				INFOPLIST_FILE = "Cat Cards UITests/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ouyangapps.Cat-Cards-UITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = CatCards;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -683,6 +795,15 @@
 			buildConfigurations = (
 				F6BAEFF426022D8C004D5A50 /* Debug */,
 				F6BAEFF526022D8C004D5A50 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F6BAF01026037C8F004D5A50 /* Build configuration list for PBXNativeTarget "Cat Cards UITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F6BAF01126037C8F004D5A50 /* Debug */,
+				F6BAF01226037C8F004D5A50 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

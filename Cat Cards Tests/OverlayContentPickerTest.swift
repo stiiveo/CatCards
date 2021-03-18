@@ -23,7 +23,7 @@ class OverlayContentPickerTest: XCTestCase {
         super.tearDown()
     }
     
-    func testReturnedStringIsValid() {
+    func testValidationOfReturnedString() {
         for _ in 0..<500 {
             XCTAssertFalse(picker.randomContent(contentTypes: [.trivia]).contains("TRIVIA_"))
             
@@ -39,7 +39,7 @@ class OverlayContentPickerTest: XCTestCase {
         }
     }
     
-    func testRandomContentRetrievingPerformance() {
+    func testPerformanceOfRandomContentRetrieving() {
         measure {
             _ = picker.randomContent(contentTypes: [.trivia, .quote])
         }
