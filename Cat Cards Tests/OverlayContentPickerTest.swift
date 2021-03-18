@@ -23,24 +23,6 @@ class OverlayContentPickerTest: XCTestCase {
         super.tearDown()
     }
     
-    func test_trivia_returned_string_is_valid_before_reshuffle() {
-        for i in (0..<K.numberOfTrivia) {
-            let correctString = NSLocalizedString(picker.triviaKey + "\(i)", comment: "")
-            let returnedString = picker.randomContent(contentTypes: [.trivia])
-            
-            XCTAssertEqual(correctString, returnedString)
-        }
-    }
-    
-    func test_quote_returned_string_is_valid_before_reshuffle() {
-        for i in (0..<K.numberOfQuotes) {
-            let correctString = NSLocalizedString(picker.quoteKey + "\(i)", comment: "")
-            let returnedString = picker.randomContent(contentTypes: [.quote])
-            
-            XCTAssertEqual(correctString, returnedString)
-        }
-    }
-    
     func test_returned_string_is_not_invalid() {
         for _ in 0..<500 {
             XCTAssertFalse(picker.randomContent(contentTypes: [.trivia]).contains("TRIVIA_"))

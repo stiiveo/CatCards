@@ -45,29 +45,23 @@ class OverlayContentPicker {
         var pickIndex: Int!
         switch contentType {
         case .trivia:
-            if triviaCounter < K.numberOfTrivia {
-                pickIndex = triviaCounter
-                triviaCounter += 1
-            } else {
+            if triviaCounter >= K.numberOfTrivia {
                 shufflePickingOrder(of: .trivia)
                 triviaCounter = 0
-                pickIndex = triviaCounter
-                triviaCounter += 1
             }
+            pickIndex = triviaPickingOrder[triviaCounter]
+            triviaCounter += 1
             
             let key = "TRIVIA_" + "\(pickIndex!)"
             let localizedTrivia = NSLocalizedString(key, comment: "A cat trivia.")
             return localizedTrivia
         case .quote:
-            if quoteCounter < K.numberOfQuotes {
-                pickIndex = quoteCounter
-                quoteCounter += 1
-            } else {
+            if quoteCounter >= K.numberOfQuotes {
                 shufflePickingOrder(of: .quote)
                 quoteCounter = 0
-                pickIndex = quoteCounter
-                quoteCounter += 1
             }
+            pickIndex = quotePickingOrder[quoteCounter]
+            quoteCounter += 1
             
             let key = "QUOTE_" + "\(pickIndex!)"
             let localizedQuote = NSLocalizedString(key, comment: "A cat quote.")
