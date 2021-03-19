@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		004C3B56318AD936B4893427 /* Pods_CatCards.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2F5C82BF49C7513BD5BE102C /* Pods_CatCards.framework */; };
 		F60214D424E5205500872F34 /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F60214D224E5205500872F34 /* DataModel.xcdatamodeld */; };
-		F612B5F62554F304008BBCDC /* ImageProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F612B5F52554F304008BBCDC /* ImageProcessor.swift */; };
 		F6240A9B258B18EE00217C2D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F6240A9D258B18EE00217C2D /* Localizable.strings */; };
 		F6240AA4258B2EB800217C2D /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6240AA3258B2EB800217C2D /* Strings.swift */; };
 		F6240AAD258B425C00217C2D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F6240AAC258B425C00217C2D /* InfoPlist.strings */; };
@@ -62,7 +61,6 @@
 		41168D40AA6045FECBED4B3F /* Pods-CatCards.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CatCards.debug.xcconfig"; path = "Target Support Files/Pods-CatCards/Pods-CatCards.debug.xcconfig"; sourceTree = "<group>"; };
 		681AB58E2DF9E98BFA9DCD21 /* Pods-CatCards.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CatCards.release.xcconfig"; path = "Target Support Files/Pods-CatCards/Pods-CatCards.release.xcconfig"; sourceTree = "<group>"; };
 		F60214D324E5205500872F34 /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
-		F612B5F52554F304008BBCDC /* ImageProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessor.swift; sourceTree = "<group>"; };
 		F6240A9C258B18EE00217C2D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F6240A9F258B190000217C2D /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		F6240AA3258B2EB800217C2D /* Strings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
@@ -228,7 +226,6 @@
 			children = (
 				F6746FFC24C6E02C006A2905 /* NetworkManager.swift */,
 				F67B191F24E6672E003E5A83 /* DatabaseManager.swift */,
-				F612B5F52554F304008BBCDC /* ImageProcessor.swift */,
 				F675B41A25C9927300698291 /* HapticManager.swift */,
 				F6D5C13C2600E6D800429C82 /* OverlayContentPicker.swift */,
 			);
@@ -446,7 +443,6 @@
 				F6240AA4258B2EB800217C2D /* Strings.swift in Sources */,
 				F67B192024E6672E003E5A83 /* DatabaseManager.swift in Sources */,
 				F675B41B25C9927300698291 /* HapticManager.swift in Sources */,
-				F612B5F62554F304008BBCDC /* ImageProcessor.swift in Sources */,
 				F6C928202540678B00BAB89E /* ImageScrollView.swift in Sources */,
 				F60214D424E5205500872F34 /* DataModel.xcdatamodeld in Sources */,
 				F6C1AAF325F76C7A00C03215 /* TriviaOverlay.swift in Sources */,

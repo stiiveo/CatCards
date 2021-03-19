@@ -17,7 +17,6 @@ class NetworkManager {
     
     var delegate: NetworkManagerDelegate?
     private var dataIndex: Int = 0
-    private let imageProcesser = ImageProcessor()
     
     func performRequest(numberOfRequests: Int) {
         guard numberOfRequests > 0 else {
@@ -75,13 +74,16 @@ class NetworkManager {
             }
             let id = jsonData.id
             let image = imageFromURL(url: imageURL)
-            guard let processedImage = imageProcesser.resizeImage(image) else {
-                // Call another fetch request if the processed image is not valid
+            let screenSize = UIScreen.main.nativeBounds.size
+            
+            guard let filteredImage = image.filterOutGrumpyCatImage(),
+                  let downsizedImage = filteredImage.downsizeTo(screenSize) else {
+                // Fetch another image if the image is not valid.
                 performRequest(numberOfRequests: 1)
                 return
             }
             
-            let newData = CatData(id: id, image: processedImage)
+            let newData = CatData(id: id, image: downsizedImage)
             // Transfer newly fetched data to the delegate
             delegate?.dataDidFetch(data: newData, dataIndex: dataIndex)
             
@@ -101,5 +103,44 @@ class NetworkManager {
             debugPrint("Failed to initialize new image data from fetched URL object. Error: \(error)")
         }
         return K.Image.defaultImage // Return default image if any error occured.
+    }
+}
+
+extension UIImage {
+    /// Filter out any image matching the grumpy cat image's size
+    func filterOutGrumpyCatImage() -> UIImage? {
+        guard self.size != K.Image.grumpyCatImageSize else {
+            return nil
+        }
+        return self
+    }
+    
+    /// Resize the image to be within the designated bounds. Original input image will be returned if its size is within the designated bounds.
+    func downsizeTo(_ bounds: CGSize) -> UIImage? {
+        let imageSize = self.size
+        
+        // Return the original image if its height or width is not bigger than the designated bounds.
+        guard imageSize.height > bounds.height || imageSize.width > bounds.width else {
+            return self
+        }
+        
+        // The new image size's width and height is limited to the device's native resolution
+        let widthDiff = imageSize.width / bounds.width
+        let heightDiff = imageSize.height / bounds.height
+        let newImageSize = CGSize(
+            width: imageSize.width / max(widthDiff, heightDiff),
+            height: imageSize.height / max(widthDiff, heightDiff)
+        )
+        
+        // This is the rect that we've calculated out and this is what is actually used below
+        let rect = CGRect(x: 0, y: 0, width: newImageSize.width, height: newImageSize.height)
+        
+        // Actually do the resizing to the rect using the ImageContext stuff
+        UIGraphicsBeginImageContextWithOptions(newImageSize, false, 1.0)
+        self.draw(in: rect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage
     }
 }

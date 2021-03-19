@@ -149,7 +149,6 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         
         fetchNewData(initialRequest: true) // initiate data downloading
         
-        setDownsampleSize() // Prepare ImageProcess's operation parameter
         addBackgroundLayer() // Add gradient color layer to background
         addShadeOverlay() // Add overlay view to be used when card is being zoomed in
         
@@ -397,21 +396,6 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     /// Save the value of card view count to user defaults
     @objc func saveViewCount() {
         defaults.setValue(viewCount, forKey: K.UserDefaultsKeys.viewCount)
-    }
-    
-    /// Determine the downsample size of image by calculating the thumbnail's width footprint on the user's device
-    private func setDownsampleSize() {
-        // Device with wider screen (iPhone Plus and Max series) has one more cell per row than other devices
-        let screenWidth = UIScreen.main.bounds.width
-        let wideScreenWidth: CGFloat = 414 // Point width of iPhone Plus or Max series
-        let cellsPerRow: CGFloat = (screenWidth >= wideScreenWidth) ? 4.0 : 3.0
-        let cellSpacing: CGFloat = 1.5 // Space between each cell
-        
-        // Floor the calculated width to remove any decimal number
-        let cellWidth = floor((screenWidth - (cellSpacing * (cellsPerRow - 1))) / cellsPerRow)
-        
-        let cellSize = CGSize(width: cellWidth, height: cellWidth)
-        databaseManager.imageProcess.cellSize = cellSize
     }
     
     /// Hide navigation bar and toolbar's border line

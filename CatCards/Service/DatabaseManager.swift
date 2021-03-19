@@ -20,7 +20,6 @@ class DatabaseManager {
     private let imageFolderName = K.Image.FolderName.fullImage
     private let thumbFolderName = K.Image.FolderName.thumbnail
     private let cacheFolderName = K.Image.FolderName.cacheImage
-    let imageProcess = ImageProcessor()
     private var favoriteArray: [Favorite]!
     static var imageFileURLs = [FilePath]()
     var delegate: DatabaseManagerDelegate?
@@ -89,14 +88,15 @@ class DatabaseManager {
             debugPrint("Unable to convert UIImage to JPG data."); return }
         writeFileTo(folder: imageFolderName, withData: compressedJPG, withName: fileName + fileExtension)
         
-        // Downsample the downloaded image
-        guard let imageData = image.pngData() else {
-            debugPrint("Unable to convert UIImage object to PNG data."); return }
-        let downsampledImage = imageProcess.downsample(dataAt: imageData)
+        // Downsample the image to be used as the thumbnail image
+        let downsampledImage = image.downsampleToSize(K.Image.thumbnailSize)
         
         // Convert downsampled image to JPG data and save it to local disk
         guard let jpegData = downsampledImage.jpegData(compressionQuality: jpegCompression) else {
-            debugPrint("Error: Unable to convert downsampled image data to JPG data."); return }
+            debugPrint("Error: Unable to convert downsampled image data to JPG data.")
+            return
+        }
+        
         writeFileTo(folder: thumbFolderName, withData: jpegData, withName: fileName + fileExtension)
         
         // Refresh image file url cache
@@ -254,4 +254,32 @@ class DatabaseManager {
         }
     }
    
+}
+
+extension UIImage {
+    func downsampleToSize(_ size: CGSize) -> UIImage {
+        guard let imageData = self.pngData() else {
+            debugPrint("Unable to convert UIImage object to PNG data.")
+            return self
+        }
+        
+        let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
+        let imageSource = CGImageSourceCreateWithData(imageData as CFData, imageSourceOptions)!
+        let screenScale = UIScreen.main.scale
+        
+        let maxDimensionInPixels = max(size.width, size.height) * screenScale
+        let downsampleOptions =
+            [kCGImageSourceCreateThumbnailFromImageAlways: true,
+             kCGImageSourceShouldCacheImmediately: true,
+             kCGImageSourceCreateThumbnailWithTransform: true,
+             kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
+        
+        if let downsampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downsampleOptions) {
+            return UIImage(cgImage: downsampledImage)
+        } else {
+            debugPrint("Error: Unable to downsample image source to thumbnail image data.")
+            return self
+        }
+        
+    }
 }
