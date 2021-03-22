@@ -73,7 +73,7 @@ class NetworkManager {
             }
             
             let newData = CatData(id: id, image: downsizedImage)
-            // Transfer newly fetched data to the delegate
+            // Pass newly established data to the delegate
             delegate?.dataDidFetch(data: newData, dataIndex: dataIndex)
             
             dataIndex += 1
