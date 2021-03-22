@@ -19,18 +19,10 @@ class NetworkManager {
     private var dataIndex: Int = 0
     
     func performRequest(numberOfRequests: Int) {
-        guard numberOfRequests > 0 else {
-            debugPrint("Error: Number of network request equals 0 or less.")
-            return
-        }
-        for _ in 1...numberOfRequests {
-            // Create URL object
-            guard let url = URL(string: K.API.urlString) else {
-                debugPrint("Error initiating an URL object from API's HTTP address string.")
-                return
-            }
-            
-            // Pass in HTTP request header
+        // Make sure the number of requests is not negative.
+        let validatedNumber = numberOfRequests > 0 ? numberOfRequests : 1
+        for _ in 1...validatedNumber {
+            guard let url = URL(string: K.API.urlString) else { return }
             var request = URLRequest(url: url)
             request.addValue(Secrets.API.key, forHTTPHeaderField: Secrets.API.header)
             
@@ -67,14 +59,11 @@ class NetworkManager {
                 return
             }
             
-            let jsonData = decodedData[0] // [JSONModel] -> JSONModel
-            guard let imageURL = URL(string: jsonData.url) else {
-                debugPrint("Error creating image URL object from decoded json data.")
-                return
-            }
-            let id = jsonData.id
+            let jsonData = decodedData[0] // Type [JSONModel] -> JSONModel
+            guard let imageURL = URL(string: jsonData.url) else { return }
             let image = imageFromURL(url: imageURL)
             let screenSize = UIScreen.main.nativeBounds.size
+            let id = jsonData.id
             
             guard let filteredImage = image.filterOutGrumpyCatImage(),
                   let downsizedImage = filteredImage.downsizeTo(screenSize) else {

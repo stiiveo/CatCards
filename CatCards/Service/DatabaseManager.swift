@@ -15,13 +15,14 @@ protocol DatabaseManagerDelegate {
 
 class DatabaseManager {
     
+    static let shared = DatabaseManager()
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     private let fileManager = FileManager.default
     private let imageFolderName = K.Image.FolderName.fullImage
     private let thumbFolderName = K.Image.FolderName.thumbnail
     private let cacheFolderName = K.Image.FolderName.cacheImage
     private var favoriteArray: [Favorite]!
-    static var imageFileURLs = [FilePath]()
+    var imageFileURLs = [FilePath]()
     var delegate: DatabaseManagerDelegate?
     private let jpegCompression = K.Image.jpegCompressionQuality
     private let fileExtension = "." + K.API.imageType
@@ -35,7 +36,7 @@ class DatabaseManager {
     
     // Load thumbnail images from local folder
     internal func getSavedImageFileURLs() {
-        DatabaseManager.imageFileURLs.removeAll() // Clean all image file URLs in memory buffer first
+        imageFileURLs.removeAll() // Clean all image file URLs in memory buffer first
         
         let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let imageFolderURL = url.appendingPathComponent(imageFolderName, isDirectory: true)
@@ -48,7 +49,7 @@ class DatabaseManager {
             let thumbnailURL = thumbnailFolderURL.appendingPathComponent(fileName + fileExtension)
             let newFilePath = FilePath(image: imageURL, thumbnail: thumbnailURL)
             
-            DatabaseManager.imageFileURLs.append(newFilePath)
+            imageFileURLs.append(newFilePath)
         }
     }
     

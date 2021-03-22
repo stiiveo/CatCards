@@ -11,6 +11,7 @@ import ImageIO
 
 class CollectionVC: UICollectionViewController {
     
+    private let databaseManager = DatabaseManager.shared
     private var selectedCellIndex: Int = 0
     private let backgroundLayer = CAGradientLayer()
     private var backgroundView: UIView!
@@ -65,7 +66,7 @@ class CollectionVC: UICollectionViewController {
         collectionView.reloadData()
         
         // Display background view if no picture is saved yet
-        noSavedPicturesHint.alpha = (DatabaseManager.imageFileURLs.count == 0) ? 1 : 0
+        noSavedPicturesHint.alpha = (databaseManager.imageFileURLs.count == 0) ? 1 : 0
     }
     
     override func viewWillLayoutSubviews() {
@@ -120,14 +121,14 @@ class CollectionVC: UICollectionViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return DatabaseManager.imageFileURLs.count
+        return databaseManager.imageFileURLs.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Cell.reuseIdentifier, for: indexPath) as? Cell else {
             fatalError("Expected `\(Cell.self)` type for reuseIdentifier \(Cell.reuseIdentifier). Check the configuration in Main.storyboard.")
         }
-        let thumbnailURL = DatabaseManager.imageFileURLs[indexPath.row].thumbnail
+        let thumbnailURL = databaseManager.imageFileURLs[indexPath.row].thumbnail
         cell.imageView.image = UIImage(contentsOfFile: thumbnailURL.path)
         
         return cell

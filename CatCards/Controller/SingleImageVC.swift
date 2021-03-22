@@ -15,6 +15,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     @IBOutlet weak var toolbar: UIToolbar!
     
     var selectedCellIndex: Int = 0
+    private let databaseManager = DatabaseManager.shared
     private let backgroundLayer = CAGradientLayer()
     private var bufferImageArray = [ImageScrollView()] // ImageViews cache used to populate stackView
     private let bufferImageNumber: Int = K.Data.prefetchNumberOfImageAtEachSide
@@ -146,16 +147,16 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     /// - Parameter index: Image's index number of the image buffer array
     private func setImage(at index: Int) {
         // Ensure index is within the bound of array
-        guard 0 <= index && index < DatabaseManager.imageFileURLs.count else { return }
+        guard 0 <= index && index < databaseManager.imageFileURLs.count else { return }
         
-        let imageFileURL = DatabaseManager.imageFileURLs[index].image
+        let imageFileURL = databaseManager.imageFileURLs[index].image
         guard let imageAtDisk = UIImage(contentsOfFile: imageFileURL.path) else { return }
         bufferImageArray[index].set(image: imageAtDisk)
     }
     
     /// Create an `ImageScrollView` array with same item number as local saved image number and set each object's image property the default image defined in this class
     private func initiateImageBufferArray() {
-        bufferImageArray = (1...DatabaseManager.imageFileURLs.count).map { _ in
+        bufferImageArray = (1...databaseManager.imageFileURLs.count).map { _ in
             let imageView = ImageScrollView(frame: view.bounds)
             imageView.set(image: defaultCacheImage)
             return imageView
@@ -164,7 +165,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     
     /// Load ImageScrollView objects from cached array of 'imageViews' into stackView
     private func loadDefaultImageView() {
-        for index in 0...(DatabaseManager.imageFileURLs.count - 1) {
+        for index in 0...(databaseManager.imageFileURLs.count - 1) {
             stackView.addArrangedSubview(bufferImageArray[index])
             bufferImageArray[index].widthAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.widthAnchor).isActive = true
             bufferImageArray[index].heightAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.heightAnchor).isActive = true
@@ -236,11 +237,11 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     //MARK: - Toolbar Button Methods
     
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
-        let imageFileURLs = DatabaseManager.imageFileURLs
+        let imageFileURLs = databaseManager.imageFileURLs
         guard currentPage >= 0 && currentPage < imageFileURLs.count else { return }
         
         hapticManager.prepareImpactGenerator(style: .soft)
-        let imageURL = DatabaseManager.imageFileURLs[currentPage].image
+        let imageURL = databaseManager.imageFileURLs[currentPage].image
         let activityVC = UIActivityViewController(activityItems: [imageURL], applicationActivities: nil)
         
         // Set up Popover Presentation Controller's barButtonItem for iPad
@@ -259,7 +260,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let alert = UIAlertController(title: Z.AlertMessage.DeleteWarning.alertTitle, message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: Z.AlertMessage.DeleteWarning.actionTitle, style: .destructive) { (action) in
             
-            let databaseManager = HomeVC.shared.databaseManager
+            let databaseManager = DatabaseManager.shared
             let savedDataList = databaseManager.listOfSavedFileNames()
             let dataID = savedDataList[self.currentPage]
             

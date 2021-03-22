@@ -27,21 +27,21 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Local Properties
     
-    static let shared = HomeVC()
-    private let defaults = UserDefaults.standard
-    let databaseManager = DatabaseManager()
+    static let shared = HomeVC() // Singleton of this class.
+    private let defaults = UserDefaults.standard // Singleton of access point to UserDefaults database.
+    private let databaseManager = DatabaseManager.shared
     private let networkManager = NetworkManager()
-    private var cardArray: [Card] = []
-    private let onboardData = K.OnboardOverlay.data
-    private var navBar: UINavigationBar!
-    private var cardIndex: Int = 0
-    private var maxCardIndex: Int = 0
-    private var adReceived = false
-    private var backgroundLayer: CAGradientLayer!
-    private var zoomOverlay: UIView!
-    private var cardIsBeingPanned = false
-    private let hapticManager = HapticManager()
-    var showOverlay = true
+    private var cardArray: [Card] = [] // Cache of all Card objects used to display to the user.
+    private let onboardData = K.OnboardOverlay.data // Array of string data used as the content of the onboard info.
+    private var navBar: UINavigationBar! // Navigational bar this view controller provides.
+    private var cardIndex: Int = 0 // The index of the current card being shown to the user.
+    private var maxCardIndex: Int = 0 // Maximum number of cards with different data shown to the user.
+    private var adReceived = false // Indicator on if any banner ad is received by GoogleMobileAds API.
+    private var backgroundLayer: CAGradientLayer! // Background view behind the main imageView.
+    private var zoomOverlay: UIView! // A shading layer displayed behind the current card when the current card is zoomed–in by the user.
+    private var cardIsBeingPanned = false // Indicator on whether the current card is being panned.
+    private let hapticManager = HapticManager() // Haptic manager which manages customized operation of the device's haptic engine.
+    var showOverlay = true // Indicator on whether to display overlay on the card.
     
     // Number of cards with cat images the user has seen
     private var viewCount: Int = 0 {
@@ -146,8 +146,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         // Create local image folder in file system and/or load data from it
         databaseManager.createNecessaryFolders()
         databaseManager.getSavedImageFileURLs()
-        
-        fetchNewData(initialRequest: true) // initiate data downloading
+        networkManager.performRequest(numberOfRequests: K.Data.cacheDataNumber)
         
         addBackgroundLayer() // Add gradient color layer to background
         addShadeOverlay() // Add overlay view to be used when card is being zoomed in
@@ -190,15 +189,6 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     }
     
     //MARK: - Data Fetch & Cache Methods
-    
-    private func fetchNewData(initialRequest: Bool) {
-        switch initialRequest {
-        case true:
-            networkManager.performRequest(numberOfRequests: K.Data.cacheDataNumber)
-        case false:
-            networkManager.performRequest(numberOfRequests: 1)
-        }
-    }
     
     // Create and add a new card to the card array
     func dataDidFetch(data: CatData, dataIndex: Int) {
@@ -808,7 +798,8 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             }
             
             if self.cardIndex > self.maxCardIndex {
-                self.fetchNewData(initialRequest: false)
+                // Fetch new data if the next card has not being displayed before
+                self.networkManager.performRequest(numberOfRequests: 1)
             }
             
             // Toggle the status of onboard completion
