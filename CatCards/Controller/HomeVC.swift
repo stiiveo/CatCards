@@ -911,6 +911,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             
             // An button which send network request to the network manager
             let retryAction = UIAlertAction(title: Z.AlertMessage.NetworkError.actionTitle, style: .default) { _ in
+                // Request enough number of new data to satisfy the ideal cache data number.
                 let requestNumber = K.Data.cacheDataNumber - self.cardArray.count
                 self.networkManager.performRequest(numberOfRequests: requestNumber)
             }

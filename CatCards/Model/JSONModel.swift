@@ -9,6 +9,6 @@
 import Foundation
 
 struct JSONModel: Decodable {
-    let id: String
-    let url: String
+    let id: String // Unique ID string assigned to the object.
+    let url: String // HTTP address of the image.
 }
