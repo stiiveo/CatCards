@@ -15,35 +15,71 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     
     //MARK: - IBOutlet
     
+    // Access point to this view's built–in toolbar.
     @IBOutlet weak var toolbar: UIToolbar!
-    @IBOutlet weak var toolbarHeight: NSLayoutConstraint!
+    
+    // A button which saves the current card's image to the device's app folder with attribute info being saved to database via CoreData.
     @IBOutlet weak var saveButton: UIBarButtonItem!
+    
+    // A button which allows user to share current card's image.
     @IBOutlet weak var shareButton: UIBarButtonItem!
+    
+    // A button which retrieves previously dismissed card back to the top layer of the card view.
     @IBOutlet weak var undoButton: UIBarButtonItem!
+    
+    // A button which triggers segue from HomeVC to CollectionVC.
     @IBOutlet weak var collectionButton: UIBarButtonItem!
+    
+    // A reserved space used to accommodate the banner view.
     @IBOutlet weak var bannerSpace: UIView!
+    
+    // Modifying the banner space's height to accommodate the adaptive bannerView once the its height is determined.
     @IBOutlet weak var bannerSpaceHeight: NSLayoutConstraint!
+    
+    // Super view to which all cards being added.
     @IBOutlet weak var cardView: UIView!
     
     //MARK: - Local Properties
     
-    static let shared = HomeVC() // Singleton of this class.
-    private let defaults = UserDefaults.standard // Singleton of access point to UserDefaults database.
+    static let shared = HomeVC()
+    private let defaults = UserDefaults.standard
     private let databaseManager = DatabaseManager.shared
     private let networkManager = NetworkManager()
-    private var cardArray: [Card] = [] // Cache of all Card objects used to display to the user.
-    private let onboardData = K.OnboardOverlay.data // Array of string data used as the content of the onboard info.
-    private var navBar: UINavigationBar! // Navigational bar this view controller provides.
-    private var cardIndex: Int = 0 // The index of the current card being shown to the user.
-    private var maxCardIndex: Int = 0 // Maximum number of cards with different data shown to the user.
-    private var adReceived = false // Indicator on if any banner ad is received by GoogleMobileAds API.
-    private var backgroundLayer: CAGradientLayer! // Background view behind the main imageView.
-    private var zoomOverlay: UIView! // A shading layer displayed behind the current card when the current card is zoomed–in by the user.
-    private var cardIsBeingPanned = false // Indicator on whether the current card is being panned.
-    private let hapticManager = HapticManager() // Haptic manager which manages customized operation of the device's haptic engine.
-    var showOverlay = true // Indicator on whether to display overlay on the card.
     
-    // Number of cards with cat images the user has seen
+    // Cache of all Card objects used to display to the user.
+    private var cardArray: [Card] = []
+    
+    // Array of string data used as the content of the onboard info.
+    private let onboardData = K.OnboardOverlay.data
+    
+    // Navigational bar this view controller provides.
+    private var navBar: UINavigationBar!
+    
+    // The pointer to which card being added to the top layer of the cardView.
+    private var pointer: Int = 0
+    
+    // Maximum number of cards with different data shown to the user.
+    private var maxCardIndex: Int = 0
+    
+    // Indicator on if any banner ad is received by GoogleMobileAds API.
+    private var adReceived = false
+    
+    // Background view behind the main imageView.
+    private var backgroundLayer: CAGradientLayer!
+    
+    // A shading layer displayed behind the current card when the current card is zoomed–in by the user.
+    private var zoomOverlay: UIView!
+    
+    // Indicator on whether the current card is being panned.
+    private var cardIsBeingPanned = false
+    
+    // Haptic manager which manages customized operation of the device's haptic engine.
+    private let hapticManager = HapticManager()
+    
+    // Indicator on whether to display overlay over the card.
+    var showOverlay = true
+    
+    // Number of cards with cat images the user has seen.
     private var viewCount: Int = 0 {
         didSet {
             saveViewCount()
@@ -57,24 +93,24 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     }
     
     private var currentCard: Card? {
-        if !cardArray.isEmpty && cardIndex < cardArray.count {
-            return cardArray[cardIndex]
+        if !cardArray.isEmpty && pointer < cardArray.count {
+            return cardArray[pointer]
         } else {
             return nil
         }
     }
     
     private var previousCard: Card? {
-        let previoudCardIndex = cardIndex - 1
+        let previoudCardIndex = pointer - 1
         if previoudCardIndex >= 0 && previoudCardIndex < cardArray.count {
-            return cardArray[cardIndex - 1]
+            return cardArray[pointer - 1]
         } else {
             return nil
         }
     }
     
     private var nextCard: Card? {
-        let nextCardIndex = cardIndex + 1
+        let nextCardIndex = pointer + 1
         if nextCardIndex > 0 && nextCardIndex < cardArray.count {
             return cardArray[nextCardIndex]
         } else {
@@ -112,8 +148,8 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     }()
     
     private lazy var adBannerView: GADBannerView = {
-        // Initialize ad banner
-        let adBannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait) // Define ad banner's size
+        // Set up the banner view with default size which is adjusted later according to the device's screen width.
+        let adBannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait)
         adBannerView.adUnitID = K.Banner.adUnitID
         adBannerView.rootViewController = self
         adBannerView.delegate = self
@@ -125,38 +161,35 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        navBar = self.navigationController?.navigationBar // Save the reference of the built-in navigation bar
+        // Save the reference of this view's built-in navigation bar.
+        navBar = self.navigationController?.navigationBar
         databaseManager.delegate = self
         networkManager.delegate = self
         
-        // Load viewCount value from UserDefaults if there's any
+        // Load viewCount value from database if there's any.
         let savedViewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
         viewCount = (savedViewCount != 0) ? savedViewCount : 0
         
-        // Notify this VC that if the app enters the background, save the cached view count value to UserDefaults.
+        // Notify this VC that if the app enters the background, save the cached view count value to the db.
         NotificationCenter.default.addObserver(self, selector: #selector(saveViewCount), name: UIApplication.didEnterBackgroundNotification, object: nil)
         
-        // Show onboarding tutorial and hide toolbar if the user is a new comer
+        // Retrieve the user status from db.
         onboardCompleted = defaults.bool(forKey: K.UserDefaultsKeys.onboardCompleted)
         if !onboardCompleted {
             hideUIButtons()
         }
         
-        // Create local image folder in file system and/or load data from it
-        databaseManager.createNecessaryFolders()
+        // Create local image folder in file system and/or load data from it.
+        databaseManager.createFolders()
         databaseManager.getSavedImageFileURLs()
+        
+        addBackgroundLayer()
+        addShadeOverlay()
+        
         networkManager.performRequest(numberOfRequests: K.Data.cacheDataNumber)
         
-        addBackgroundLayer() // Add gradient color layer to background
-        addShadeOverlay() // Add overlay view to be used when card is being zoomed in
-        
-        
         // For UI Testing
-        shareButton.accessibilityIdentifier = "shareButton"
-        undoButton.accessibilityIdentifier = "undoButton"
-        saveButton.accessibilityIdentifier = "saveButton"
-        collectionButton.accessibilityIdentifier = "collectionButton"
+        setUpUIReference()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -206,7 +239,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             self.cardArray.append(newCard)
             
             // Add the card to the view if it's the last card in the card array
-            if self.cardIndex == self.cardArray.count - 1 {
+            if self.pointer == self.cardArray.count - 1 {
                 self.addCardToView(newCard, atBottom: false)
                 
                 // Introduce the card by animating the change of the card size
@@ -225,7 +258,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             }
             
             // Add the card to the view if it's the next card
-            if newCard.index == self.cardIndex + 1 {
+            if newCard.index == self.pointer + 1 {
                 // Introduce the card by animating the change of the card size
                 self.addCardToView(newCard, atBottom: true)
                 newCard.setSize(status: .intro)
@@ -342,9 +375,11 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    /// Google recommends waiting for the completion callback prior to loading ads,
-    /// so that if the user grants the App Tracking Transparency permission,
-    /// the Google Mobile Ads SDK can use the IDFA in ad requests.
+    /*
+     Google recommends waiting for the completion callback prior to loading ads,
+     so that if the user grants the App Tracking Transparency permission,
+     the Google Mobile Ads SDK can use the IDFA in ad requests.
+     */
     @available(iOS 14, *)
     private func requestIDFA() {
         ATTrackingManager.requestTrackingAuthorization { (status) in
@@ -353,8 +388,10 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         }
     }
     
-    /// If iOS version is 14 or above, request IDFA access permission from the user before requesting an Ad through AdMob API.
-    /// Otherwise, request an ad immediately.
+    /*
+     If iOS version is 14 or above, request IDFA access permission from the user before requesting an Ad through AdMob API.
+     Otherwise, request an ad immediately.
+     */
     private func requestBannerAd() {
         if #available(iOS 14, *) {
             requestIDFA()
@@ -391,11 +428,13 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         }()
         let viewWidth = frame.size.width
         
-        // With adaptive banner, height of banner is based on the width of the banner itself
-        // Get Adaptive GADAdSize and set the ad view.
-        // Here the current interface orientation is used. If the ad is being preloaded
-        // for a future orientation change or different orientation, the function for the
-        // relevant orientation should be used.
+        /*
+         With adaptive banner, height of banner is based on the width of the banner itself
+         Get Adaptive GADAdSize and set the ad view.
+         Here the current interface orientation is used. If the ad is being preloaded
+         for a future orientation change or different orientation, the function for the
+         relevant orientation should be used.
+         */
         bannerView.adSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(viewWidth)
         // Set the height of the reserved ad space the same as the adaptive banner's height
         bannerSpaceHeight.constant = bannerView.frame.height
@@ -432,14 +471,14 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         guard previousCard?.data != nil else { return }
         
         hapticManager.prepareImpactGenerator(style: .medium)
-        maxCardIndex = cardIndex // Save the current index
+        maxCardIndex = pointer // Save the current index
         undoButton.isEnabled = false
         hapticManager.impactHaptic?.impactOccurred()
         
         // Remove the next card's data and from the superview
         nextCard?.removeFromSuperview()
         
-        let undoCard = cardArray[cardIndex - 1]
+        let undoCard = cardArray[pointer - 1]
         addCardToView(undoCard, atBottom: false)
         undoCard.centerXConstraint.constant = 0
         undoCard.centerYConstraint.constant = 0
@@ -450,7 +489,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             undoCard.transform = .identity
         } completion: { _ in
             self.attachGestureRecognizers(to: undoCard)
-            self.cardIndex -= 1
+            self.pointer -= 1
             DispatchQueue.main.async {
                 self.refreshButtonState()
             }
@@ -519,7 +558,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         
         // Delete the cache image file after the activityVC is dismissed
         activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
-            self.databaseManager.removeFile(atDirectory: .cachesDirectory, withinFolder: K.Image.FolderName.cacheImage, fileName: catData!.id)
+            self.databaseManager.removeFile(fromDirectory: .cachesDirectory, inFolder: K.Image.FolderName.cacheImage, fileName: catData!.id)
             
             self.hapticManager.releaseImpactGenerator()
         }
@@ -537,7 +576,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             shareButton.isEnabled = false
         }
         
-        undoButton.isEnabled = (cardIndex > 0 && previousCard?.data != nil) ? true : false
+        undoButton.isEnabled = (pointer > 0 && previousCard?.data != nil) ? true : false
         
         // Toggle the status of save button
         if let data = currentCard?.data {
@@ -828,7 +867,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         } completion: { _ in
             card.removeFromSuperview()
             self.cardIsBeingPanned = false
-            self.cardIndex += 1
+            self.pointer += 1
             
             // Attach gesture recognizers to the current card if it's not nil.
             if self.currentCard?.data != nil {
@@ -841,19 +880,19 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             }
             
             // Fetch new data if the next card has not being displayed before.
-            if self.cardIndex > self.maxCardIndex {
+            if self.pointer > self.maxCardIndex {
                 self.networkManager.performRequest(numberOfRequests: 1)
             }
             
             // Toggle the status of onboard completion
-            if !self.onboardCompleted && self.cardIndex >= self.onboardData.count {
+            if !self.onboardCompleted && self.pointer >= self.onboardData.count {
                 self.onboardCompleted = true
                 self.collectionButton.isEnabled = true
             }
             
             // Update the number of cards viewed by the user if onboard session is completed
             // and the current card has not been seen by the user before.
-            if self.onboardCompleted && self.cardIndex > self.maxCardIndex {
+            if self.onboardCompleted && self.pointer > self.maxCardIndex {
                 self.viewCount += 1
             }
             
@@ -886,7 +925,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     /// Clear the card's cache data if its index position is beyond the bound of the undo–able range.
     private func clearOldCardCacheData() {
         let maxUndoNumber = K.Data.undoCardNumber
-        let oldCardIndex = cardIndex - (maxUndoNumber + 1)
+        let oldCardIndex = pointer - (maxUndoNumber + 1)
         if oldCardIndex >= 0 && oldCardIndex < cardArray.count {
             let oldCard = cardArray[oldCardIndex]
             oldCard.clearCache()
@@ -921,6 +960,15 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             self.hapticManager.notificationHaptic?.notificationOccurred(.error)
             self.hapticManager.releaseNotificationGenerator()
         }
+    }
+    
+    //MARK: - Testing
+    
+    private func setUpUIReference() {
+        shareButton.accessibilityIdentifier = "shareButton"
+        undoButton.accessibilityIdentifier = "undoButton"
+        saveButton.accessibilityIdentifier = "saveButton"
+        collectionButton.accessibilityIdentifier = "collectionButton"
     }
     
 }

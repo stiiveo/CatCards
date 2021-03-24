@@ -17,7 +17,9 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     var selectedCellIndex: Int = 0
     private let databaseManager = DatabaseManager.shared
     private let backgroundLayer = CAGradientLayer()
-    private var bufferImageArray = [ImageScrollView()] // ImageViews cache used to populate stackView
+    
+    // ImageViews cache used to populate stackView
+    private var bufferImageArray = [ImageScrollView()]
     private let bufferImageNumber: Int = K.Data.prefetchNumberOfImageAtEachSide
     private let defaultCacheImage = K.Image.defaultCacheImage
     private var previousPage: Int = 0
@@ -42,10 +44,14 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.scrollView.delegate = self
-        attachPanGestureRecognizer() // Prevent scrollView from responding to two-finger panning events
-        removeImageView(atPage: 0) // Remove the template imageView set up in storyboard interface
         
-        // Add background layer
+        // Prevent scrollView from responding to two-finger panning events.
+        attachPanGestureRecognizer()
+        
+        // Remove the template imageView set up in storyboard interface
+        removeImageView(atPage: 0)
+        
+        // Set up background layer's color and add it to the view.
         backgroundLayer.frame = view.bounds
         setBackgroundColor()
         view.layer.insertSublayer(backgroundLayer, at: 0)
@@ -53,8 +59,12 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         setToolbarStyle()
-        initiateImageBufferArray() // Create imageView cache
-        loadDefaultImageView() // Populate cache array with default imageViews
+        
+        // Create imageView cache.
+        initiateImageBufferArray()
+        
+        // Populate cache array with default imageViews.
+        loadDefaultImageView()
         loadImagesToStackView(atIndex: selectedCellIndex)
     }
     
@@ -63,7 +73,9 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
             // Update background layer's frame
             self.backgroundLayer.frame = self.view.bounds
             
-            // By reloading the images again, each ImageScrollView's frame will be updated according to the frame of the view it's going to be.
+            /* By reloading the images again, each ImageScrollView's frame will be updated
+             according to the frame of the view it's going to be.
+             */
             self.loadImagesToStackView(atIndex: self.currentPage)
         }, completion: nil)
     }
@@ -82,26 +94,27 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     //MARK: - Image Loading & Zoom Scale Control
     
     private func loadImagesToStackView(atIndex index: Int) {
-        // Load images to selected imageView and nearby ones
+        // Load images to selected imageView and nearby ones.
         let startIndex = selectedCellIndex - bufferImageNumber
         let endIndex = selectedCellIndex + bufferImageNumber
         
         for index in startIndex...endIndex {
             setImage(at: index)
         }
-        
-        setScrollViewOffset(toIndex: index) // Scroll to show the user selected image
+        // Scroll to show the user selected image.
+        setScrollViewOffset(toIndex: index)
     }
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        previousPage = currentPage // Save the index of scrollView's page before it's changed by the user
+        // Save the index of scrollView's page before it's changed by the user.
+        previousPage = currentPage
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         currentPage = Int(round(scrollView.contentOffset.x / scrollView.frame.width))
     }
     
-    /// Dynamically load/unload images and control the total number of arranged subviews in the stackView to limit the system memory consumption
+    /// Dynamically load/unload images and control the total number of arranged subviews in the stackView to limit the memory usage.
     /// - Parameter scrollView: The scroll-view object that is decelerating the scrolling of the content view.
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         guard currentPage != previousPage else { return } // Make sure the page is changed
@@ -154,7 +167,10 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         bufferImageArray[index].set(image: imageAtDisk)
     }
     
-    /// Create an `ImageScrollView` array with same item number as local saved image number and set each object's image property the default image defined in this class
+    /*
+     Create an `ImageScrollView` array with same item number as local saved image number
+     and set each object's image property the default image defined in this class.
+     */
     private func initiateImageBufferArray() {
         bufferImageArray = (1...databaseManager.imageFileURLs.count).map { _ in
             let imageView = ImageScrollView(frame: view.bounds)
@@ -214,7 +230,8 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
                     self.scrollView.contentOffset = CGPoint(x: CGFloat(pageIndex) * self.scrollView.frame.width, y: 0)
                 }
             } completion: { _ in
-                self.removeImageView(atPage: originalPage) // Remove imageView from the stackView
+                // Remove imageView from the stackView
+                self.removeImageView(atPage: originalPage)
                 
                 // Compensate the reduced number of arranged stackView if stack view is scrolled to the next page
                 if pageToScroll == originalPage + 1 {

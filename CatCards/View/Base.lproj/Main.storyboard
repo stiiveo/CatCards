@@ -95,7 +95,6 @@
                         <outlet property="saveButton" destination="eix-IU-TsW" id="kOq-j5-OQe"/>
                         <outlet property="shareButton" destination="qHs-X8-xcv" id="LC9-zj-rUj"/>
                         <outlet property="toolbar" destination="ZI0-C0-QUe" id="1E1-XT-9aH"/>
-                        <outlet property="toolbarHeight" destination="7qg-j3-968" id="Ret-xM-7bd"/>
                         <outlet property="undoButton" destination="c3g-fk-JM1" id="5Cm-E7-yo9"/>
                     </connections>
                 </viewController>

@@ -18,6 +18,8 @@ class NetworkManager {
     var delegate: NetworkManagerDelegate?
     private var dataIndex: Int = 0
     
+    /// Fetch new data and send it to the delegate of this class.
+    /// - Parameter numberOfRequests: Number of data the delegate needs to receive.
     func performRequest(numberOfRequests: Int) {
         // Make sure the number of requests is not negative.
         let validatedNumber = numberOfRequests > 0 ? numberOfRequests : 1

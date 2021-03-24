@@ -57,21 +57,21 @@ class DatabaseManager {
     
     internal func saveData(_ data: CatData, completion: K.CompletionHandler) {
         guard favoriteArray.count < K.Data.maxSavedImages else {
-            delegate?.savedImagesMaxReached() // Notify the error to the delegate.
+            delegate?.savedImagesMaxReached()
             completion(false)
             return
         }
         
-        // Save data to local database
+        // Save new data to local database.
         let newData = Favorite(context: context)
         newData.id = data.id
         newData.date = Date()
         saveContext()
         
-        // Update favorite list
+        // Update favorite list.
         favoriteArray.append(newData)
         
-        // Save image to local file system with ID as the file name
+        // Save image to local file system with ID as the file name.
         saveImageToLocalSystem(image: data.image, fileName: data.id)
         completion(true)
     }
@@ -104,7 +104,7 @@ class DatabaseManager {
         getSavedImageFileURLs()
     }
     
-    // Write data into application's document folder
+    // Write data into app's document folder.
     private func writeFileTo(folder folderName: String, withData data: Data, withName fileName: String) {
         let url = try? fileManager.url(
             for: .documentDirectory,
@@ -141,8 +141,8 @@ class DatabaseManager {
         }
         
         // Remove full and thumbnail image file from local file system
-        removeFile(atDirectory: .documentDirectory, withinFolder: imageFolderName, fileName: id)
-        removeFile(atDirectory: .documentDirectory, withinFolder: thumbFolderName, fileName: id)
+        removeFile(fromDirectory: .documentDirectory, inFolder: imageFolderName, fileName: id)
+        removeFile(fromDirectory: .documentDirectory, inFolder: thumbFolderName, fileName: id)
         
         // Refresh the image file URL cache
         getSavedImageFileURLs()
@@ -155,7 +155,7 @@ class DatabaseManager {
         }
     }
     
-    func removeFile(atDirectory directory: FileManager.SearchPathDirectory, withinFolder folderName: String, fileName: String) {
+    func removeFile(fromDirectory directory: FileManager.SearchPathDirectory, inFolder folderName: String, fileName: String) {
         let url = getFolderURL(folderName: folderName, at: directory).appendingPathComponent(fileName + fileExtension)
         
         if fileManager.fileExists(atPath: url.path) {
@@ -169,7 +169,7 @@ class DatabaseManager {
     
     //MARK: - Cache Creation & Removal
     
-    /// Get an image's temporary URL object for share sheet's preview usage
+    /// Get an image's temporary URL object for share sheet's preview usage.
     func getImageTempURL(catData: CatData) -> URL? {
         // Convert image to jpeg file and write it to cache directory folder
         guard let imageData = catData.image.jpegData(compressionQuality: jpegCompression) else { return nil }
@@ -210,7 +210,7 @@ class DatabaseManager {
         return documentURL.appendingPathComponent(folderName, isDirectory: true)
     }
     
-    func createNecessaryFolders() {
+    func createFolders() {
         createDirectory(withName: imageFolderName, at: .documentDirectory)
         createDirectory(withName: thumbFolderName, at: .documentDirectory)
         createDirectory(withName: cacheFolderName, at: .cachesDirectory)
@@ -218,6 +218,9 @@ class DatabaseManager {
     
     //MARK: - CoreData and File Manager Tools
     
+    /// Determine if the provided data already exists in local folder.
+    /// - Parameter data: Data to be determined.
+    /// - Returns: Boolean value on whether the provided data exists in the device's image folder.
     internal func isDataSaved(data: CatData) -> Bool {
         let url = getFolderURL(folderName: imageFolderName, at: .documentDirectory)
         let dataId = data.id
@@ -225,6 +228,8 @@ class DatabaseManager {
         return fileManager.fileExists(atPath: newFileURL.path)
     }
     
+    /// Get all the names of files saved in the database.
+    /// - Returns: An array containing string values of all file's names saved in the database.
     internal func listOfSavedFileNames() -> [String] {
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         
@@ -258,6 +263,11 @@ class DatabaseManager {
 }
 
 extension UIImage {
+    /// Downsize the image to be used as the collection VC's cell image.
+    ///
+    /// The non–processed image could be returned if data initialization or downsizing process went wrong.
+    /// - Parameter size: Size the image to be downsized to.
+    /// - Returns: The downsized image.
     func downsampleToSize(_ size: CGSize) -> UIImage {
         guard let imageData = self.pngData() else {
             debugPrint("Unable to convert UIImage object to PNG data.")
