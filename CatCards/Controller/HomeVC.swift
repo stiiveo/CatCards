@@ -366,7 +366,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         toolbar.alpha = 1
     }
     
-    //MARK: - Banner Ad Methods
+    //MARK: - Ad Banner Methods
     
     /// Request ad for the ad banner.
     private func loadBannerAd() {
