@@ -64,8 +64,8 @@
 	</array>
 	<key>UIRequiresFullScreen</key>
 	<true/>
-    <key>UIRequiresFullScreen~ipad</key>
-    <false/>
+	<key>UIRequiresFullScreen~ipad</key>
+	<false/>
 	<key>UIStatusBarHidden</key>
 	<false/>
 	<key>UIStatusBarTintParameters</key>
