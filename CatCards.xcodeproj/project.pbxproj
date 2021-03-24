@@ -24,6 +24,7 @@
 		F6746FFF24C6E245006A2905 /* HomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6746FFE24C6E245006A2905 /* HomeVC.swift */; };
 		F674700124C6E8F3006A2905 /* JSONModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F674700024C6E8F3006A2905 /* JSONModel.swift */; };
 		F675B41B25C9927300698291 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F675B41A25C9927300698291 /* HapticManager.swift */; };
+		F6794449260B2BAA0066D20F /* APITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6794448260B2BAA0066D20F /* APITests.swift */; };
 		F67B192024E6672E003E5A83 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67B191F24E6672E003E5A83 /* DatabaseManager.swift */; };
 		F67E4DEE24CE80A7006DDE96 /* CatData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67E4DED24CE80A7006DDE96 /* CatData.swift */; };
 		F67E4E3224D3C571006DDE96 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67E4E3124D3C571006DDE96 /* Constants.swift */; };
@@ -81,6 +82,7 @@
 		F6746FFE24C6E245006A2905 /* HomeVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeVC.swift; sourceTree = "<group>"; };
 		F674700024C6E8F3006A2905 /* JSONModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONModel.swift; sourceTree = "<group>"; };
 		F675B41A25C9927300698291 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
+		F6794448260B2BAA0066D20F /* APITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APITests.swift; sourceTree = "<group>"; };
 		F67B191F24E6672E003E5A83 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 		F67E4DED24CE80A7006DDE96 /* CatData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatData.swift; sourceTree = "<group>"; };
 		F67E4E3124D3C571006DDE96 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -237,6 +239,7 @@
 			children = (
 				F6BAEFF926022E34004D5A50 /* OverlayContentPickerTest.swift */,
 				F6BAEFF126022D8C004D5A50 /* Info.plist */,
+				F6794448260B2BAA0066D20F /* APITests.swift */,
 			);
 			path = "Cat Cards Tests";
 			sourceTree = "<group>";
@@ -465,6 +468,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6794449260B2BAA0066D20F /* APITests.swift in Sources */,
 				F6BAEFFA26022E34004D5A50 /* OverlayContentPickerTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
