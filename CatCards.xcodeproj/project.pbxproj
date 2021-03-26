@@ -20,7 +20,7 @@
 		F6746FEE24C6DCF2006A2905 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F6746FEC24C6DCF2006A2905 /* Main.storyboard */; };
 		F6746FF024C6DCF5006A2905 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F6746FEF24C6DCF5006A2905 /* Assets.xcassets */; };
 		F6746FF324C6DCF5006A2905 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F6746FF124C6DCF5006A2905 /* LaunchScreen.storyboard */; };
-		F6746FFD24C6E02C006A2905 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6746FFC24C6E02C006A2905 /* NetworkManager.swift */; };
+		F6746FFD24C6E02C006A2905 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6746FFC24C6E02C006A2905 /* APIManager.swift */; };
 		F6746FFF24C6E245006A2905 /* HomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6746FFE24C6E245006A2905 /* HomeVC.swift */; };
 		F674700124C6E8F3006A2905 /* JSONModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F674700024C6E8F3006A2905 /* JSONModel.swift */; };
 		F675B41B25C9927300698291 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F675B41A25C9927300698291 /* HapticManager.swift */; };
@@ -78,7 +78,7 @@
 		F6746FEF24C6DCF5006A2905 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F6746FF224C6DCF5006A2905 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F6746FF424C6DCF5006A2905 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F6746FFC24C6E02C006A2905 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
+		F6746FFC24C6E02C006A2905 /* APIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIManager.swift; sourceTree = "<group>"; };
 		F6746FFE24C6E245006A2905 /* HomeVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeVC.swift; sourceTree = "<group>"; };
 		F674700024C6E8F3006A2905 /* JSONModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONModel.swift; sourceTree = "<group>"; };
 		F675B41A25C9927300698291 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
@@ -226,7 +226,7 @@
 		F67E4DEA24CC7725006DDE96 /* Service */ = {
 			isa = PBXGroup;
 			children = (
-				F6746FFC24C6E02C006A2905 /* NetworkManager.swift */,
+				F6746FFC24C6E02C006A2905 /* APIManager.swift */,
 				F67B191F24E6672E003E5A83 /* DatabaseManager.swift */,
 				F675B41A25C9927300698291 /* HapticManager.swift */,
 				F6D5C13C2600E6D800429C82 /* OverlayContentPicker.swift */,
@@ -442,7 +442,7 @@
 				F6D09CCC259DD89600EAAE1C /* Secrets.swift in Sources */,
 				F6EDE0AF254F998900513A98 /* Card.swift in Sources */,
 				F6CE40AE2593231000B09008 /* OnboardOverlay.swift in Sources */,
-				F6746FFD24C6E02C006A2905 /* NetworkManager.swift in Sources */,
+				F6746FFD24C6E02C006A2905 /* APIManager.swift in Sources */,
 				F6240AA4258B2EB800217C2D /* Strings.swift in Sources */,
 				F67B192024E6672E003E5A83 /* DatabaseManager.swift in Sources */,
 				F675B41B25C9927300698291 /* HapticManager.swift in Sources */,

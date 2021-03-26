@@ -1,5 +1,5 @@
 //
-//  NetworkManager.swift
+//  APIManager.swift
 //  CatCards
 //
 //  Created by Jason Ou Yang on 2020/7/21.
@@ -8,40 +8,43 @@
 
 import UIKit
 
-protocol NetworkManagerDelegate {
+protocol APIManagerDelegate {
     func dataDidFetch(data: CatData, dataIndex: Int)
-    func networkErrorDidOccur()
+    func APIErrorDidOccur()
 }
 
-class NetworkManager {
+class APIManager {
     
-    var delegate: NetworkManagerDelegate?
+    var delegate: APIManagerDelegate?
     private var dataIndex: Int = 0
+    private let urlString = K.API.urlString
     
-    /// Fetch new data and send it to the delegate of this class.
+    /// Fetch and send created data to the delegate of this class.
     /// - Parameter numberOfRequests: Number of data the delegate needs to receive.
-    func performRequest(numberOfRequests: Int) {
-        // Make sure the number of requests is not negative.
-        let validatedNumber = numberOfRequests > 0 ? numberOfRequests : 1
-        
-        guard let url = URL(string: K.API.urlString) else { return }
-        for _ in 0..<validatedNumber {
-            fetchDataViaURL(url: url)
+    func sendRequestToAPI(numberOfRequests: Int) {
+        let validatedRequestNumber = numberOfRequests > 0 ? numberOfRequests : 1
+        for _ in 0..<validatedRequestNumber {
+            fetchDataFromAPI()
         }
     }
     
-    /// Fetch the JSON data from the URL object and decode the data.
+    /// Fetch the data from the URL object and decode the data.
     /// - Parameter url: The URL object used to fetch the data from.
-    private func fetchDataViaURL(url: URL) {
+    private func fetchDataFromAPI() {
+        // Retry API request if URL init failed.
+        guard let url = URL(string: urlString) else {
+            sendRequestToAPI(numberOfRequests: 1)
+            return
+        }
+        
         var request = URLRequest(url: url)
-        // Add header and API key to the request.
         request.addValue(Secrets.API.key, forHTTPHeaderField: Secrets.API.header)
         
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             // Transport error occured
             if let error = error {
                 // Make the delegate awared that an error occured in the data retrieving process.
-                self.delegate?.networkErrorDidOccur()
+                self.delegate?.APIErrorDidOccur()
                 debugPrint("Error sending URLSession request to the server or getting response from the server. Error: \(error)")
                 return
             }
@@ -56,45 +59,60 @@ class NetworkManager {
             
             // Data is retrieved successfully
             if let fetchedData = data {
-                self.parseJSON(data: fetchedData)
+                self.createDataAndSendItToDelegate(withData: fetchedData)
             }
         }.resume() // Start the newly-initialized task
     }
     
-    /// Decode JSON data, initialize image object, filter out and downsize the image if conditions are met, initialize a CatData object from the processed image and pass the object to the delegate.
-    /// - Parameter data: JSON data to be decoded.
-    private func parseJSON(data: Data) {
+    private func createDataAndSendItToDelegate(withData data: Data) {
+        if let parsedData = parsedJSONData(from: data),
+           let catData = dataCreateFrom(parsedData: parsedData) {
+            delegate?.dataDidFetch(data: catData, dataIndex: self.dataIndex)
+            dataIndex += 1
+        }
+    }
+    
+    /// Return parsed JSON data.
+    /// - Parameter data: The raw JSON data which is usually downloaded from an API service.
+    /// - Returns: Parsed JSON data.
+    private func parsedJSONData(from data: Data) -> JSONModel? {
         let jsonDecoder = JSONDecoder()
         do {
             let decodedData = try jsonDecoder.decode([JSONModel].self, from: data) // Decoded data type: [JSONModel]
             guard !decodedData.isEmpty else {
                 debugPrint("Decoded JSON data is invalid.")
-                return
+                return nil
             }
             
             let jsonData = decodedData[0] // Type [JSONModel] -> JSONModel
-            guard let imageURL = URL(string: jsonData.url) else { return }
-            let image = imageFromURL(url: imageURL)
-            let screenSize = UIScreen.main.nativeBounds.size
-            
-            // Filter out any image with the size as same as the "Grumpy Cat" image which is returned constantly from the Cat API.
-            // Downsize the image if its width or height exceeds the native size(with the screen scale considered) of the device's screen in order to limit memory usage by the imageView.
-            guard let filteredImage = image.filterOutGrumpyCatImage(),
-                  let downsizedImage = filteredImage.downsizeTo(screenSize) else {
-                // Fetch another image if the image is not valid.
-                performRequest(numberOfRequests: 1)
-                return
-            }
-            
-            let id = jsonData.id
-            let newData = CatData(id: id, image: downsizedImage)
-            
-            // Pass the newly established data to the delegate
-            delegate?.dataDidFetch(data: newData, dataIndex: dataIndex)
-            
-            dataIndex += 1
+            return jsonData
         } catch {
             debugPrint(error.localizedDescription)
+            return nil
+        }
+    }
+    
+    /// Init and return a CatData object from the parsed data.
+    ///
+    /// An invalid value could be returned if an image object could not be initiated from the provided data.
+    /// - Parameter parsedData: A parsed data.
+    /// - Returns: A CatData object created using the provided parsed data.
+    private func dataCreateFrom(parsedData: JSONModel) -> CatData? {
+        let id = parsedData.id
+        let imageUrlString = parsedData.url
+        
+        guard let imageURL = URL(string: imageUrlString) else { return nil }
+        guard let image = imageFromURL(url: imageURL) else { return nil }
+        
+        let screenSize = UIScreen.main.nativeBounds.size
+        
+        // Filter out any image with the size as same as the "Grumpy Cat" image which is returned constantly from the Cat API.
+        // Downsize the image if its width or height exceeds the native size(with the screen scale considered) of the device's screen in order to limit memory usage by the imageView.
+        if let filteredImage = image.filterOutGrumpyCatImage(),
+           let downsizedImage = filteredImage.downsizeTo(screenSize) {
+            return CatData(id: id, image: downsizedImage)
+        } else {
+            return nil
         }
     }
     
@@ -103,7 +121,7 @@ class NetworkManager {
     /// If the provided URL object is invalid or the initialization of the image object failed, a default image object provided with the bundle will be returned.
     /// - Parameter url: The URL object from which the data will be retrieved from.
     /// - Returns: The image object initialized by using the data retrieved from the provided URL object.
-    private func imageFromURL(url: URL) -> UIImage {
+    private func imageFromURL(url: URL) -> UIImage? {
         do {
             let imageData = try Data(contentsOf: url)
             if let image = UIImage(data: imageData) {

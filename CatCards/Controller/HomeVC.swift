@@ -11,7 +11,7 @@ import GoogleMobileAds
 import UserNotifications
 import AppTrackingTransparency
 
-class HomeVC: UIViewController, NetworkManagerDelegate {
+class HomeVC: UIViewController, APIManagerDelegate {
     
     //MARK: - IBOutlet
     
@@ -44,7 +44,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     static let shared = HomeVC()
     private let defaults = UserDefaults.standard
     private let databaseManager = DatabaseManager.shared
-    private let networkManager = NetworkManager()
+    private let apiManager = APIManager()
     
     // Cache of all Card objects used to display to the user.
     private var cardArray: [Card] = []
@@ -164,7 +164,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         // Save the reference of this view's built-in navigation bar.
         navBar = self.navigationController?.navigationBar
         databaseManager.delegate = self
-        networkManager.delegate = self
+        apiManager.delegate = self
         
         // Load viewCount value from database if there's any.
         let savedViewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
@@ -186,7 +186,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
         addBackgroundLayer()
         addShadeOverlay()
         
-        networkManager.performRequest(numberOfRequests: K.Data.cacheDataNumber)
+        apiManager.sendRequestToAPI(numberOfRequests: K.Data.cacheDataNumber)
         
         // For UI Testing
         setUpUIReference()
@@ -224,7 +224,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     
     //MARK: - Card Caching and Addition to the View
     
-    /// Once any new data is fetched via API by the network manager, the fetched data is passed to any delegate which conforms to its protocol: NetworkManagerDelegate.
+    /// Once any new data is fetched via API by the network manager, the fetched data is passed to any delegate which conforms to its protocol: APIManagerDelegate.
     ///
     /// This method creates a new Card instance with the newly fetched data, assigned dataIndex and card's type based on the status on whether the onboard session is completed
     /// which is then appended to the cache card array.
@@ -883,7 +883,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             
             // Fetch new data if the next card has not being displayed before.
             if self.pointer > self.maxCardIndex {
-                self.networkManager.performRequest(numberOfRequests: 1)
+                self.apiManager.sendRequestToAPI(numberOfRequests: 1)
             }
             
             // Toggle the status of onboard completion
@@ -937,7 +937,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     //MARK: - Error Handling Section
     
     /// An error occured in the data fetching process.
-    func networkErrorDidOccur() {
+    func APIErrorDidOccur() {
         // Present alert view to the user if any error occurs in the data fetching process.
         
         // Make sure no existing alert controller being presented already.
@@ -954,7 +954,7 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
             let retryAction = UIAlertAction(title: Z.AlertMessage.NetworkError.actionTitle, style: .default) { _ in
                 // Request enough number of new data to satisfy the ideal cache data number.
                 let requestNumber = K.Data.cacheDataNumber - self.cardArray.count
-                self.networkManager.performRequest(numberOfRequests: requestNumber)
+                self.apiManager.sendRequestToAPI(numberOfRequests: requestNumber)
             }
             
             alert.addAction(retryAction)
