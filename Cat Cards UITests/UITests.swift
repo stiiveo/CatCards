@@ -1,5 +1,5 @@
 //
-//  Cat_Cards_UITests.swift
+//  UITests.swift
 //  Cat Cards UITests
 //
 //  Created by Jason Ou Yang on 2021/3/18.
@@ -8,7 +8,7 @@
 
 import XCTest
 
-class Cat_Cards_UITests: XCTestCase {
+class UITests: XCTestCase {
     
     private let numberOfSavedImages = 5
     
@@ -73,13 +73,13 @@ class Cat_Cards_UITests: XCTestCase {
         }
         
         
-        app.navigationBars["Cat_Cards.HomeVC"]/*@START_MENU_TOKEN@*/.buttons["collectionButton"]/*[[".buttons[\"grid 2x2\"]",".buttons[\"collectionButton\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.navigationBars["CatCards.HomeVC"]/*@START_MENU_TOKEN@*/.buttons["collectionButton"]/*[[".buttons[\"grid 2x2\"]",".buttons[\"collectionButton\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
         sleep(1)
         app.collectionViews.cells.images.firstMatch.tap()
         sleep(1)
-        app.navigationBars["Cat_Cards.SingleImageVC"].buttons["Back"].tap()
+        app.navigationBars["CatCards.SingleImageVC"].buttons["Back"].tap()
         sleep(1)
-        app.navigationBars["Cat_Cards.CollectionVC"].buttons["Back"].tap()
+        app.navigationBars["CatCards.CollectionVC"].buttons["Back"].tap()
         sleep(1)
         
     }
@@ -88,8 +88,8 @@ class Cat_Cards_UITests: XCTestCase {
         let app = XCUIApplication()
         app.activate()
         
-        // Go to SingleImageVC.
-        app.navigationBars["Cat_Cards.HomeVC"]/*@START_MENU_TOKEN@*/.buttons["collectionButton"]/*[[".buttons[\"grid 2x2\"]",".buttons[\"collectionButton\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        // Navigate to SingleImageVC.
+        app.navigationBars["CatCards.HomeVC"]/*@START_MENU_TOKEN@*/.buttons["collectionButton"]/*[[".buttons[\"grid 2x2\"]",".buttons[\"collectionButton\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
         app.collectionViews.cells.images.firstMatch.tap()
         
         // Test tap and pinch gesture recognizers.

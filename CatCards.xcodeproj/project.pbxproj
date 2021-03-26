@@ -30,7 +30,7 @@
 		F67E4E3224D3C571006DDE96 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67E4E3124D3C571006DDE96 /* Constants.swift */; };
 		F6AB3F2125F1E1CF005400DD /* ConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB3F2025F1E1CF005400DD /* ConfirmationView.swift */; };
 		F6BAEFFA26022E34004D5A50 /* OverlayContentPickerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BAEFF926022E34004D5A50 /* OverlayContentPickerTest.swift */; };
-		F6BAF00C26037C8F004D5A50 /* Cat_Cards_UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BAF00B26037C8F004D5A50 /* Cat_Cards_UITests.swift */; };
+		F6BAF00C26037C8F004D5A50 /* UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BAF00B26037C8F004D5A50 /* UITests.swift */; };
 		F6C1AAF325F76C7A00C03215 /* TriviaOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C1AAF225F76C7A00C03215 /* TriviaOverlay.swift */; };
 		F6C928202540678B00BAB89E /* ImageScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C9281F2540678B00BAB89E /* ImageScrollView.swift */; };
 		F6CE40AB2593063700B09008 /* OnboardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AA2593063700B09008 /* OnboardData.swift */; };
@@ -91,7 +91,7 @@
 		F6BAEFF126022D8C004D5A50 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F6BAEFF926022E34004D5A50 /* OverlayContentPickerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayContentPickerTest.swift; sourceTree = "<group>"; };
 		F6BAF00926037C8F004D5A50 /* Cat Cards UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Cat Cards UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F6BAF00B26037C8F004D5A50 /* Cat_Cards_UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cat_Cards_UITests.swift; sourceTree = "<group>"; };
+		F6BAF00B26037C8F004D5A50 /* UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITests.swift; sourceTree = "<group>"; };
 		F6BAF00D26037C8F004D5A50 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F6C1AAF225F76C7A00C03215 /* TriviaOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriviaOverlay.swift; sourceTree = "<group>"; };
 		F6C9281F2540678B00BAB89E /* ImageScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollView.swift; sourceTree = "<group>"; };
@@ -247,7 +247,7 @@
 		F6BAF00A26037C8F004D5A50 /* Cat Cards UITests */ = {
 			isa = PBXGroup;
 			children = (
-				F6BAF00B26037C8F004D5A50 /* Cat_Cards_UITests.swift */,
+				F6BAF00B26037C8F004D5A50 /* UITests.swift */,
 				F6BAF00D26037C8F004D5A50 /* Info.plist */,
 			);
 			path = "Cat Cards UITests";
@@ -477,7 +477,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F6BAF00C26037C8F004D5A50 /* Cat_Cards_UITests.swift in Sources */,
+				F6BAF00C26037C8F004D5A50 /* UITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
