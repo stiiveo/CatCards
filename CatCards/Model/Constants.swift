@@ -101,12 +101,13 @@ struct K {
     
     struct OnboardOverlay {
         static let zoomImage = UIImage(named: "onboard_zoom_image")!
-        struct ButtonImage {
+        static let tapGesture = UIImage(systemName: "hand.tap.fill")!
+        
+        struct CellImage {
             static let share = UIImage(systemName: "square.and.arrow.up")!
             static let undo = UIImage(systemName: "arrow.counterclockwise")!
             static let save = UIImage(systemName: "heart")!
             static let showDownloads = UIImage(systemName: "square.grid.2x2.fill")!
-            static let tapGesture = UIImage(systemName: "hand.tap.fill")!
         }
         
         // Text and images used for the onboarding card
@@ -121,16 +122,16 @@ struct K {
                         cellImage: nil),
             OnboardData(cellText: ["Toggle the Info Overlay",
                                    "Tap the card once to toggle the overlay over the card."],
-                        cellImage: [K.OnboardOverlay.ButtonImage.tapGesture]),
+                        cellImage: nil),
             OnboardData(cellText: [Z.InstructionText.buttonInstruction,
                                    Z.InstructionText.shareButton,
                                    Z.InstructionText.undoButton,
                                    Z.InstructionText.saveButton,
                                    Z.InstructionText.showDownloadsButton],
-                        cellImage: [K.OnboardOverlay.ButtonImage.share,
-                                    K.OnboardOverlay.ButtonImage.undo,
-                                    K.OnboardOverlay.ButtonImage.save,
-                                    K.OnboardOverlay.ButtonImage.showDownloads]),
+                        cellImage: [K.OnboardOverlay.CellImage.share,
+                                    K.OnboardOverlay.CellImage.undo,
+                                    K.OnboardOverlay.CellImage.save,
+                                    K.OnboardOverlay.CellImage.showDownloads]),
             ]
     }
     

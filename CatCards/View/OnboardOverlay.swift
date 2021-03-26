@@ -35,12 +35,12 @@ class OnboardOverlay: UIView {
     
     private func OverlayDidLoad() {
         addBackgroundView()
-        addStackView()
+        addContent()
     }
     
     //MARK: - Stack View
     
-    private func addStackView() {
+    private func addContent() {
         initTableView()
         initLabelView()
         
@@ -86,7 +86,7 @@ class OnboardOverlay: UIView {
         }
     }
     
-    //MARK: - TableView, Label, Image
+    //MARK: - Content
     
     private func initTableView() {
         // Add tableView to onboard overlay

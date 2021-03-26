@@ -6,7 +6,7 @@
 //  Copyright © 2021 Jason Ou Yang. All rights reserved.
 //
 
-@testable import Cat_Cards
+@testable import CatCards
 import XCTest
 
 class OverlayContentPickerTest: XCTestCase {

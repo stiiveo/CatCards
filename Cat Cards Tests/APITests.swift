@@ -6,12 +6,13 @@
 //  Copyright © 2021 Jason Ou Yang. All rights reserved.
 //
 
-@testable import Cat_Cards
+@testable import CatCards
 import XCTest
 
 class APITests: XCTestCase {
     
     var urlSession: URLSession!
+    let urlString = K.API.urlString
 
     override func setUp() {
         super.setUp()

@@ -237,9 +237,9 @@
 		F6BAEFEE26022D8C004D5A50 /* Cat Cards Tests */ = {
 			isa = PBXGroup;
 			children = (
+				F6794448260B2BAA0066D20F /* APITests.swift */,
 				F6BAEFF926022E34004D5A50 /* OverlayContentPickerTest.swift */,
 				F6BAEFF126022D8C004D5A50 /* Info.plist */,
-				F6794448260B2BAA0066D20F /* APITests.swift */,
 			);
 			path = "Cat Cards Tests";
 			sourceTree = "<group>";
@@ -704,7 +704,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cat Cards.app/Cat Cards";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CatCards.app/CatCards";
 			};
 			name = Debug;
 		};
@@ -725,7 +725,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cat Cards.app/Cat Cards";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CatCards.app/CatCards";
 			};
 			name = Release;
 		};
