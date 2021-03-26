@@ -821,14 +821,16 @@ class HomeVC: UIViewController, NetworkManagerDelegate {
     /// What happens when user taps on the card.
     /// - Parameter sender: A discrete gesture recognizer that interprets single or multiple taps.
     @objc private func tapHandler(sender: UITapGestureRecognizer) {
-        switch sender.state {
-        case .ended:
-            // Toggle every card's overlay
-            for card in cardArray {
+        guard let card = sender.view as? Card else { return }
+        if sender.state == .ended {
+            switch card.cardType {
+            case .regular:
+                for card in cardArray {
+                    card.toggleOverlay()
+                }
+            case .onboard:
                 card.toggleOverlay()
             }
-        default:
-            debugPrint("Error handling tap gesture.")
         }
     }
     

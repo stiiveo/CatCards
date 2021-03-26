@@ -38,7 +38,7 @@ class Card: UIView {
         self.data = data
         self.index = index
         self.cardType = cardType
-        addOverlay(cardType: cardType)
+        addOverlay()
     }
     
     required init?(coder: NSCoder) {
@@ -50,7 +50,7 @@ class Card: UIView {
         addImageView()
     }
     
-    private func addOverlay(cardType: CardType) {
+    private func addOverlay() {
         switch cardType {
         case .regular:
             addTriviaOverlay()
@@ -130,8 +130,8 @@ class Card: UIView {
     
     private func addOnboardOverlay() {
         // Make sure the index is within the bound of onboard data array
-        let onboardArray = K.OnboardOverlay.data
-        guard index! >= 0 && index! < onboardArray.count else {
+        let onboardData = K.OnboardOverlay.data
+        guard index! >= 0 && index! < onboardData.count else {
             debugPrint("Index(\(index!)) of onboard data is unavailable for onboard card")
             return
         }
@@ -171,7 +171,9 @@ class Card: UIView {
                 self.triviaOverlay?.alpha = self.triviaOverlay?.alpha == 1 ? 0 : 1
                 HomeVC.shared.showOverlay = self.triviaOverlay?.alpha == 1 ? true : false
             case .onboard:
-                self.onboardOverlay?.alpha = self.onboardOverlay?.alpha == 1 ? 0 : 1
+                if self.index == 2 {
+                    self.onboardOverlay?.alpha = self.onboardOverlay?.alpha == 1 ? 0 : 1
+                }
             }
             
         }

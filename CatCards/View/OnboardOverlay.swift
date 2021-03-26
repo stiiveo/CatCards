@@ -10,7 +10,7 @@ import UIKit
 
 class OnboardOverlay: UIView {
     
-    var index: Int = 0
+    var cardIndex: Int = 0
     private lazy var blurEffectView = UIVisualEffectView()
     private lazy var labelView = UILabel()
     private let data = K.OnboardOverlay.data
@@ -23,7 +23,7 @@ class OnboardOverlay: UIView {
     
     convenience init(cardIndex: Int) {
         self.init()
-        self.index = cardIndex
+        self.cardIndex = cardIndex
         cardDidLoad()
     }
     
@@ -37,7 +37,7 @@ class OnboardOverlay: UIView {
         addTableView()
     }
     
-    //MARK: - Background & Text Info
+    //MARK: - Blur Background, TableView & Label
     
     /// Add background view and blur effect to the label view
     private func addBackgroundView() {
@@ -59,7 +59,7 @@ class OnboardOverlay: UIView {
         }
     }
     
-    func addTableView() {
+    private func addTableView() {
         // Add tableView to onboard overlay
         let tableView = UITableView()
         self.addSubview(tableView)
@@ -102,14 +102,14 @@ class OnboardOverlay: UIView {
 extension OnboardOverlay: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // Return rows for title and prompt message only if body's value is nil
-        return data[index].cellText.count
+        return data[cardIndex].cellText.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
         // Text messages
-        cell.textLabel?.text = data[index].cellText[indexPath.row]
+        cell.textLabel?.text = data[cardIndex].cellText[indexPath.row]
         labelView.text = Z.InstructionText.prompt
         
         // Text style
@@ -121,18 +121,23 @@ extension OnboardOverlay: UITableViewDataSource {
         cell.backgroundColor = .clear
         cell.isUserInteractionEnabled = false
         
-        if index == 1 {
+        if cardIndex == 1 {
             // Remove blur effect view of the card for zooming gesture instruction
             self.blurEffectView.removeFromSuperview()
         }
         
-        if index == 2 {
-            // Last card's cell images
-            if indexPath.row != 0 {
-                // Add image to each cell except the first and the last one
-                cell.imageView?.image = data[2].cellImage?[indexPath.row - 1]
+        // Show start prompt if it's the last onboard card.
+        if cardIndex == 2 {
+            if indexPath.row == 1 {
+                cell.imageView?.image = data[cardIndex].cellImage?[0]
             }
-            // Label view text message
+        }
+        
+        if cardIndex == K.OnboardOverlay.data.count - 1 {
+            if indexPath.row != 0 {
+                // Add image to each cell except the first one
+                cell.imageView?.image = data[cardIndex].cellImage?[indexPath.row - 1]
+            }
             labelView.text = Z.InstructionText.startPrompt
         }
         

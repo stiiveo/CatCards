@@ -106,6 +106,7 @@ struct K {
             static let undo = UIImage(systemName: "arrow.counterclockwise")!
             static let save = UIImage(systemName: "heart")!
             static let showDownloads = UIImage(systemName: "square.grid.2x2.fill")!
+            static let tapGesture = UIImage(systemName: "hand.tap.fill")!
         }
         
         // Text and images used for the onboarding card
@@ -118,6 +119,9 @@ struct K {
             OnboardData(cellText: [Z.InstructionText.zoomGestureTitle,
                                    Z.InstructionText.zoomInstruction],
                         cellImage: nil),
+            OnboardData(cellText: ["Toggle the Info Overlay",
+                                   "Tap the card once to toggle the overlay over the card."],
+                        cellImage: [K.OnboardOverlay.ButtonImage.tapGesture]),
             OnboardData(cellText: [Z.InstructionText.buttonInstruction,
                                    Z.InstructionText.shareButton,
                                    Z.InstructionText.undoButton,
@@ -126,12 +130,14 @@ struct K {
                         cellImage: [K.OnboardOverlay.ButtonImage.share,
                                     K.OnboardOverlay.ButtonImage.undo,
                                     K.OnboardOverlay.ButtonImage.save,
-                                    K.OnboardOverlay.ButtonImage.showDownloads])
+                                    K.OnboardOverlay.ButtonImage.showDownloads]),
             ]
     }
     
-    // Important: Sync this value to the real number of trivia content
-    // , otherwise the string value will not be fetched and shown.
+    /*
+     Important: Sync this value to the real number of trivia content,
+     otherwise the string value will not be fetched and shown.
+     */
     static let numberOfTrivia: Int = 34
     static let numberOfQuotes: Int = 39
 }

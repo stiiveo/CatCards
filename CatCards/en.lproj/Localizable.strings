@@ -19,7 +19,7 @@
 "SHARE_BUTTON" = "Share the picture";
 "UNDO_BUTTON" = "Retrieve the last card";
 "SAVE_BUTTON" = "Save the picture";
-"VIEW_SAVED" = "Show downloaded pictures";
+"VIEW_SAVED" = "Show saved pictures";
 "PROMPT" = "🐈 Swipe me to see the next card";
 "START_PROMPT" = "😺 Swipe me to start";
 
