@@ -16,24 +16,16 @@ protocol APIManagerDelegate {
 class APIManager {
     
     var delegate: APIManagerDelegate?
+    static let shared = APIManager()
     private var dataIndex: Int = 0
     private let urlString = K.API.urlString
     
-    /// Fetch and send created data to the delegate of this class.
-    /// - Parameter numberOfRequests: Number of data the delegate needs to receive.
-    func sendRequestToAPI(numberOfRequests: Int) {
-        let validatedRequestNumber = numberOfRequests > 0 ? numberOfRequests : 1
-        for _ in 0..<validatedRequestNumber {
-            fetchDataFromAPI()
-        }
-    }
-    
     /// Fetch the data from the URL object and decode the data.
     /// - Parameter url: The URL object used to fetch the data from.
-    private func fetchDataFromAPI() {
+    func fetchData() {
         // Retry API request if URL init failed.
         guard let url = URL(string: urlString) else {
-            sendRequestToAPI(numberOfRequests: 1)
+            fetchData()
             return
         }
         
@@ -59,12 +51,12 @@ class APIManager {
             
             // Data is retrieved successfully
             if let fetchedData = data {
-                self.createDataAndSendItToDelegate(withData: fetchedData)
+                self.sendProcessedDataToDelegate(usingData: fetchedData)
             }
         }.resume() // Start the newly-initialized task
     }
     
-    private func createDataAndSendItToDelegate(withData data: Data) {
+    private func sendProcessedDataToDelegate(usingData data: Data) {
         if let parsedData = parsedJSONData(from: data),
            let catData = dataCreateFrom(parsedData: parsedData) {
             delegate?.dataDidFetch(data: catData, dataIndex: self.dataIndex)

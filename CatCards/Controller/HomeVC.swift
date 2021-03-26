@@ -43,8 +43,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     static let shared = HomeVC()
     private let defaults = UserDefaults.standard
-    private let databaseManager = DatabaseManager.shared
-    private let apiManager = APIManager()
+    private let dbManager = DatabaseManager.shared
     
     // Cache of all Card objects used to display to the user.
     private var cardArray: [Card] = []
@@ -163,8 +162,8 @@ class HomeVC: UIViewController, APIManagerDelegate {
         super.viewDidLoad()
         // Save the reference of this view's built-in navigation bar.
         navBar = self.navigationController?.navigationBar
-        databaseManager.delegate = self
-        apiManager.delegate = self
+        dbManager.delegate = self
+        APIManager.shared.delegate = self
         
         // Load viewCount value from database if there's any.
         let savedViewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
@@ -180,13 +179,13 @@ class HomeVC: UIViewController, APIManagerDelegate {
         }
         
         // Create local image folder in file system and/or load data from it.
-        databaseManager.createFolders()
-        databaseManager.getSavedImageFileURLs()
+        dbManager.createFolders()
+        dbManager.getSavedImageFileURLs()
         
         addBackgroundLayer()
         addShadeOverlay()
         
-        apiManager.sendRequestToAPI(numberOfRequests: K.Data.cacheDataNumber)
+        sendAPIRequest(numberOfRequests: K.Data.cacheDataNumber)
         
         // For UI Testing
         setUpUIReference()
@@ -222,7 +221,16 @@ class HomeVC: UIViewController, APIManagerDelegate {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
     
-    //MARK: - Card Caching and Addition to the View
+    //MARK: - Data Request & Receive
+    
+    /// Send data request to API Manager.
+    /// - Parameter numberOfRequests: Number of request sent to API Manager.
+    func sendAPIRequest(numberOfRequests: Int) {
+        let validatedRequestNumber = numberOfRequests > 0 ? numberOfRequests : 1
+        for _ in 0..<validatedRequestNumber {
+            APIManager.shared.fetchData()
+        }
+    }
     
     /// Once any new data is fetched via API by the network manager, the fetched data is passed to any delegate which conforms to its protocol: APIManagerDelegate.
     ///
@@ -507,11 +515,11 @@ class HomeVC: UIViewController, APIManagerDelegate {
             hapticManager.prepareNotificationGenerator()
             
             // Save data if it's absent in database, otherwise delete it.
-            let isSaved = databaseManager.isDataSaved(data: data)
+            let isSaved = dbManager.isDataSaved(data: data)
             
             switch isSaved {
             case false:
-                databaseManager.saveData(data) { success in
+                dbManager.saveData(data) { success in
                     if success {
                         // Data is saved successfully
                         DispatchQueue.main.async {
@@ -524,7 +532,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
                     }
                 }
             case true:
-                databaseManager.deleteData(id: data.id)
+                dbManager.deleteData(id: data.id)
                 hapticManager.impactHaptic?.impactOccurred()
             }
             
@@ -541,7 +549,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         guard !cardIsBeingPanned, catData != nil else { return }
         
         // Create and save the cache image file to cache folder
-        guard let imageURL = databaseManager.getImageTempURL(catData: catData!) else { return }
+        guard let imageURL = dbManager.getImageTempURL(catData: catData!) else { return }
         
         hapticManager.prepareImpactGenerator(style: .soft)
 
@@ -558,7 +566,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         
         // Delete the cache image file after the activityVC is dismissed
         activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
-            self.databaseManager.removeFile(fromDirectory: .cachesDirectory, inFolder: K.Image.FolderName.cacheImage, fileName: catData!.id)
+            self.dbManager.removeFile(fromDirectory: .cachesDirectory, inFolder: K.Image.FolderName.cacheImage, fileName: catData!.id)
             
             self.hapticManager.releaseImpactGenerator()
         }
@@ -580,7 +588,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         
         // Toggle the status of save button
         if let data = currentCard?.data {
-            let isDataSaved = databaseManager.isDataSaved(data: data)
+            let isDataSaved = dbManager.isDataSaved(data: data)
             saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
         }
     }
@@ -883,7 +891,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             
             // Fetch new data if the next card has not being displayed before.
             if self.pointer > self.maxCardIndex {
-                self.apiManager.sendRequestToAPI(numberOfRequests: 1)
+                self.sendAPIRequest(numberOfRequests: 1)
             }
             
             // Toggle the status of onboard completion
@@ -954,7 +962,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             let retryAction = UIAlertAction(title: Z.AlertMessage.NetworkError.actionTitle, style: .default) { _ in
                 // Request enough number of new data to satisfy the ideal cache data number.
                 let requestNumber = K.Data.cacheDataNumber - self.cardArray.count
-                self.apiManager.sendRequestToAPI(numberOfRequests: requestNumber)
+                self.sendAPIRequest(numberOfRequests: requestNumber)
             }
             
             alert.addAction(retryAction)
