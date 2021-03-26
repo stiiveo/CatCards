@@ -13,9 +13,6 @@ class OnboardOverlay: UIView {
     var cardIndex: Int = 0
     private let tableViewContent = K.OnboardOverlay.data
     private lazy var blurEffectView = UIVisualEffectView()
-    private var tableView: UITableView!
-    private var labelView: UILabel!
-    private var imageView: UIImageView?
     
     //MARK: - Initialization
     
@@ -34,32 +31,35 @@ class OnboardOverlay: UIView {
     }
     
     private func OverlayDidLoad() {
-        addBackgroundView()
+        addBlurBackground()
         addContent()
     }
     
     //MARK: - Stack View
     
     private func addContent() {
-        initTableView()
-        initLabelView()
-        
+        // Content
+        let tableView = OverlayTableView(dataSource: self)
+        let labelView = OverlayPromptLabel(cardIndex: self.cardIndex)
         let stackView = UIStackView(arrangedSubviews: [tableView, labelView])
         if self.cardIndex == 2 {
-            initImageView()
-            stackView.insertArrangedSubview(imageView!, at: 1)
+            let imageView = UIImageView(image: K.OnboardOverlay.tapGesture)
+            imageView.heightAnchor.constraint(equalToConstant: 100).isActive = true
+            imageView.contentMode = .scaleAspectFit
+            stackView.insertArrangedSubview(imageView, at: 1)
         }
         
+        // Contraints
         stackView.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(stackView)
         NSLayoutConstraint.activate([
             stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10),
             stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -10),
-            stackView.topAnchor.constraint(equalTo: self.topAnchor, constant: 10),
-            stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -10)
+            stackView.topAnchor.constraint(equalTo: self.topAnchor, constant: 15),
+            stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -20)
         ])
         
-        // style
+        // Style
         stackView.axis = .vertical
         stackView.distribution = .fill
     }
@@ -67,7 +67,9 @@ class OnboardOverlay: UIView {
     //MARK: - Background
     
     /// Add background view and blur effect to the label view
-    private func addBackgroundView() {
+    private func addBlurBackground() {
+        guard cardIndex != 1 else { return }
+        
         // Only applies blur effect view on top of this view if the user hadn't disable transparancy effects
         if !UIAccessibility.isReduceTransparencyEnabled {
             self.backgroundColor = .clear
@@ -85,38 +87,65 @@ class OnboardOverlay: UIView {
             self.backgroundColor = K.Color.onboardBackground
         }
     }
-    
-    //MARK: - Content
-    
-    private func initTableView() {
-        // Add tableView to onboard overlay
-        tableView = UITableView()
-        
-        // Delegate
-        tableView.dataSource = self
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
-        
-        // Style
-        tableView.separatorStyle = .none
-        tableView.backgroundColor = .clear
-        tableView.isScrollEnabled = false
+}
+
+//MARK: - Content
+
+class OverlayTableView: UITableView {
+    override init(frame: CGRect, style: UITableView.Style) {
+        super.init(frame: frame, style: style)
     }
     
-    private func initLabelView() {
-        labelView = UILabel()
-        
-        // Style
-        labelView.textColor = .label
-        labelView.font = .systemFont(ofSize: 18, weight: .regular)
-        labelView.adjustsFontSizeToFitWidth = true
-        labelView.minimumScaleFactor = 0.5
-        labelView.textAlignment = .center
+    convenience init(dataSource: UITableViewDataSource) {
+        self.init()
+        self.dataSource = dataSource
+        tableViewDidLoad()
     }
     
-    private func initImageView() {
-        imageView = UIImageView(image: K.OnboardOverlay.tapGesture)
-        imageView!.heightAnchor.constraint(equalToConstant: 100).isActive = true
-        imageView!.contentMode = .scaleAspectFit
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func tableViewDidLoad() {
+        self.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        
+        // Configuration
+        self.separatorStyle = .none
+        self.backgroundColor = .clear
+        self.isScrollEnabled = false
+        self.allowsSelection = false
+    }
+}
+
+class OverlayPromptLabel: UILabel {
+    var cardIndex: Int!
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    
+    convenience init(cardIndex: Int) {
+        self.init()
+        self.cardIndex = cardIndex
+        labelDidLoad()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func labelDidLoad() {
+        self.textColor = .label
+        self.font = .systemFont(ofSize: 18, weight: .regular)
+        self.adjustsFontSizeToFitWidth = true
+        self.minimumScaleFactor = 0.5
+        self.textAlignment = .center
+        
+        if cardIndex != K.OnboardOverlay.data.count - 1 {
+            self.text = Z.Onboard.continuePrompt
+        } else {
+            self.text = Z.Onboard.finalPrompt
+        }
     }
 }
 
@@ -130,46 +159,24 @@ extension OnboardOverlay: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        
-        // Text messages
-        cell.textLabel?.text = tableViewContent[cardIndex].cellText[indexPath.row]
-        labelView.text = Z.InstructionText.prompt
-        
-        // Text style
-        cell.textLabel?.textColor = .label
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 20, weight: .regular)
-        cell.textLabel?.numberOfLines = 0
-        
-        // Cell style
         cell.backgroundColor = .clear
-        cell.isUserInteractionEnabled = false
+        cell.textLabel?.textColor = .label
+        cell.textLabel?.text = tableViewContent[cardIndex].cellText[indexPath.row]
+        cell.textLabel?.numberOfLines = 0
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 20, weight: .regular)
         
-        if cardIndex == 1 {
-            // Remove blur effect view of the card for zooming gesture instruction
-            self.blurEffectView.removeFromSuperview()
+        // Title's text style
+        if indexPath.row == 0 {
+            cell.textLabel?.font = UIFont.systemFont(ofSize: 28, weight: .medium)
         }
         
-        // Show start prompt if it's the last onboard card.
-        if cardIndex == 2 {
-            if indexPath.row == 1 {
-                cell.imageView?.image = tableViewContent[cardIndex].cellImage?[0]
-            }
-        }
-        
+        // Add image to last onboard card's each cell except the first one.
         if cardIndex == tableViewContent.count - 1 {
             if indexPath.row != 0 {
-                // Add image to each cell except the first one
                 cell.imageView?.image = tableViewContent[cardIndex].cellImage?[indexPath.row - 1]
             }
-            labelView.text = Z.InstructionText.startPrompt
-        }
-        
-        if indexPath.row == 0 {
-            // Title's text style
-            cell.textLabel?.font = UIFont.systemFont(ofSize: 28, weight: .medium)
         }
         
         return cell
     }
-    
 }

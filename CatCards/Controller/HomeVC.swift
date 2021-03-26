@@ -60,7 +60,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     // Maximum number of cards with different data shown to the user.
     private var maxCardIndex: Int = 0
     
-    // Indicator on if any banner ad is received by GoogleMobileAds API.
+    // Indicator on if any banner ad is received from GoogleMobileAds API.
     private var adReceived = false
     
     // Background view behind the main imageView.

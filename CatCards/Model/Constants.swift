@@ -68,7 +68,7 @@ struct K {
     }
     
     struct Data {
-        static let cacheDataNumber: Int = 15 // Smaller this number is, bigger the chance the user experiences the loading process
+        static let cacheDataNumber: Int = 3 // Smaller this number is, bigger the chance the user experiences the loading process
         static let undoCardNumber: Int = 9 // Number of cards the user can undo
         static let prefetchNumberOfImageAtEachSide: Int = 2 // Number of prefetched images in the stackView's arranged subviews. The value must be positive. The larger the value, the more the memory consumption will be.
         static let maxSavedImages: Int = 36 // Maximum number of pictures which can be saved to user's device
@@ -113,21 +113,21 @@ struct K {
         // Text and images used for the onboarding card
         // Each data represents the data each card uses
         static let data =
-            [OnboardData(cellText: [Z.InstructionText.greetTitle,
-                                   Z.InstructionText.greet_1,
-                                   Z.InstructionText.greet_2],
+            [OnboardData(cellText: [Z.Onboard.greetTitle,
+                                   Z.Onboard.greet_1,
+                                   Z.Onboard.greet_2],
                         cellImage: nil),
-            OnboardData(cellText: [Z.InstructionText.zoomGestureTitle,
-                                   Z.InstructionText.zoomInstruction],
+            OnboardData(cellText: [Z.Onboard.zoomGestureTitle,
+                                   Z.Onboard.zoomInstruction],
                         cellImage: nil),
             OnboardData(cellText: ["Toggle the Info Overlay",
                                    "Tap the card once to toggle the overlay over the card."],
                         cellImage: nil),
-            OnboardData(cellText: [Z.InstructionText.buttonInstruction,
-                                   Z.InstructionText.shareButton,
-                                   Z.InstructionText.undoButton,
-                                   Z.InstructionText.saveButton,
-                                   Z.InstructionText.showDownloadsButton],
+            OnboardData(cellText: [Z.Onboard.buttonInstruction,
+                                   Z.Onboard.shareButton,
+                                   Z.Onboard.undoButton,
+                                   Z.Onboard.saveButton,
+                                   Z.Onboard.showDownloadsButton],
                         cellImage: [K.OnboardOverlay.CellImage.share,
                                     K.OnboardOverlay.CellImage.undo,
                                     K.OnboardOverlay.CellImage.save,
