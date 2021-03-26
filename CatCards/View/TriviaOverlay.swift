@@ -47,7 +47,7 @@ class TriviaOverlay: UIView {
     
     private func addTriviaLabel() {
         let label = UILabel()
-        self.addSubview(label)
+        blurEffectView.contentView.addSubview(label)
         label.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             label.leadingAnchor.constraint(equalTo: blurEffectView.leadingAnchor, constant: 15),
