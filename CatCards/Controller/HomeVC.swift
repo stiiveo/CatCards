@@ -990,15 +990,21 @@ extension HomeVC: UIGestureRecognizerDelegate {
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        // Recognize pinch gesture only after the failure of a pan gesture
+        // Recognize pinch gesture only after the failure of single–finger pan gesture
         if gestureRecognizer == pinchGestureRecognizer && otherGestureRecognizer == panGestureRecognizer {
             return true
         }
         
-        // Recognize two-finger pan gesture only after the failure of single-finger pan gesture
+        // Recognize two–finger pan gesture only after the failure of single–finger pan gesture
         if gestureRecognizer == twoFingerPanGestureRecognizer && otherGestureRecognizer == panGestureRecognizer {
             return true
         }
+        
+        // Recognize tap gesture only after the failure of single–finger pan gesture
+        if gestureRecognizer == tapGestureRecognizer && otherGestureRecognizer == panGestureRecognizer {
+            return true
+        }
+        
         return false
     }
 }
