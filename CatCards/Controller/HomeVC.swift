@@ -225,7 +225,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     /// Send data request to API Manager.
     /// - Parameter numberOfRequests: Number of request sent to API Manager.
-    func sendAPIRequest(numberOfRequests: Int) {
+    private func sendAPIRequest(numberOfRequests: Int) {
         let validatedRequestNumber = numberOfRequests > 0 ? numberOfRequests : 1
         for _ in 0..<validatedRequestNumber {
             APIManager.shared.fetchData()
@@ -669,7 +669,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
                 y: defaultScale + (distance * (1 - defaultScale))
             )
             
-        // When user's finger left the screen
+        // When user's finger left the screen.
         case .ended, .cancelled, .failed:
             firstFingerLocation = nil // Reset first finger location
             
@@ -680,24 +680,27 @@ class HomeVC: UIViewController, APIManagerDelegate {
             
             let distanceDelta = minTravelDistance / panDistance
             let minimumDelta = CGPoint(x: offset.x * distanceDelta,
-                                     y: offset.y * distanceDelta)
+                                       y: offset.y * distanceDelta)
             
-            if currentCard?.data != nil &&
-                vectorDistance >= minTravelDistance {
-                // Card dismissing threshold A: Data is available and
-                // the projected travel distance is greater than or equals minimum distance
-                animateCard(card, deltaX: vector.x, deltaY: vector.y)
+            if vectorDistance >= minTravelDistance {
+                pointer += 1
+                /*
+                 Card dismissing threshold A:
+                 The projected travel distance is greater than or equals minimum distance.
+                 */
+                dismissCard(card, deltaX: vector.x, deltaY: vector.y)
             }
-            else if currentCard?.data != nil &&
-                        vectorDistance < minTravelDistance &&
-                            panDistance >= minDragDistance {
-                // Card dismissing thrshold B: Data is available and
-                // the projected travel distance is less than the minimum travel distance
-                // but the distance of card being dragged is greater than distance threshold
-                animateCard(card, deltaX: minimumDelta.x, deltaY: minimumDelta.y)
+            else if vectorDistance < minTravelDistance && panDistance >= minDragDistance {
+                pointer += 1
+                /*
+                 Card dismissing thrshold B:
+                 The projected travel distance is less than the minimum travel distance
+                 but the distance of card being dragged is greater than distance threshold.
+                 */
+                dismissCard(card, deltaX: minimumDelta.x, deltaY: minimumDelta.y)
             }
             
-            // Reset card's position and rotation state
+            // Reset card's position and rotation.
             else {
                 // Bouncing effect
                 let bounceVector = CGPoint(x: -(offset.x) / 8, y: -(offset.y) / 8)
@@ -722,108 +725,107 @@ class HomeVC: UIViewController, APIManagerDelegate {
                 }
             }
         default:
-            debugPrint("Error handling card panning detection.")
+            return
         }
     }
     
     /// What happens when user uses two finger to pan the card.
     /// - Parameter sender: A discrete gesture recognizer that interprets panning gestures.
     @objc private func twoFingerPanHandler(sender: UIPanGestureRecognizer) {
-        if let card = sender.view as? Card {
-            switch sender.state {
-            case .began:
-                startingCenterX = card.centerXConstraint.constant
-                startingCenterY = card.centerYConstraint.constant
-            case .changed:
-                // Get the touch position
-                let translation = sender.translation(in: card)
-                
-                // Card move to where the user's finger position is
-                let zoomRatio = card.frame.width / card.bounds.width
-                card.centerXConstraint.constant = startingCenterX + translation.x * zoomRatio
-                card.centerYConstraint.constant = startingCenterY + translation.y * zoomRatio
-                updateLayout()
-                
-            case .ended, .cancelled, .failed:
-                // Move card back to original position
-                card.centerXConstraint.constant = startingCenterX
-                card.centerYConstraint.constant = startingCenterY
-                UIView.animate(withDuration: 0.35, animations: {
-                    self.updateLayout()
-                })
-            default:
-                debugPrint("Error handling image panning")
-            }
+        guard let card = sender.view as? Card else { return }
+        switch sender.state {
+        case .began:
+            startingCenterX = card.centerXConstraint.constant
+            startingCenterY = card.centerYConstraint.constant
+        case .changed:
+            // Get the touch position
+            let translation = sender.translation(in: card)
+            
+            // Card move to where the user's finger position is
+            let zoomRatio = card.frame.width / card.bounds.width
+            card.centerXConstraint.constant = startingCenterX + translation.x * zoomRatio
+            card.centerYConstraint.constant = startingCenterY + translation.y * zoomRatio
+            updateLayout()
+            
+        case .ended, .cancelled, .failed:
+            // Move card back to original position
+            card.centerXConstraint.constant = startingCenterX
+            card.centerYConstraint.constant = startingCenterY
+            UIView.animate(withDuration: 0.35, animations: {
+                self.updateLayout()
+            })
+        default:
+            return
         }
     }
     
     /// What happens when user pinches the card with 2 fingers.
     /// - Parameter sender: A discrete gesture recognizer that interprets pinching gestures involving two touches.
     @objc private func zoomHandler(sender: UIPinchGestureRecognizer) {
-        if let card = sender.view as? Card {
-            switch sender.state {
-            case .began:
-                startingTransform = card.transform
-                
-                // Hide navBar button
-                if self.onboardCompleted {
-                    self.collectionButton.tintColor = .clear
-                }
-                
-                // Hide card's trivia overlay
-                card.hideTriviaOverlay()
-                
-            case .changed:
-                // Coordinate of the pinch center where the view's center is (0, 0)
-                let pinchCenter = CGPoint(
-                    x: sender.location(in: card).x - card.bounds.midX,
-                    y: sender.location(in: card).y - card.bounds.midY)
-                
-                // Card transform behavior
-                
-                // Move the card to the opposite point of the pinch center if the scale delta > 1, vice versa
-                let transform = card.transform.translatedBy(
-                    x: pinchCenter.x, y: pinchCenter.y)
-                    .scaledBy(x: sender.scale, y: sender.scale)
-                    .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
-                
-                // Limit the scale at which a card can be zoom in/out
-                let newWidth = sender.scale * card.frame.width
-                let minWidth = card.bounds.width
-                let maxWidth = minWidth * K.ImageView.maximumScaleFactor
-                if newWidth > minWidth && newWidth < maxWidth {
-                    card.transform = startingTransform.concatenating(transform)
-                }
-                sender.scale = 1
-                
-                // Increase opacity of the overlay view as the card is enlarged
-                let originalWidth = card.bounds.width
-                let currentWidth = card.frame.width
-                let maxOpacity: CGFloat = 0.6 // max opacity of the overlay view
-                let cardWidthDelta = (currentWidth / originalWidth) - 1 // Percentage change of width
-                let deltaToMaxOpacity: CGFloat = 0.2 // number of width delta to get maximum opacity
-                    
-                zoomOverlay.alpha = maxOpacity * min((cardWidthDelta / deltaToMaxOpacity), 1.0)
+        guard let card = sender.view as? Card else { return }
+        switch sender.state {
+        case .began:
+            startingTransform = card.transform
             
-            case .ended, .cancelled, .failed:
-                // Reset card's size
-                UIView.animate(withDuration: 0.35, animations: {
-                    card.transform = self.startingTransform
-                    self.zoomOverlay.alpha = 0
-                }) { _ in
-                    if self.onboardCompleted {
-                        self.collectionButton.tintColor = K.Color.tintColor
-                    }
-                }
-                
-                // Re-show trivia overlay if showOverlay is true
-                if showOverlay == true {
-                    card.showTriviaOverlay()
-                }
-            default:
-                debugPrint("Error handling image zooming")
+            // Hide navBar button
+            if self.onboardCompleted {
+                self.collectionButton.tintColor = .clear
             }
+            
+            // Hide card's trivia overlay
+            card.hideTriviaOverlay()
+            
+        case .changed:
+            // Coordinate of the pinch center where the view's center is (0, 0)
+            let pinchCenter = CGPoint(
+                x: sender.location(in: card).x - card.bounds.midX,
+                y: sender.location(in: card).y - card.bounds.midY)
+            
+            // Card transform behavior
+            
+            // Move the card to the opposite point of the pinch center if the scale delta > 1, vice versa
+            let transform = card.transform.translatedBy(
+                x: pinchCenter.x, y: pinchCenter.y)
+                .scaledBy(x: sender.scale, y: sender.scale)
+                .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
+            
+            // Limit the scale at which a card can be zoom in/out
+            let newWidth = sender.scale * card.frame.width
+            let minWidth = card.bounds.width
+            let maxWidth = minWidth * K.ImageView.maximumScaleFactor
+            if newWidth > minWidth && newWidth < maxWidth {
+                card.transform = startingTransform.concatenating(transform)
+            }
+            sender.scale = 1
+            
+            // Increase opacity of the overlay view as the card is enlarged
+            let originalWidth = card.bounds.width
+            let currentWidth = card.frame.width
+            let maxOpacity: CGFloat = 0.6 // max opacity of the overlay view
+            let cardWidthDelta = (currentWidth / originalWidth) - 1 // Percentage change of width
+            let deltaToMaxOpacity: CGFloat = 0.2 // number of width delta to get maximum opacity
+            
+            zoomOverlay.alpha = maxOpacity * min((cardWidthDelta / deltaToMaxOpacity), 1.0)
+            
+        case .ended, .cancelled, .failed:
+            // Reset card's size
+            UIView.animate(withDuration: 0.35, animations: {
+                card.transform = self.startingTransform
+                self.zoomOverlay.alpha = 0
+            }) { _ in
+                if self.onboardCompleted {
+                    self.collectionButton.tintColor = K.Color.tintColor
+                }
+            }
+            
+            // Re-show trivia overlay if showOverlay is true
+            if showOverlay == true {
+                card.showTriviaOverlay()
+            }
+        default:
+            return
         }
+        
     }
     
     /// What happens when user taps on the card.
@@ -844,45 +846,33 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     /// Attach all gesturn recognizers to the designated card.
     /// - Parameter card: The card to which the gesture recognizers are attached.
-    private func attachGestureRecognizers(to card: Card) {
-        card.addGestureRecognizer(panGestureRecognizer)
-        card.addGestureRecognizer(pinchGestureRecognizer)
-        card.addGestureRecognizer(twoFingerPanGestureRecognizer)
-        card.addGestureRecognizer(tapGestureRecognizer)
-    }
-    
-    /// Detach all gesturn recognizers from the designated card.
-    /// - Parameter card: The card from which the gesture recognizers are detached.
-    private func removeGestureRecognizers(from card: Card) {
-        card.removeGestureRecognizer(panGestureRecognizer)
-        card.removeGestureRecognizer(pinchGestureRecognizer)
-        card.removeGestureRecognizer(twoFingerPanGestureRecognizer)
-        card.removeGestureRecognizer(tapGestureRecognizer)
+    private func attachGestureRecognizers(to card: Card?) {
+        card?.addGestureRecognizer(panGestureRecognizer)
+        card?.addGestureRecognizer(pinchGestureRecognizer)
+        card?.addGestureRecognizer(twoFingerPanGestureRecognizer)
+        card?.addGestureRecognizer(tapGestureRecognizer)
     }
     
     //MARK: - Animation Methods
     
-    /// Animate the dismissing of the current card and the introduction of the next card if there's any.
+    /// Dismiss the card and reset the current card's size if there's any.
     /// - Parameters:
-    ///   - card: The card to be dismissed after it's swiped or panned to the corner of the view by the user.
-    ///   - deltaX: Amount of x–axis delta to be applied to the card.
-    ///   - deltaY: Amount of y–axis delta to be applied to the card.
-    private func animateCard(_ card: Card, deltaX: CGFloat, deltaY: CGFloat) {
+    ///   - card: The card to be dismissed.
+    ///   - deltaX: X–axis delta applied to the card.
+    ///   - deltaY: Y–axis delta applied to the card.
+    private func dismissCard(_ card: Card, deltaX: CGFloat, deltaY: CGFloat) {
         card.centerXConstraint.constant += deltaX
         card.centerYConstraint.constant += deltaY
         
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
             self.updateLayout()
-            self.resetNextCardTransform()
+            self.currentCard?.transform = .identity
         } completion: { _ in
             card.removeFromSuperview()
             self.cardIsBeingPanned = false
-            self.pointer += 1
             
-            // Attach gesture recognizers to the current card if it's not nil.
-            if self.currentCard?.data != nil {
-                self.attachGestureRecognizers(to: self.currentCard!)
-            }
+            // Attach gesture recognizers to the current card if there's any.
+            self.attachGestureRecognizers(to: self.currentCard)
             
             // Add the next card to the view if it's not nil.
             if self.nextCard != nil {
@@ -920,11 +910,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
                 self.requestBannerAd()
             }
         }
-    }
-    
-    /// Reset the next card's transform with animation
-    private func resetNextCardTransform() {
-        nextCard?.transform = .identity
     }
     
     /// Lay out this view's subviews immediately, if layout updates are pending.
