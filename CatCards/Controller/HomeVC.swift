@@ -221,7 +221,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
     }
     
-    //MARK: - Data Request & Receive
+    //MARK: - Data Request & Handling
     
     /// Send data request to API Manager.
     /// - Parameter numberOfRequests: Number of request sent to API Manager.
@@ -286,7 +286,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private func addCardToView(_ card: Card, atBottom: Bool) {
         cardView.addSubview(card)
         addCardConstraint(card)
-        card.updateImage()
+        card.optimizeContentMode()
         
         if atBottom {
             cardView.sendSubviewToBack(card)

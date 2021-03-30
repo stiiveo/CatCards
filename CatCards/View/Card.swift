@@ -17,9 +17,9 @@ class Card: UIView {
     var data: CatData?
     var index: Int?
     private let imageView = UIImageView()
-    private let backgroundImageView = UIImageView()
-    var onboardOverlay: OnboardOverlay?
-    var triviaOverlay: TriviaOverlay?
+    private let bgImageView = UIImageView()
+    private var onboardOverlay: OnboardOverlay?
+    private var triviaOverlay: TriviaOverlay?
     var cardType: CardType = .regular
     
     //MARK: - Initialization
@@ -30,7 +30,6 @@ class Card: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        cardDidLoad()
     }
     
     convenience init(data: CatData, index: Int, type cardType: CardType) {
@@ -38,7 +37,7 @@ class Card: UIView {
         self.data = data
         self.index = index
         self.cardType = cardType
-        addOverlay()
+        cardDidLoad()
     }
     
     required init?(coder: NSCoder) {
@@ -46,8 +45,9 @@ class Card: UIView {
     }
     
     private func cardDidLoad() {
-        addBluredImageBackground()
-        addImageView()
+        setUpBackground()
+        setUpImageView()
+        addOverlay()
     }
     
     private func addOverlay() {
@@ -94,36 +94,37 @@ class Card: UIView {
         }
     }
     
-    //MARK: - ImageView & Background
+    //MARK: - Image & Background
     
-    private func addImageView() {
+    /// Insert duplicated imageView with blur effect on top of it as a filter below the primary imageView as the card's background.
+    private func setUpBackground() {
+        self.addSubview(bgImageView)
+        bgImageView.frame = self.bounds
+        bgImageView.contentMode = .scaleAspectFill
+        bgImageView.clipsToBounds = true
+        bgImageView.layer.cornerRadius = K.Card.Style.cornerRadius
+        bgImageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        bgImageView.image = data?.image
+        
+        // Place blur effect onto it.
+        let blurEffect = UIBlurEffect(style: .systemChromeMaterial)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.frame = bgImageView.frame
+        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
+        bgImageView.addSubview(blurEffectView)
+    }
+    
+    private func setUpImageView() {
         self.addSubview(imageView)
         imageView.frame = self.bounds
         imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         imageView.clipsToBounds = true
+        imageView.image = data?.image
         
         // Style
         imageView.isUserInteractionEnabled = true
-        imageView.alpha = 0 // Default status
         imageView.layer.cornerRadius = K.Card.Style.cornerRadius
-    }
-    
-    /// Insert duplicated imageView with blur effect on top of it as a filter below the primary imageView as the card's background.
-    private func addBluredImageBackground() {
-        self.insertSubview(backgroundImageView, belowSubview: imageView)
-        backgroundImageView.frame = imageView.frame
-        backgroundImageView.contentMode = .scaleAspectFill
-        backgroundImageView.clipsToBounds = true
-        backgroundImageView.layer.cornerRadius = K.Card.Style.cornerRadius
-        backgroundImageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        
-        // Add blur effect onto it
-        let blurEffect = UIBlurEffect(style: .systemChromeMaterial)
-        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-        blurEffectView.frame = backgroundImageView.frame
-        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        
-        backgroundImageView.addSubview(blurEffectView)
     }
     
     //MARK: - Overlay
@@ -139,7 +140,6 @@ class Card: UIView {
         if index == 1 {
             // Use built–in image for the second onboard card
             data = CatData(id: "zoomImage", image: K.OnboardOverlay.zoomImage)
-            setImage(data!.image)
         }
         
         // Create an onboard overlay instance and add it to Card
@@ -154,9 +154,9 @@ class Card: UIView {
         imageView.addSubview(triviaOverlay!)
         triviaOverlay!.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            triviaOverlay!.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            triviaOverlay!.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            triviaOverlay!.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            triviaOverlay!.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
+            triviaOverlay!.trailingAnchor.constraint(equalTo: imageView.trailingAnchor),
+            triviaOverlay!.bottomAnchor.constraint(equalTo: imageView.bottomAnchor),
             // Height is determined by the intrinsic size of the trivia label
         ])
         
@@ -191,55 +191,21 @@ class Card: UIView {
         }.startAnimation()
     }
     
-    //MARK: - Image Updating
+    //MARK: - Content Mode Optimization
     
-    func updateImage() {
-        // Data is valid
-        if data != nil {
-            DispatchQueue.main.async {
-                // Set imageView's image
-                self.setImage(self.data!.image)
-                
-                UIView.animate(withDuration: 0.2) {
-                    self.imageView.alpha = 1
-                }
-            }
-        }
-        // Data is NOT valid
-        else {
-            imageView.image = nil
-            backgroundImageView.image = nil
-            
-            // Animate indicator and hide imageView
-            DispatchQueue.main.async {
-                UIView.animate(withDuration: 0.2) {
-                    self.imageView.alpha = 0
-                }
-            }
-        }
-        
-    }
-    
-    private func setImage(_ image: UIImage) {
-        imageView.image = image
-        backgroundImageView.image = imageView.image
-        optimizeContentMode()
-    }
-    
-    /// If the aspect ratio of the image and the imageView is close enough,
-    /// set the imageView's content mode to 'scale aspect fill' mode to remove the margins around the image and
-    /// improve the viewing experience
-    private func optimizeContentMode() {
+    /// Calculate the difference between the ratio of the superview and the image.
+    /// If the ratio difference equals or is less than the pre–set threshold, set the imageView's content mode to `scaleAspectFill`.
+    func optimizeContentMode() {
         guard let image = imageView.image else { return }
-        
-        let imageRatio = image.size.width / image.size.height
-        let imageViewRatio = imageView.bounds.width / imageView.bounds.height
-        
-        // Calculate the difference of the aspect ratio between the image and image view
-        let ratioDifference = abs(imageRatio - imageViewRatio)
-        let ratioThreshold = K.ImageView.dynamicScaleThreshold
-        
-        imageView.contentMode = (ratioDifference > ratioThreshold) ? .scaleAspectFit : .scaleAspectFill
+        if let referenceFrame = superview {
+            let frame = referenceFrame.frame
+            let frameRatio = frame.width / frame.height
+            let imageRatio = image.size.width / image.size.height
+            let ratioDifference = abs(imageRatio - frameRatio)
+            let ratioThreshold = K.ImageView.dynamicScaleThreshold
+
+            imageView.contentMode = (ratioDifference <= ratioThreshold) ? .scaleAspectFill : .scaleAspectFit
+        }
     }
     
     //MARK: - Memory Management
@@ -247,7 +213,7 @@ class Card: UIView {
     func clearCache() {
         data = nil
         imageView.image = nil
-        backgroundImageView.image = nil
+        bgImageView.image = nil
         onboardOverlay = nil
         triviaOverlay = nil
     }
