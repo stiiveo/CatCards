@@ -132,7 +132,8 @@ class OverlayPromptLabel: UILabel {
     
     func labelDidLoad() {
         self.textColor = .label
-        self.font = .systemFont(ofSize: 18, weight: .regular)
+        self.font = .preferredFont(forTextStyle: .body)
+        self.adjustsFontForContentSizeCategory = true
         self.adjustsFontSizeToFitWidth = true
         self.minimumScaleFactor = 0.5
         self.textAlignment = .center
@@ -156,14 +157,19 @@ extension OnboardOverlay: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.backgroundColor = .clear
-        cell.textLabel?.textColor = .label
         cell.textLabel?.text = tableViewContent[cardIndex].cellText[indexPath.row]
+        
+        // Body's text style
         cell.textLabel?.numberOfLines = 0
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 20, weight: .regular)
+        cell.textLabel?.adjustsFontForContentSizeCategory = true
+        cell.textLabel?.adjustsFontSizeToFitWidth = true
+        cell.textLabel?.minimumScaleFactor = 0.5
+        cell.textLabel?.textColor = .label
+        cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .title2)
         
         // Title's text style
         if indexPath.row == 0 {
-            cell.textLabel?.font = UIFont.systemFont(ofSize: 28, weight: .medium)
+            cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .title1)
         }
         
         // Add image to last onboard card's each cell except the first one.

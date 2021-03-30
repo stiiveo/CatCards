@@ -136,6 +136,8 @@ class Card: UIView {
         if index == 1 {
             // Use built–in image for the second onboard card
             data = CatData(id: "zoomImage", image: K.OnboardOverlay.zoomImage)
+            imageView.image = data.image
+            bgImageView.image = data.image
         }
         
         // Create an onboard overlay instance and add it to Card
@@ -153,7 +155,7 @@ class Card: UIView {
             triviaOverlay!.leadingAnchor.constraint(equalTo: imageView.leadingAnchor),
             triviaOverlay!.trailingAnchor.constraint(equalTo: imageView.trailingAnchor),
             triviaOverlay!.bottomAnchor.constraint(equalTo: imageView.bottomAnchor),
-            // Height is determined by the intrinsic size of the trivia label
+            triviaOverlay!.topAnchor.constraint(greaterThanOrEqualTo: imageView.topAnchor)
         ])
         
         // Show/Hidden the overlay depends on the value of `showOverlay` in HomeVC.

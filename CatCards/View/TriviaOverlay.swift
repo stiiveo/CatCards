@@ -70,7 +70,10 @@ extension UILabel {
     }
     
     func setStyle() {
-        self.font = UIFont.systemFont(ofSize: 18)
+        self.font = UIFont.preferredFont(forTextStyle: .body)
+        self.adjustsFontForContentSizeCategory = true
+        self.adjustsFontSizeToFitWidth = true
+        self.minimumScaleFactor = 0.5
         self.numberOfLines = 0
     }
 }
