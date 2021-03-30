@@ -46,7 +46,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private let dbManager = DatabaseManager.shared
     
     // Cache of all Card objects used to display to the user.
-    private var cardArray: [Card] = []
+    private var cardArray: [Int: Card] = [:]
     
     // Array of string data used as the content of the onboard info.
     private let onboardData = K.OnboardOverlay.data
@@ -58,7 +58,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private var pointer: Int = 0
     
     // Maximum number of cards with different data shown to the user.
-    private var maxCardIndex: Int = 0
+    private var maxPointerReached: Int = 0
     
     // Indicator on if any banner ad is received from GoogleMobileAds API.
     private var adReceived = false
@@ -92,29 +92,15 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     private var currentCard: Card? {
-        if !cardArray.isEmpty && pointer < cardArray.count {
-            return cardArray[pointer]
-        } else {
-            return nil
-        }
+        return cardArray[pointer]
     }
     
     private var previousCard: Card? {
-        let previoudCardIndex = pointer - 1
-        if previoudCardIndex >= 0 && previoudCardIndex < cardArray.count {
-            return cardArray[pointer - 1]
-        } else {
-            return nil
-        }
+        return cardArray[pointer - 1]
     }
     
     private var nextCard: Card? {
-        let nextCardIndex = pointer + 1
-        if nextCardIndex > 0 && nextCardIndex < cardArray.count {
-            return cardArray[nextCardIndex]
-        } else {
-            return nil
-        }
+        return cardArray[pointer + 1]
     }
     
     private lazy var panGestureRecognizer: UIPanGestureRecognizer = {
@@ -185,7 +171,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         addBackgroundLayer()
         addShadeOverlay()
         
-        sendAPIRequest(numberOfRequests: K.Data.cacheDataNumber)
+        sendAPIRequest(numberOfRequests: K.Data.numberOfPrefetchedData)
         
         // For UI Testing
         setUpUIReference()
@@ -242,12 +228,12 @@ class HomeVC: UIViewController, APIManagerDelegate {
     ///   - dataIndex: An integer number which increments every time a new data is fetched and passed to its delegate.
     func dataDidFetch(data: CatData, dataIndex: Int) {
         DispatchQueue.main.async {
-            let cardType: Card.CardType = !self.onboardCompleted && dataIndex < self.onboardData.count ? .onboard : .regular
+            let cardType: CardType = !self.onboardCompleted && dataIndex < self.onboardData.count ? .onboard : .regular
             let newCard = Card(data: data, index: dataIndex, type: cardType)
-            self.cardArray.append(newCard)
+            self.cardArray[dataIndex] = newCard
             
             // Add the card to the view if it's the last card in the card array
-            if self.pointer == self.cardArray.count - 1 {
+            if newCard.index == self.pointer {
                 self.addCardToView(newCard, atBottom: false)
                 
                 // Introduce the card by animating the change of the card size
@@ -255,7 +241,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
                 UIView.animate(withDuration: 0.3) {
                     newCard.transform = .identity
                 } completion: { _ in
-                    self.attachGestureRecognizers(to: newCard)
+                    self.addGestureRecognizers(to: newCard)
                     self.refreshButtonState()
                     
                     // Update the number of cards viewed by the user
@@ -476,27 +462,26 @@ class HomeVC: UIViewController, APIManagerDelegate {
         guard !cardIsBeingPanned else { return }
         
         // Make sure data is available for the undo card
-        guard previousCard?.data != nil else { return }
+        guard previousCard != nil else { return }
         
         hapticManager.prepareImpactGenerator(style: .medium)
-        maxCardIndex = pointer // Save the current index
+        maxPointerReached = pointer > maxPointerReached ? pointer : maxPointerReached
         undoButton.isEnabled = false
         hapticManager.impactHaptic?.impactOccurred()
         
-        // Remove the next card's data and from the superview
+        // Remove the next card from the superview.
         nextCard?.removeFromSuperview()
         
-        let undoCard = cardArray[pointer - 1]
-        addCardToView(undoCard, atBottom: false)
-        undoCard.centerXConstraint.constant = 0
-        undoCard.centerYConstraint.constant = 0
+        addCardToView(previousCard!, atBottom: false)
+        previousCard!.centerXConstraint.constant = 0
+        previousCard!.centerYConstraint.constant = 0
         
         UIView.animate(withDuration: 0.5) {
             self.currentCard?.setSize(status: .standby)
             self.updateLayout()
-            undoCard.transform = .identity
+            self.previousCard!.transform = .identity
         } completion: { _ in
-            self.attachGestureRecognizers(to: undoCard)
+            self.addGestureRecognizers(to: self.previousCard!)
             self.pointer -= 1
             DispatchQueue.main.async {
                 self.refreshButtonState()
@@ -545,17 +530,17 @@ class HomeVC: UIViewController, APIManagerDelegate {
     /// What happens when the save button is pressed.
     /// - Parameter sender: A specialized button for placement on a toolbar or tab bar.
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
-        let catData = currentCard?.data
-        guard !cardIsBeingPanned, catData != nil else { return }
+        guard !cardIsBeingPanned, currentCard != nil else { return }
+        let dataToShare = currentCard!.data
         
-        // Create and save the cache image file to cache folder
-        guard let imageURL = dbManager.getImageTempURL(catData: catData!) else { return }
+        // Get URL of the data for activity VC's image preview.
+        guard let imageURL = dbManager.getImageTempURL(catData: dataToShare) else { return }
         
         hapticManager.prepareImpactGenerator(style: .soft)
 
         let activityVC = UIActivityViewController(activityItems: [imageURL], applicationActivities: nil)
         
-        // Set up Popover Presentation Controller's barButtonItem for iPad
+        // Set up Popover Presentation Controller's barButtonItem for iPad.
         if UIDevice.current.userInterfaceIdiom == .pad {
             activityVC.popoverPresentationController?.barButtonItem = sender
         }
@@ -564,9 +549,9 @@ class HomeVC: UIViewController, APIManagerDelegate {
         
         hapticManager.impactHaptic?.impactOccurred()
         
-        // Delete the cache image file after the activityVC is dismissed
+        // Delete the cache image file after the activityVC is dismissed.
         activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
-            self.dbManager.removeFile(fromDirectory: .cachesDirectory, inFolder: K.Image.FolderName.cacheImage, fileName: catData!.id)
+            self.dbManager.removeFile(fromDirectory: .cachesDirectory, inFolder: K.Image.FolderName.cacheImage, fileName: dataToShare.id)
             
             self.hapticManager.releaseImpactGenerator()
         }
@@ -576,7 +561,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private func refreshButtonState() {
         guard onboardCompleted && !cardArray.isEmpty else { return }
         
-        if currentCard?.data != nil {
+        if currentCard != nil {
             saveButton.isEnabled = true
             shareButton.isEnabled = true
         } else {
@@ -584,7 +569,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             shareButton.isEnabled = false
         }
         
-        undoButton.isEnabled = (pointer > 0 && previousCard?.data != nil) ? true : false
+        undoButton.isEnabled = (pointer > 0 && previousCard != nil) ? true : false
         
         // Toggle the status of save button
         if let data = currentCard?.data {
@@ -835,7 +820,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         if sender.state == .ended {
             switch card.cardType {
             case .regular:
-                for card in cardArray {
+                for card in cardArray.values {
                     card.toggleOverlay()
                 }
             case .onboard:
@@ -846,7 +831,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     /// Attach all gesturn recognizers to the designated card.
     /// - Parameter card: The card to which the gesture recognizers are attached.
-    private func attachGestureRecognizers(to card: Card?) {
+    private func addGestureRecognizers(to card: Card?) {
         card?.addGestureRecognizer(panGestureRecognizer)
         card?.addGestureRecognizer(pinchGestureRecognizer)
         card?.addGestureRecognizer(twoFingerPanGestureRecognizer)
@@ -872,7 +857,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             self.cardIsBeingPanned = false
             
             // Attach gesture recognizers to the current card if there's any.
-            self.attachGestureRecognizers(to: self.currentCard)
+            self.addGestureRecognizers(to: self.currentCard)
             
             // Add the next card to the view if it's not nil.
             if self.nextCard != nil {
@@ -880,7 +865,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             }
             
             // Fetch new data if the next card has not being displayed before.
-            if self.pointer > self.maxCardIndex {
+            if self.pointer > self.maxPointerReached {
                 self.sendAPIRequest(numberOfRequests: 1)
             }
             
@@ -892,7 +877,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             
             // Update the number of cards viewed by the user if onboard session is completed
             // and the current card has not been seen by the user before.
-            if self.onboardCompleted && self.pointer > self.maxCardIndex {
+            if self.onboardCompleted && self.pointer > self.maxPointerReached {
                 self.viewCount += 1
             }
             
@@ -919,18 +904,18 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     /// Clear the card's cache data if its index position is beyond the bound of the undo–able range.
     private func clearOldCardCacheData() {
-        let maxUndoNumber = K.Data.undoCardNumber
+        let maxUndoNumber = K.Data.numberOfUndoCard
         let oldCardIndex = pointer - (maxUndoNumber + 1)
-        if oldCardIndex >= 0 && oldCardIndex < cardArray.count {
-            let oldCard = cardArray[oldCardIndex]
-            oldCard.clearCache()
+        if cardArray[oldCardIndex] != nil {
+            cardArray[oldCardIndex] = nil
         }
+        
     }
     
     //MARK: - Error Handling Section
     
     /// An error occured in the data fetching process.
-    func APIErrorDidOccur() {
+    func APIErrorDidOccur(error: APIError) {
         // Present alert view to the user if any error occurs in the data fetching process.
         
         // Make sure no existing alert controller being presented already.
@@ -939,14 +924,14 @@ class HomeVC: UIViewController, APIManagerDelegate {
         hapticManager.prepareNotificationGenerator()
         DispatchQueue.main.async {
             let alert = UIAlertController(
-                title: Z.AlertMessage.NetworkError.alertTitle,
-                message: Z.AlertMessage.NetworkError.alertMessage,
+                title: Z.AlertMessage.APIError.alertTitle,
+                message: Z.AlertMessage.APIError.alertMessage,
                 preferredStyle: .alert)
             
             // An button which send network request to the network manager
-            let retryAction = UIAlertAction(title: Z.AlertMessage.NetworkError.actionTitle, style: .default) { _ in
+            let retryAction = UIAlertAction(title: Z.AlertMessage.APIError.actionTitle, style: .default) { _ in
                 // Request enough number of new data to satisfy the ideal cache data number.
-                let requestNumber = K.Data.cacheDataNumber - self.cardArray.count
+                let requestNumber = K.Data.numberOfPrefetchedData - self.cardArray.count
                 self.sendAPIRequest(numberOfRequests: requestNumber)
             }
             

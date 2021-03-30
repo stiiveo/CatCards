@@ -68,8 +68,8 @@ struct K {
     }
     
     struct Data {
-        static let cacheDataNumber: Int = 9 // Smaller this number is, bigger the chance the user experiences the loading process
-        static let undoCardNumber: Int = 9 // Number of cards the user can undo
+        static let numberOfPrefetchedData: Int = 9 // Smaller this number is, bigger the chance the user experiences the loading process
+        static let numberOfUndoCard: Int = 9 // Number of cards the user can undo
         static let prefetchNumberOfImageAtEachSide: Int = 2 // Number of prefetched images in the stackView's arranged subviews. The value must be positive. The larger the value, the more the memory consumption will be.
         static let maxSavedImages: Int = 36 // Maximum number of pictures which can be saved to user's device
     }
