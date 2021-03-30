@@ -58,7 +58,7 @@ struct K {
         static let thumbnailSize = CGSize(width: 300, height: 300)
         static let jpegCompressionQuality: CGFloat = 0.7 // 0: lowest quality; 1: highest quality
         static let grumpyCatImageSize = CGSize(width: 1265, height: 951)
-        static let savedFeedbackImage = UIImage(named: "heart_with_circle_background")!
+        static let feedbackImage = UIImage(named: "heart_with_circle_background")!
         
         struct FolderName {
             static let fullImage = "Cat_Pictures"

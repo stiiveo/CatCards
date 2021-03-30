@@ -126,7 +126,7 @@ class Card: UIView {
     }
     
     private func addOnboardOverlay() {
-        // Make sure the index is within the bound of onboard data array
+        // Make sure the index is within the bound of onboard data array.
         let onboardData = K.OnboardOverlay.data
         guard index >= 0 && index < onboardData.count else {
             debugPrint("Index(\(index)) of onboard data is unavailable for onboard card")
@@ -134,13 +134,13 @@ class Card: UIView {
         }
         
         if index == 1 {
-            // Use built–in image for the second onboard card
+            // Use built–in image for the second onboard card.
             data = CatData(id: "zoomImage", image: K.OnboardOverlay.zoomImage)
             imageView.image = data.image
             bgImageView.image = data.image
         }
         
-        // Create an onboard overlay instance and add it to Card
+        // Create an onboard overlay instance and add it to Card.
         onboardOverlay = OnboardOverlay(cardIndex: index)
         imageView.addSubview(onboardOverlay!)
         onboardOverlay!.frame = self.bounds
@@ -158,7 +158,7 @@ class Card: UIView {
             triviaOverlay!.topAnchor.constraint(greaterThanOrEqualTo: imageView.topAnchor)
         ])
         
-        // Show/Hidden the overlay depends on the value of `showOverlay` in HomeVC.
+        // Show / Hidden the overlay depends on the value of `showOverlay` in HomeVC.
         triviaOverlay?.alpha = HomeVC.shared.showOverlay ? 1 : 0
     }
     

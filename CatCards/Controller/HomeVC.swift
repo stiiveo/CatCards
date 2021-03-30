@@ -581,8 +581,8 @@ class HomeVC: UIViewController, APIManagerDelegate {
     /// Show feedback image to the user onced the card's image is saved successfully to the device.
     private func showConfirmIcon() {
         guard let card = currentCard else { return }
-        let confirmView = ConfirmationView(parentView: card, confirmImage: K.Image.savedFeedbackImage)
-        confirmView.startAnimation(withDelay: nil, duration: 0.4)
+        let feedbackView = FeedbackView(parentView: card, image: K.Image.feedbackImage)
+        feedbackView.startAnimation(withDelay: nil, duration: 0.4)
     }
     
     //MARK: - Gesture Recognizers
