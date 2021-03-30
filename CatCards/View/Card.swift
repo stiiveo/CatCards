@@ -8,55 +8,42 @@
 
 import UIKit
 
+enum CardType {
+    case onboard, regular
+}
+
 class Card: UIView {
 
-    var centerXConstraint: NSLayoutConstraint!
-    var centerYConstraint: NSLayoutConstraint!
-    var heightConstraint: NSLayoutConstraint!
-    var widthConstraint: NSLayoutConstraint!
-    var data: CatData?
-    var index: Int?
+    var data: CatData
+    var index: Int
+    var cardType: CardType
     private let imageView = UIImageView()
     private let bgImageView = UIImageView()
     private var onboardOverlay: OnboardOverlay?
     private var triviaOverlay: TriviaOverlay?
-    var cardType: CardType = .regular
+    var centerXConstraint: NSLayoutConstraint!
+    var centerYConstraint: NSLayoutConstraint!
+    var heightConstraint: NSLayoutConstraint!
+    var widthConstraint: NSLayoutConstraint!
     
     //MARK: - Initialization
     
-    enum CardType {
-        case onboard, regular
-    }
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-    }
-    
-    convenience init(data: CatData, index: Int, type cardType: CardType) {
-        self.init()
+    init(data: CatData, index: Int, type cardType: CardType) {
         self.data = data
         self.index = index
         self.cardType = cardType
-        cardDidLoad()
+        super.init(frame: .zero)
+        cardDidInit()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func cardDidLoad() {
+    private func cardDidInit() {
         setUpBackground()
         setUpImageView()
         addOverlay()
-    }
-    
-    private func addOverlay() {
-        switch cardType {
-        case .regular:
-            addTriviaOverlay()
-        case .onboard:
-            addOnboardOverlay()
-        }
     }
     
     //MARK: - Style & Shadow
@@ -104,7 +91,7 @@ class Card: UIView {
         bgImageView.clipsToBounds = true
         bgImageView.layer.cornerRadius = K.Card.Style.cornerRadius
         bgImageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        bgImageView.image = data?.image
+        bgImageView.image = data.image
         
         // Place blur effect onto it.
         let blurEffect = UIBlurEffect(style: .systemChromeMaterial)
@@ -120,7 +107,7 @@ class Card: UIView {
         imageView.frame = self.bounds
         imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         imageView.clipsToBounds = true
-        imageView.image = data?.image
+        imageView.image = data.image
         
         // Style
         imageView.isUserInteractionEnabled = true
@@ -129,11 +116,20 @@ class Card: UIView {
     
     //MARK: - Overlay
     
+    private func addOverlay() {
+        switch cardType {
+        case .regular:
+            addTriviaOverlay()
+        case .onboard:
+            addOnboardOverlay()
+        }
+    }
+    
     private func addOnboardOverlay() {
         // Make sure the index is within the bound of onboard data array
         let onboardData = K.OnboardOverlay.data
-        guard index! >= 0 && index! < onboardData.count else {
-            debugPrint("Index(\(index!)) of onboard data is unavailable for onboard card")
+        guard index >= 0 && index < onboardData.count else {
+            debugPrint("Index(\(index)) of onboard data is unavailable for onboard card")
             return
         }
         
@@ -143,7 +139,7 @@ class Card: UIView {
         }
         
         // Create an onboard overlay instance and add it to Card
-        onboardOverlay = OnboardOverlay(cardIndex: self.index!)
+        onboardOverlay = OnboardOverlay(cardIndex: index)
         imageView.addSubview(onboardOverlay!)
         onboardOverlay!.frame = self.bounds
         onboardOverlay!.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -206,16 +202,6 @@ class Card: UIView {
 
             imageView.contentMode = (ratioDifference <= ratioThreshold) ? .scaleAspectFill : .scaleAspectFit
         }
-    }
-    
-    //MARK: - Memory Management
-    
-    func clearCache() {
-        data = nil
-        imageView.image = nil
-        bgImageView.image = nil
-        onboardOverlay = nil
-        triviaOverlay = nil
     }
     
 }

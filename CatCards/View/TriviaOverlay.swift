@@ -14,14 +14,14 @@ class TriviaOverlay: UIView {
     
     //MARK: - Init
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        addBackgroundView()
-        addTriviaLabel()
-    }
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    init() {
+        super.init(frame: .zero)
+        addBackgroundView()
+        addTriviaLabel()
     }
     
     //MARK: - Background & Label

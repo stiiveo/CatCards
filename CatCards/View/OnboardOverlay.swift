@@ -16,21 +16,17 @@ class OnboardOverlay: UIView {
     
     //MARK: - Initialization
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-    }
-    
-    convenience init(cardIndex: Int) {
-        self.init()
-        self.cardIndex = cardIndex
-        OverlayDidLoad()
-    }
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func OverlayDidLoad() {
+    init(cardIndex: Int) {
+        super.init(frame: .zero)
+        self.cardIndex = cardIndex
+        overlayDidInit()
+    }
+    
+    private func overlayDidInit() {
         addBlurBackground()
         addContent()
     }
