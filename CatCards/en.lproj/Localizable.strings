@@ -24,9 +24,9 @@
 "START_PROMPT" = "😺 Swipe me to start";
 
 // Network Error Alert
-"NETWORK_ERROR_ALERT_TITLE" = "🙀 Cannot connect to the Internet.";
-"NETWORK_ERROR_ALERT_MESSAGE" = "Signal from cat planet is too weak.\n Please check your internet connection";
-"NETWORK_ERROR_ALERT_ACTION" = "Try Again";
+"API_ERROR_ALERT_TITLE" = "🙀 Something went wrong";
+"API_ERROR_ALERT_MESSAGE" = "The server is not responsive.";
+"API_ERROR_ALERT_ACTION" = "Try Again";
 
 // Databse Error Alert
 "DATABASE_ERROR_ALERT_TITLE" = "Storage is full.";

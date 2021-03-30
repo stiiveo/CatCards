@@ -25,10 +25,10 @@ struct Z {
     }
     
     struct AlertMessage {
-        struct NetworkError {
-            static let alertTitle = NSLocalizedString("NETWORK_ERROR_ALERT_TITLE", comment: "")
-            static let alertMessage = NSLocalizedString("NETWORK_ERROR_ALERT_MESSAGE", comment: "")
-            static let actionTitle = NSLocalizedString("NETWORK_ERROR_ALERT_ACTION", comment: "")
+        struct APIError {
+            static let alertTitle = NSLocalizedString("API_ERROR_ALERT_TITLE", comment: "")
+            static let alertMessage = NSLocalizedString("API_ERROR_ALERT_MESSAGE", comment: "")
+            static let actionTitle = NSLocalizedString("API_ERROR_ALERT_ACTION", comment: "")
         }
         
         struct DatabaseError {

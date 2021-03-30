@@ -8,9 +8,13 @@
 
 import UIKit
 
+enum APIError {
+    case server
+}
+
 protocol APIManagerDelegate {
     func dataDidFetch(data: CatData, dataIndex: Int)
-    func APIErrorDidOccur()
+    func APIErrorDidOccur(error: APIError)
 }
 
 class APIManager {
@@ -36,7 +40,7 @@ class APIManager {
             // Transport error occured
             if let error = error {
                 // Make the delegate awared that an error occured in the data retrieving process.
-                self.delegate?.APIErrorDidOccur()
+                self.delegate?.APIErrorDidOccur(error: .server)
                 debugPrint("Error sending URLSession request to the server or getting response from the server. Error: \(error)")
                 return
             }
@@ -52,6 +56,9 @@ class APIManager {
             // Data is retrieved successfully
             if let fetchedData = data {
                 self.sendProcessedDataToDelegate(usingData: fetchedData)
+            } else {
+                self.fetchData()
+                debugPrint("Fetched data is invalid.")
             }
         }.resume() // Start the newly-initialized task
     }
@@ -61,6 +68,9 @@ class APIManager {
            let catData = dataCreateFrom(parsedData: parsedData) {
             delegate?.dataDidFetch(data: catData, dataIndex: self.dataIndex)
             dataIndex += 1
+        } else {
+            self.fetchData()
+            debugPrint("Parsed data is invalid.")
         }
     }
     

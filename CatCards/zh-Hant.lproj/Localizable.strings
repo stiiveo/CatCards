@@ -24,9 +24,9 @@
 "START_PROMPT" = "😺 將我滑開後開始";
 
 // Network Error Alert
-"NETWORK_ERROR_ALERT_TITLE" = "🙀 無法連接至網路";
-"NETWORK_ERROR_ALERT_MESSAGE" = "來自貓星球的訊號太弱\n 請檢查您的網路連線";
-"NETWORK_ERROR_ALERT_ACTION" = "再試一次";
+"API_ERROR_ALERT_TITLE" = "🙀 出了點差錯";
+"API_ERROR_ALERT_MESSAGE" = "伺服器無回應。";
+"API_ERROR_ALERT_ACTION" = "再試一次";
 
 // Databse Error Alert
 "DATABASE_ERROR_ALERT_TITLE" = "儲存數量已達上限";
