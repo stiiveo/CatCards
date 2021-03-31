@@ -21,6 +21,7 @@ final class DBManager {
     private let imageFolderName = K.Image.FolderName.fullImage
     private let thumbFolderName = K.Image.FolderName.thumbnail
     private let cacheFolderName = K.Image.FolderName.cacheImage
+    private let previewImageFolderName = K.Image.FolderName.activityPreview
     private var favoriteArray: [Favorite]!
     var imageFileURLs = [FilePath]()
     var delegate: DBManagerDelegate?
@@ -62,7 +63,7 @@ final class DBManager {
             return
         }
         
-        // Save new data to local database.
+        // Save data to local database.
         let newData = Favorite(context: context)
         newData.id = data.id
         newData.date = Date()
@@ -180,7 +181,7 @@ final class DBManager {
                                        create: true)
         let fileName = catData.id + fileExtension
         
-        if let fileURL = cacheURL?.appendingPathComponent(cacheFolderName, isDirectory: true).appendingPathComponent(fileName) {
+        if let fileURL = cacheURL?.appendingPathComponent(previewImageFolderName, isDirectory: true).appendingPathComponent(fileName) {
             do {
                 try imageData.write(to: fileURL)
                 // Return file's url
@@ -214,6 +215,7 @@ final class DBManager {
         createDirectory(withName: imageFolderName, at: .documentDirectory)
         createDirectory(withName: thumbFolderName, at: .documentDirectory)
         createDirectory(withName: cacheFolderName, at: .cachesDirectory)
+        createDirectory(withName: previewImageFolderName, at: .cachesDirectory)
     }
     
     //MARK: - CoreData and File Manager Tools

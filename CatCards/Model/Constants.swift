@@ -64,6 +64,7 @@ struct K {
             static let fullImage = "Cat_Pictures"
             static let thumbnail = "Thumbnails"
             static let cacheImage = "Cache Images"
+            static let activityPreview = "Activity VC Preview Image"
         }
     }
     

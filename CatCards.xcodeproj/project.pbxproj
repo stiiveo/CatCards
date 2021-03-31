@@ -28,6 +28,7 @@
 		F67B192024E6672E003E5A83 /* DBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67B191F24E6672E003E5A83 /* DBManager.swift */; };
 		F67E4DEE24CE80A7006DDE96 /* CatData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67E4DED24CE80A7006DDE96 /* CatData.swift */; };
 		F67E4E3224D3C571006DDE96 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67E4E3124D3C571006DDE96 /* Constants.swift */; };
+		F6A76FFD261450A7007C505A /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A76FFC261450A7007C505A /* CacheManager.swift */; };
 		F6AB3F2125F1E1CF005400DD /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB3F2025F1E1CF005400DD /* FeedbackView.swift */; };
 		F6BAEFFA26022E34004D5A50 /* OverlayContentPickerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BAEFF926022E34004D5A50 /* OverlayContentPickerTest.swift */; };
 		F6BAF00C26037C8F004D5A50 /* UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BAF00B26037C8F004D5A50 /* UITests.swift */; };
@@ -86,6 +87,7 @@
 		F67B191F24E6672E003E5A83 /* DBManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBManager.swift; sourceTree = "<group>"; };
 		F67E4DED24CE80A7006DDE96 /* CatData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatData.swift; sourceTree = "<group>"; };
 		F67E4E3124D3C571006DDE96 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		F6A76FFC261450A7007C505A /* CacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheManager.swift; sourceTree = "<group>"; };
 		F6AB3F2025F1E1CF005400DD /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
 		F6BAEFED26022D8C004D5A50 /* Cat Cards Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Cat Cards Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6BAEFF126022D8C004D5A50 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -230,6 +232,7 @@
 				F67B191F24E6672E003E5A83 /* DBManager.swift */,
 				F675B41A25C9927300698291 /* HapticManager.swift */,
 				F6D5C13C2600E6D800429C82 /* OverlayContentPicker.swift */,
+				F6A76FFC261450A7007C505A /* CacheManager.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";

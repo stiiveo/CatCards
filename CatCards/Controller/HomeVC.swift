@@ -980,7 +980,7 @@ extension HomeVC: UIGestureRecognizerDelegate {
     }
 }
 
-extension HomeVC: DatabaseManagerDelegate {
+extension HomeVC: DBManagerDelegate {
     /// Number of saved images has reached the limit.
     func savedImagesMaxReached() {
         // Show alert to the user
