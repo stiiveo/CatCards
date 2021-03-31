@@ -158,7 +158,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         viewCount = (savedViewCount != 0) ? savedViewCount : 0
         
         // Notify this VC that if the app enters the background, save the cached view count value to the db.
-        NotificationCenter.default.addObserver(self, selector: #selector(saveViewCount), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(takeActionsBeforeTermination), name: UIApplication.willTerminateNotification, object: nil)
         
         // Retrieve the user status from db.
         onboardCompleted = defaults.bool(forKey: K.UserDefaultsKeys.onboardCompleted)
@@ -454,6 +454,31 @@ class HomeVC: UIViewController, APIManagerDelegate {
         navBar.shadowImage = UIImage()
         toolbar.setBackgroundImage(UIImage(), forToolbarPosition: .any, barMetrics: .default)
         toolbar.setShadowImage(UIImage(), forToolbarPosition: .bottom)
+    }
+    
+    //MARK: - Actions Taken Before App Termination
+    
+    @objc private func takeActionsBeforeTermination() {
+        guard onboardCompleted else { return }
+        savePointer()
+        saveViewCount()
+        cacheData()
+    }
+    
+    private func savePointer() {
+        defaults.setValue(pointer, forKey: K.UserDefaultsKeys.pointer)
+    }
+    
+    /// Save the value of card view count to user defaults
+    private func saveViewCount() {
+        defaults.setValue(viewCount, forKey: K.UserDefaultsKeys.viewCount)
+    }
+    
+    private func cacheData() {
+        let cacheData = cardArray.map { dict in
+            dict.value.data
+        }
+        cacheManager.save(cacheData)
     }
     
     //MARK: - Toolbar Button Method and State Control
