@@ -52,7 +52,7 @@ class CacheManager {
     }
     
     //MARK: - Load Cache
-    func readData() {
+    func getCacheData() -> [CatData] {
         // Local database
         let fetchRequest: NSFetchRequest<Cache> = Cache.fetchRequest()
         let sort = NSSortDescriptor(key: "date", ascending: true)
@@ -73,6 +73,7 @@ class CacheManager {
         
         // Local images using the file list
         loadImageFromLocal(withFileList: fileList)
+        return cacheData
     }
     
     private func loadImageFromLocal(withFileList fileList: [String]) {

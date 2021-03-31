@@ -21,7 +21,7 @@ final class APIManager {
     
     var delegate: APIManagerDelegate?
     static let shared = APIManager()
-    private var dataIndex: Int = 0
+    var dataIndex: Int = 0
     private let urlString = K.API.urlString
     
     /// Fetch the data from the URL object and decode the data.

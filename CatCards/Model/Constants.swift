@@ -12,6 +12,7 @@ struct K {
     typealias CompletionHandler = (Bool) -> Void
     
     struct UserDefaultsKeys {
+        static let pointer = "pointer"
         static let viewCount = "viewCount"
         static let onboardCompleted = "onboardCompleted"
     }

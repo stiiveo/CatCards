@@ -62,6 +62,8 @@ class HomeVC: UIViewController, APIManagerDelegate {
     // Maximum number of cards with different data shown to the user.
     private var maxPointerReached: Int = 0
     
+    private let numberOfPrefetchData = K.Data.numberOfPrefetchedData
+    
     // Indicator on if any banner ad is received from GoogleMobileAds API.
     private var adReceived = false
     
@@ -157,6 +159,9 @@ class HomeVC: UIViewController, APIManagerDelegate {
         let savedViewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
         viewCount = (savedViewCount != 0) ? savedViewCount : 0
         
+        // Load saved pointer if there's any.
+        pointer = defaults.integer(forKey: K.UserDefaultsKeys.pointer)
+        
         // Notify this VC that if the app enters the background, save the cached view count value to the db.
         NotificationCenter.default.addObserver(self, selector: #selector(takeActionsBeforeTermination), name: UIApplication.willTerminateNotification, object: nil)
         
@@ -166,14 +171,23 @@ class HomeVC: UIViewController, APIManagerDelegate {
             hideUIButtons()
         }
         
-        // Create local image folder in file system and/or load data from it.
+        /*
+         Create folders used by data and cache manager if they're absent.
+         Read cache data and get saved files' URLs if there's any.
+         */
         dbManager.createFolders()
         dbManager.getSavedImageFileURLs()
+        loadCacheData()
         
         addBackgroundLayer()
         addShadeOverlay()
         
-        sendAPIRequest(numberOfRequests: K.Data.numberOfPrefetchedData)
+        // Request enough number of new data to make sure number of prefetch data meets the pre–set target.
+        let numberOfNonUndoCard = cardArray.count - pointer
+        if numberOfNonUndoCard < numberOfPrefetchData {
+            let numberOfNewDataShort = numberOfPrefetchData - numberOfNonUndoCard
+            sendAPIRequest(numberOfRequests: numberOfNewDataShort)
+        }
         
         // For UI Testing
         setUpUIReference()
@@ -206,7 +220,40 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     // Remove notif. observer to avoid sending notification to invalid obj.
     deinit {
-        NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willTerminateNotification, object: nil)
+    }
+    
+    //MARK: - Cache Data Handling
+    
+    private func loadCacheData() {
+        let cacheData = cacheManager.getCacheData()
+        guard !cacheData.isEmpty else { debugPrint("No cache data found."); return }
+        
+        // Cache data exists
+        for i in 0...cacheData.count - 1 {
+            let card = Card(data: cacheData[i], index: i, type: .regular)
+            cardArray[i] = card
+        }
+        
+        // Update data index pointer of APIManager.
+        apiManager.dataIndex = cacheData.count
+
+        // Introduce card
+        if cardArray[pointer] != nil {
+            addCacheCardToView()
+        } else {
+            debugPrint("Card created using cache data cannot be found.")
+        }
+    }
+    
+    private func addCacheCardToView() {
+        let pointedCard = cardArray[pointer]!
+        addCardToView(pointedCard, atBottom: false)
+        introduceCard(card: pointedCard)
+        
+        if let nextCard = cardArray[pointer + 1] {
+            addCardToView(nextCard, atBottom: true)
+        }
     }
     
     //MARK: - Data Request & Handling
@@ -237,19 +284,11 @@ class HomeVC: UIViewController, APIManagerDelegate {
             // Add the card to the view if it's the last card in the card array
             if newCard.index == self.pointer {
                 self.addCardToView(newCard, atBottom: false)
+                self.introduceCard(card: newCard)
                 
-                // Introduce the card by animating the change of the card size
-                newCard.setSize(status: .intro)
-                UIView.animate(withDuration: 0.3) {
-                    newCard.transform = .identity
-                } completion: { _ in
-                    self.addGestureRecognizers(to: newCard)
-                    self.refreshButtonState()
-                    
-                    // Update the number of cards viewed by the user
-                    if self.onboardCompleted {
-                        self.viewCount += 1
-                    }
+                // Update the number of cards viewed by the user
+                if self.onboardCompleted {
+                    self.viewCount += 1
                 }
             }
             
@@ -284,6 +323,17 @@ class HomeVC: UIViewController, APIManagerDelegate {
         if !onboardCompleted && card.index == onboardData.count {
             // Show UI buttons when the last onboarding card is showned to user
             showUIButtons()
+        }
+    }
+    
+    private func introduceCard(card: Card) {
+        // Introduce the card by animating the change of the card size.
+        card.setSize(status: .intro)
+        UIView.animate(withDuration: 0.3) {
+            card.transform = .identity
+        } completion: { _ in
+            self.addGestureRecognizers(to: card)
+            self.refreshButtonState()
         }
     }
     
@@ -441,11 +491,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     //MARK: - Support Methods
-    
-    /// Save the value of card view count to user defaults
-    @objc func saveViewCount() {
-        defaults.setValue(viewCount, forKey: K.UserDefaultsKeys.viewCount)
-    }
     
     /// Hide navigation bar and toolbar's border line
     private func setBarStyle() {
@@ -933,7 +978,9 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private func clearOldCardCacheData() {
         let maxUndoNumber = K.Data.numberOfUndoCard
         let oldCardIndex = pointer - (maxUndoNumber + 1)
-        if cardArray[oldCardIndex] != nil {
+        
+        if let oldCard = cardArray[oldCardIndex] {
+            cacheManager.clearCache(dataID: oldCard.data.id)
             cardArray[oldCardIndex] = nil
         }
         
