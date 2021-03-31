@@ -19,11 +19,11 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     private let backgroundLayer = CAGradientLayer()
     
     // ImageViews cache used to populate stackView
-    private var bufferImageArray = [ImageScrollView()]
+    private var bufferImageArray: [ImageScrollView] = []
     private let bufferImageNumber: Int = K.Data.prefetchNumberOfImageAtEachSide
     private let defaultCacheImage = K.Image.defaultCacheImage
-    private var previousPage: Int = 0
     private let hapticManager = HapticManager()
+    private var previousPage: Int = 0
     private var currentPage: Int = 0 {
         didSet(oldPage) {
             if currentPage > oldPage {
@@ -141,7 +141,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
             let bufferToRemoveIndex = currentPage - bufferImageNumber - 1
             guard bufferToRemoveIndex >= 0 && bufferToRemoveIndex < bufferImageArray.count else { return }
             if let imageToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
-                imageToReset.set(image: defaultCacheImage)
+                imageToReset.updateImageView(image: defaultCacheImage)
             }
         case .backward:
             // Update imageView before the current page
@@ -151,7 +151,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
             let bufferToRemoveIndex = currentPage + bufferImageNumber + 1
             guard bufferToRemoveIndex >= 0 && bufferToRemoveIndex < bufferImageArray.count else { return }
             if let imageToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
-                imageToReset.set(image: defaultCacheImage)
+                imageToReset.updateImageView(image: defaultCacheImage)
             }
         }
     }
@@ -164,7 +164,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         
         let imageFileURL = databaseManager.imageFileURLs[index].image
         guard let imageAtDisk = UIImage(contentsOfFile: imageFileURL.path) else { return }
-        bufferImageArray[index].set(image: imageAtDisk)
+        bufferImageArray[index].updateImageView(image: imageAtDisk)
     }
     
     /*
@@ -174,7 +174,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     private func initiateImageBufferArray() {
         bufferImageArray = (1...databaseManager.imageFileURLs.count).map { _ in
             let imageView = ImageScrollView(frame: view.bounds)
-            imageView.set(image: defaultCacheImage)
+            imageView.updateImageView(image: defaultCacheImage)
             return imageView
         }
     }

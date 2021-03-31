@@ -39,30 +39,21 @@ class ImageScrollView: UIScrollView {
     
     //MARK: - ScrollView & ImageView Configuration
     
-    func set(image: UIImage) {
-        imageView?.removeFromSuperview()
-        imageView = nil
-        
+    func updateImageView(image: UIImage) {
+        imageView?.removeFromSuperview() // Remove default image.
         imageView = UIImageView(image: image)
         imageView.contentMode = .scaleAspectFit
-        self.addSubview(imageView)
-        
-        configurateFor(imageSize: image.size)
-    }
-
-    private func configurateFor(imageSize: CGSize) {
-        self.contentSize = imageSize
-        
-        setZoomScale()
-        self.zoomScale = self.minimumZoomScale
-        
         imageView.addGestureRecognizer(zoomingTap)
         imageView.isUserInteractionEnabled = true
+        self.addSubview(imageView)
+        self.contentSize = image.size
+        
+        setUpZoomScale()
+        self.zoomScale = self.minimumZoomScale
     }
     
-    func setZoomScale() {
+    private func setUpZoomScale() {
         let scrollViewSize = self.bounds.size
-        
         let xScale = scrollViewSize.width / imageView.frame.width
         let yScale = scrollViewSize.height / imageView.frame.height
         let minScale = min(xScale, yScale)
