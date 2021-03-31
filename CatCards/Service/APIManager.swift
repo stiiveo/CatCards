@@ -17,7 +17,7 @@ protocol APIManagerDelegate {
     func APIErrorDidOccur(error: APIError)
 }
 
-class APIManager {
+final class APIManager {
     
     var delegate: APIManagerDelegate?
     static let shared = APIManager()

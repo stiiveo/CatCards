@@ -13,7 +13,7 @@ protocol DatabaseManagerDelegate {
     func savedImagesMaxReached()
 }
 
-class DatabaseManager {
+final class DatabaseManager {
     
     static let shared = DatabaseManager()
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -35,7 +35,7 @@ class DatabaseManager {
     //MARK: - Data Loading
     
     // Load thumbnail images from local folder
-    internal func getSavedImageFileURLs() {
+    func getSavedImageFileURLs() {
         imageFileURLs.removeAll() // Clean all image file URLs in memory buffer first
         
         let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -55,7 +55,7 @@ class DatabaseManager {
     
     //MARK: - Data Saving
     
-    internal func saveData(_ data: CatData, completion: K.CompletionHandler) {
+    func saveData(_ data: CatData, completion: K.CompletionHandler) {
         guard favoriteArray.count < K.Data.maxSavedImages else {
             delegate?.savedImagesMaxReached()
             completion(false)
@@ -221,7 +221,7 @@ class DatabaseManager {
     /// Determine if the provided data already exists in local folder.
     /// - Parameter data: Data to be determined.
     /// - Returns: Boolean value on whether the provided data exists in the device's image folder.
-    internal func isDataSaved(data: CatData) -> Bool {
+    func isDataSaved(data: CatData) -> Bool {
         let url = getFolderURL(folderName: imageFolderName, at: .documentDirectory)
         let dataId = data.id
         let newFileURL = url.appendingPathComponent(dataId + fileExtension)
@@ -230,7 +230,7 @@ class DatabaseManager {
     
     /// Get all the names of files saved in the database.
     /// - Returns: An array containing string values of all file's names saved in the database.
-    internal func listOfSavedFileNames() -> [String] {
+    func listOfSavedFileNames() -> [String] {
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         
         // Sort data by making the last saved data at first
@@ -262,7 +262,7 @@ class DatabaseManager {
    
 }
 
-extension UIImage {
+private extension UIImage {
     /// Downsize the image to be used as the collection VC's cell image.
     ///
     /// The non–processed image could be returned if data initialization or downsizing process went wrong.

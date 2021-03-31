@@ -87,6 +87,7 @@ class OnboardOverlay: UIView {
 
 //MARK: - Content
 
+/// The tableView which organizes all the onboard text and image content.
 class OverlayTableView: UITableView {
     override init(frame: CGRect, style: UITableView.Style) {
         super.init(frame: frame, style: style)
@@ -113,6 +114,7 @@ class OverlayTableView: UITableView {
     }
 }
 
+/// The label placed at the bottom position of the card as a hint prompt.
 class OverlayPromptLabel: UILabel {
     var cardIndex: Int!
     

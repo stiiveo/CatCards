@@ -64,7 +64,7 @@ class TriviaOverlay: UIView {
 
 //MARK: - Trivia Content
 
-extension UILabel {
+private extension UILabel {
     func setContent() {
         self.text = OverlayContentPicker.shared.randomContent(contentTypes: [.trivia, .quote])
     }
