@@ -1,5 +1,5 @@
 //
-//  DatabaseManager.swift
+//  DBManager.swift
 //  CatCards
 //
 //  Created by Jason Ou Yang on 2020/8/14.
@@ -9,13 +9,13 @@
 import UIKit
 import CoreData
 
-protocol DatabaseManagerDelegate {
+protocol DBManagerDelegate {
     func savedImagesMaxReached()
 }
 
-final class DatabaseManager {
+final class DBManager {
     
-    static let shared = DatabaseManager()
+    static let shared = DBManager()
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     private let fileManager = FileManager.default
     private let imageFolderName = K.Image.FolderName.fullImage
@@ -23,7 +23,7 @@ final class DatabaseManager {
     private let cacheFolderName = K.Image.FolderName.cacheImage
     private var favoriteArray: [Favorite]!
     var imageFileURLs = [FilePath]()
-    var delegate: DatabaseManagerDelegate?
+    var delegate: DBManagerDelegate?
     private let jpegCompression = K.Image.jpegCompressionQuality
     private let fileExtension = "." + K.API.imageType
     

@@ -43,7 +43,8 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     static let shared = HomeVC()
     private let defaults = UserDefaults.standard
-    private let dbManager = DatabaseManager.shared
+    private let dbManager = DBManager.shared
+    private let cacheManager = CacheManager.shared
     
     // Cache of all Card objects used to display to the user.
     private var cardArray: [Int: Card] = [:]
