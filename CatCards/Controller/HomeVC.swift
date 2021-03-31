@@ -45,6 +45,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private let defaults = UserDefaults.standard
     private let dbManager = DBManager.shared
     private let cacheManager = CacheManager.shared
+    private let apiManager = APIManager.shared
     
     // Cache of all Card objects used to display to the user.
     private var cardArray: [Int: Card] = [:]
@@ -150,7 +151,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         // Save the reference of this view's built-in navigation bar.
         navBar = self.navigationController?.navigationBar
         dbManager.delegate = self
-        APIManager.shared.delegate = self
+        apiManager.delegate = self
         
         // Load viewCount value from database if there's any.
         let savedViewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
@@ -215,7 +216,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private func sendAPIRequest(numberOfRequests: Int) {
         let validatedRequestNumber = numberOfRequests > 0 ? numberOfRequests : 1
         for _ in 0..<validatedRequestNumber {
-            APIManager.shared.fetchData()
+            apiManager.fetchData()
         }
     }
     
