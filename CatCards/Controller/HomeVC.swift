@@ -562,28 +562,45 @@ class HomeVC: UIViewController, APIManagerDelegate {
     /// - Parameter sender: A specialized button for placement on a toolbar or tab bar.
     @IBAction func undoButtonPressed(_ sender: UIBarButtonItem) {
         guard !cardIsBeingPanned else { return }
-        
-        // Make sure data is available for the undo card
-        guard previousCard != nil else { return }
+        guard let undoCard = previousCard else { return }
         
         hapticManager.prepareImpactGenerator(style: .medium)
         maxPointerReached = pointer > maxPointerReached ? pointer : maxPointerReached
         undoButton.isEnabled = false
         hapticManager.impactHaptic?.impactOccurred()
-        
-        // Remove the next card from the superview.
         nextCard?.removeFromSuperview()
         
-        addCardToView(previousCard!, atBottom: false)
-        previousCard!.centerXConstraint.constant = 0
-        previousCard!.centerYConstraint.constant = 0
+        addCardToView(undoCard, atBottom: false)
+        
+        /*
+         Card created from cached data has no position offset at default.
+         To create animation and improve user experience,
+         add arbitrary position offset to the undoCard and reset its position with animation.
+         */
+        if undoCard.frame.size == .zero {
+            // Place the card randomly to one of the corners of the view.
+            var randomMultiplier: CGFloat {
+                if Bool.random() {
+                    return 1
+                } else {
+                    return -1
+                }
+            }
+            undoCard.centerXConstraint.constant = cardView.frame.height * 3 * randomMultiplier
+            undoCard.centerYConstraint.constant = cardView.frame.height * 3 * randomMultiplier
+            updateLayout()
+            
+            undoCard.centerXConstraint.constant = 0
+            undoCard.centerYConstraint.constant = 0
+        }
+        
         
         UIView.animate(withDuration: 0.5) {
             self.currentCard?.setSize(status: .standby)
             self.updateLayout()
-            self.previousCard!.transform = .identity
+            undoCard.transform = .identity
         } completion: { _ in
-            self.addGestureRecognizers(to: self.previousCard!)
+            self.addGestureRecognizers(to: undoCard)
             self.pointer -= 1
             DispatchQueue.main.async {
                 self.refreshButtonState()
@@ -775,7 +792,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
                  Card dismissing threshold A:
                  The projected travel distance is greater than or equals minimum distance.
                  */
-                dismissCard(card, deltaX: vector.x, deltaY: vector.y)
+                dismissCardWithVelocity(card, deltaX: vector.x, deltaY: vector.y)
             }
             else if vectorDistance < minTravelDistance && panDistance >= minDragDistance {
                 pointer += 1
@@ -784,7 +801,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
                  The projected travel distance is less than the minimum travel distance
                  but the distance of card being dragged is greater than distance threshold.
                  */
-                dismissCard(card, deltaX: minimumDelta.x, deltaY: minimumDelta.y)
+                dismissCardWithVelocity(card, deltaX: minimumDelta.x, deltaY: minimumDelta.y)
             }
             
             // Reset card's position and rotation.
@@ -947,7 +964,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     ///   - card: The card to be dismissed.
     ///   - deltaX: X–axis delta applied to the card.
     ///   - deltaY: Y–axis delta applied to the card.
-    private func dismissCard(_ card: Card, deltaX: CGFloat, deltaY: CGFloat) {
+    private func dismissCardWithVelocity(_ card: Card, deltaX: CGFloat, deltaY: CGFloat) {
         card.centerXConstraint.constant += deltaX
         card.centerYConstraint.constant += deltaY
         
