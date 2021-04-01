@@ -143,25 +143,24 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Save the reference of this view's built-in navigation bar.
         navBar = self.navigationController?.navigationBar
+        addBackgroundLayer()
+        
         dbManager.delegate = self
         apiManager.delegate = self
         
         loadStoredParameters()
+        
         if !onboardCompleted {
             hideUIButtons()
         }
         
-        /*
-         Create folders used by data and cache manager if they're absent.
-         Read cache data and get saved files' URLs if there's any.
-         */
         loadCacheData()
-        dbManager.getSavedImageFileURLs()
+        requestNewDataIfNeeded()
         
-        addBackgroundLayer()
         addShadeOverlay()
+        
+        dbManager.getSavedImageFileURLs()
         
         
         // Notify this VC that if the app enters the background, save the cached view count value to the db.
@@ -223,7 +222,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
             cardArray[i] = card
         }
         
-        // Update data index of APIManager.
         apiManager.dataIndex = cachedData.count
 
         /*
@@ -236,8 +234,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
             pointer = 0
             addCacheCardToView()
         }
-        
-        requestNewDataIfNeeded()
     }
     
     private func addCacheCardToView() {
@@ -257,6 +253,18 @@ class HomeVC: UIViewController, APIManagerDelegate {
             let numberOfNewDataShort = numberOfPrefetchData - numberOfNonUndoCard
             sendAPIRequest(numberOfRequests: numberOfNewDataShort)
         }
+    }
+    
+    /// Clear the card's cache data if its index position is beyond the bound of the undo–able range.
+    private func clearCacheData() {
+        let maxUndoNumber = K.Data.numberOfUndoCard
+        let oldCardIndex = pointer - (maxUndoNumber + 1)
+        
+        if let oldCard = cardArray[oldCardIndex] {
+            cacheManager.clearCache(dataID: oldCard.data.id)
+            cardArray[oldCardIndex] = nil
+        }
+        
     }
     
     //MARK: - Data Request & Handling
@@ -994,18 +1002,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
     /// Lay out this view's subviews immediately, if layout updates are pending.
     private func updateLayout() {
         self.view.layoutIfNeeded()
-    }
-    
-    /// Clear the card's cache data if its index position is beyond the bound of the undo–able range.
-    private func clearCacheData() {
-        let maxUndoNumber = K.Data.numberOfUndoCard
-        let oldCardIndex = pointer - (maxUndoNumber + 1)
-        
-        if let oldCard = cardArray[oldCardIndex] {
-            cacheManager.clearCache(dataID: oldCard.data.id)
-            cardArray[oldCardIndex] = nil
-        }
-        
     }
     
     //MARK: - Error Handling Section

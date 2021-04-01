@@ -17,14 +17,14 @@ class Card: UIView {
     var data: CatData
     var index: Int
     var cardType: CardType
-    private let imageView = UIImageView()
-    private let bgImageView = UIImageView()
-    private var onboardOverlay: OnboardOverlay?
-    private var triviaOverlay: TriviaOverlay?
     var centerXConstraint: NSLayoutConstraint!
     var centerYConstraint: NSLayoutConstraint!
     var heightConstraint: NSLayoutConstraint!
     var widthConstraint: NSLayoutConstraint!
+    private let imageView = UIImageView()
+    private let bgImageView = UIImageView()
+    private var onboardOverlay: OnboardOverlay?
+    private var triviaOverlay: TriviaOverlay?
     
     //MARK: - Initialization
     
