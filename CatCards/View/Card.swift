@@ -135,7 +135,7 @@ class Card: UIView {
         
         if index == 1 {
             // Use built–in image for the second onboard card.
-            data = CatData(id: "zoomImage", image: K.OnboardOverlay.zoomImage)
+            data = CatData(id: K.OnboardOverlay.zoomImageID, image: K.OnboardOverlay.zoomImage)
             imageView.image = data.image
             bgImageView.image = data.image
         }

@@ -239,7 +239,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private func addCacheCardToView() {
         let pointedCard = cardArray[pointer]!
         addCardToView(pointedCard, atBottom: false)
-        introduceCard(card: pointedCard)
+        introduceCard(card: pointedCard, animated: false)
         
         if let nextCard = cardArray[pointer + 1] {
             addCardToView(nextCard, atBottom: true)
@@ -295,7 +295,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             // Add the card to the view if it's the last card in the card array
             if newCard.index == self.pointer {
                 self.addCardToView(newCard, atBottom: false)
-                self.introduceCard(card: newCard)
+                self.introduceCard(card: newCard, animated: true)
                 
                 // Update the number of cards viewed by the user
                 if self.onboardCompleted {
@@ -337,12 +337,18 @@ class HomeVC: UIViewController, APIManagerDelegate {
         }
     }
     
-    private func introduceCard(card: Card) {
-        // Introduce the card by animating the change of the card size.
-        card.setSize(status: .intro)
-        UIView.animate(withDuration: 0.3) {
-            card.transform = .identity
-        } completion: { _ in
+    private func introduceCard(card: Card, animated: Bool) {
+        if animated {
+            // Introduce the card by enlarging the card's size.
+            card.setSize(status: .intro)
+            UIView.animate(withDuration: 0.3) {
+                card.transform = .identity
+            } completion: { _ in
+                self.addGestureRecognizers(to: card)
+                self.refreshButtonState()
+            }
+        } else {
+            card.setSize(status: .shown)
             self.addGestureRecognizers(to: card)
             self.refreshButtonState()
         }
