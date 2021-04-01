@@ -83,17 +83,10 @@ class HomeVC: UIViewController, APIManagerDelegate {
     var showOverlay = true
     
     // Number of cards with cat images the user has seen.
-    private var viewCount: Int = 0 {
-        didSet {
-            saveViewCount()
-        }
-    }
+    private var viewCount: Int = 0
     
-    private var onboardCompleted = false {
-        didSet {
-            defaults.setValue(onboardCompleted, forKey: K.UserDefaultsKeys.onboardCompleted)
-        }
-    }
+    // Status on if the onboard sessions were completed by the user.
+    private var onboardCompleted = false
     
     private var currentCard: Card? {
         return cardArray[pointer]
@@ -155,18 +148,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         dbManager.delegate = self
         apiManager.delegate = self
         
-        // Load viewCount value from database if there's any.
-        let savedViewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
-        viewCount = (savedViewCount != 0) ? savedViewCount : 0
-        
-        // Load saved pointer if there's any.
-        pointer = defaults.integer(forKey: K.UserDefaultsKeys.pointer)
-        
-        // Notify this VC that if the app enters the background, save the cached view count value to the db.
-        NotificationCenter.default.addObserver(self, selector: #selector(takeActionsBeforeTermination), name: UIApplication.willTerminateNotification, object: nil)
-        
-        // Retrieve the user status from db.
-        onboardCompleted = defaults.bool(forKey: K.UserDefaultsKeys.onboardCompleted)
+        loadStoredParameters()
         if !onboardCompleted {
             hideUIButtons()
         }
@@ -176,18 +158,15 @@ class HomeVC: UIViewController, APIManagerDelegate {
          Read cache data and get saved files' URLs if there's any.
          */
         dbManager.createFolders()
-        dbManager.getSavedImageFileURLs()
         loadCacheData()
+        dbManager.getSavedImageFileURLs()
         
         addBackgroundLayer()
         addShadeOverlay()
         
-        // Request enough number of new data to make sure number of prefetch data meets the pre–set target.
-        let numberOfNonUndoCard = cardArray.count - pointer
-        if numberOfNonUndoCard < numberOfPrefetchData {
-            let numberOfNewDataShort = numberOfPrefetchData - numberOfNonUndoCard
-            sendAPIRequest(numberOfRequests: numberOfNewDataShort)
-        }
+        
+        // Notify this VC that if the app enters the background, save the cached view count value to the db.
+        NotificationCenter.default.addObserver(self, selector: #selector(takeActionsBeforeTermination), name: UIApplication.willTerminateNotification, object: nil)
         
         // For UI Testing
         setUpUIReference()
@@ -225,25 +204,41 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     //MARK: - Cache Data Handling
     
+    private func loadStoredParameters() {
+        viewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
+        pointer = defaults.integer(forKey: K.UserDefaultsKeys.pointer)
+        onboardCompleted = defaults.bool(forKey: K.UserDefaultsKeys.onboardCompleted)
+    }
+    
     private func loadCacheData() {
-        let cacheData = cacheManager.getCacheData()
-        guard !cacheData.isEmpty else { debugPrint("No cache data found."); return }
+        let cachedData = cacheManager.getCacheData()
+        guard !cachedData.isEmpty else {
+            pointer = 0
+            debugPrint("No cache data found.")
+            return
+        }
         
-        // Cache data exists
-        for i in 0...cacheData.count - 1 {
-            let card = Card(data: cacheData[i], index: i, type: .regular)
+        // Create cards using cached data indexed starting from 0.
+        for i in 0...cachedData.count - 1 {
+            let card = Card(data: cachedData[i], index: i, type: .regular)
             cardArray[i] = card
         }
         
-        // Update data index pointer of APIManager.
-        apiManager.dataIndex = cacheData.count
+        // Update data index of APIManager.
+        apiManager.dataIndex = cachedData.count
 
-        // Introduce card
+        /*
+         Make sure the pointed card exist before adding it to the view, otherwise
+         reset the pointer to 0 in case the number of cache data is insufficient.
+         */
         if cardArray[pointer] != nil {
             addCacheCardToView()
         } else {
-            debugPrint("Card created using cache data cannot be found.")
+            pointer = 0
+            addCacheCardToView()
         }
+        
+        requestNewDataIfNeeded()
     }
     
     private func addCacheCardToView() {
@@ -253,6 +248,15 @@ class HomeVC: UIViewController, APIManagerDelegate {
         
         if let nextCard = cardArray[pointer + 1] {
             addCardToView(nextCard, atBottom: true)
+        }
+    }
+    
+    /// Request new data to make the number of prefetched data meets the pre–set target.
+    private func requestNewDataIfNeeded() {
+        let numberOfNonUndoCard = cardArray.count - pointer
+        if numberOfNonUndoCard < numberOfPrefetchData {
+            let numberOfNewDataShort = numberOfPrefetchData - numberOfNonUndoCard
+            sendAPIRequest(numberOfRequests: numberOfNewDataShort)
         }
     }
     
@@ -501,13 +505,18 @@ class HomeVC: UIViewController, APIManagerDelegate {
         toolbar.setShadowImage(UIImage(), forToolbarPosition: .bottom)
     }
     
-    //MARK: - Actions Taken Before App Termination
+    //MARK: - Actions To Take Before App Termination
     
     @objc private func takeActionsBeforeTermination() {
         guard onboardCompleted else { return }
+        saveOnboardStatus()
         savePointer()
         saveViewCount()
         cacheData()
+    }
+    
+    private func saveOnboardStatus() {
+        defaults.setValue(onboardCompleted, forKey: K.UserDefaultsKeys.onboardCompleted)
     }
     
     private func savePointer() {
@@ -534,10 +543,10 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     private func cacheData() {
-        let cacheData = cardArray.map { dict in
+        let data = cardArray.map { dict in
             dict.value.data
         }
-        cacheManager.save(cacheData)
+        cacheManager.cache(data)
     }
     
     //MARK: - Toolbar Button Method and State Control
@@ -973,7 +982,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             }
             
             // Clear the old card's cache data.
-            self.clearOldCardCacheData()
+            self.clearCacheData()
             
             // Request banner ad if onboard session is completed, no ad is received yet,
             // and the number of cards seen by the user passes the threshold.
@@ -989,7 +998,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     /// Clear the card's cache data if its index position is beyond the bound of the undo–able range.
-    private func clearOldCardCacheData() {
+    private func clearCacheData() {
         let maxUndoNumber = K.Data.numberOfUndoCard
         let oldCardIndex = pointer - (maxUndoNumber + 1)
         
