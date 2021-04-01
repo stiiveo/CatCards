@@ -12,7 +12,7 @@ import CoreData
 class CacheManager {
     
     static let shared = CacheManager()
-    var cacheData: [CatData] = []
+    var cachedData: [CatData] = []
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     private let fileManager = FileManager.default
     private var cacheFolderURL: URL {
@@ -23,16 +23,17 @@ class CacheManager {
     private let fileExtension = "." + K.API.imageType
     
     //MARK: - Clear Cache
-    func delete() {
+    func clearCache(dataID: String) {
         // Local database
         let fetchRequest: NSFetchRequest<Cache> = Cache.fetchRequest()
         do {
             let fetchResult = try context.fetch(fetchRequest)
-            // Delete all attributes in the Cache entity
+            // Delete specified attributes in the Cache entity
             for object in fetchResult {
-                context.delete(object)
-                // Remove cache file from local file system
-                removeCacheFile(fileName: object.name!)
+                if object.name == dataID {
+                    context.delete(object)
+                    removeCacheFile(fileName: object.name!)
+                }
             }
             saveContext()
         } catch {
@@ -40,6 +41,8 @@ class CacheManager {
         }
     }
     
+    /// Remove cache file from local file system with specified file name.
+    /// - Parameter fileName: Name of file to be removed from local cache folder.
     private func removeCacheFile(fileName: String) {
         let fileURL = cacheFolderURL.appendingPathComponent(fileName + fileExtension)
         if fileManager.fileExists(atPath: fileURL.path) {
@@ -73,7 +76,7 @@ class CacheManager {
         
         // Local images using the file list
         loadImageFromLocal(withFileList: fileList)
-        return cacheData
+        return cachedData
     }
     
     private func loadImageFromLocal(withFileList fileList: [String]) {
@@ -81,17 +84,28 @@ class CacheManager {
             let imageURL = cacheFolderURL.appendingPathComponent(fileName + fileExtension)
             if let image = UIImage(contentsOfFile: imageURL.path) {
                 let data = CatData(id: fileName, image: image)
-                cacheData.append(data)
+                cachedData.append(data)
             }
         }
     }
     
     //MARK: - Save Cache
-    func save(_ dataToSave: [CatData]) {
-        cacheData = dataToSave
+    func cache(_ dataToCache: [CatData]) {
+        // Filter out data that's already cached.
+        var filteredData: [CatData] = []
+        let idOfCachedData: [String] = cachedData.map { data in
+            data.id
+        }
+        
+        let eDTC = dataToCache.enumerated()
+        for (index, data) in eDTC {
+            if !idOfCachedData.contains(data.id) {
+                filteredData.append(dataToCache[index])
+            }
+        }
         
         // Local database
-        for data in cacheData {
+        for data in filteredData {
             let cache = Cache(context: context)
             cache.name = data.id
             cache.date = Date()
@@ -99,18 +113,18 @@ class CacheManager {
         }
         
         // Local file system
-        saveImageToLocal()
+        saveImageToLocal(withData: filteredData)
     }
     
-    private func saveImageToLocal() {
-        for data in cacheData {
-            let image = data.image
+    private func saveImageToLocal(withData data: [CatData]) {
+        for d in data {
+            let image = d.image
             guard let imageData = image.jpegData(compressionQuality: jpegCompression) else {
                 debugPrint("Failed to compress UIImage to JPEG data.")
                 return
             }
             
-            let fileName = data.id + fileExtension
+            let fileName = d.id + fileExtension
             let fileURL = cacheFolderURL.appendingPathComponent(fileName)
             do {
                 try imageData.write(to: fileURL)
