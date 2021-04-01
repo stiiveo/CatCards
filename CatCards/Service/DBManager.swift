@@ -33,6 +33,10 @@ final class DBManager {
         let thumbnail: URL
     }
     
+    init() {
+        createFoldersNeeded()
+    }
+    
     //MARK: - Data Loading
     
     // Load thumbnail images from local folder
@@ -207,11 +211,11 @@ final class DBManager {
     }
     
     private func getFolderURL(folderName: String, at directory: FileManager.SearchPathDirectory) -> URL {
-        let documentURL = fileManager.urls(for: directory, in: .userDomainMask).first!
-        return documentURL.appendingPathComponent(folderName, isDirectory: true)
+        let directoryURL = fileManager.urls(for: directory, in: .userDomainMask).first!
+        return directoryURL.appendingPathComponent(folderName, isDirectory: true)
     }
     
-    func createFolders() {
+    func createFoldersNeeded() {
         createDirectory(withName: imageFolderName, at: .documentDirectory)
         createDirectory(withName: thumbFolderName, at: .documentDirectory)
         createDirectory(withName: cacheFolderName, at: .cachesDirectory)

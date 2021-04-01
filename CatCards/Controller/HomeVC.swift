@@ -157,7 +157,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
          Create folders used by data and cache manager if they're absent.
          Read cache data and get saved files' URLs if there's any.
          */
-        dbManager.createFolders()
         loadCacheData()
         dbManager.getSavedImageFileURLs()
         
@@ -211,7 +210,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     private func loadCacheData() {
-        let cachedData = cacheManager.getCacheData()
+        let cachedData = cacheManager.getCachedData()
         guard !cachedData.isEmpty else {
             pointer = 0
             debugPrint("No cache data found.")

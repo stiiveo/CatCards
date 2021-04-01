@@ -17,14 +17,17 @@ class CacheManager {
     private let fileManager = FileManager.default
     private var cacheFolderURL: URL {
         let cacheDirectoryURL = try! fileManager.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        return cacheDirectoryURL.appendingPathComponent(K.Image.FolderName.cacheImage, isDirectory: true)
+        let folderURL = cacheDirectoryURL.appendingPathComponent(K.Image.FolderName.cacheImage, isDirectory: true)
+        return folderURL
     }
     private let jpegCompression = K.Image.jpegCompressionQuality
     private let fileExtension = "." + K.API.imageType
     
     //MARK: - Clear Cache
+    
+    /// Remove cached data matching the specified id name.
+    /// - Parameter dataID: ID of the data to be removed.
     func clearCache(dataID: String) {
-        // Local database
         let fetchRequest: NSFetchRequest<Cache> = Cache.fetchRequest()
         do {
             let fetchResult = try context.fetch(fetchRequest)
@@ -55,83 +58,77 @@ class CacheManager {
     }
     
     //MARK: - Load Cache
-    func getCacheData() -> [CatData] {
-        // Local database
+    
+    /// Return the cached data stored in app's cache directory.
+    /// - Returns: Cached data stored in app's cache directory.
+    func getCachedData() -> [CatData] {
+        print("CacheFolderURL:", cacheFolderURL)
+        
         let fetchRequest: NSFetchRequest<Cache> = Cache.fetchRequest()
         let sort = NSSortDescriptor(key: "date", ascending: true)
         fetchRequest.sortDescriptors = [sort]
         
-        // Get all the saved file names
-        var fileList: [String] = []
         do {
             let dataArray = try context.fetch(fetchRequest)
             for data in dataArray {
-                if let id = data.name {
-                    fileList.append(id)
+                if let fileName = data.name {
+                    loadCachedImageFile(fileName)
                 }
             }
         } catch {
             debugPrint("Error fetching Favorite entity from container: \(error)")
         }
         
-        // Local images using the file list
-        loadImageFromLocal(withFileList: fileList)
         return cachedData
     }
     
-    private func loadImageFromLocal(withFileList fileList: [String]) {
-        for fileName in fileList {
-            let imageURL = cacheFolderURL.appendingPathComponent(fileName + fileExtension)
-            if let image = UIImage(contentsOfFile: imageURL.path) {
-                let data = CatData(id: fileName, image: image)
-                cachedData.append(data)
-            }
+    /// Retrieve the stored image file matching the specified file name.
+    /// - Parameter fileName: Name of the image file to be retrieved.
+    private func loadCachedImageFile(_ fileName: String) {
+        let imageURL = cacheFolderURL.appendingPathComponent(fileName + fileExtension)
+        if let image = UIImage(contentsOfFile: imageURL.path) {
+            let data = CatData(id: fileName, image: image)
+            cachedData.append(data)
         }
     }
     
     //MARK: - Save Cache
+    
+    /// Cache the provided data to local cache directory.
+    ///
+    /// Note: To reduce disk I/O, only the data not cached yet will be processed and cached.
+    /// - Parameter dataToCache: Data to be cached into the cache directory.
     func cache(_ dataToCache: [CatData]) {
-        // Filter out data that's already cached.
-        var filteredData: [CatData] = []
         let idOfCachedData: [String] = cachedData.map { data in
             data.id
         }
         
-        let eDTC = dataToCache.enumerated()
-        for (index, data) in eDTC {
+        for data in dataToCache {
             if !idOfCachedData.contains(data.id) {
-                filteredData.append(dataToCache[index])
+                let cache = Cache(context: context)
+                cache.name = data.id
+                cache.date = Date()
+                saveContext()
+                saveImageToLocal(withData: data)
             }
         }
-        
-        // Local database
-        for data in filteredData {
-            let cache = Cache(context: context)
-            cache.name = data.id
-            cache.date = Date()
-            saveContext()
-        }
-        
-        // Local file system
-        saveImageToLocal(withData: filteredData)
     }
     
-    private func saveImageToLocal(withData data: [CatData]) {
-        for d in data {
-            let image = d.image
-            guard let imageData = image.jpegData(compressionQuality: jpegCompression) else {
-                debugPrint("Failed to compress UIImage to JPEG data.")
-                return
-            }
-            
-            let fileName = d.id + fileExtension
-            let fileURL = cacheFolderURL.appendingPathComponent(fileName)
-            do {
-                try imageData.write(to: fileURL)
-            } catch {
-                debugPrint("Failed to write data into cache directory: \(error.localizedDescription)")
-            }
-            
+    /// Cache the provided data into cache directory.
+    /// - Parameter data: Data to be cached.
+    private func saveImageToLocal(withData data: CatData) {
+        let image = data.image
+        guard let imageData = image.jpegData(compressionQuality: jpegCompression) else {
+            debugPrint("Failed to compress UIImage to JPEG data.")
+            return
+        }
+        
+        let fileName = data.id + fileExtension
+        let fileURL = cacheFolderURL.appendingPathComponent(fileName)
+        do {
+            try imageData.write(to: fileURL)
+        } catch {
+            debugPrint("Failed to write data into cache directory: \(error.localizedDescription)")
         }
     }
     
