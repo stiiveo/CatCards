@@ -511,7 +511,21 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     private func savePointer() {
-        defaults.setValue(pointer, forKey: K.UserDefaultsKeys.pointer)
+        guard !cardArray.isEmpty else {
+            debugPrint("Pointer cannot be saved to UserDefaults since cardArray: '\(cardArray)' is empty.")
+            return
+        }
+        /*
+         Since the index of cards created using the cached data will be reset
+         and starting from 0, save the value of pointer which is the relative position of the cardArray,
+         with the first card's index being 0.
+         E.g. If the pointer was 105 and the first card's index in the array was 100,
+         the first card's index will be reset to 0, thus the pointer will be 5, which
+         is also the relative position to the first card's index.
+         */
+        let firstCardIndex = cardArray.keys.sorted().first!
+        let pointerToSave = pointer - firstCardIndex
+        defaults.setValue(pointerToSave, forKey: K.UserDefaultsKeys.pointer)
     }
     
     /// Save the value of card view count to user defaults
