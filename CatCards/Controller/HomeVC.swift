@@ -559,7 +559,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         let data = cardArray.map { dict in
             dict.value.data
         }
-        cacheManager.cache(data)
+        cacheManager.cacheData(data)
     }
     
     //MARK: - Toolbar Button Method and State Control
@@ -656,13 +656,25 @@ class HomeVC: UIViewController, APIManagerDelegate {
     /// - Parameter sender: A specialized button for placement on a toolbar or tab bar.
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
         guard !cardIsBeingPanned, currentCard != nil else { return }
-        let dataToShare = currentCard!.data
+        let data = currentCard!.data
         
-        // Get URL of the data for activity VC's image preview.
-        guard let imageURL = dbManager.getImageTempURL(catData: dataToShare) else { return }
+        // Get URL of the current card's image for activity VC's image preview.
+        let cacheManager = CacheManager()
+        let fileName = data.id + K.Image.fileExtension
+        cacheManager.cacheImage(data.image, withFileName: fileName)
+        var url: URL?
+        do {
+            let imageFileURL = try cacheManager.urlOfImageFile(fileName: fileName)
+            url = imageFileURL
+        } catch CacheError.fileNotFound {
+            debugPrint("The URL of image file cannot be created because it cannot be found.")
+        } catch {
+            debugPrint("Unknown error occured when getting the url of the cached image file. File name: \(fileName)")
+        }
         
         hapticManager.prepareImpactGenerator(style: .soft)
 
+        guard let imageURL = url else { return }
         let activityVC = UIActivityViewController(activityItems: [imageURL], applicationActivities: nil)
         
         // Set up Popover Presentation Controller's barButtonItem for iPad.
@@ -676,7 +688,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         
         // Delete the cache image file after the activityVC is dismissed.
         activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
-            self.dbManager.removeFile(fromDirectory: .cachesDirectory, inFolder: K.Image.FolderName.cacheImage, fileName: dataToShare.id)
+            self.dbManager.removeFile(fromDirectory: .cachesDirectory, inFolder: K.Image.FolderName.cacheImage, fileName: data.id)
             
             self.hapticManager.releaseImpactGenerator()
         }

@@ -26,7 +26,7 @@ final class DBManager {
     var imageFileURLs = [FilePath]()
     var delegate: DBManagerDelegate?
     private let jpegCompression = K.Image.jpegCompressionQuality
-    private let fileExtension = "." + K.API.imageType
+    private let fileExtension = K.Image.fileExtension
     
     struct FilePath {
         let image: URL
@@ -172,32 +172,7 @@ final class DBManager {
         }
     }
     
-    //MARK: - Cache Creation & Removal
-    
-    /// Get an image's temporary URL object for share sheet's preview usage.
-    func getImageTempURL(catData: CatData) -> URL? {
-        // Convert image to jpeg file and write it to cache directory folder
-        guard let imageData = catData.image.jpegData(compressionQuality: jpegCompression) else { return nil }
-        
-        let cacheURL = try? fileManager.url(for: .cachesDirectory,
-                                       in: .userDomainMask,
-                                       appropriateFor: nil,
-                                       create: true)
-        let fileName = catData.id + fileExtension
-        
-        if let fileURL = cacheURL?.appendingPathComponent(previewImageFolderName, isDirectory: true).appendingPathComponent(fileName) {
-            do {
-                try imageData.write(to: fileURL)
-                // Return file's url
-                return fileURL
-            } catch {
-                debugPrint("Error writing data into cache directory: \(error)")
-            }
-        } 
-        return nil
-    }
-    
-    //MARK: - Creation of Directory / sub-Directory
+    //MARK: - Directories Creation
     
     private func createDirectory(withName name: String, at directory: FileManager.SearchPathDirectory) {
         let url = getFolderURL(folderName: name, at: directory)
@@ -222,7 +197,7 @@ final class DBManager {
         createDirectory(withName: previewImageFolderName, at: .cachesDirectory)
     }
     
-    //MARK: - CoreData and File Manager Tools
+    //MARK: - Data Detection & Listing
     
     /// Determine if the provided data already exists in local folder.
     /// - Parameter data: Data to be determined.
@@ -267,6 +242,8 @@ final class DBManager {
     }
    
 }
+
+//MARK: - Picture Downsampling
 
 private extension UIImage {
     /// Downsize the image to be used as the collection VC's cell image.
