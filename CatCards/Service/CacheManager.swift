@@ -12,7 +12,6 @@ import CoreData
 class CacheManager {
     
     static let shared = CacheManager()
-    var cachedData: [CatData] = []
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     private let fileManager = FileManager.default
     private var imageFolderURL: URL {
@@ -35,7 +34,13 @@ class CacheManager {
             for object in fetchResult {
                 if object.name == dataID {
                     context.delete(object)
-                    removeCacheFile(fileName: object.name!)
+                    if object.isDeleted {
+                        if let fileId = object.name {
+                            removeCacheFile(fileName: fileId + fileExtension)
+                        }
+                    } else {
+                        debugPrint("The specified cache data with ID '\(dataID)' cannot be removed for some reason.")
+                    }
                 }
             }
             saveContext()
@@ -47,13 +52,15 @@ class CacheManager {
     /// Remove cache file from local file system with specified file name.
     /// - Parameter fileName: Name of file to be removed from local cache folder.
     private func removeCacheFile(fileName: String) {
-        let fileURL = imageFolderURL.appendingPathComponent(fileName + fileExtension)
+        let fileURL = imageFolderURL.appendingPathComponent(fileName)
         if fileManager.fileExists(atPath: fileURL.path) {
             do {
                 try fileManager.removeItem(at: fileURL)
             } catch {
                 debugPrint("Failed to remove file `\(fileName)` from the cache folder:\n\(error.localizedDescription)")
             }
+        } else {
+            debugPrint("File '\(fileName)' cannot be removed from cache folder because it's absent.")
         }
     }
     
@@ -62,53 +69,52 @@ class CacheManager {
     /// Return the cached data stored in app's cache directory.
     /// - Returns: Cached data stored in app's cache directory.
     func getCachedData() -> [CatData] {
-        print("imageFolderURL:", imageFolderURL)
+        print("Cache images folder url:", imageFolderURL)
         
         let fetchRequest: NSFetchRequest<Cache> = Cache.fetchRequest()
         let sort = NSSortDescriptor(key: "date", ascending: true)
         fetchRequest.sortDescriptors = [sort]
         
         do {
+            var cachedData: [CatData] = []
             let dataArray = try context.fetch(fetchRequest)
             for data in dataArray {
                 if let dataKey = data.name {
-                    loadCachedImageFile(dataKey + fileExtension)
+                    // Get the image file from the cache image folder.
+                    do {
+                        let imageUrl = try urlOfImageFile(fileName: dataKey + fileExtension)
+                        if let image = UIImage(contentsOfFile: imageUrl.path) {
+                            let data = CatData(id: dataKey, image: image)
+                            cachedData.append(data)
+                        }
+                    } catch {
+                        debugPrint("Failed to get validated url of the specified image file. \(error)")
+                    }
                 }
             }
+            return cachedData
         } catch {
-            debugPrint("Error fetching Favorite entity from container: \(error)")
-        }
-        
-        return cachedData
-    }
-    
-    /// Retrieve the stored image file matching the specified file name.
-    /// - Parameter fileName: Name of the image file to be retrieved.
-    private func loadCachedImageFile(_ fileName: String) {
-        let imageURL = imageFolderURL.appendingPathComponent(fileName)
-        if let image = UIImage(contentsOfFile: imageURL.path) {
-            let data = CatData(id: fileName, image: image)
-            cachedData.append(data)
+            // Cannot fetch cache data from local database.
+            debugPrint("Error fetching Cache entity from persistent container: \(error)")
+            return []
         }
     }
     
     //MARK: - Save Cache
     
-    /// Cache the CatData's id string value and the date it is saved.
-    /// The image data will also be saved into the cache image folder.
+    /// Cache the data's id string value and the date it is saved.
+    /// The image data is also saved into the cache image folder with CatData's id as its file name.
     ///
     /// Note: To reduce disk I/O, only the data not cached yet will be processed and cached.
     /// - Parameter dataToCache: Data to be cached into the cache directory.
     func cacheData(_ dataToCache: [CatData]) {
-        let idOfCachedData: [String] = cachedData.map { data in
-            data.id
-        }
-        
+        let cachedData = self.getCachedData()
+        let cachedDataIdList: [String] = cachedData.map { $0.id }
         for data in dataToCache {
-            if !idOfCachedData.contains(data.id) {
-                let cache = Cache(context: context)
-                cache.name = data.id
-                cache.date = Date()
+            if !cachedDataIdList.contains(data.id) {
+                let cacheItem = Cache(context: context)
+                cacheItem.name = data.id
+                cacheItem.date = Date()
                 saveContext()
                 
                 let fileName = data.id + fileExtension

@@ -155,7 +155,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             hideUIButtons()
         }
         
-        loadCacheData()
+        loadCachedData()
         requestNewDataIfNeeded()
         
         addShadeOverlay()
@@ -208,11 +208,11 @@ class HomeVC: UIViewController, APIManagerDelegate {
         onboardCompleted = defaults.bool(forKey: K.UserDefaultsKeys.onboardCompleted)
     }
     
-    private func loadCacheData() {
+    private func loadCachedData() {
         let cachedData = cacheManager.getCachedData()
         guard !cachedData.isEmpty else {
             pointer = 0
-            debugPrint("No cache data found.")
+            debugPrint("No cached data saved.")
             return
         }
         
@@ -221,7 +221,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             let card = Card(data: cachedData[i], index: i, type: .regular)
             cardArray[i] = card
         }
-        
+        // API manager's dataIndex starts from the index after the last index of the cached data.
         apiManager.dataIndex = cachedData.count
 
         /*
@@ -259,7 +259,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private func clearCacheData() {
         let maxUndoNumber = K.Data.numberOfUndoCard
         let oldCardIndex = pointer - (maxUndoNumber + 1)
-        
         if let oldCard = cardArray[oldCardIndex] {
             cacheManager.clearCache(dataID: oldCard.data.id)
             cardArray[oldCardIndex] = nil
@@ -556,10 +555,15 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     private func cacheData() {
-        let data = cardArray.map { dict in
-            dict.value.data
-        }
-        cacheManager.cacheData(data)
+        /*
+         Since the downloaded data is stored in a dictionary,
+         you need to sort the collection by its keys.
+         Firstly, create a temporary array with sorted keys of the dictionary,
+         then retrieve the data by the sorted keys and store it in a temporary collection.
+         */
+        let sortedCardArrayKeys = cardArray.keys.sorted()
+        let sortedData = sortedCardArrayKeys.map { cardArray[$0]!.data }
+        cacheManager.cacheData(sortedData)
     }
     
     //MARK: - Toolbar Button Method and State Control
