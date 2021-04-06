@@ -16,11 +16,11 @@ class CacheManager {
     private let fileManager = FileManager.default
     private var imageFolderURL: URL {
         let cacheDirectoryURL = try! fileManager.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        let folderURL = cacheDirectoryURL.appendingPathComponent(K.Image.FolderName.cacheImage, isDirectory: true)
+        let folderURL = cacheDirectoryURL.appendingPathComponent(K.File.FolderName.cacheImage, isDirectory: true)
         return folderURL
     }
     private let jpegCompression = K.Image.jpegCompressionQuality
-    private let fileExtension = K.Image.fileExtension
+    private let fileExtension = K.File.fileExtension
     
     //MARK: - Clear Cache
     
@@ -69,7 +69,7 @@ class CacheManager {
     /// Return the cached data stored in app's cache directory.
     /// - Returns: Cached data stored in app's cache directory.
     func getCachedData() -> [CatData] {
-        print("Cache images folder url:", imageFolderURL)
+        print("Cache images folder URL:", imageFolderURL.relativePath)
         
         let fetchRequest: NSFetchRequest<Cache> = Cache.fetchRequest()
         let sort = NSSortDescriptor(key: "date", ascending: true)

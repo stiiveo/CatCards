@@ -60,6 +60,10 @@ struct K {
         static let jpegCompressionQuality: CGFloat = 0.7 // 0: lowest quality; 1: highest quality
         static let grumpyCatImageSize = CGSize(width: 1265, height: 951)
         static let feedbackImage = UIImage(named: "heart_with_circle_background")!
+        
+    }
+    
+    struct File {
         static let fileExtension = "." + K.API.imageType
         
         struct FolderName {

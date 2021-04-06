@@ -664,7 +664,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         
         // Get URL of the current card's image for activity VC's image preview.
         let cacheManager = CacheManager()
-        let fileName = data.id + K.Image.fileExtension
+        let fileName = data.id + K.File.fileExtension
         cacheManager.cacheImage(data.image, withFileName: fileName)
         var url: URL?
         do {
@@ -692,7 +692,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         
         // Delete the cache image file after the activityVC is dismissed.
         activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
-            self.dbManager.removeFile(fromDirectory: .cachesDirectory, inFolder: K.Image.FolderName.cacheImage, fileName: data.id)
+            self.dbManager.removeFile(fromDirectory: .cachesDirectory, inFolder: K.File.FolderName.cacheImage, fileName: data.id)
             
             self.hapticManager.releaseImpactGenerator()
         }

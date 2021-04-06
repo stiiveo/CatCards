@@ -18,15 +18,15 @@ final class DBManager {
     static let shared = DBManager()
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     private let fileManager = FileManager.default
-    private let imageFolderName = K.Image.FolderName.fullImage
-    private let thumbFolderName = K.Image.FolderName.thumbnail
-    private let cacheFolderName = K.Image.FolderName.cacheImage
-    private let previewImageFolderName = K.Image.FolderName.activityPreview
+    private let imageFolderName = K.File.FolderName.fullImage
+    private let thumbFolderName = K.File.FolderName.thumbnail
+    private let cacheFolderName = K.File.FolderName.cacheImage
+    private let previewImageFolderName = K.File.FolderName.activityPreview
     private var favoriteArray: [Favorite]!
     var imageFileURLs = [FilePath]()
     var delegate: DBManagerDelegate?
     private let jpegCompression = K.Image.jpegCompressionQuality
-    private let fileExtension = K.Image.fileExtension
+    private let fileExtension = K.File.fileExtension
     
     struct FilePath {
         let image: URL
