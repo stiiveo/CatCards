@@ -32,7 +32,8 @@ class CacheManager {
     //MARK: - Clear Cache
     
     /// Remove cached data matching the specified id name.
-    /// - Parameter dataID: ID of the data to be removed.
+    /// - Parameter dataName: Name attribute of the data to be removed.
+    /// - Throws: One of the cache errors could be thrown.
     func clearCache(dataId dataName: String) throws {
         let fetchRequest: NSFetchRequest<Cache> = Cache.fetchRequest()
         var fetchResult: [Cache] = []
@@ -60,6 +61,7 @@ class CacheManager {
     
     /// Remove cache file from local file system with specified file name.
     /// - Parameter fileName: Name of file to be removed from local cache folder.
+    /// - Throws: An error could be thrown if the specified file cannot be found in the cache directory.
     private func removeCacheFile(fileName: String) throws {
         guard let fileURL = cacheImagesFolderUrl?.appendingPathComponent(fileName) else {
             debugPrint("Failed to remove cache file \(fileName) since the valid url of cache images folder cannot be obtained.")
@@ -113,6 +115,7 @@ class CacheManager {
     ///
     /// Note: To reduce disk I/O, only the data not cached yet will be processed and cached.
     /// - Parameter dataToCache: Data to be cached into the cache directory.
+    /// - Throws: This attempt could fail and return one or more cases of CacheError.
     func cacheData(_ dataToCache: [CatData]) throws {
         let cachedData = self.fetchCachedData()
         let cachedDataIdList: [String] = cachedData.map { $0.id }
@@ -136,6 +139,7 @@ class CacheManager {
     /// Convert the specified image into a jpeg format data and save it in the cache images folder.
     /// - Parameter image: Image data to be saved.
     /// - Parameter fileName: File name with which the image file to be saved.
+    /// - Throws: This attempt could fail and return one or more cases of CacheError.
     func cacheImage(_ image: UIImage, withFileName fileName: String) throws {
         guard let imageData = image.jpegData(compressionQuality: K.Data.jpegDataCompressionQuality) else {
             throw CacheError.failedToConvertImageToJpegData(image: image)
