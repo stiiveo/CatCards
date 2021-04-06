@@ -14,53 +14,62 @@ class CacheManager {
     static let shared = CacheManager()
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     private let fileManager = FileManager.default
-    private var imageFolderURL: URL {
-        let cacheDirectoryURL = try! fileManager.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        let folderURL = cacheDirectoryURL.appendingPathComponent(K.File.FolderName.cacheImage, isDirectory: true)
-        return folderURL
+    private var cacheImagesFolderUrl: URL? {
+        do {
+            let cacheRootUrl = try fileManager.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            return cacheRootUrl.appendingPathComponent(K.File.FolderName.cacheImage, isDirectory: true)
+        } catch {
+            debugPrint("Failed to locate nor create standard system Caches directory: \(error)")
+            return nil
+        }
     }
-    private let jpegCompression = K.Image.jpegCompressionQuality
-    private let fileExtension = K.File.fileExtension
+    private let imageFileExtension = K.File.fileExtension
+    
+    init() {
+        print("Cache images folder url path:", cacheImagesFolderUrl?.path ?? "")
+    }
     
     //MARK: - Clear Cache
     
     /// Remove cached data matching the specified id name.
     /// - Parameter dataID: ID of the data to be removed.
-    func clearCache(dataID: String) {
+    func clearCache(dataId dataName: String) throws {
         let fetchRequest: NSFetchRequest<Cache> = Cache.fetchRequest()
+        var fetchResult: [Cache] = []
         do {
-            let fetchResult = try context.fetch(fetchRequest)
-            // Delete specified attributes in the Cache entity
-            for object in fetchResult {
-                if object.name == dataID {
-                    context.delete(object)
-                    if object.isDeleted {
-                        if let fileId = object.name {
-                            removeCacheFile(fileName: fileId + fileExtension)
-                        }
-                    } else {
-                        debugPrint("The specified cache data with ID '\(dataID)' cannot be removed for some reason.")
-                    }
-                }
-            }
-            saveContext()
+            fetchResult = try context.fetch(fetchRequest)
         } catch {
             debugPrint("Error fetching result from container: \(error)")
         }
+        // Remove specified attributes in the Cache entity
+        for cacheObject in fetchResult {
+            if cacheObject.name == dataName {
+                context.delete(cacheObject)
+                if cacheObject.isDeleted {
+                    if let fileId = cacheObject.name {
+                        // Remove cached file matching the specified file name.
+                        try removeCacheFile(fileName: fileId + imageFileExtension)
+                    }
+                } else {
+                    debugPrint("Unknown error: The specified attribute '\(dataName)' cannot be removed from Cache database.")
+                }
+            }
+        }
+        try saveContext()
     }
     
     /// Remove cache file from local file system with specified file name.
     /// - Parameter fileName: Name of file to be removed from local cache folder.
-    private func removeCacheFile(fileName: String) {
-        let fileURL = imageFolderURL.appendingPathComponent(fileName)
+    private func removeCacheFile(fileName: String) throws {
+        guard let fileURL = cacheImagesFolderUrl?.appendingPathComponent(fileName) else {
+            debugPrint("Failed to remove cache file \(fileName) since the valid url of cache images folder cannot be obtained.")
+            return
+        }
+        
         if fileManager.fileExists(atPath: fileURL.path) {
-            do {
-                try fileManager.removeItem(at: fileURL)
-            } catch {
-                debugPrint("Failed to remove file `\(fileName)` from the cache folder:\n\(error.localizedDescription)")
-            }
+            try fileManager.removeItem(at: fileURL)
         } else {
-            debugPrint("File '\(fileName)' cannot be removed from cache folder because it's absent.")
+            throw CacheError.fileNotFound(fileName: fileName)
         }
     }
     
@@ -68,36 +77,33 @@ class CacheManager {
     
     /// Return the cached data stored in app's cache directory.
     /// - Returns: Cached data stored in app's cache directory.
-    func getCachedData() -> [CatData] {
-        print("Cache images folder URL:", imageFolderURL.relativePath)
-        
+    func fetchCachedData() -> [CatData] {
+        // Fetch the collection of cached objects sorted by the date each item was saved with in ascending order.
         let fetchRequest: NSFetchRequest<Cache> = Cache.fetchRequest()
         let sort = NSSortDescriptor(key: "date", ascending: true)
         fetchRequest.sortDescriptors = [sort]
-        
+        var objects: [Cache] = []
         do {
-            var cachedData: [CatData] = []
-            let dataArray = try context.fetch(fetchRequest)
-            for data in dataArray {
-                if let dataKey = data.name {
-                    // Get the image file from the cache image folder.
-                    do {
-                        let imageUrl = try urlOfImageFile(fileName: dataKey + fileExtension)
-                        if let image = UIImage(contentsOfFile: imageUrl.path) {
-                            let data = CatData(id: dataKey, image: image)
-                            cachedData.append(data)
-                        }
-                    } catch {
-                        debugPrint("Failed to get validated url of the specified image file. \(error)")
-                    }
-                }
-            }
-            return cachedData
+            objects = try context.fetch(fetchRequest)
         } catch {
-            // Cannot fetch cache data from local database.
-            debugPrint("Error fetching Cache entity from persistent container: \(error)")
-            return []
+            debugPrint("Failed to fetch cached objects from persistent container: \(error)")
         }
+        
+        // Get the image file from the cache images folder.
+        var cachedData: [CatData] = []
+        for object in objects {
+            let dataKey = object.name!
+            if let imageUrl = urlOfImageFile(fileName: dataKey + imageFileExtension) {
+                guard let image = UIImage(contentsOfFile: imageUrl.path) else {
+                    debugPrint("Failed to initialize an image object with the contents of file located at \(imageUrl.path)")
+                    continue
+                }
+                let data = CatData(id: dataKey, image: image)
+                cachedData.append(data)
+            }
+        }
+        
+        return cachedData
     }
     
     //MARK: - Save Cache
@@ -107,44 +113,51 @@ class CacheManager {
     ///
     /// Note: To reduce disk I/O, only the data not cached yet will be processed and cached.
     /// - Parameter dataToCache: Data to be cached into the cache directory.
-    func cacheData(_ dataToCache: [CatData]) {
-        let cachedData = self.getCachedData()
+    func cacheData(_ dataToCache: [CatData]) throws {
+        let cachedData = self.fetchCachedData()
         let cachedDataIdList: [String] = cachedData.map { $0.id }
         for data in dataToCache {
             if !cachedDataIdList.contains(data.id) {
                 let cacheItem = Cache(context: context)
                 cacheItem.name = data.id
                 cacheItem.date = Date()
-                saveContext()
+                do {
+                    try saveContext()
+                } catch {
+                    throw CacheError.failedToCommitChangesToPersistentContainer
+                }
                 
-                let fileName = data.id + fileExtension
-                cacheImage(data.image, withFileName: fileName)
+                let fileName = data.id + imageFileExtension
+                try cacheImage(data.image, withFileName: fileName)
             }
         }
     }
     
-    /// Cache the image data into the cache image folder.
-    /// - Parameter image: Image data to be cached.
-    /// - Parameter fileName: File name with which the image file to be created.
-    func cacheImage(_ image: UIImage, withFileName fileName: String) {
-        guard let imageData = image.jpegData(compressionQuality: jpegCompression) else {
-            debugPrint("Failed to compress UIImage to JPEG data.")
-            return
+    /// Convert the specified image into a jpeg format data and save it in the cache images folder.
+    /// - Parameter image: Image data to be saved.
+    /// - Parameter fileName: File name with which the image file to be saved.
+    func cacheImage(_ image: UIImage, withFileName fileName: String) throws {
+        guard let imageData = image.jpegData(compressionQuality: K.Data.jpegDataCompressionQuality) else {
+            throw CacheError.failedToConvertImageToJpegData(image: image)
         }
         
-        let fileURL = imageFolderURL.appendingPathComponent(fileName)
-        do {
-            try imageData.write(to: fileURL)
-        } catch {
-            debugPrint("Failed to write data into cache directory: \(error.localizedDescription)")
+        if let fileURL = cacheImagesFolderUrl?.appendingPathComponent(fileName) {
+            do {
+                try imageData.write(to: fileURL)
+            } catch {
+                throw CacheError.failedToWriteImageFile(url: fileURL)
+            }
         }
     }
     
-    private func saveContext() {
+    /// Attempts to commit unsaved changes to cache objects to the persistent container.
+    /// - Throws: This attempt could fail and return one of the cases of CacheError.
+    private func saveContext() throws {
+        guard self.context.hasChanges else { return }
         do {
             try self.context.save()
         } catch {
-            debugPrint("Error saving Favorite object to container: \(error.localizedDescription)")
+            throw CacheError.failedToCommitChangesToPersistentContainer
         }
     }
     
@@ -154,17 +167,14 @@ class CacheManager {
     /// - Parameter fileName: The file name of the image file.
     /// - Throws: An error could be thrown if the file with provided file name does not exist.
     /// - Returns: The URL of the image file saved in cache image folder.
-    func urlOfImageFile(fileName: String) throws -> URL {
-        let fileURL = imageFolderURL.appendingPathComponent(fileName)
-        let fileExists = fileManager.fileExists(atPath: fileURL.relativePath)
-        
-        guard fileExists else {
-            throw CacheError.fileNotFound
-        }
-        return fileURL
+    func urlOfImageFile(fileName: String) -> URL? {
+        return cacheImagesFolderUrl?.appendingPathComponent(fileName)
     }
 }
 
 enum CacheError: Error {
-    case fileNotFound
+    case failedToCommitChangesToPersistentContainer
+    case failedToConvertImageToJpegData(image: UIImage)
+    case failedToWriteImageFile(url: URL)
+    case fileNotFound(fileName: String)
 }

@@ -25,7 +25,7 @@ final class DBManager {
     private var favoriteArray: [Favorite]!
     var imageFileURLs = [FilePath]()
     var delegate: DBManagerDelegate?
-    private let jpegCompression = K.Image.jpegCompressionQuality
+    private let jpegCompression = K.Data.jpegDataCompressionQuality
     private let fileExtension = K.File.fileExtension
     
     struct FilePath {

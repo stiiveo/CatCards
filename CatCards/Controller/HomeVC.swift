@@ -209,7 +209,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     private func loadCachedData() {
-        let cachedData = cacheManager.getCachedData()
+        let cachedData = cacheManager.fetchCachedData()
         guard !cachedData.isEmpty else {
             pointer = 0
             debugPrint("No cached data saved.")
@@ -260,8 +260,17 @@ class HomeVC: UIViewController, APIManagerDelegate {
         let maxUndoNumber = K.Data.numberOfUndoCard
         let oldCardIndex = pointer - (maxUndoNumber + 1)
         if let oldCard = cardArray[oldCardIndex] {
-            cacheManager.clearCache(dataID: oldCard.data.id)
-            cardArray[oldCardIndex] = nil
+            do {
+                // Clear the data in cardArray no matter if the cache clearing operation successed or not.
+                defer {
+                    cardArray[oldCardIndex] = nil
+                }
+                try cacheManager.clearCache(dataId: oldCard.data.id)
+            } catch CacheError.fileNotFound(let fileName) {
+                debugPrint("Cache file '\(fileName)' cannot be removed because it's absent.")
+            } catch {
+                debugPrint("Unknown error occured when trying to remove cache data: \(error)")
+            }
         }
         
     }
@@ -554,6 +563,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         defaults.setValue(viewCount, forKey: K.UserDefaultsKeys.viewCount)
     }
     
+    /// Cache the established data stored in the local variable cardArray to the standard system Cache directory.
     private func cacheData() {
         /*
          Since the downloaded data is stored in a dictionary,
@@ -563,7 +573,17 @@ class HomeVC: UIViewController, APIManagerDelegate {
          */
         let sortedCardArrayKeys = cardArray.keys.sorted()
         let sortedData = sortedCardArrayKeys.map { cardArray[$0]!.data }
-        cacheManager.cacheData(sortedData)
+        do {
+            try cacheManager.cacheData(sortedData)
+        } catch CacheError.failedToCommitChangesToPersistentContainer {
+            debugPrint("Failed to commit objects changes to Cache entity")
+        } catch CacheError.failedToConvertImageToJpegData(let image) {
+            debugPrint("Failed to convert image: \(image) to jpeg data.")
+        } catch CacheError.failedToWriteImageFile(let url) {
+            debugPrint("Failed to write image file to url: \(url)")
+        } catch {
+            debugPrint("Unknown error occured in the data caching operation: \(error)")
+        }
     }
     
     //MARK: - Toolbar Button Method and State Control
@@ -659,27 +679,29 @@ class HomeVC: UIViewController, APIManagerDelegate {
     /// What happens when the save button is pressed.
     /// - Parameter sender: A specialized button for placement on a toolbar or tab bar.
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
+        hapticManager.prepareImpactGenerator(style: .soft)
+        
         guard !cardIsBeingPanned, currentCard != nil else { return }
         let data = currentCard!.data
         
-        // Get URL of the current card's image for activity VC's image preview.
+        // Write the current card's image data to cache images folder named by it's id value.
         let cacheManager = CacheManager()
         let fileName = data.id + K.File.fileExtension
-        cacheManager.cacheImage(data.image, withFileName: fileName)
-        var url: URL?
         do {
-            let imageFileURL = try cacheManager.urlOfImageFile(fileName: fileName)
-            url = imageFileURL
-        } catch CacheError.fileNotFound {
-            debugPrint("The URL of image file cannot be created because it cannot be found.")
+            try cacheManager.cacheImage(data.image, withFileName: fileName)
+        } catch CacheError.failedToWriteImageFile(let fileUrl) {
+            debugPrint("Failed to cache file \(fileName) to path: \(fileUrl.path)")
+            return
         } catch {
-            debugPrint("Unknown error occured when getting the url of the cached image file. File name: \(fileName)")
+            debugPrint("Unknown error occured when caching image data with ID \(data.id)")
         }
-        
-        hapticManager.prepareImpactGenerator(style: .soft)
+        // Get the url of the cached image file.
+        guard let imageFileUrl = cacheManager.urlOfImageFile(fileName: fileName) else {
+            debugPrint("Failed to get the url of the cached image file \(fileName)")
+            return
+        }
 
-        guard let imageURL = url else { return }
-        let activityVC = UIActivityViewController(activityItems: [imageURL], applicationActivities: nil)
+        let activityVC = UIActivityViewController(activityItems: [imageFileUrl], applicationActivities: nil)
         
         // Set up Popover Presentation Controller's barButtonItem for iPad.
         if UIDevice.current.userInterfaceIdiom == .pad {
@@ -690,7 +712,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         
         hapticManager.impactHaptic?.impactOccurred()
         
-        // Delete the cache image file after the activityVC is dismissed.
+        // Remove the cache image file after the activityVC is dismissed.
         activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
             self.dbManager.removeFile(fromDirectory: .cachesDirectory, inFolder: K.File.FolderName.cacheImage, fileName: data.id)
             
