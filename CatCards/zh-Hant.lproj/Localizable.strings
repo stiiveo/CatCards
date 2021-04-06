@@ -12,7 +12,7 @@
 // Instruction Text
 "GREET_TITLE" = "歡迎來到貓咪卡片";
 "GREET_1" = "這裡有數千張由全世界愛貓人士所提供的貓圖";
-"GREET_2" = "我相信您會非常喜歡";
+"GREET_2" = "當你看的貓咪圖片愈多，你愈有可能感受到貓咪可以帶來的樂趣與喜悅。";
 "ZOOM_GESTURE_TITLE" = "再看仔細一點";
 "HOW_TO_ZOOM_IN" = "將兩指分開來放大卡片";
 "BUTTON_TITLE" = "按鈕的功能";
@@ -20,8 +20,10 @@
 "UNDO_BUTTON" = "召回上一張卡片";
 "SAVE_BUTTON" = "儲存圖片";
 "VIEW_SAVED" = "顯示已儲存的圖片";
-"PROMPT" = "🐈 將我滑開來看下一張卡片";
-"START_PROMPT" = "😺 將我滑開後開始";
+"PROMPT" = "👆 將我滑開看下一張卡片";
+"START_PROMPT" = "😺 將我滑開後開始！";
+"OVERLAY_TITLE" = "顯示／隱藏貓咪資訊";
+"OVERLAY_HOW_TO_TOGGLE" = "單擊卡片以顯示／隱藏在卡片上與貓有關的知識";
 
 // Network Error Alert
 "API_ERROR_ALERT_TITLE" = "🙀 出了點差錯";

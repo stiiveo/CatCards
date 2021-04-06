@@ -7,12 +7,12 @@
 */
 
 
-/// MainViewController
+/// HomeVC
 
 // Instruction Text
-"GREET_TITLE" = "Welcome to Cat Cards";
+"GREET_TITLE" = "Welcome";
 "GREET_1" = "Here we have countless cat pictures provided by cat lovers around the world.";
-"GREET_2" = "I'm sure you'd love them.";
+"GREET_2" = "The more pictures you see, the more chance you will find pleasure and joy cats could provide.";
 "ZOOM_GESTURE_TITLE" = "Look Closer";
 "HOW_TO_ZOOM_IN" = "Pinch two fingers apart to zoom in the card.";
 "BUTTON_TITLE" = "How buttons work";
@@ -20,8 +20,10 @@
 "UNDO_BUTTON" = "Retrieve the last card";
 "SAVE_BUTTON" = "Save the picture";
 "VIEW_SAVED" = "Show saved pictures";
-"PROMPT" = "🐈 Swipe me to see the next card";
+"PROMPT" = "👆 Swipe me to see the next card";
 "START_PROMPT" = "😺 Swipe me to start";
+"OVERLAY_TITLE" = "Toggle the Info Overlay";
+"OVERLAY_HOW_TO_TOGGLE" = "Tap the card once to toggle the overlay over the card.";
 
 // Network Error Alert
 "API_ERROR_ALERT_TITLE" = "🙀 Something went wrong";

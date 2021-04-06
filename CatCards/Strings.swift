@@ -22,6 +22,8 @@ struct Z {
         static let showDownloadsButton = NSLocalizedString("VIEW_SAVED", comment: "View saved images")
         static let continuePrompt = NSLocalizedString("PROMPT", comment: "Prompt message")
         static let finalPrompt = NSLocalizedString("START_PROMPT", comment: "Prompt to start")
+        static let overlayTitle = NSLocalizedString("OVERLAY_TITLE", comment: "Title of overlay instruction")
+        static let overlayInstruction = NSLocalizedString("OVERLAY_HOW_TO_TOGGLE", comment: "How to toggle overlay")
     }
     
     struct AlertMessage {
