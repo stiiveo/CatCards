@@ -29,14 +29,11 @@ final class APIManager {
     func fetchData() {
         // Retry API request if URL init failed.
         guard let url = URL(string: urlString) else {
-            fetchData()
+            debugPrint("Failed to initialize an valid URL object using the provided url string: \(urlString).")
             return
         }
         
-        var request = URLRequest(url: url)
-        request.addValue(Secrets.API.key, forHTTPHeaderField: Secrets.API.header)
-        
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
+        URLSession.shared.dataTask(with: url) { (data, response, error) in
             // Transport error occured
             if let error = error {
                 // Make the delegate awared that an error occured in the data retrieving process.
