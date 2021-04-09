@@ -71,7 +71,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private var backgroundLayer: CAGradientLayer!
     
     // A shading layer displayed behind the current card when the current card is zoomed–in by the user.
-    private var zoomOverlay: UIView!
+    private var shadeLayer: UIView!
     
     // Indicator on whether the current card is being panned.
     private var cardIsBeingPanned = false
@@ -79,8 +79,8 @@ class HomeVC: UIViewController, APIManagerDelegate {
     // Haptic manager which manages customized operation of the device's haptic engine.
     private let hapticManager = HapticManager()
     
-    // Indicator on whether to display overlay over the card.
-    var showOverlay = true
+    // Status on whether to show card info on all cards.
+    static var showOverlay = true
     
     // Number of cards with cat images the user has seen.
     private var viewCount: Int = 0
@@ -410,10 +410,10 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     /// Insert a black view below the card view with 0 opacity which is used to create shading effect when the card is being zoomed–in.
     private func addShadeOverlay() {
-        zoomOverlay = UIView(frame: view.bounds)
-        zoomOverlay.backgroundColor = .black
-        zoomOverlay.alpha = 0
-        view.insertSubview(zoomOverlay, belowSubview: cardView)
+        shadeLayer = UIView(frame: view.bounds)
+        shadeLayer.backgroundColor = .black
+        shadeLayer.alpha = 0
+        view.insertSubview(shadeLayer, belowSubview: cardView)
     }
     
     //MARK: - UI Buttons Visibility Control
@@ -921,7 +921,9 @@ class HomeVC: UIViewController, APIManagerDelegate {
             }
             
             // Hide card's trivia overlay
-            card.hideTriviaOverlay()
+            if HomeVC.showOverlay {
+                card.hideTriviaOverlay()
+            }
             
         case .changed:
             // Coordinate of the pinch center where the view's center is (0, 0)
@@ -947,19 +949,17 @@ class HomeVC: UIViewController, APIManagerDelegate {
             sender.scale = 1
             
             // Increase opacity of the overlay view as the card is enlarged
-            let originalWidth = card.bounds.width
-            let currentWidth = card.frame.width
+            let cardWidth = card.frame.width
             let maxOpacity: CGFloat = 0.6 // max opacity of the overlay view
-            let cardWidthDelta = (currentWidth / originalWidth) - 1 // Percentage change of width
+            let cardWidthDelta = (cardWidth / minWidth) - 1 // Percentage change of width
             let deltaToMaxOpacity: CGFloat = 0.2 // number of width delta to get maximum opacity
-            
-            zoomOverlay.alpha = maxOpacity * min((cardWidthDelta / deltaToMaxOpacity), 1.0)
+            shadeLayer.alpha = maxOpacity * min((cardWidthDelta / deltaToMaxOpacity), 1.0)
             
         case .ended, .cancelled, .failed:
             // Reset card's size
             UIView.animate(withDuration: 0.35, animations: {
                 card.transform = self.startingTransform
-                self.zoomOverlay.alpha = 0
+                self.shadeLayer.alpha = 0
             }) { _ in
                 if self.onboardCompleted {
                     self.collectionButton.tintColor = K.Color.tintColor
@@ -967,7 +967,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             }
             
             // Re-show trivia overlay if showOverlay is true
-            if showOverlay == true {
+            if HomeVC.showOverlay == true {
                 card.showTriviaOverlay()
             }
         default:
@@ -983,11 +983,15 @@ class HomeVC: UIViewController, APIManagerDelegate {
         if sender.state == .ended {
             switch card.cardType {
             case .regular:
+                HomeVC.showOverlay = !HomeVC.showOverlay
                 for card in cardArray.values {
                     card.toggleOverlay()
                 }
             case .onboard:
-                card.toggleOverlay()
+                // Only the third onboard card's overlay can be toggled.
+                if card.index == 2 {
+                    card.toggleOverlay()
+                }
             }
         }
     }
