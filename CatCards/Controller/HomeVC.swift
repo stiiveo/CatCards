@@ -57,7 +57,13 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private var navBar: UINavigationBar!
     
     // The pointer to which card being added to the top layer of the cardView.
-    private var pointer: Int = 0
+    private var pointer: Int = 0 {
+        didSet {
+            if !onboardCompleted && pointer >= K.OnboardOverlay.data.count {
+                onboardCompleted = true
+            }
+        }
+    }
     
     // Maximum number of cards with different data shown to the user.
     private var maxPointerReached: Int = 0
@@ -145,17 +151,16 @@ class HomeVC: UIViewController, APIManagerDelegate {
         super.viewDidLoad()
         navBar = self.navigationController?.navigationBar
         addBackgroundLayer()
-        
         dbManager.delegate = self
         apiManager.delegate = self
-        
+        disableToolbarButtons()
         loadStoredParameters()
+        loadCachedData()
         
         if !onboardCompleted {
-            hideUIButtons()
+            hideAndDisableUIButtons()
         }
         
-        loadCachedData()
         requestNewDataIfNeeded()
         
         addShadeOverlay()
@@ -173,7 +178,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refreshButtonState()
-        setBarStyle()
+        setUpBarStyle()
         backgroundLayer.frame = view.bounds
     }
     
@@ -202,10 +207,27 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     //MARK: - Cache Data Handling
     
-    private func loadStoredParameters() {
-        viewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
-        pointer = defaults.integer(forKey: K.UserDefaultsKeys.pointer)
-        onboardCompleted = defaults.bool(forKey: K.UserDefaultsKeys.onboardCompleted)
+    /// Cache the established data stored in the local variable cardArray to the standard system Cache directory.
+    private func cacheData() {
+        /*
+         Since the downloaded data is stored in a dictionary,
+         you need to sort the collection by its keys.
+         Firstly, create a temporary array with sorted keys of the dictionary,
+         then retrieve the data by the sorted keys and store it in a temporary collection.
+         */
+        let sortedCardArrayKeys = cardArray.keys.sorted()
+        let sortedData = sortedCardArrayKeys.map { cardArray[$0]!.data }
+        do {
+            try cacheManager.cacheData(sortedData)
+        } catch CacheError.failedToCommitChangesToPersistentContainer {
+            debugPrint("Failed to commit objects changes to Cache entity")
+        } catch CacheError.failedToConvertImageToJpegData(let image) {
+            debugPrint("Failed to convert image: \(image) to jpeg data.")
+        } catch CacheError.failedToWriteImageFile(let url) {
+            debugPrint("Failed to write image file to url: \(url)")
+        } catch {
+            debugPrint("Unknown error occured in the data caching operation: \(error)")
+        }
     }
     
     private func loadCachedData() {
@@ -339,14 +361,15 @@ class HomeVC: UIViewController, APIManagerDelegate {
             card.setSize(status: .standby)
         }
         
+        // Show UI buttons when the last onboard card is shown to user
         if !onboardCompleted && card.index == onboardData.count {
-            // Show UI buttons when the last onboarding card is showned to user
             showUIButtons()
         }
     }
     
     private func introduceCard(card: Card, animated: Bool) {
-        if animated {
+        switch animated {
+        case true:
             // Introduce the card by enlarging the card's size.
             card.setSize(status: .intro)
             UIView.animate(withDuration: 0.3) {
@@ -355,7 +378,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
                 self.addGestureRecognizers(to: card)
                 self.refreshButtonState()
             }
-        } else {
+        case false:
             card.setSize(status: .shown)
             self.addGestureRecognizers(to: card)
             self.refreshButtonState()
@@ -419,7 +442,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     //MARK: - UI Buttons Visibility Control
     
     /// Disable and hide all button items in nav-bar and toolbar.
-    private func hideUIButtons() {
+    private func hideAndDisableUIButtons() {
         // Hide navBar button
         navBar.tintColor = .clear
         collectionButton.isEnabled = false
@@ -518,7 +541,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     //MARK: - Support Methods
     
     /// Hide navigation bar and toolbar's border line
-    private func setBarStyle() {
+    private func setUpBarStyle() {
         // Make background of navBar and toolbar transparent
         navBar.setBackgroundImage(UIImage(), for: .default)
         navBar.shadowImage = UIImage()
@@ -526,7 +549,13 @@ class HomeVC: UIViewController, APIManagerDelegate {
         toolbar.setShadowImage(UIImage(), forToolbarPosition: .bottom)
     }
     
-    //MARK: - Actions To Take Before App Termination
+    //MARK: - User Defaults Handling
+    
+    private func loadStoredParameters() {
+        viewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
+        pointer = defaults.integer(forKey: K.UserDefaultsKeys.pointer)
+        onboardCompleted = defaults.bool(forKey: K.UserDefaultsKeys.onboardCompleted)
+    }
     
     @objc private func takeActionsBeforeTermination() {
         guard onboardCompleted else { return }
@@ -561,29 +590,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
     /// Save the value of card view count to user defaults
     private func saveViewCount() {
         defaults.setValue(viewCount, forKey: K.UserDefaultsKeys.viewCount)
-    }
-    
-    /// Cache the established data stored in the local variable cardArray to the standard system Cache directory.
-    private func cacheData() {
-        /*
-         Since the downloaded data is stored in a dictionary,
-         you need to sort the collection by its keys.
-         Firstly, create a temporary array with sorted keys of the dictionary,
-         then retrieve the data by the sorted keys and store it in a temporary collection.
-         */
-        let sortedCardArrayKeys = cardArray.keys.sorted()
-        let sortedData = sortedCardArrayKeys.map { cardArray[$0]!.data }
-        do {
-            try cacheManager.cacheData(sortedData)
-        } catch CacheError.failedToCommitChangesToPersistentContainer {
-            debugPrint("Failed to commit objects changes to Cache entity")
-        } catch CacheError.failedToConvertImageToJpegData(let image) {
-            debugPrint("Failed to convert image: \(image) to jpeg data.")
-        } catch CacheError.failedToWriteImageFile(let url) {
-            debugPrint("Failed to write image file to url: \(url)")
-        } catch {
-            debugPrint("Unknown error occured in the data caching operation: \(error)")
-        }
     }
     
     //MARK: - Toolbar Button Method and State Control
@@ -720,9 +726,16 @@ class HomeVC: UIViewController, APIManagerDelegate {
         }
     }
     
+    private func disableToolbarButtons() {
+        shareButton.isEnabled = false
+        undoButton.isEnabled = false
+        saveButton.isEnabled = false
+    }
+    
     /// Update the availability of the toolbar buttons.
     private func refreshButtonState() {
-        guard onboardCompleted && !cardArray.isEmpty else { return }
+        guard onboardCompleted else { return }
+        collectionButton.isEnabled = true
         
         if currentCard != nil {
             saveButton.isEnabled = true
@@ -732,7 +745,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             shareButton.isEnabled = false
         }
         
-        undoButton.isEnabled = (pointer > 0 && previousCard != nil) ? true : false
+        undoButton.isEnabled = previousCard != nil ? true : false
         
         // Toggle the status of save button
         if let data = currentCard?.data {
@@ -1034,12 +1047,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
             // Fetch new data if the next card has not being displayed before.
             if self.pointer > self.maxPointerReached {
                 self.sendAPIRequest(numberOfRequests: 1)
-            }
-            
-            // Toggle the status of onboard completion
-            if !self.onboardCompleted && self.pointer >= self.onboardData.count {
-                self.onboardCompleted = true
-                self.collectionButton.isEnabled = true
             }
             
             // Update the number of cards viewed by the user if onboard session is completed
