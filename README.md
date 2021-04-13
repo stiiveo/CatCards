@@ -1,5 +1,5 @@
 # CatCards 
-## Tinder–like cat pictures enjoyment App
+## Tinder–like cat pictures browser iOS App
 ### What does it do?  
 Enjoy thousands of cards with cat pictures, trivia and quote by simply swiping your fingers.  
 Saving and sharing any picture you see is only a tap away as well.
