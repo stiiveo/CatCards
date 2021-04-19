@@ -66,7 +66,7 @@ class CollectionVC: UICollectionViewController {
         collectionView.reloadData()
         
         // Display background view if no picture is saved yet
-        noSavedPicturesHint.alpha = (dbManager.imageFileURLs.count == 0) ? 1 : 0
+        noSavedPicturesHint.alpha = dbManager.imageFileURLs.isEmpty ? 1 : 0
     }
     
     override func viewWillLayoutSubviews() {

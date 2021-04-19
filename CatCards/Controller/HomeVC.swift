@@ -789,18 +789,20 @@ class HomeVC: UIViewController, APIManagerDelegate {
         let translation = sender.translation(in: view)
         
         // Amount of x-axis offset the card moved from its original position
-        let xAxisOffset = card.centerXConstraint.constant
+        let xAxisOffset = card.transform.tx
+        let yAxisOffset = card.transform.ty
         
         // 1.0 Radian = 180º
-        let rotationAtMax: CGFloat = 1.0
-        let rotationDegree = (rotationAtMax / 5) * (xAxisOffset / halfViewWidth)
+        let maxRotation: CGFloat = 1.0 / 6 // 180° / 6 = 30°
+        // Card's rotation degree is at the at max rotation when x axis reaches the edge of the view
+        let rotationDegree = maxRotation * (xAxisOffset / halfViewWidth)
         
         // Card's rotation direction is based on the finger position on the card
         let cardRotationRadian = (firstFingerLocation == .upper) ? rotationDegree : -rotationDegree
         let velocity = sender.velocity(in: self.view) // points per second
         
         // Card's offset of x and y position
-        let offset = CGPoint(x: card.centerXConstraint.constant, y: card.centerYConstraint.constant)
+        let offset = CGPoint(x: xAxisOffset, y: yAxisOffset)
         
         // Distance of card's center to its origin point
         let panDistance = hypot(offset.x, offset.y)
@@ -813,13 +815,11 @@ class HomeVC: UIViewController, APIManagerDelegate {
             
             cardIsBeingPanned = true
         case .changed:
-            // Card move to where the user's finger is
-            card.centerXConstraint.constant = startingCenterX + translation.x
-            card.centerYConstraint.constant = startingCenterY + translation.y
-            updateLayout()
-            
-            // Card's rotation increase when it approaches the side edge of the screen
-            card.transform = startingTransform.concatenating(CGAffineTransform(rotationAngle: cardRotationRadian))
+            /*
+             Card's position is offset by the user's finger position offset.
+             Card's rotation increases when it approaches the edge of the screen.
+             */
+            card.transform = CGAffineTransform(translationX: translation.x, y: translation.y).concatenating(CGAffineTransform(rotationAngle: cardRotationRadian))
             
             // Set next card's transform based on current card's travel distance
             let distance = (panDistance <= halfViewWidth) ? (panDistance / halfViewWidth) : 1
@@ -843,21 +843,21 @@ class HomeVC: UIViewController, APIManagerDelegate {
             let minimumDelta = CGPoint(x: offset.x * distanceDelta,
                                        y: offset.y * distanceDelta)
             
+            /*
+             Card dismissing threshold A:
+             The projected travel distance is greater than or equals minimum distance.
+             */
             if vectorDistance >= minTravelDistance {
                 pointer += 1
-                /*
-                 Card dismissing threshold A:
-                 The projected travel distance is greater than or equals minimum distance.
-                 */
                 dismissCardWithVelocity(card, deltaX: vector.x, deltaY: vector.y)
             }
+            /*
+             Card dismissing threshold B:
+             The projected travel distance is less than the minimum travel distance
+             BUT the distance of card being dragged is greater than distance threshold.
+             */
             else if vectorDistance < minTravelDistance && panDistance >= minDragDistance {
                 pointer += 1
-                /*
-                 Card dismissing thrshold B:
-                 The projected travel distance is less than the minimum travel distance
-                 but the distance of card being dragged is greater than distance threshold.
-                 */
                 dismissCardWithVelocity(card, deltaX: minimumDelta.x, deltaY: minimumDelta.y)
             }
             
