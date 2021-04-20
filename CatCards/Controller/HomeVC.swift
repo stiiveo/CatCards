@@ -106,34 +106,33 @@ class HomeVC: UIViewController, APIManagerDelegate {
         return cardArray[pointer + 1]
     }
     
-    private lazy var panGestureRecognizer: UIPanGestureRecognizer = {
+    private var panGestureRecognizer: UIPanGestureRecognizer {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(panHandler))
         pan.delegate = self
         pan.minimumNumberOfTouches = 1
         pan.maximumNumberOfTouches = 1
         return pan
-    }()
+    }
     
-    private lazy var pinchGestureRecognizer: UIPinchGestureRecognizer = {
+    private var pinchGestureRecognizer: UIPinchGestureRecognizer {
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(zoomHandler))
         pinch.delegate = self
         return pinch
-    }()
+    }
     
-    private lazy var twoFingerPanGestureRecognizer: UIPanGestureRecognizer = {
+    private var twoFingerPanGestureRecognizer: UIPanGestureRecognizer {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(twoFingerPanHandler))
         pan.delegate = self
         pan.minimumNumberOfTouches = 2
         pan.maximumNumberOfTouches = 2
         return pan
-    }()
+    }
     
-    private lazy var tapGestureRecognizer: UITapGestureRecognizer = {
+    private var tapGestureRecognizer: UITapGestureRecognizer {
         let tap = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
         tap.delegate = self
-        
         return tap
-    }()
+    }
     
     private lazy var adBannerView: GADBannerView = {
         // Set up the banner view with default size which is adjusted later according to the device's screen width.
@@ -356,6 +355,11 @@ class HomeVC: UIViewController, APIManagerDelegate {
         addCardConstraint(card)
         card.optimizeContentMode()
         
+        // Add gesture recognizers if there's none.
+        if card.gestureRecognizers == nil {
+            addGestureRecognizers(to: card)
+        }
+        
         if atBottom {
             cardView.sendSubviewToBack(card)
             card.setSize(status: .standby)
@@ -375,12 +379,10 @@ class HomeVC: UIViewController, APIManagerDelegate {
             UIView.animate(withDuration: 0.3) {
                 card.transform = .identity
             } completion: { _ in
-                self.addGestureRecognizers(to: card)
                 self.refreshButtonState()
             }
         case false:
             card.setSize(status: .shown)
-            self.addGestureRecognizers(to: card)
             self.refreshButtonState()
         }
     }
@@ -636,7 +638,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
             self.updateLayout()
             undoCard.transform = .identity
         } completion: { _ in
-            self.addGestureRecognizers(to: undoCard)
             self.pointer -= 1
             DispatchQueue.main.async {
                 self.refreshButtonState()
@@ -849,6 +850,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             if vectorDistance >= minTravelDistance {
                 pointer += 1
                 dismissCardWithVelocity(card, deltaX: vector.x, deltaY: vector.y)
+                self.resetTransform()
             }
             /*
              Card dismissing threshold B:
@@ -858,12 +860,14 @@ class HomeVC: UIViewController, APIManagerDelegate {
             else if vectorDistance < minTravelDistance && panDistance >= minDragDistance {
                 pointer += 1
                 dismissCardWithVelocity(card, deltaX: minimumDelta.x, deltaY: minimumDelta.y)
+                self.resetTransform()
             }
             
             // Reset card's position and rotation.
             else {
                 UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
-                    self.resetCardTransform(card: card)
+                    card.transform = .identity
+                    self.resetTransform()
                     self.nextCard?.setSize(status: .standby)
                 } completion: { _ in
                     self.cardIsBeingPanned = false
@@ -950,7 +954,8 @@ class HomeVC: UIViewController, APIManagerDelegate {
         case .ended, .cancelled, .failed:
             // Reset card's size
             UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
-                self.resetCardTransform(card: card)
+                card.transform = .identity
+                self.resetTransform()
                 self.shadeLayer.alpha = 0
             } completion: { _ in
                 if self.onboardCompleted {
@@ -990,11 +995,11 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     /// Attach all gesturn recognizers to the designated card.
     /// - Parameter card: The card to which the gesture recognizers are attached.
-    private func addGestureRecognizers(to card: Card?) {
-        card?.addGestureRecognizer(panGestureRecognizer)
-        card?.addGestureRecognizer(pinchGestureRecognizer)
-        card?.addGestureRecognizer(twoFingerPanGestureRecognizer)
-        card?.addGestureRecognizer(tapGestureRecognizer)
+    private func addGestureRecognizers(to card: Card) {
+        card.addGestureRecognizer(panGestureRecognizer)
+        card.addGestureRecognizer(pinchGestureRecognizer)
+        card.addGestureRecognizer(twoFingerPanGestureRecognizer)
+        card.addGestureRecognizer(tapGestureRecognizer)
     }
     
     private func updateCardTransform(card: Card) {
@@ -1002,8 +1007,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         card.transform = hybridTransform
     }
     
-    private func resetCardTransform(card: Card) {
-        card.transform = .identity
+    private func resetTransform() {
         panTransform = .identity
         zoomTransform = .identity
     }
@@ -1025,9 +1029,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
         } completion: { _ in
             card.removeFromSuperview()
             self.cardIsBeingPanned = false
-            
-            // Attach gesture recognizers to the current card if there's any.
-            self.addGestureRecognizers(to: self.currentCard)
             
             // Add the next card to the view if it's not nil.
             if self.nextCard != nil {
