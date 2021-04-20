@@ -631,7 +631,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         }
         
         
-        UIView.animate(withDuration: 0.5) {
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
             self.currentCard?.setSize(status: .standby)
             self.updateLayout()
             undoCard.transform = .identity
