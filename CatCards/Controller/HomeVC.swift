@@ -770,9 +770,8 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     private var firstFingerLocation: Side!
     
-    var startingCenterX: CGFloat = 0
-    var startingCenterY: CGFloat = 0
-    var startingTransform: CGAffineTransform = .identity
+    private var panTransform: CGAffineTransform = .identity
+    private var zoomTransform: CGAffineTransform = .identity
     
     /// What happens when user drags the card with 1 finger.
     /// - Parameter sender: A discrete gesture recognizer that interprets panning gestures.
@@ -781,12 +780,11 @@ class HomeVC: UIViewController, APIManagerDelegate {
         
         let halfViewWidth = view.frame.width / 2
         
-        // Save which side of the card the finger is placed
+        // Detect onto which side (upper or lower) of the card is the user's finger placed.
         let fingerPosition = sender.location(in: sender.view)
         let side: Side = fingerPosition.y < card.frame.midY ? .upper : .lower
         firstFingerLocation = (firstFingerLocation == nil) ? side : firstFingerLocation
         
-        let translation = sender.translation(in: view)
         
         // Amount of x-axis offset the card moved from its original position
         let xAxisOffset = card.transform.tx
@@ -802,26 +800,27 @@ class HomeVC: UIViewController, APIManagerDelegate {
         let velocity = sender.velocity(in: self.view) // points per second
         
         // Card's offset of x and y position
-        let offset = CGPoint(x: xAxisOffset, y: yAxisOffset)
+        let cardOffset = CGPoint(x: xAxisOffset, y: yAxisOffset)
         
-        // Distance of card's center to its origin point
-        let panDistance = hypot(offset.x, offset.y)
+        // Distance by which the card is offset by the user.
+        let panDistance = hypot(cardOffset.x, cardOffset.y)
         
         switch sender.state {
         case .began:
-            startingCenterX = card.centerXConstraint.constant
-            startingCenterY = card.centerYConstraint.constant
-            startingTransform = card.transform
-            
             cardIsBeingPanned = true
         case .changed:
             /*
-             Card's position is offset by the user's finger position offset.
-             Card's rotation increases when it approaches the edge of the screen.
+             Sync the card position's offset with the offset amount applied by the user.
+             Increase the card's rotation degrees as it approaches either side of the screen.
              */
-            card.transform = CGAffineTransform(translationX: translation.x, y: translation.y).concatenating(CGAffineTransform(rotationAngle: cardRotationRadian))
+            let translation = sender.translation(in: cardView)
+            let offsetTransform = CGAffineTransform(translationX: translation.x, y: translation.y)
+            let rotation = CGAffineTransform(rotationAngle: cardRotationRadian)
             
-            // Set next card's transform based on current card's travel distance
+            panTransform = offsetTransform.concatenating(rotation)
+            updateCardTransform(card: card)
+            
+            // Determine next card's transform based on current card's travel distance
             let distance = (panDistance <= halfViewWidth) ? (panDistance / halfViewWidth) : 1
             let defaultScale = K.Card.SizeScale.standby
             
@@ -840,8 +839,8 @@ class HomeVC: UIViewController, APIManagerDelegate {
             let vectorDistance = hypot(vector.x, vector.y)
             
             let distanceDelta = minTravelDistance / panDistance
-            let minimumDelta = CGPoint(x: offset.x * distanceDelta,
-                                       y: offset.y * distanceDelta)
+            let minimumDelta = CGPoint(x: cardOffset.x * distanceDelta,
+                                       y: cardOffset.y * distanceDelta)
             
             /*
              Card dismissing threshold A:
@@ -863,30 +862,15 @@ class HomeVC: UIViewController, APIManagerDelegate {
             
             // Reset card's position and rotation.
             else {
-                // Bouncing effect
-                let bounceVector = CGPoint(x: -(offset.x) / 8, y: -(offset.y) / 8)
-                card.centerXConstraint.constant = startingCenterX + bounceVector.x
-                card.centerYConstraint.constant = startingCenterY + bounceVector.y
-                
-                UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseOut) {
-                    self.updateLayout()
-                    card.transform = self.startingTransform
-                    
-                    // Reset the next card's transform
+                UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
+                    self.resetCardTransform(card: card)
                     self.nextCard?.setSize(status: .standby)
                 } completion: { _ in
-                    card.centerXConstraint.constant = self.startingCenterX
-                    card.centerYConstraint.constant = self.startingCenterY
-                    
-                    UIView.animate(withDuration: 0.1, delay: 0, options: .curveEaseIn) {
-                        self.updateLayout()
-                    } completion: { _ in
-                        self.cardIsBeingPanned = false
-                    }
+                    self.cardIsBeingPanned = false
                 }
             }
         default:
-            return
+            break
         }
     }
     
@@ -895,28 +879,24 @@ class HomeVC: UIViewController, APIManagerDelegate {
     @objc private func twoFingerPanHandler(sender: UIPanGestureRecognizer) {
         guard let card = sender.view as? Card else { return }
         switch sender.state {
-        case .began:
-            startingCenterX = card.centerXConstraint.constant
-            startingCenterY = card.centerYConstraint.constant
         case .changed:
             // Get the touch position
-            let translation = sender.translation(in: card)
+            let translation = sender.translation(in: cardView)
             
             // Card move to where the user's finger position is
-            let zoomRatio = card.frame.width / card.bounds.width
-            card.centerXConstraint.constant = startingCenterX + translation.x * zoomRatio
-            card.centerYConstraint.constant = startingCenterY + translation.y * zoomRatio
+            card.centerXConstraint.constant = translation.x
+            card.centerYConstraint.constant = translation.y
             updateLayout()
-            
+        
         case .ended, .cancelled, .failed:
             // Move card back to original position
-            card.centerXConstraint.constant = startingCenterX
-            card.centerYConstraint.constant = startingCenterY
-            UIView.animate(withDuration: 0.35, animations: {
+            card.centerXConstraint.constant = 0
+            card.centerYConstraint.constant = 0
+            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
                 self.updateLayout()
-            })
+            }
         default:
-            return
+            break
         }
     }
     
@@ -926,8 +906,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
         guard let card = sender.view as? Card else { return }
         switch sender.state {
         case .began:
-            startingTransform = card.transform
-            
             // Hide navBar button
             if self.onboardCompleted {
                 self.collectionButton.tintColor = .clear
@@ -957,7 +935,8 @@ class HomeVC: UIViewController, APIManagerDelegate {
             let minWidth = card.bounds.width
             let maxWidth = minWidth * K.ImageView.maximumScaleFactor
             if newWidth > minWidth && newWidth < maxWidth {
-                card.transform = startingTransform.concatenating(transform)
+                zoomTransform = transform
+                updateCardTransform(card: card)
             }
             sender.scale = 1
             
@@ -970,10 +949,10 @@ class HomeVC: UIViewController, APIManagerDelegate {
             
         case .ended, .cancelled, .failed:
             // Reset card's size
-            UIView.animate(withDuration: 0.35, animations: {
-                card.transform = self.startingTransform
+            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
+                self.resetCardTransform(card: card)
                 self.shadeLayer.alpha = 0
-            }) { _ in
+            } completion: { _ in
                 if self.onboardCompleted {
                     self.collectionButton.tintColor = K.Color.tintColor
                 }
@@ -984,7 +963,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
                 card.showTriviaOverlay()
             }
         default:
-            return
+            break
         }
         
     }
@@ -1016,6 +995,17 @@ class HomeVC: UIViewController, APIManagerDelegate {
         card?.addGestureRecognizer(pinchGestureRecognizer)
         card?.addGestureRecognizer(twoFingerPanGestureRecognizer)
         card?.addGestureRecognizer(tapGestureRecognizer)
+    }
+    
+    private func updateCardTransform(card: Card) {
+        let hybridTransform = panTransform.concatenating(zoomTransform)
+        card.transform = hybridTransform
+    }
+    
+    private func resetCardTransform(card: Card) {
+        card.transform = .identity
+        panTransform = .identity
+        zoomTransform = .identity
     }
     
     //MARK: - Animation Methods
