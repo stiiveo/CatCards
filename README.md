@@ -4,6 +4,8 @@
 Enjoy thousands of cards with cat pictures, trivia and quote by simply swiping your fingers.  
 Saving and sharing any picture you see is only a tap away as well.
 
+![Screenshot](./Docs/Screenshots/dark_mode.jpg)
+
 ---
 ### Note
 **Even though the lastest version of the code had been through many physical devices and simulator tests, only a few parts of the code had passed the unit testing since the testing code is still not completed yet (around 20% coverage), hence bugs and errors should be expected.**
