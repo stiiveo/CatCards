@@ -111,12 +111,14 @@ class HomeVC: UIViewController, APIManagerDelegate {
         pan.delegate = self
         pan.minimumNumberOfTouches = 1
         pan.maximumNumberOfTouches = 1
+        pan.name = GestureRecognizerTag.panGR.rawValue
         return pan
     }
     
     private var pinchGestureRecognizer: UIPinchGestureRecognizer {
-        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(zoomHandler))
+        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(pinchHandler))
         pinch.delegate = self
+        pinch.name = GestureRecognizerTag.pinchGR.rawValue
         return pinch
     }
     
@@ -125,12 +127,14 @@ class HomeVC: UIViewController, APIManagerDelegate {
         pan.delegate = self
         pan.minimumNumberOfTouches = 2
         pan.maximumNumberOfTouches = 2
+        pan.name = GestureRecognizerTag.twoFingerPanGR.rawValue
         return pan
     }
     
     private var tapGestureRecognizer: UITapGestureRecognizer {
         let tap = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
         tap.delegate = self
+        tap.name = GestureRecognizerTag.tapGR.rawValue
         return tap
     }
     
@@ -770,15 +774,13 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     private var firstFingerLocation: Side!
-    
-    private var panTransform: CGAffineTransform = .identity
-    private var zoomTransform: CGAffineTransform = .identity
+    private var offsetTransform: CGAffineTransform = .identity
+    private var scaleTransform: CGAffineTransform = .identity
     
     /// What happens when user drags the card with 1 finger.
     /// - Parameter sender: A discrete gesture recognizer that interprets panning gestures.
     @objc private func panHandler(_ sender: UIPanGestureRecognizer) {
         guard let card = sender.view as? Card else { return }
-        
         let halfViewWidth = view.frame.width / 2
         
         // Detect onto which side (upper or lower) of the card is the user's finger placed.
@@ -786,14 +788,11 @@ class HomeVC: UIViewController, APIManagerDelegate {
         let side: Side = fingerPosition.y < card.frame.midY ? .upper : .lower
         firstFingerLocation = (firstFingerLocation == nil) ? side : firstFingerLocation
         
-        
         // Amount of x-axis offset the card moved from its original position
         let xAxisOffset = card.transform.tx
         let yAxisOffset = card.transform.ty
-        
-        // 1.0 Radian = 180º
-        let maxRotation: CGFloat = 1.0 / 6 // 180° / 6 = 30°
-        // Card's rotation degree is at the at max rotation when x axis reaches the edge of the view
+        let maxRotation: CGFloat = 1.0 / 6 // 1.0 Radian = 180º | 180° / 6 = 30°
+        // Card reaches its maximum rotation degree when its y–axis reaches the edge of the view.
         let rotationDegree = maxRotation * (xAxisOffset / halfViewWidth)
         
         // Card's rotation direction is based on the finger position on the card
@@ -802,7 +801,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
         
         // Card's offset of x and y position
         let cardOffset = CGPoint(x: xAxisOffset, y: yAxisOffset)
-        
         // Distance by which the card is offset by the user.
         let panDistance = hypot(cardOffset.x, cardOffset.y)
         
@@ -814,17 +812,15 @@ class HomeVC: UIViewController, APIManagerDelegate {
              Sync the card position's offset with the offset amount applied by the user.
              Increase the card's rotation degrees as it approaches either side of the screen.
              */
-            let translation = sender.translation(in: cardView)
-            let offsetTransform = CGAffineTransform(translationX: translation.x, y: translation.y)
+            let t = sender.translation(in: cardView)
+            let transform = CGAffineTransform(translationX: t.x, y: t.y)
             let rotation = CGAffineTransform(rotationAngle: cardRotationRadian)
-            
-            panTransform = offsetTransform.concatenating(rotation)
+            offsetTransform = transform.concatenating(rotation)
             updateCardTransform(card: card)
             
             // Determine next card's transform based on current card's travel distance
             let distance = (panDistance <= halfViewWidth) ? (panDistance / halfViewWidth) : 1
             let defaultScale = K.Card.SizeScale.standby
-            
             nextCard?.transform = CGAffineTransform(
                 scaleX: defaultScale + (distance * (1 - defaultScale)),
                 y: defaultScale + (distance * (1 - defaultScale))
@@ -833,16 +829,10 @@ class HomeVC: UIViewController, APIManagerDelegate {
         // When user's finger left the screen.
         case .ended, .cancelled, .failed:
             firstFingerLocation = nil // Reset first finger location
-            
             let minTravelDistance = view.frame.height // minimum travel distance of the card
             let minDragDistance = halfViewWidth // minimum dragging distance of the card
             let vector = CGPoint(x: velocity.x / 2, y: velocity.y / 2)
             let vectorDistance = hypot(vector.x, vector.y)
-            
-            let distanceDelta = minTravelDistance / panDistance
-            let minimumDelta = CGPoint(x: cardOffset.x * distanceDelta,
-                                       y: cardOffset.y * distanceDelta)
-            
             /*
              Card dismissing threshold A:
              The projected travel distance is greater than or equals minimum distance.
@@ -858,6 +848,9 @@ class HomeVC: UIViewController, APIManagerDelegate {
              BUT the distance of card being dragged is greater than distance threshold.
              */
             else if vectorDistance < minTravelDistance && panDistance >= minDragDistance {
+                let distanceDelta = minTravelDistance / panDistance
+                let minimumDelta = CGPoint(x: cardOffset.x * distanceDelta,
+                                           y: cardOffset.y * distanceDelta)
                 pointer += 1
                 dismissCardWithVelocity(card, deltaX: minimumDelta.x, deltaY: minimumDelta.y)
                 self.resetTransform()
@@ -867,9 +860,9 @@ class HomeVC: UIViewController, APIManagerDelegate {
             else {
                 UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
                     card.transform = .identity
-                    self.resetTransform()
                     self.nextCard?.setSize(status: .standby)
                 } completion: { _ in
+                    self.resetTransform()
                     self.cardIsBeingPanned = false
                 }
             }
@@ -906,7 +899,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     /// What happens when user pinches the card with 2 fingers.
     /// - Parameter sender: A discrete gesture recognizer that interprets pinching gestures involving two touches.
-    @objc private func zoomHandler(sender: UIPinchGestureRecognizer) {
+    @objc private func pinchHandler(sender: UIPinchGestureRecognizer) {
         guard let card = sender.view as? Card else { return }
         switch sender.state {
         case .began:
@@ -939,7 +932,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             let minWidth = card.bounds.width
             let maxWidth = minWidth * K.ImageView.maximumScaleFactor
             if newWidth > minWidth && newWidth < maxWidth {
-                zoomTransform = transform
+                scaleTransform = transform
                 updateCardTransform(card: card)
             }
             sender.scale = 1
@@ -955,9 +948,9 @@ class HomeVC: UIViewController, APIManagerDelegate {
             // Reset card's size
             UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
                 card.transform = .identity
-                self.resetTransform()
                 self.shadeLayer.alpha = 0
             } completion: { _ in
+                self.resetTransform()
                 if self.onboardCompleted {
                     self.collectionButton.tintColor = K.Color.tintColor
                 }
@@ -978,6 +971,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     @objc private func tapHandler(sender: UITapGestureRecognizer) {
         guard let card = sender.view as? Card else { return }
         if sender.state == .ended {
+            // Toggle every regular card's overlay.
             switch card.cardType {
             case .regular:
                 HomeVC.showOverlay = !HomeVC.showOverlay
@@ -1003,13 +997,13 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     private func updateCardTransform(card: Card) {
-        let hybridTransform = panTransform.concatenating(zoomTransform)
+        let hybridTransform = offsetTransform.concatenating(scaleTransform)
         card.transform = hybridTransform
     }
     
     private func resetTransform() {
-        panTransform = .identity
-        zoomTransform = .identity
+        offsetTransform = .identity
+        scaleTransform = .identity
     }
     
     //MARK: - Animation Methods
@@ -1110,26 +1104,27 @@ class HomeVC: UIViewController, APIManagerDelegate {
 
 extension HomeVC: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        // Allow multiple gesture recognizers to be recognized simultaneously.
         return true
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        // Recognize pinch gesture only after the failure of single–finger pan gesture
-        if gestureRecognizer == pinchGestureRecognizer && otherGestureRecognizer == panGestureRecognizer {
-            return true
-        }
+        let panGR = currentCard?.panGR
+        let twoFingerPanGR = currentCard?.twoFingerPanGR
+        let pinchGR = currentCard?.pinchGR
+        let tapGR = currentCard?.tapGR
         
-        // Recognize two–finger pan gesture only after the failure of single–finger pan gesture
-        if gestureRecognizer == twoFingerPanGestureRecognizer && otherGestureRecognizer == panGestureRecognizer {
-            return true
+        let conditions: [Bool] = [
+            gestureRecognizer == pinchGR && otherGestureRecognizer == panGR,
+            gestureRecognizer == twoFingerPanGR && otherGestureRecognizer == panGR,
+            gestureRecognizer == tapGR && otherGestureRecognizer == panGR,
+            gestureRecognizer == tapGR && otherGestureRecognizer == twoFingerPanGR,
+            gestureRecognizer == tapGR && otherGestureRecognizer == pinchGR,
+        ]
+        for condition in conditions {
+            if condition == true {
+                return true
+            }
         }
-        
-        // Recognize tap gesture only after the failure of single–finger pan gesture
-        if gestureRecognizer == tapGestureRecognizer && otherGestureRecognizer == panGestureRecognizer {
-            return true
-        }
-        
         return false
     }
 }
