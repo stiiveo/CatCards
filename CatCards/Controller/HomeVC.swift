@@ -140,11 +140,10 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     private lazy var adBannerView: GADBannerView = {
         // Set up the banner view with default size which is adjusted later according to the device's screen width.
-        let adBannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait)
+        let adBannerView = GADBannerView(adSize: GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(view.frame.width))
         adBannerView.adUnitID = K.Banner.adUnitID
         adBannerView.rootViewController = self
         adBannerView.delegate = self
-        
         return adBannerView
     }()
     
@@ -187,7 +186,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        
         coordinator.animate { _ in
             self.backgroundLayer.frame = self.view.bounds
             if self.adReceived {
@@ -286,7 +284,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         let oldCardIndex = pointer - (maxUndoNumber + 1)
         if let oldCard = cardArray[oldCardIndex] {
             do {
-                // Clear the data in cardArray no matter if the cache clearing operation successed or not.
+                // Clear the data in cardArray regardless if the cache clearing operation succeeded or not.
                 defer {
                     cardArray[oldCardIndex] = nil
                 }
@@ -470,6 +468,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     /// Request ad for the ad banner.
     private func loadBannerAd() {
+        print("loadBannerAd")
         DispatchQueue.main.async {
             self.adBannerView.load(GADRequest())
         }
@@ -1146,11 +1145,10 @@ extension HomeVC: DBManagerDelegate {
 
 extension HomeVC: GADBannerViewDelegate {
     /// An ad request successfully receive an ad.
-    func adViewDidReceiveAd(_ bannerView: GADBannerView) {
+    func bannerViewDidReceiveAd(_ bannerView: GADBannerView) {
         if !adReceived {
             addBannerToBannerSpace(adBannerView)
             updateBannerSpaceHeight(bannerView: bannerView)
-            
             adReceived = true
         }
         
@@ -1162,7 +1160,7 @@ extension HomeVC: GADBannerViewDelegate {
     }
     
     /// Failed to receive ad with error.
-    func adView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: GADRequestError) {
-        debugPrint("adView: didFailToReceiveAdWithError: \(error.localizedDescription)")
+    func bannerView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: Error) {
+        debugPrint("Failed to receive banner ad: \(error.localizedDescription)")
     }
 }
