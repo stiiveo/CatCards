@@ -56,24 +56,12 @@ class TriviaOverlay: UIView {
             label.bottomAnchor.constraint(equalTo: blurEffectView.bottomAnchor, constant: -15)
         ])
         
-        // Set content and style
-        label.setContent()
-        label.setStyle()
-    }
-}
-
-//MARK: - Trivia Content
-
-private extension UILabel {
-    func setContent() {
-        self.text = OverlayContentPicker.shared.randomContent(contentTypes: [.trivia, .quote])
-    }
-    
-    func setStyle() {
-        self.font = UIFont.preferredFont(forTextStyle: .body)
-        self.adjustsFontForContentSizeCategory = true
-        self.adjustsFontSizeToFitWidth = true
-        self.minimumScaleFactor = 0.5
-        self.numberOfLines = 0
+        // Label text and style
+        label.text = OverlayContentPicker.shared.randomContent(contentTypes: [.trivia, .quote])
+        label.font = UIFont.preferredFont(forTextStyle: .body)
+        label.adjustsFontForContentSizeCategory = true
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.5
+        label.numberOfLines = 0
     }
 }

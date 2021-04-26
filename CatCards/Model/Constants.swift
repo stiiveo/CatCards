@@ -57,8 +57,10 @@ struct K {
         static let defaultCacheImage = UIColor.systemGray5.image() // Default image for stackView
         static let defaultImage = UIImage(named: "default_image")! // Default image to be used if something went wrong
         static let thumbnailSize = CGSize(width: 300, height: 300)
-        static let grumpyCatImageSize = CGSize(width: 1265, height: 951)
         static let feedbackImage = UIImage(named: "heart_with_circle_background")!
+        static let imageSizeFilterList = [
+            CGSize(width: 1265, height: 951) // Grumpy cat image's size
+        ]
         
     }
     

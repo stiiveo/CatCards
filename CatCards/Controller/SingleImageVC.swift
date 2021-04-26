@@ -329,16 +329,3 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     
 }
 
-extension UIColor {
-    /// Simplified way to create a solid-color UIimage object with set size
-    ///
-    /// Demo code: *let image0 = UIColor.orange.image(CGSize(width: 128, height: 128)); let image1 = UIColor.yellow.image()*
-    /// - Parameter size: *Optional*: Default size is CGSize(width: 1, height: 1)
-    /// - Returns: UIImage object with designated color
-    func image(_ size: CGSize = CGSize(width: 1, height: 1)) -> UIImage {
-        return UIGraphicsImageRenderer(size: size).image { rendererContext in
-            self.setFill()
-            rendererContext.fill(CGRect(origin: .zero, size: size))
-        }
-    }
-}

@@ -97,19 +97,14 @@ final class APIManager {
     /// - Parameter parsedData: A parsed data.
     /// - Returns: A CatData object created using the provided parsed data.
     private func dataCreateFrom(parsedData: JSONModel) -> CatData? {
-        let id = parsedData.id
-        let imageUrlString = parsedData.url
+        guard let imageURL = URL(string: parsedData.url) else { return nil }
         
-        guard let imageURL = URL(string: imageUrlString) else { return nil }
-        guard let image = imageFromURL(url: imageURL) else { return nil }
-        
+        let image = imageFromURL(url: imageURL)
         let screenSize = UIScreen.main.nativeBounds.size
         
-        // Filter out any image with the size as same as the "Grumpy Cat" image which is returned constantly from the Cat API.
-        // Downsize the image if its width or height exceeds the native size(with the screen scale considered) of the device's screen in order to limit memory usage by the imageView.
-        if let filteredImage = image.filterOutGrumpyCatImage(),
-           let downsizedImage = filteredImage.downsizeTo(screenSize) {
-            return CatData(id: id, image: downsizedImage)
+        if let filteredImage = image.filteredBySpecifiedSize {
+            let downsizedImage = filteredImage.scaledToAspectFit(size: screenSize)
+            return CatData(id: parsedData.id, image: downsizedImage)
         } else {
             return nil
         }
@@ -120,7 +115,7 @@ final class APIManager {
     /// If the provided URL object is invalid or the initialization of the image object failed, a default image object provided with the bundle will be returned.
     /// - Parameter url: The URL object from which the data will be retrieved from.
     /// - Returns: The image object initialized by using the data retrieved from the provided URL object.
-    private func imageFromURL(url: URL) -> UIImage? {
+    private func imageFromURL(url: URL) -> UIImage {
         do {
             let imageData = try Data(contentsOf: url)
             if let image = UIImage(data: imageData) {
@@ -133,41 +128,3 @@ final class APIManager {
     }
 }
 
-extension UIImage {
-    /// Filter out any image matching the grumpy cat image's size
-    func filterOutGrumpyCatImage() -> UIImage? {
-        guard self.size != K.Image.grumpyCatImageSize else {
-            return nil
-        }
-        return self
-    }
-    
-    /// Resize the image to be within the designated bounds. Original input image will be returned if its size is within the designated bounds.
-    func downsizeTo(_ bounds: CGSize) -> UIImage? {
-        let imageSize = self.size
-        
-        // Return the original image if its height or width is not bigger than the designated bounds.
-        guard imageSize.height > bounds.height || imageSize.width > bounds.width else {
-            return self
-        }
-        
-        // The new image size's width and height is limited to the device's native resolution
-        let widthDiff = imageSize.width / bounds.width
-        let heightDiff = imageSize.height / bounds.height
-        let newImageSize = CGSize(
-            width: imageSize.width / max(widthDiff, heightDiff),
-            height: imageSize.height / max(widthDiff, heightDiff)
-        )
-        
-        // This is the rect that we've calculated out and this is what is actually used below
-        let rect = CGRect(x: 0, y: 0, width: newImageSize.width, height: newImageSize.height)
-        
-        // Actually do the resizing to the rect using the ImageContext stuff
-        UIGraphicsBeginImageContextWithOptions(newImageSize, false, 1.0)
-        self.draw(in: rect)
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return newImage
-    }
-}

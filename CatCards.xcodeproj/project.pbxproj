@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		004C3B56318AD936B4893427 /* Pods_CatCards.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2F5C82BF49C7513BD5BE102C /* Pods_CatCards.framework */; };
 		F60214D424E5205500872F34 /* DataModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F60214D224E5205500872F34 /* DataModel.xcdatamodeld */; };
+		F61A729D2636779E00C734E8 /* UIExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61A729C2636779E00C734E8 /* UIExtensions.swift */; };
 		F6240A9B258B18EE00217C2D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F6240A9D258B18EE00217C2D /* Localizable.strings */; };
 		F6240AA4258B2EB800217C2D /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6240AA3258B2EB800217C2D /* Strings.swift */; };
 		F6240AAD258B425C00217C2D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F6240AAC258B425C00217C2D /* InfoPlist.strings */; };
@@ -63,6 +64,7 @@
 		41168D40AA6045FECBED4B3F /* Pods-CatCards.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CatCards.debug.xcconfig"; path = "Target Support Files/Pods-CatCards/Pods-CatCards.debug.xcconfig"; sourceTree = "<group>"; };
 		681AB58E2DF9E98BFA9DCD21 /* Pods-CatCards.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CatCards.release.xcconfig"; path = "Target Support Files/Pods-CatCards/Pods-CatCards.release.xcconfig"; sourceTree = "<group>"; };
 		F60214D324E5205500872F34 /* DataModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = DataModel.xcdatamodel; sourceTree = "<group>"; };
+		F61A729C2636779E00C734E8 /* UIExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIExtensions.swift; sourceTree = "<group>"; };
 		F6240A9C258B18EE00217C2D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		F6240A9F258B190000217C2D /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		F6240AA3258B2EB800217C2D /* Strings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
@@ -147,6 +149,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		F61A729B2636777C00C734E8 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				F61A729C2636779E00C734E8 /* UIExtensions.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
 		F6746FD824C6DCF2006A2905 = {
 			isa = PBXGroup;
 			children = (
@@ -183,6 +193,7 @@
 				F67E4DEA24CC7725006DDE96 /* Service */,
 				F6240AAC258B425C00217C2D /* InfoPlist.strings */,
 				F6746FF424C6DCF5006A2905 /* Info.plist */,
+				F61A729B2636777C00C734E8 /* Utilities */,
 				F6E18FD225E8B2C90014A9A6 /* Resource */,
 			);
 			path = CatCards;
@@ -479,6 +490,7 @@
 				F64FFF0D2518A10900E80DE2 /* SingleImageVC.swift in Sources */,
 				F6D5C13D2600E6D800429C82 /* OverlayContentPicker.swift in Sources */,
 				F6746FE724C6DCF2006A2905 /* SceneDelegate.swift in Sources */,
+				F61A729D2636779E00C734E8 /* UIExtensions.swift in Sources */,
 				F6746FFF24C6E245006A2905 /* HomeVC.swift in Sources */,
 				F67E4DEE24CE80A7006DDE96 /* CatData.swift in Sources */,
 			);

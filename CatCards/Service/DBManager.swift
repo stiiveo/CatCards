@@ -95,7 +95,7 @@ final class DBManager {
         writeFileTo(folder: imageFolderName, withData: compressedJPG, withName: fileName + fileExtension)
         
         // Downsample the image to be used as the thumbnail image
-        let downsampledImage = image.downsampleToSize(K.Image.thumbnailSize)
+        let downsampledImage = image.downsampled(toSize: K.Image.thumbnailSize)
         
         // Convert downsampled image to JPG data and save it to local disk
         guard let jpegData = downsampledImage.jpegData(compressionQuality: jpegCompression) else {
@@ -241,39 +241,4 @@ final class DBManager {
         }
     }
    
-}
-
-//MARK: - Picture Downsampling
-
-private extension UIImage {
-    /// Downsize the image to be used as the collection VC's cell image.
-    ///
-    /// The non–processed image could be returned if data initialization or downsizing process went wrong.
-    /// - Parameter size: Size the image to be downsized to.
-    /// - Returns: The downsized image.
-    func downsampleToSize(_ size: CGSize) -> UIImage {
-        guard let imageData = self.pngData() else {
-            debugPrint("Unable to convert UIImage object to PNG data.")
-            return self
-        }
-        
-        let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
-        let imageSource = CGImageSourceCreateWithData(imageData as CFData, imageSourceOptions)!
-        let screenScale = UIScreen.main.scale
-        
-        let maxDimensionInPixels = max(size.width, size.height) * screenScale
-        let downsampleOptions =
-            [kCGImageSourceCreateThumbnailFromImageAlways: true,
-             kCGImageSourceShouldCacheImmediately: true,
-             kCGImageSourceCreateThumbnailWithTransform: true,
-             kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
-        
-        if let downsampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downsampleOptions) {
-            return UIImage(cgImage: downsampledImage)
-        } else {
-            debugPrint("Error: Unable to downsample image source to thumbnail image data.")
-            return self
-        }
-        
-    }
 }
