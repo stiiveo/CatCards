@@ -164,11 +164,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         }
         
         requestNewDataIfNeeded()
-        
         addShadeOverlay()
-        
-        dbManager.getSavedImageFileURLs()
-        
         
         // Notify this VC that if the app enters the background, save the cached view count value to the db.
         NotificationCenter.default.addObserver(self, selector: #selector(takeActionsBeforeTermination), name: UIApplication.willTerminateNotification, object: nil)

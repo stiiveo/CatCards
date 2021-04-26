@@ -23,14 +23,17 @@ final class DBManager {
     private let cacheFolderName = K.File.FolderName.cacheImage
     private let previewImageFolderName = K.File.FolderName.activityPreview
     private var favoriteArray: [Favorite]!
-    var imageFileURLs = [FilePath]()
     var delegate: DBManagerDelegate?
     private let jpegCompression = K.Data.jpegDataCompressionQuality
     private let fileExtension = K.File.fileExtension
     
-    struct FilePath {
+    struct ImageFileURL {
         let image: URL
         let thumbnail: URL
+    }
+    
+    var imageFileURLs: [ImageFileURL] {
+        return savedImageFilesURLs()
     }
     
     init() {
@@ -40,22 +43,23 @@ final class DBManager {
     //MARK: - Data Loading
     
     // Load thumbnail images from local folder
-    func getSavedImageFileURLs() {
-        imageFileURLs.removeAll() // Clean all image file URLs in memory buffer first
+    private func savedImageFilesURLs() -> [ImageFileURL] {
+        var imageFilesURLs: [ImageFileURL] = []
         
-        let url = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let imageFolderURL = url.appendingPathComponent(imageFolderName, isDirectory: true)
-        let thumbnailFolderURL = url.appendingPathComponent(thumbFolderName, isDirectory: true)
+        let rootUrl = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let imageFolderURL = rootUrl.appendingPathComponent(imageFolderName, isDirectory: true)
+        let thumbnailFolderURL = rootUrl.appendingPathComponent(thumbFolderName, isDirectory: true)
         
-        // Load image file path to cache
         let fileList = listOfSavedFileNames() // Get list of image file IDs from local database
         for fileName in fileList {
             let imageURL = imageFolderURL.appendingPathComponent(fileName + fileExtension)
             let thumbnailURL = thumbnailFolderURL.appendingPathComponent(fileName + fileExtension)
-            let newFilePath = FilePath(image: imageURL, thumbnail: thumbnailURL)
             
-            imageFileURLs.append(newFilePath)
+            let filePath = ImageFileURL(image: imageURL, thumbnail: thumbnailURL)
+            imageFilesURLs.append(filePath)
         }
+        
+        return imageFilesURLs
     }
     
     //MARK: - Data Saving
@@ -77,7 +81,7 @@ final class DBManager {
         favoriteArray.append(newData)
         
         // Save image to local file system with ID as the file name.
-        saveImageToLocalSystem(image: data.image, fileName: data.id)
+        saveImageFile(image: data.image, withFileName: data.id)
         completion(true)
     }
     
@@ -88,7 +92,7 @@ final class DBManager {
     /// - Parameters:
     ///   - image: Image to be processed and saved.
     ///   - fileName: The name used to be saved in local file system, both image and thumbnail image.
-    private func saveImageToLocalSystem(image: UIImage, fileName: String) {
+    private func saveImageFile(image: UIImage, withFileName fileName: String) {
         // Compress image to JPG data and save it in local disk
         guard let compressedJPG = image.jpegData(compressionQuality: jpegCompression) else {
             debugPrint("Unable to convert UIImage to JPG data."); return }
@@ -104,9 +108,6 @@ final class DBManager {
         }
         
         writeFileTo(folder: thumbFolderName, withData: jpegData, withName: fileName + fileExtension)
-        
-        // Refresh image file url cache
-        getSavedImageFileURLs()
     }
     
     // Write data into app's document folder.
@@ -149,9 +150,6 @@ final class DBManager {
         removeFile(fromDirectory: .documentDirectory, inFolder: imageFolderName, fileName: id)
         removeFile(fromDirectory: .documentDirectory, inFolder: thumbFolderName, fileName: id)
         
-        // Refresh the image file URL cache
-        getSavedImageFileURLs()
-        
         // Remove the cached favorite item matching the id
         for item in favoriteArray {
             if item.id == id {
@@ -190,7 +188,7 @@ final class DBManager {
         return directoryURL.appendingPathComponent(folderName, isDirectory: true)
     }
     
-    func createFoldersNeeded() {
+    private func createFoldersNeeded() {
         createDirectory(withName: imageFolderName, at: .documentDirectory)
         createDirectory(withName: thumbFolderName, at: .documentDirectory)
         createDirectory(withName: cacheFolderName, at: .cachesDirectory)
