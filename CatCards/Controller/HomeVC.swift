@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import GoogleMobileAds
 import UserNotifications
 import AppTrackingTransparency
 
