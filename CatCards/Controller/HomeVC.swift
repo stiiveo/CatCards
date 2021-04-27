@@ -8,7 +8,6 @@
 
 import UIKit
 import UserNotifications
-import AppTrackingTransparency
 
 class HomeVC: UIViewController, APIManagerDelegate {
     
