@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="jeA-7F-Qie">
-    <device id="ipad10_5" orientation="portrait" layout="fullscreen" appearance="light"/>
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
@@ -15,14 +15,14 @@
             <objects>
                 <viewController id="jpg-gr-ShF" customClass="HomeVC" customModule="CatCards" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cSQ-ii-ZYK">
-                        <rect key="frame" x="0.0" y="0.0" width="834" height="1112"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="3kd-kf-SGh">
-                                <rect key="frame" x="0.0" y="1048" width="834" height="64"/>
+                                <rect key="frame" x="0.0" y="623" width="375" height="44"/>
                                 <subviews>
                                     <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZI0-C0-QUe">
-                                        <rect key="frame" x="0.0" y="0.0" width="834" height="44"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="44" id="7qg-j3-968"/>
                                         </constraints>
@@ -50,20 +50,13 @@
                                             <barButtonItem style="plain" systemItem="flexibleSpace" id="m7o-fo-Gpu"/>
                                         </items>
                                     </toolbar>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cGb-6Z-c2Z" userLabel="Ad Fixed Space">
-                                        <rect key="frame" x="0.0" y="64" width="834" height="0.0"/>
-                                        <color key="backgroundColor" name="backgroundColor"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" id="xKe-58-e39"/>
-                                        </constraints>
-                                    </view>
                                 </subviews>
                             </stackView>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="o9H-d8-u3v">
-                                <rect key="frame" x="398.5" y="537.5" width="37" height="37"/>
+                                <rect key="frame" x="169" y="315" width="37" height="37"/>
                             </activityIndicatorView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bts-7g-pnA" userLabel="CardView">
-                                <rect key="frame" x="0.0" y="50" width="834" height="998"/>
+                                <rect key="frame" x="0.0" y="44" width="375" height="579"/>
                             </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="E8D-Zx-PRV"/>
@@ -88,8 +81,6 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="bannerSpace" destination="cGb-6Z-c2Z" id="Qx4-YP-Hlk"/>
-                        <outlet property="bannerSpaceHeight" destination="xKe-58-e39" id="s4l-IN-9xV"/>
                         <outlet property="cardView" destination="Bts-7g-pnA" id="Wk6-gt-kz9"/>
                         <outlet property="collectionButton" destination="sSu-jw-cTH" id="auR-gH-DQd"/>
                         <outlet property="saveButton" destination="eix-IU-TsW" id="kOq-j5-OQe"/>
@@ -107,7 +98,7 @@
             <objects>
                 <collectionViewController id="nfh-xn-jhC" customClass="CollectionVC" customModule="CatCards" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="s03-pl-d20">
-                        <rect key="frame" x="0.0" y="0.0" width="834" height="1112"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" name="backgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="q4y-nE-Wkn">
@@ -159,17 +150,17 @@
             <objects>
                 <viewController id="qlD-G6-Afc" customClass="SingleImageVC" customModule="CatCards" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="qn6-hw-Gab">
-                        <rect key="frame" x="0.0" y="0.0" width="834" height="1112"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" directionalLockEnabled="YES" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Ze-wL-vlY">
-                                <rect key="frame" x="0.0" y="50" width="834" height="998"/>
+                                <rect key="frame" x="0.0" y="44" width="375" height="559"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="eiQ-d0-gPU">
-                                        <rect key="frame" x="0.0" y="0.0" width="834" height="998"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="559"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="default_image" translatesAutoresizingMaskIntoConstraints="NO" id="Tno-z9-hkl">
-                                                <rect key="frame" x="0.0" y="0.0" width="834" height="998"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="375" height="559"/>
                                             </imageView>
                                         </subviews>
                                     </stackView>
@@ -186,7 +177,7 @@
                                 <viewLayoutGuide key="frameLayoutGuide" id="S4A-Fj-ePw"/>
                             </scrollView>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="naK-xz-Kcm">
-                                <rect key="frame" x="0.0" y="1058" width="834" height="44"/>
+                                <rect key="frame" x="0.0" y="613" width="375" height="44"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="44" id="PRy-aC-7Jr"/>
                                 </constraints>
@@ -238,7 +229,7 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="jeA-7F-Qie" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="YCN-F7-b1W">
-                        <rect key="frame" x="0.0" y="0.0" width="834" height="50"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>

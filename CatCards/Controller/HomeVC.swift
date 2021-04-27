@@ -29,12 +29,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
     // A button which triggers segue from HomeVC to CollectionVC.
     @IBOutlet weak var collectionButton: UIBarButtonItem!
     
-    // A reserved space used to accommodate the banner view.
-    @IBOutlet weak var bannerSpace: UIView!
-    
-    // Modifying the banner space's height to accommodate the adaptive bannerView once the its height is determined.
-    @IBOutlet weak var bannerSpaceHeight: NSLayoutConstraint!
-    
     // Super view to which all cards being added.
     @IBOutlet weak var cardView: UIView!
     
@@ -137,15 +131,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
         return tap
     }
     
-    private lazy var adBannerView: GADBannerView = {
-        // Set up the banner view with default size which is adjusted later according to the device's screen width.
-        let adBannerView = GADBannerView(adSize: GADPortraitAnchoredAdaptiveBannerAdSizeWithWidth(view.frame.width))
-        adBannerView.adUnitID = K.Banner.adUnitID
-        adBannerView.rootViewController = self
-        adBannerView.delegate = self
-        return adBannerView
-    }()
-    
     //MARK: - View Overriding Methods
     
     override func viewDidLoad() {
@@ -183,11 +168,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
         super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate { _ in
             self.backgroundLayer.frame = self.view.bounds
-            if self.adReceived {
-                // Request another banner ad if the orientation of the screen is changing
-                self.updateBannerSpaceHeight(bannerView: self.adBannerView)
-                self.requestBannerAd()
-            }
         }
     }
     
@@ -457,85 +437,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private func showUIButtons() {
         navBar.tintColor = K.Color.tintColor
         toolbar.alpha = 1
-    }
-    
-    //MARK: - Ad Banner Methods
-    
-    /// Request ad for the ad banner.
-    private func loadBannerAd() {
-        print("loadBannerAd")
-        DispatchQueue.main.async {
-            self.adBannerView.load(GADRequest())
-        }
-    }
-    
-    /*
-     Google recommends waiting for the completion callback prior to loading ads,
-     so that if the user grants the App Tracking Transparency permission,
-     the Google Mobile Ads SDK can use the IDFA in ad requests.
-     */
-    @available(iOS 14, *)
-    private func requestIDFA() {
-        ATTrackingManager.requestTrackingAuthorization { (status) in
-            // Tracking authorization completed. Start loading ads here.
-            self.loadBannerAd()
-        }
-    }
-    
-    /*
-     If iOS version is 14 or above, request IDFA access permission from the user before requesting an Ad through AdMob API.
-     Otherwise, request an ad immediately.
-     */
-    private func requestBannerAd() {
-        if #available(iOS 14, *) {
-            requestIDFA()
-        } else {
-            loadBannerAd()
-        }
-    }
-    
-    /// Add and place the ad banner at the center of the reserved ad space.
-    private func addBannerToBannerSpace(_ bannerView: GADBannerView) {
-        bannerView.translatesAutoresizingMaskIntoConstraints = false
-        bannerSpace.addSubview(bannerView)
-        
-        // Define center position only. Width and height is defined later.
-        NSLayoutConstraint.activate([
-            bannerView.centerYAnchor.constraint(equalTo: bannerSpace.centerYAnchor),
-            bannerView.centerXAnchor.constraint(equalTo: bannerSpace.centerXAnchor)
-        ])
-    }
-    
-    /// Adapt the banner space's height according to the adaptive banner size with animation.
-    /// This method should be called before presenting the banner ad onto the view.
-    /// - Parameter bannerView: The banner view from which the banner space's height is adjusted.
-    private func updateBannerSpaceHeight(bannerView: GADBannerView) {
-        // Banner's width equals the safe area's width
-        let frame = { () -> CGRect in
-            // Here safe area is taken into account, hence the view frame is used
-            // after the view has been laid out.
-            if #available(iOS 11.0, *) {
-                return view.frame.inset(by: view.safeAreaInsets)
-            } else {
-                return view.frame
-            }
-        }()
-        let viewWidth = frame.size.width
-        
-        /*
-         With adaptive banner, height of banner is based on the width of the banner itself
-         Get Adaptive GADAdSize and set the ad view.
-         Here the current interface orientation is used. If the ad is being preloaded
-         for a future orientation change or different orientation, the function for the
-         relevant orientation should be used.
-         */
-        bannerView.adSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(viewWidth)
-        // Set the height of the reserved ad space the same as the adaptive banner's height
-        bannerSpaceHeight.constant = bannerView.frame.height
-        
-        UIView.animate(withDuration: 0.5) {
-            self.updateLayout() // Animate the update of bannerSpace's height
-        }
     }
     
     //MARK: - Support Methods
@@ -1041,12 +942,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
             
             // Clear the old card's cache data.
             self.clearCacheData()
-            
-            // Request banner ad if onboard session is completed, no ad is received yet,
-            // and the number of cards seen by the user passes the threshold.
-            if self.onboardCompleted && !self.adReceived && self.viewCount > K.Banner.adLoadingThreshold {
-                self.requestBannerAd()
-            }
         }
     }
     
@@ -1135,27 +1030,5 @@ extension HomeVC: DBManagerDelegate {
         alert.addAction(acknowledgeAction)
         
         present(alert, animated: true, completion: nil)
-    }
-}
-
-extension HomeVC: GADBannerViewDelegate {
-    /// An ad request successfully receive an ad.
-    func bannerViewDidReceiveAd(_ bannerView: GADBannerView) {
-        if !adReceived {
-            addBannerToBannerSpace(adBannerView)
-            updateBannerSpaceHeight(bannerView: bannerView)
-            adReceived = true
-        }
-        
-        // Animate the appearence of the banner view
-        bannerView.alpha = 0
-        UIView.animate(withDuration: 1.0) {
-            bannerView.alpha = 1
-        }
-    }
-    
-    /// Failed to receive ad with error.
-    func bannerView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: Error) {
-        debugPrint("Failed to receive banner ad: \(error.localizedDescription)")
     }
 }
