@@ -16,14 +16,15 @@ protocol DBManagerDelegate {
 final class DBManager {
     
     static let shared = DBManager()
+    var delegate: DBManagerDelegate?
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     private let fileManager = FileManager.default
+    private let previewImageFolderName = K.File.FolderName.activityPreview
+    private var favoriteArray = [Favorite]()
+    
     private let imageFolderName = K.File.FolderName.fullImage
     private let thumbFolderName = K.File.FolderName.thumbnail
     private let cacheFolderName = K.File.FolderName.cacheImage
-    private let previewImageFolderName = K.File.FolderName.activityPreview
-    private var favoriteArray: [Favorite]!
-    var delegate: DBManagerDelegate?
     private let jpegCompression = K.Data.jpegDataCompressionQuality
     private let fileExtension = K.File.fileExtension
     
@@ -153,7 +154,7 @@ final class DBManager {
         // Remove the cached favorite item matching the id
         for item in favoriteArray {
             if item.id == id {
-                favoriteArray.removeAll{$0 == item} // Remove all elements that satisfy the predicate
+                favoriteArray.removeAll(where: { $0 == item })
             }
         }
     }
