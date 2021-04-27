@@ -62,9 +62,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     private let numberOfPrefetchData = K.Data.numberOfPrefetchedData
     
-    // Indicator on if any banner ad is received from GoogleMobileAds API.
-    private var adReceived = false
-    
     // Background view behind the main imageView.
     private var backgroundLayer: CAGradientLayer!
     
