@@ -17,12 +17,6 @@ struct K {
         static let onboardCompleted = "onboardCompleted"
     }
     
-    struct Banner {
-        static let adMobAppID = "ca-app-pub-2421510056015407~5275025170"
-        static let adUnitID = "ca-app-pub-2421510056015407/2067597276" // my real ad unit ID
-        static let adLoadingThreshold: Int = 9 // how many cards the user sees before loading the ad
-    }
-    
     struct API {
         static let urlString = "https://api.thecatapi.com/v1/images/search?mime_types=\(imageType)"
         static let imageType: String = "jpg" // Input option: 'gif', 'jpg', 'png', 'jpg,gif,png'
