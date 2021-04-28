@@ -979,6 +979,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     //MARK: - Testing
     
     private func setUpUIReference() {
+        toolbar.accessibilityIdentifier = "toolbar"
         shareButton.accessibilityIdentifier = "shareButton"
         undoButton.accessibilityIdentifier = "undoButton"
         saveButton.accessibilityIdentifier = "saveButton"

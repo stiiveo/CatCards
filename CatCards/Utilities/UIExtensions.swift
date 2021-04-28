@@ -41,7 +41,7 @@ extension UIImage {
         
         let scaledSize = CGSize(width: imageSize.width * resizeVector, height: imageSize.height * resizeVector)
         
-        // Actually do the resizing to the rect using the ImageContext stuff
+        // Re–draw the image with calculated scaled size.
         UIGraphicsBeginImageContextWithOptions(scaledSize, false, 0)
         draw(in: CGRect(origin: .zero, size: scaledSize))
         
@@ -83,11 +83,11 @@ extension UIImage {
 }
 
 extension UIColor {
-    /// Create a solid-color UIimage object with specified size.
+    /// Initialize an UIImage object with specified size and color.
     ///
     /// Demo code: *let image0 = UIColor.orange.image(CGSize(width: 128, height: 128)); let image1 = UIColor.yellow.image()*
     /// - Parameter size: *Optional*: Default size is CGSize(width: 1, height: 1)
-    /// - Returns: UIImage object with designated color
+    /// - Returns: Returns UIImage object with specified size and color.
     func image(size: CGSize = CGSize(width: 1, height: 1)) -> UIImage {
         return UIGraphicsImageRenderer(size: size).image { rendererContext in
             self.setFill()
