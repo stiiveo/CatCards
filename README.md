@@ -1,10 +1,21 @@
 # CatCards 
-## Tinder–like cat pictures browser iOS App
-### What does it do?  
-Enjoy thousands of cards with cat pictures, trivia and quote by simply swiping your fingers.  
-Saving and sharing any picture you see is only a tap away as well.
+## Tinder–like Cat Pictures Browser iOS App
+##### Enjoy cat pictures using Tinder–app like card UI design.
 
-![Screenshot](./Docs/Screenshots/dark_mode.jpg)
+![Screenshot](./Docs/Screenshots/dark_mode.jpeg)
+
+##### Demonstration Video:
+https://youtu.be/Y7D-Lp_HVNc
+
+#### Features:
+1. Browse countless cat pictures
+2. Save pictures and browse saved pictures in the gallery
+3. Share currently viewed picture or saved one
+4. Cache: Pictures that were retrieved via the API will be reserved in local cache folder until the maximum cache number is reached
+5. iPad support
+6. Dark mode with gradient background
+7. Language: English, Traditional Chinese
+8. Onboard session
 
 ---
 ### Note
@@ -13,21 +24,27 @@ Saving and sharing any picture you see is only a tap away as well.
 ---
 ### Specs Overview
 
-1. Mixed design patterns with MVC, Delegate and Notifications.
+1. MVC structure
 2. Restful API
 3. URLSession
-4. JSON Decoding & Parsing
-5. Persistent Storage: UserDefaults, Core Data
-6. UIKit: UIView, UIImageView, UIStackView, UIScrollView, UITableView, UILabel, UIGestureRecognizer, UIVisualEffectView, UIAlertController
-7. AutoLayout
-8. ImageIO: Image Resizing, Image downsampling
+4. JSON decoding and parsing
+5. UserDefaults, Core Data, FileManager
+6. Cache realized by using File Manager
+7. UIKit
+8. AutoLayout
 9. Memory Management
-10. Native dark mode support
-11. Multi-Language Support
-12. Version control: Git (local and remote repo hosted on GitHub)
-13. BannerAds collaborated with Google AdMob (Integrated via Cocoapods)
-14. AppTrackingTransparency
+10. Native Dark Mode support
+11. NSLocalisedString
+12. Git SVC
+13. Unit & UI Test (Currently 71% coverage)
+
+_No third–party library is used in this project_
+
 ---
-### Footnote  
-This is my first front–to–end iOS app project which is built with all the knowledge I've learned through the courses and resources on the internet.
-Although it's not ready to be published onto the App Store yet, I've grown and learned so much in the process of developing this project.
+#### Footnote  
+This is the first moderate scale project I've ever built.
+
+All images used in this App are provided by **TheCatAPI**.
+Please refer to https://thecatapi.com/ for more info.
+
+**If any issue was spotted within this project, feel free to raise an issue ticket and I'll look into it when I get spared time.**
