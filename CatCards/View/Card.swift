@@ -180,7 +180,7 @@ class Card: UIView {
     
     private func addOnboardOverlay() {
         // Make sure the index is within the bound of onboard data array.
-        let onboardData = K.OnboardOverlay.data
+        let onboardData = K.OnboardOverlay.content
         guard index >= 0 && index < onboardData.count else {
             debugPrint("Index(\(index)) of onboard data is unavailable for onboard card")
             return

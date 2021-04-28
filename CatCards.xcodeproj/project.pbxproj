@@ -36,7 +36,7 @@
 		F6BAF00C26037C8F004D5A50 /* UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BAF00B26037C8F004D5A50 /* UITests.swift */; };
 		F6C1AAF325F76C7A00C03215 /* TriviaOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C1AAF225F76C7A00C03215 /* TriviaOverlay.swift */; };
 		F6C928202540678B00BAB89E /* ImageScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C9281F2540678B00BAB89E /* ImageScrollView.swift */; };
-		F6CE40AB2593063700B09008 /* OnboardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AA2593063700B09008 /* OnboardData.swift */; };
+		F6CE40AB2593063700B09008 /* OnboardContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AA2593063700B09008 /* OnboardContent.swift */; };
 		F6CE40AE2593231000B09008 /* OnboardOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CE40AD2593231000B09008 /* OnboardOverlay.swift */; };
 		F6D5C13D2600E6D800429C82 /* OverlayContentPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D5C13C2600E6D800429C82 /* OverlayContentPicker.swift */; };
 		F6EDE0AF254F998900513A98 /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EDE0AE254F998900513A98 /* Card.swift */; };
@@ -100,7 +100,7 @@
 		F6BAF00D26037C8F004D5A50 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F6C1AAF225F76C7A00C03215 /* TriviaOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriviaOverlay.swift; sourceTree = "<group>"; };
 		F6C9281F2540678B00BAB89E /* ImageScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollView.swift; sourceTree = "<group>"; };
-		F6CE40AA2593063700B09008 /* OnboardData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardData.swift; sourceTree = "<group>"; };
+		F6CE40AA2593063700B09008 /* OnboardContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardContent.swift; sourceTree = "<group>"; };
 		F6CE40AD2593231000B09008 /* OnboardOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardOverlay.swift; sourceTree = "<group>"; };
 		F6D5C13C2600E6D800429C82 /* OverlayContentPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayContentPicker.swift; sourceTree = "<group>"; };
 		F6EDE0AE254F998900513A98 /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
@@ -205,7 +205,7 @@
 				F67E4DED24CE80A7006DDE96 /* CatData.swift */,
 				F674700024C6E8F3006A2905 /* JSONModel.swift */,
 				F60214D224E5205500872F34 /* DataModel.xcdatamodeld */,
-				F6CE40AA2593063700B09008 /* OnboardData.swift */,
+				F6CE40AA2593063700B09008 /* OnboardContent.swift */,
 				F67E4E3124D3C571006DDE96 /* Constants.swift */,
 			);
 			path = Model;
@@ -465,7 +465,7 @@
 				F674700124C6E8F3006A2905 /* JSONModel.swift in Sources */,
 				F639A17F24E29FD000FB6C0A /* Cell.swift in Sources */,
 				F6746FE524C6DCF2006A2905 /* AppDelegate.swift in Sources */,
-				F6CE40AB2593063700B09008 /* OnboardData.swift in Sources */,
+				F6CE40AB2593063700B09008 /* OnboardContent.swift in Sources */,
 				F67E4E3224D3C571006DDE96 /* Constants.swift in Sources */,
 				F639A17D24E29FB600FB6C0A /* CollectionVC.swift in Sources */,
 				F6AB3F2125F1E1CF005400DD /* FeedbackView.swift in Sources */,
@@ -665,7 +665,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 39;
+				CURRENT_PROJECT_VERSION = 40;
 				DEVELOPMENT_TEAM = 94WY3HPZ4Q;
 				INFOPLIST_FILE = CatCards/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -690,7 +690,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 39;
+				CURRENT_PROJECT_VERSION = 40;
 				DEVELOPMENT_TEAM = 94WY3HPZ4Q;
 				INFOPLIST_FILE = CatCards/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

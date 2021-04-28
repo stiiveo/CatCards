@@ -58,7 +58,7 @@ class TriviaOverlay: UIView {
         
         // Label text and style
         label.text = OverlayContentPicker.shared.randomContent(contentTypes: [.trivia, .quote])
-        label.font = UIFont.preferredFont(forTextStyle: .body)
+        label.font = UIFont.preferredFont(forTextStyle: .callout)
         label.adjustsFontForContentSizeCategory = true
         label.adjustsFontSizeToFitWidth = true
         label.minimumScaleFactor = 0.5

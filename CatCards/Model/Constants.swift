@@ -56,6 +56,13 @@ struct K {
             CGSize(width: 1265, height: 951) // Grumpy cat image's size
         ]
         
+        struct Icon {
+            static let share = UIImage(systemName: "square.and.arrow.up")!
+            static let undo = UIImage(systemName: "arrow.counterclockwise")!
+            static let save = UIImage(systemName: "heart")!
+            static let downloads = UIImage(systemName: "square.grid.2x2.fill")!
+        }
+        
     }
     
     struct File {
@@ -107,36 +114,24 @@ struct K {
         static let zoomImageID = "zoomImage"
         static let tapGesture = UIImage(systemName: "hand.tap.fill")!
         
-        struct CellImage {
-            static let share = UIImage(systemName: "square.and.arrow.up")!
-            static let undo = UIImage(systemName: "arrow.counterclockwise")!
-            static let save = UIImage(systemName: "heart")!
-            static let showDownloads = UIImage(systemName: "square.grid.2x2.fill")!
-        }
-        
-        // Text and images used for the onboarding card
-        // Each data represents the data each card uses
-        static let data =
-            [OnboardData(cellText: [Z.Onboard.greetTitle,
-                                   Z.Onboard.greet_1,
-                                   Z.Onboard.greet_2],
-                        cellImage: nil),
-            OnboardData(cellText: [Z.Onboard.zoomGestureTitle,
-                                   Z.Onboard.zoomInstruction],
-                        cellImage: nil),
-            OnboardData(cellText: [Z.Onboard.overlayTitle,
-                                   Z.Onboard.overlayInstruction],
-                        cellImage: nil),
-            OnboardData(cellText: [Z.Onboard.buttonInstruction,
-                                   Z.Onboard.shareButton,
-                                   Z.Onboard.undoButton,
-                                   Z.Onboard.saveButton,
-                                   Z.Onboard.showDownloadsButton],
-                        cellImage: [K.OnboardOverlay.CellImage.share,
-                                    K.OnboardOverlay.CellImage.undo,
-                                    K.OnboardOverlay.CellImage.save,
-                                    K.OnboardOverlay.CellImage.showDownloads]),
-            ]
+        /*
+         Text and images used for the onboarding card.
+         Each OnboardContent object represents the data each card uses.
+         */
+        static let content = [
+            OnboardContent(title: Z.Onboard.greetTitle,
+                           content: [Content(text: Z.Onboard.greet_1, image: nil),
+                                     Content(text: Z.Onboard.greet_2, image: nil),]),
+            OnboardContent(title: Z.Onboard.zoomGestureTitle,
+                           content: [Content(text: Z.Onboard.zoomInstruction, image: nil)]),
+            OnboardContent(title: Z.Onboard.overlayTitle,
+                           content: [Content(text: Z.Onboard.overlayInstruction, image: nil)]),
+            OnboardContent(title: Z.Onboard.buttonInstruction,
+                           content: [Content(text: Z.Onboard.shareButton, image: K.Image.Icon.share),
+                                     Content(text: Z.Onboard.undoButton, image: K.Image.Icon.undo),
+                                     Content(text: Z.Onboard.saveButton, image: K.Image.Icon.save),
+                                     Content(text: Z.Onboard.downloadsButton, image: K.Image.Icon.downloads)])
+        ]
     }
     
     /*

@@ -43,7 +43,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private var cardArray: [Int: Card] = [:]
     
     // Array of string data used as the content of the onboard info.
-    private let onboardData = K.OnboardOverlay.data
+    private let onboardData = K.OnboardOverlay.content
     
     // Navigational bar this view controller provides.
     private var navBar: UINavigationBar!
@@ -51,7 +51,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     // The pointer to which card being added to the top layer of the cardView.
     private var pointer: Int = 0 {
         didSet {
-            if !onboardCompleted && pointer >= K.OnboardOverlay.data.count {
+            if !onboardCompleted && pointer >= K.OnboardOverlay.content.count {
                 onboardCompleted = true
             }
         }

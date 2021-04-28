@@ -11,7 +11,7 @@ import UIKit
 class OnboardOverlay: UIView {
     
     var cardIndex: Int = 0
-    private let tableViewContent = K.OnboardOverlay.data
+    private let content = K.OnboardOverlay.content
     private lazy var blurEffectView = UIVisualEffectView()
     
     //MARK: - Initialization
@@ -134,13 +134,13 @@ class OverlayPromptLabel: UILabel {
     
     func labelDidLoad() {
         self.textColor = .label
-        self.font = .preferredFont(forTextStyle: .body)
+        self.font = .preferredFont(forTextStyle: .caption1)
         self.adjustsFontForContentSizeCategory = true
         self.adjustsFontSizeToFitWidth = true
         self.minimumScaleFactor = 0.5
         self.textAlignment = .center
         
-        if cardIndex != K.OnboardOverlay.data.count - 1 {
+        if cardIndex != K.OnboardOverlay.content.count - 1 {
             self.text = Z.Onboard.continuePrompt
         } else {
             self.text = Z.Onboard.finalPrompt
@@ -152,34 +152,31 @@ class OverlayPromptLabel: UILabel {
 
 extension OnboardOverlay: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // Return rows for title and prompt message only if body's value is nil
-        return tableViewContent[cardIndex].cellText.count
+        return content[cardIndex].content.count + 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.backgroundColor = .clear
-        cell.textLabel?.text = tableViewContent[cardIndex].cellText[indexPath.row]
         
-        // Body's text style
+        // Label content
+        if indexPath.row == 0 {
+            // Title
+            cell.textLabel?.text = content[cardIndex].title
+            cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .title1)
+        } else {
+            // Body
+            cell.textLabel?.text = content[cardIndex].content[indexPath.row - 1].text
+            cell.imageView?.image = content[cardIndex].content[indexPath.row - 1].image
+            cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .body)
+        }
+        
+        // Label style
         cell.textLabel?.numberOfLines = 0
         cell.textLabel?.adjustsFontForContentSizeCategory = true
         cell.textLabel?.adjustsFontSizeToFitWidth = true
         cell.textLabel?.minimumScaleFactor = 0.5
         cell.textLabel?.textColor = .label
-        cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .title2)
-        
-        // Title's text style
-        if indexPath.row == 0 {
-            cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .title1)
-        }
-        
-        // Add image to last onboard card's each cell except the first one.
-        if cardIndex == tableViewContent.count - 1 {
-            if indexPath.row != 0 {
-                cell.imageView?.image = tableViewContent[cardIndex].cellImage?[indexPath.row - 1]
-            }
-        }
         
         return cell
     }
