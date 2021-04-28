@@ -18,10 +18,6 @@ https://youtu.be/Y7D-Lp_HVNc
 8. Onboard session
 
 ---
-### Note
-**Even though the lastest version of the code had been through many physical devices and simulator tests, only a few parts of the code had passed the unit testing since the testing code is still not completed yet (around 20% coverage), hence bugs and errors should be expected.**
-
----
 ### Specs Overview
 
 1. MVC structure
@@ -47,4 +43,4 @@ This is the first moderate scale project I've ever built.
 All images used in this App are provided by **TheCatAPI**.
 Please refer to https://thecatapi.com/ for more info.
 
-**If any issue was spotted within this project, feel free to raise an issue ticket and I'll look into it when I get spared time.**
+If any issue was spotted within this project, feel free to raise an issue ticket and I'll look into it when I get spared time.
