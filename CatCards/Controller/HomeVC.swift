@@ -190,7 +190,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         let sortedCardArrayKeys = cardArray.keys.sorted()
         let sortedData = sortedCardArrayKeys.map { cardArray[$0]!.data }
         do {
-            try cacheManager.cacheData(sortedData)
+            try cacheManager?.cacheData(sortedData)
         } catch CacheError.failedToCommitChangesToPersistentContainer {
             debugPrint("Failed to commit objects changes to Cache entity")
         } catch CacheError.failedToConvertImageToJpegData(let image) {
@@ -203,7 +203,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     private func loadCachedData() {
-        let cachedData = cacheManager.fetchCachedData()
+        guard let cachedData = cacheManager?.fetchCachedData() else { return }
         guard !cachedData.isEmpty else {
             pointer = 0
             debugPrint("No cached data saved.")
@@ -259,7 +259,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
                 defer {
                     cardArray[oldCardIndex] = nil
                 }
-                try cacheManager.clearCache(dataId: oldCard.data.id)
+                try cacheManager?.clearCache(dataId: oldCard.data.id)
             } catch CacheError.fileNotFound(let fileName) {
                 debugPrint("Cache file '\(fileName)' cannot be removed because it's absent.")
             } catch {
@@ -590,7 +590,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         let cacheManager = CacheManager()
         let fileName = data.id + K.File.fileExtension
         do {
-            try cacheManager.cacheImage(data.image, withFileName: fileName)
+            try cacheManager?.cacheImage(data.image, withFileName: fileName)
         } catch CacheError.failedToWriteImageFile(let fileUrl) {
             debugPrint("Failed to cache file \(fileName) to path: \(fileUrl.path)")
             return
@@ -598,7 +598,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
             debugPrint("Unknown error occured when caching image data with ID \(data.id)")
         }
         // Get the url of the cached image file.
-        guard let imageFileUrl = cacheManager.urlOfImageFile(fileName: fileName) else {
+        guard let imageFileUrl = cacheManager?.urlOfImageFile(fileName: fileName) else {
             debugPrint("Failed to get the url of the cached image file \(fileName)")
             return
         }
