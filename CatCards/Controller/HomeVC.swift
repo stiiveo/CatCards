@@ -948,18 +948,27 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     //MARK: - Error Handling Section
     
-    /// An error occured in the data fetching process.
     func APIErrorDidOccur(error: APIError) {
         // Present alert view to the user if any error occurs in the data fetching process.
-        
-        // Make sure no existing alert controller being presented already.
-        guard self.presentedViewController == nil else { return }
-        
         hapticManager.prepareNotificationGenerator()
         DispatchQueue.main.async {
+            // Make sure no existing alert controller being presented already.
+            guard self.presentedViewController == nil else { return }
+            
+            var alertTitle: String
+            var alertMessage: String
+            switch error {
+            case .network:
+                alertTitle = Z.AlertMessage.NetworkError.alertTitle
+                alertMessage = Z.AlertMessage.NetworkError.alertMessage
+            case .server:
+                alertTitle = Z.AlertMessage.APIError.alertTitle
+                alertMessage = Z.AlertMessage.APIError.alertMessage
+            }
+        
             let alert = UIAlertController(
-                title: Z.AlertMessage.APIError.alertTitle,
-                message: Z.AlertMessage.APIError.alertMessage,
+                title: alertTitle,
+                message: alertMessage,
                 preferredStyle: .alert)
             
             // An button which send network request to the network manager
