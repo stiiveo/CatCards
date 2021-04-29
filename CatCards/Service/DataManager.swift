@@ -1,5 +1,5 @@
 //
-//  DBManager.swift
+//  DataManager.swift
 //  CatCards
 //
 //  Created by Jason Ou Yang on 2020/8/14.
@@ -9,15 +9,20 @@
 import UIKit
 import CoreData
 
-protocol DBManagerDelegate {
+protocol DataManagerDelegate {
     func savedImagesMaxReached()
 }
 
-final class DBManager {
+final class DataManager {
     
-    static let shared = DBManager()
-    var delegate: DBManagerDelegate?
-    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    static let shared = DataManager()
+    var delegate: DataManagerDelegate?
+    private var context: NSManagedObjectContext? {
+        if let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext {
+            return context
+        }
+        fatalError("Failed to get valid reference to application's AppDelegate.swift.")
+    }
     private let fileManager = FileManager.default
     private let previewImageFolderName = K.File.FolderName.activityPreview
     private var favoriteArray = [Favorite]()
@@ -65,7 +70,7 @@ final class DBManager {
     
     //MARK: - Data Saving
     
-    func saveData(_ data: CatData, completion: K.CompletionHandler) {
+    internal func saveData(_ data: CatData, completion: K.CompletionHandler) {
         guard favoriteArray.count < K.Data.maxSavedImages else {
             delegate?.savedImagesMaxReached()
             completion(false)
@@ -73,7 +78,7 @@ final class DBManager {
         }
         
         // Save data to local database.
-        let newData = Favorite(context: context)
+        let newData = Favorite(context: context!)
         newData.id = data.id
         newData.date = Date()
         saveContext()
@@ -133,14 +138,13 @@ final class DBManager {
     
     // Delete data matching the ID in database and file system
     internal func deleteData(id: String) {
-        
         // Delete data in database (CoreData)
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id MATCHES %@", id) // Fetch data with the matched ID value
         do {
-            let fetchResult = try context.fetch(fetchRequest)
+            let fetchResult = try context!.fetch(fetchRequest)
             for object in fetchResult {
-                context.delete(object) // Delete every object from the fetched result
+                context!.delete(object) // Delete every object from the fetched result
             }
             saveContext()
         } catch {
@@ -159,7 +163,7 @@ final class DBManager {
         }
     }
     
-    func removeFile(fromDirectory directory: FileManager.SearchPathDirectory, inFolder folderName: String, fileName: String) {
+    internal func removeFile(fromDirectory directory: FileManager.SearchPathDirectory, inFolder folderName: String, fileName: String) {
         let url = getFolderURL(folderName: folderName, at: directory).appendingPathComponent(fileName + fileExtension)
         
         if fileManager.fileExists(atPath: url.path) {
@@ -196,12 +200,12 @@ final class DBManager {
         createDirectory(withName: previewImageFolderName, at: .cachesDirectory)
     }
     
-    //MARK: - Data Detection & Listing
+    //MARK: - Saved Data Availability & Listing
     
     /// Determine if the provided data already exists in local folder.
     /// - Parameter data: Data to be determined.
     /// - Returns: Boolean value on whether the provided data exists in the device's image folder.
-    func isDataSaved(data: CatData) -> Bool {
+    internal func isDataSaved(data: CatData) -> Bool {
         let url = getFolderURL(folderName: imageFolderName, at: .documentDirectory)
         let dataId = data.id
         let newFileURL = url.appendingPathComponent(dataId + fileExtension)
@@ -210,7 +214,7 @@ final class DBManager {
     
     /// Get all the names of files saved in the database.
     /// - Returns: An array containing string values of all file's names saved in the database.
-    func listOfSavedFileNames() -> [String] {
+    internal func listOfSavedFileNames() -> [String] {
         let fetchRequest: NSFetchRequest<Favorite> = Favorite.fetchRequest()
         
         // Sort data by making the last saved data at first
@@ -219,7 +223,7 @@ final class DBManager {
         
         var fileNameList = [String]()
         do {
-            favoriteArray = try context.fetch(fetchRequest)
+            favoriteArray = try context!.fetch(fetchRequest)
             for item in favoriteArray {
                 if let id = item.id {
                     fileNameList.append(id)
@@ -234,9 +238,9 @@ final class DBManager {
     
     private func saveContext() {
         do {
-            try self.context.save()
+            try self.context!.save()
         } catch {
-            debugPrint("Error saving Favorite object to container: \(error)")
+            debugPrint("Failed to commit changes to context's parent store: \(error)")
         }
     }
    

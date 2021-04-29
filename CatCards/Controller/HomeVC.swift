@@ -35,7 +35,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     static let shared = HomeVC()
     private let defaults = UserDefaults.standard
-    private let dbManager = DBManager.shared
+    private let dbManager = DataManager.shared
     private let cacheManager = CacheManager.shared
     private let apiManager = APIManager.shared
     
@@ -1015,7 +1015,7 @@ extension HomeVC: UIGestureRecognizerDelegate {
     }
 }
 
-extension HomeVC: DBManagerDelegate {
+extension HomeVC: DataManagerDelegate {
     /// Number of saved images has reached the limit.
     func savedImagesMaxReached() {
         // Show alert to the user

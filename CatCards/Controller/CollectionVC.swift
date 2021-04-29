@@ -11,7 +11,7 @@ import ImageIO
 
 class CollectionVC: UICollectionViewController {
     
-    private let dbManager = DBManager.shared
+    private let dbManager = DataManager.shared
     private var selectedCellIndex: Int = 0
     private let backgroundLayer = CAGradientLayer()
     private var backgroundView: UIView!

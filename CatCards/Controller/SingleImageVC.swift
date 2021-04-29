@@ -15,7 +15,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
     @IBOutlet weak var toolbar: UIToolbar!
     
     var selectedCellIndex: Int = 0
-    private let dbManager = DBManager.shared
+    private let dbManager = DataManager.shared
     private let backgroundLayer = CAGradientLayer()
     private var bufferImageArray: [ImageScrollView] = []
     private let bufferImageNumber: Int = K.Data.prefetchNumberOfImageAtEachSide
@@ -275,7 +275,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let alert = UIAlertController(title: Z.AlertMessage.DeleteWarning.alertTitle, message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: Z.AlertMessage.DeleteWarning.actionTitle, style: .destructive) { (action) in
             
-            let databaseManager = DBManager.shared
+            let databaseManager = DataManager.shared
             let savedDataList = databaseManager.listOfSavedFileNames()
             let dataID = savedDataList[self.currentPage]
             
