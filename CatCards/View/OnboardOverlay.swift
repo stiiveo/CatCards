@@ -8,7 +8,7 @@
 
 import UIKit
 
-class OnboardOverlay: UIView {
+final class OnboardOverlay: UIView {
     
     var cardIndex: Int = 0
     private let content = K.OnboardOverlay.content
@@ -38,26 +38,17 @@ class OnboardOverlay: UIView {
         let tableView = OverlayTableView(dataSource: self)
         let labelView = OverlayPromptLabel(cardIndex: self.cardIndex)
         let stackView = UIStackView(arrangedSubviews: [tableView, labelView])
+        stackView.axis = .vertical
+        stackView.distribution = .fill
+        
         if self.cardIndex == 2 {
-            let imageView = UIImageView(image: K.OnboardOverlay.tapGesture)
+            // Insert tap gesture hint image to the stackView.
+            let imageView = UIImageView(image: K.OnboardOverlay.tapGestureImage)
             imageView.heightAnchor.constraint(equalToConstant: 100).isActive = true
             imageView.contentMode = .scaleAspectFit
             stackView.insertArrangedSubview(imageView, at: 1)
         }
-        
-        // Contraints
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        self.addSubview(stackView)
-        NSLayoutConstraint.activate([
-            stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10),
-            stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -10),
-            stackView.topAnchor.constraint(equalTo: self.topAnchor, constant: 15),
-            stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -20)
-        ])
-        
-        // Style
-        stackView.axis = .vertical
-        stackView.distribution = .fill
+        addView(stackView, to: self, withOffset: AutoLayoutOffset(leading: 10, trailing: 10, top: 15, bottom: 20))
     }
     
     //MARK: - Background

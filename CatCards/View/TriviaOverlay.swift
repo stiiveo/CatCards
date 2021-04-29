@@ -8,7 +8,7 @@
 
 import UIKit
 
-class TriviaOverlay: UIView {
+final class TriviaOverlay: UIView {
     
     private var blurEffectView = UIVisualEffectView()
     
@@ -47,14 +47,7 @@ class TriviaOverlay: UIView {
     
     private func addTriviaLabel() {
         let label = UILabel()
-        blurEffectView.contentView.addSubview(label)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: blurEffectView.leadingAnchor, constant: 15),
-            label.trailingAnchor.constraint(equalTo: blurEffectView.trailingAnchor, constant: -15),
-            label.topAnchor.constraint(equalTo: blurEffectView.topAnchor, constant: 10),
-            label.bottomAnchor.constraint(equalTo: blurEffectView.bottomAnchor, constant: -15)
-        ])
+        addView(label, to: blurEffectView.contentView, withOffset: AutoLayoutOffset(leading: 15, trailing: 15, top: 10, bottom: 15))
         
         // Label text and style
         label.text = OverlayContentPicker.shared.randomContent(contentTypes: [.trivia, .quote])

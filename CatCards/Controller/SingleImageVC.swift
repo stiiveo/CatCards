@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SingleImageVC: UIViewController, UIScrollViewDelegate {
+final class SingleImageVC: UIViewController, UIScrollViewDelegate {
 
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var stackView: UIStackView!

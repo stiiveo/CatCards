@@ -9,7 +9,7 @@
 
 import UIKit
 
-class FeedbackView {
+final class FeedbackView {
     private let parentView: UIView
     private let image: UIImage
     private let feedbackView: UIImageView

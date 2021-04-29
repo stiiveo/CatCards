@@ -7,9 +7,8 @@
 //
 
 import UIKit
-import ImageIO
 
-class CollectionVC: UICollectionViewController {
+final class CollectionVC: UICollectionViewController {
     
     private let dbManager = DataManager.shared
     private var selectedCellIndex: Int = 0

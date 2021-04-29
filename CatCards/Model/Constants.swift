@@ -111,8 +111,8 @@ struct K {
     
     struct OnboardOverlay {
         static let zoomImage = UIImage(named: "onboard_zoom_image")!
-        static let zoomImageID = "zoomImage"
-        static let tapGesture = UIImage(systemName: "hand.tap.fill")!
+        static let zoomImageFileID = "zoomImage"
+        static let tapGestureImage = UIImage(systemName: "hand.tap.fill")!
         
         /*
          Text and images used for the onboarding card.

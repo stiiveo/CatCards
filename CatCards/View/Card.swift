@@ -19,7 +19,7 @@ enum GestureRecognizerTag: String {
     case tapGR = "tapGR"
 }
 
-class Card: UIView {
+final class Card: UIView {
 
     var data: CatData
     var index: Int
@@ -188,7 +188,7 @@ class Card: UIView {
         
         if index == 1 {
             // Use built–in image for the second onboard card.
-            data = CatData(id: K.OnboardOverlay.zoomImageID, image: K.OnboardOverlay.zoomImage)
+            data = CatData(id: K.OnboardOverlay.zoomImageFileID, image: K.OnboardOverlay.zoomImage)
             imageView.image = data.image
             bgImageView.image = data.image
         }

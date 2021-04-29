@@ -9,7 +9,7 @@
 import UIKit
 import UserNotifications
 
-class HomeVC: UIViewController, APIManagerDelegate {
+final class HomeVC: UIViewController, APIManagerDelegate {
     
     //MARK: - IBOutlet
     
@@ -40,7 +40,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private let apiManager = APIManager.shared
     
     // Cache of all Card objects used to display to the user.
-    private var cardArray: [Int: Card] = [:]
+    private var cardArray = [Int: Card]()
     
     // Array of string data used as the content of the onboard info.
     private let onboardData = K.OnboardOverlay.content
