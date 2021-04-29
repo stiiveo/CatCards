@@ -8,16 +8,29 @@
 
 import Foundation
 
-/// This class contains a method which can be used to randomly pick one of the trivia or quote localized string values, which are stored in the folder 'Localizable.strings'.
-class OverlayContentPicker {
+final class OverlayContentPicker {
     
     enum ContentType {
         case trivia, quote
     }
     
     static let shared = OverlayContentPicker()
-    private var triviaCounter: Int = 0
-    private var quoteCounter: Int = 0
+    private var triviaCounter: Int = 0 {
+        didSet {
+            if triviaCounter >= K.numberOfTrivia {
+                triviaCounter = 0
+                shufflePickingOrder(of: .trivia)
+            }
+        }
+    }
+    private var quoteCounter: Int = 0 {
+        didSet {
+            if quoteCounter >= K.numberOfQuotes {
+                quoteCounter = 0
+                shufflePickingOrder(of: .quote)
+            }
+        }
+    }
     private let triviaKey = "TRIVIA_"
     private let quoteKey = "QUOTE_"
     
@@ -37,17 +50,15 @@ class OverlayContentPicker {
         return indexArray.shuffled()
     }()
     
-    /// Return seemingly randomized and localized trivia or quote string from the bundle's folder Localizable.strings where the returned string will be different the next time this method is called if the same class is referenced again.
-    /// - Returns: Randomly picked a trivia or quote string where if the method is called again via the same class, the returned string value will Not be the same as the previous returned one.
+    /// Return a randomly picked content retrieved from the bundle.
+    /// Same result will not be returned in a row.
+    /// - Parameter contentTypes: Types of overlay content to be randomly picked and returned.
+    /// - Returns: Randomly picked string value of specified type of content.
     func randomContent(contentTypes: [ContentType]) -> String {
         let contentType = contentTypes.randomElement()!
         var pickIndex: Int!
         switch contentType {
         case .trivia:
-            if triviaCounter >= K.numberOfTrivia {
-                shufflePickingOrder(of: .trivia)
-                triviaCounter = 0
-            }
             pickIndex = triviaPickingOrder[triviaCounter]
             triviaCounter += 1
             
@@ -55,10 +66,6 @@ class OverlayContentPicker {
             let localizedTrivia = NSLocalizedString(key, comment: "A cat trivia.")
             return localizedTrivia
         case .quote:
-            if quoteCounter >= K.numberOfQuotes {
-                shufflePickingOrder(of: .quote)
-                quoteCounter = 0
-            }
             pickIndex = quotePickingOrder[quoteCounter]
             quoteCounter += 1
             
@@ -68,8 +75,7 @@ class OverlayContentPicker {
         }
     }
     
-    /// Shuffle previously shuffled content picking order.
-    /// This method makes sure that the same content will not be picked after the order is shuffled. E.g. if the last picking index is 2, the first picking index of the re–shuffled picking order will not be 2.
+    /// Shuffle the picking order of the specified content type.
     /// - Parameter contentType: Which content type's picking order to shuffle.
     private func shufflePickingOrder(of contentType: ContentType) {
         switch contentType {

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class HapticManager {
+final class HapticManager {
     var impactHaptic: UIImpactFeedbackGenerator? = nil
     var notificationHaptic: UINotificationFeedbackGenerator? = nil
     
