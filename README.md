@@ -1,5 +1,5 @@
 ## CatCards: Tinder–like Cat Pictures Browser App
-#### Enjoy internet cat pictures using one–finger swiping
+#### Enjoy cat pictures with 2 fingers 🤞
 
 ![Screenshot](./Docs/Screenshots/dark_mode.jpeg)
 
