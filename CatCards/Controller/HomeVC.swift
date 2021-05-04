@@ -7,47 +7,34 @@
 //
 
 import UIKit
-import UserNotifications
 
 final class HomeVC: UIViewController, APIManagerDelegate {
     
-    //MARK: - IBOutlet
+    // MARK: - IBOutlet
     
-    // Access point to this view's built–in toolbar.
     @IBOutlet weak var toolbar: UIToolbar!
-    
-    // A button which saves the current card's image to the device's app folder with attribute info being saved to database via CoreData.
     @IBOutlet weak var saveButton: UIBarButtonItem!
-    
-    // A button which allows user to share current card's image.
     @IBOutlet weak var shareButton: UIBarButtonItem!
-    
-    // A button which retrieves previously dismissed card back to the top layer of the card view.
     @IBOutlet weak var undoButton: UIBarButtonItem!
-    
-    // A button which triggers segue from HomeVC to CollectionVC.
     @IBOutlet weak var collectionButton: UIBarButtonItem!
-    
     // Super view to which all cards being added.
     @IBOutlet weak var cardView: UIView!
     
-    //MARK: - Local Properties
+    // MARK: - Local Properties
     
     static let shared = HomeVC()
     private let defaults = UserDefaults.standard
     private let dbManager = DataManager.shared
     private let cacheManager = CacheManager.shared
     private let apiManager = APIManager.shared
-    
     // Cache of all Card objects used to display to the user.
     private var cardArray = [Int: Card]()
-    
     // Array of string data used as the content of the onboard info.
     private let onboardData = K.OnboardOverlay.content
-    
-    // Navigational bar this view controller provides.
     private var navBar: UINavigationBar!
-    
+    private var backgroundLayer: CAGradientLayer!
+    // A shading layer displayed behind the current card when the current card is zoomed–in by the user.
+    private var shadeLayer: UIView!
     // The pointer to which card being added to the top layer of the cardView.
     private var pointer: Int = 0 {
         didSet {
@@ -56,44 +43,22 @@ final class HomeVC: UIViewController, APIManagerDelegate {
             }
         }
     }
-    
     // Maximum number of cards with different data shown to the user.
     private var maxPointerReached: Int = 0
-    
-    private let numberOfPrefetchData = K.Data.numberOfPrefetchedData
-    
-    // Background view behind the main imageView.
-    private var backgroundLayer: CAGradientLayer!
-    
-    // A shading layer displayed behind the current card when the current card is zoomed–in by the user.
-    private var shadeLayer: UIView!
-    
-    // Indicator on whether the current card is being panned.
     private var cardIsBeingPanned = false
-    
-    // Haptic manager which manages customized operation of the device's haptic engine.
     private let hapticManager = HapticManager()
     
     // Status on whether to show card info on all cards.
     static var showOverlay = true
-    
     // Number of cards with cat images the user has seen.
     private var viewCount: Int = 0
-    
     // Status on if the onboard sessions were completed by the user.
     private var onboardCompleted = false
+    private var currentCard: Card? { return cardArray[pointer] }
+    private var previousCard: Card? { return cardArray[pointer - 1] }
+    private var nextCard: Card? { return cardArray[pointer + 1] }
     
-    private var currentCard: Card? {
-        return cardArray[pointer]
-    }
-    
-    private var previousCard: Card? {
-        return cardArray[pointer - 1]
-    }
-    
-    private var nextCard: Card? {
-        return cardArray[pointer + 1]
-    }
+    // MARK: - Initialized Gesture Recognizers
     
     private var panGestureRecognizer: UIPanGestureRecognizer {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(panHandler))
@@ -133,23 +98,22 @@ final class HomeVC: UIViewController, APIManagerDelegate {
         super.viewDidLoad()
         navBar = self.navigationController?.navigationBar
         addBackgroundLayer()
+        addShadeOverlay()
         dbManager.delegate = self
         apiManager.delegate = self
-        disableToolbarButtons()
         loadStoredParameters()
         loadCachedData()
+        requestNewDataIfNeeded()
         
+        disableToolbarButtons()
         if !onboardCompleted {
             hideAndDisableUIButtons()
         }
         
-        requestNewDataIfNeeded()
-        addShadeOverlay()
-        
         // Notify this VC that if the app enters the background, save the cached view count value to the db.
         NotificationCenter.default.addObserver(self, selector: #selector(takeActionsBeforeTermination), name: UIApplication.willTerminateNotification, object: nil)
         
-        // For UI Testing
+        // UI testing references
         setUpUIReference()
     }
     
@@ -167,7 +131,6 @@ final class HomeVC: UIViewController, APIManagerDelegate {
         }
     }
     
-    /// Auto hidden the home indicator.
     override var prefersHomeIndicatorAutoHidden: Bool {
         return true
     }
@@ -243,6 +206,7 @@ final class HomeVC: UIViewController, APIManagerDelegate {
     /// Request new data to make the number of prefetched data meets the pre–set target.
     private func requestNewDataIfNeeded() {
         let numberOfNonUndoCard = cardArray.count - pointer
+        let numberOfPrefetchData = K.Data.numberOfPrefetchedData
         if numberOfNonUndoCard < numberOfPrefetchData {
             let numberOfNewDataShort = numberOfPrefetchData - numberOfNonUndoCard
             sendAPIRequest(numberOfRequests: numberOfNewDataShort)
@@ -555,23 +519,25 @@ final class HomeVC: UIViewController, APIManagerDelegate {
             
             switch isSaved {
             case false:
+                // Save data
                 dbManager.saveData(data) { success in
-                    if success {
-                        // Data is saved successfully
-                        DispatchQueue.main.async {
-                            self.showConfirmIcon()
-                        }
-                        hapticManager.notificationHaptic?.notificationOccurred(.success)
-                    } else {
+                    guard success else {
                         // Data is not saved successfully
+                        debugPrint("Current image cannot be saved. Image ID: \(currentCard!.data.id)")
                         hapticManager.notificationHaptic?.notificationOccurred(.error)
+                        return
                     }
+                    // Data is saved successfully
+                    DispatchQueue.main.async {
+                        self.showConfirmIcon()
+                    }
+                    hapticManager.notificationHaptic?.notificationOccurred(.success)
                 }
             case true:
+                // Delete data
                 dbManager.deleteData(id: data.id)
                 hapticManager.impactHaptic?.impactOccurred()
             }
-            
             refreshButtonState()
             hapticManager.releaseImpactGenerator()
             hapticManager.releaseNotificationGenerator()
