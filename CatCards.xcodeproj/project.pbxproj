@@ -152,6 +152,7 @@
 		F61A729B2636777C00C734E8 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				F67E4E3124D3C571006DDE96 /* Constants.swift */,
 				F61A729C2636779E00C734E8 /* UIExtensions.swift */,
 			);
 			path = Utilities;
@@ -206,7 +207,6 @@
 				F674700024C6E8F3006A2905 /* JSONModel.swift */,
 				F60214D224E5205500872F34 /* DataModel.xcdatamodeld */,
 				F6CE40AA2593063700B09008 /* OnboardContent.swift */,
-				F67E4E3124D3C571006DDE96 /* Constants.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
