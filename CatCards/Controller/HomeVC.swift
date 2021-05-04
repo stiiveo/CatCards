@@ -17,7 +17,7 @@ final class HomeVC: UIViewController, APIManagerDelegate {
     @IBOutlet weak var shareButton: UIBarButtonItem!
     @IBOutlet weak var undoButton: UIBarButtonItem!
     @IBOutlet weak var collectionButton: UIBarButtonItem!
-    // Super view to which all cards being added.
+    // Superview to which all cards being added.
     @IBOutlet weak var cardView: UIView!
     
     // MARK: - Local Properties

@@ -32,6 +32,7 @@
 		F67E4E3224D3C571006DDE96 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67E4E3124D3C571006DDE96 /* Constants.swift */; };
 		F6A76FFD261450A7007C505A /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A76FFC261450A7007C505A /* CacheManager.swift */; };
 		F6AB3F2125F1E1CF005400DD /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB3F2025F1E1CF005400DD /* FeedbackView.swift */; };
+		F6AB803B26419EC500EE622A /* GesturesHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6AB803A26419EC400EE622A /* GesturesHandler.swift */; };
 		F6BAEFFA26022E34004D5A50 /* OverlayContentPickerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BAEFF926022E34004D5A50 /* OverlayContentPickerTest.swift */; };
 		F6BAF00C26037C8F004D5A50 /* UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BAF00B26037C8F004D5A50 /* UITests.swift */; };
 		F6C1AAF325F76C7A00C03215 /* TriviaOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C1AAF225F76C7A00C03215 /* TriviaOverlay.swift */; };
@@ -92,6 +93,7 @@
 		F67E4E3124D3C571006DDE96 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		F6A76FFC261450A7007C505A /* CacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheManager.swift; sourceTree = "<group>"; };
 		F6AB3F2025F1E1CF005400DD /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
+		F6AB803A26419EC400EE622A /* GesturesHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GesturesHandler.swift; sourceTree = "<group>"; };
 		F6BAEFED26022D8C004D5A50 /* Cat Cards Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Cat Cards Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6BAEFF126022D8C004D5A50 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F6BAEFF926022E34004D5A50 /* OverlayContentPickerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayContentPickerTest.swift; sourceTree = "<group>"; };
@@ -153,6 +155,7 @@
 			isa = PBXGroup;
 			children = (
 				F61A729C2636779E00C734E8 /* UIExtensions.swift */,
+				F6AB803A26419EC400EE622A /* GesturesHandler.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -472,6 +475,7 @@
 				F64FFF0D2518A10900E80DE2 /* SingleImageVC.swift in Sources */,
 				F6D5C13D2600E6D800429C82 /* OverlayContentPicker.swift in Sources */,
 				F6746FE724C6DCF2006A2905 /* SceneDelegate.swift in Sources */,
+				F6AB803B26419EC500EE622A /* GesturesHandler.swift in Sources */,
 				F61A729D2636779E00C734E8 /* UIExtensions.swift in Sources */,
 				F6746FFF24C6E245006A2905 /* HomeVC.swift in Sources */,
 				F67E4DEE24CE80A7006DDE96 /* CatData.swift in Sources */,
