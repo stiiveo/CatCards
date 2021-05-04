@@ -466,7 +466,6 @@ final class HomeVC: UIViewController, APIManagerDelegate {
         undoButton.isEnabled = false
         hapticManager.impactHaptic?.impactOccurred()
         nextCard?.removeFromSuperview()
-        
         addCardToView(undoCard, atBottom: false)
         
         /*
@@ -476,19 +475,16 @@ final class HomeVC: UIViewController, APIManagerDelegate {
          */
         if undoCard.frame.size == .zero {
             // Place the card randomly to one of the corners of the view.
-            var randomMultiplier: CGFloat {
+            var randomTranslation: CGFloat {
+                let offset = cardView.frame.height * 2
                 if Bool.random() {
-                    return 1
+                    return 1 * offset
                 } else {
-                    return -1
+                    return -1 * offset
                 }
             }
-            undoCard.centerXConstraint.constant = cardView.frame.height * 3 * randomMultiplier
-            undoCard.centerYConstraint.constant = cardView.frame.height * 3 * randomMultiplier
-            updateLayout()
-            
-            undoCard.centerXConstraint.constant = 0
-            undoCard.centerYConstraint.constant = 0
+            let transform = CGAffineTransform(translationX: randomTranslation, y: randomTranslation)
+            undoCard.transform = transform
         }
         
         
@@ -631,8 +627,7 @@ final class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     private var firstFingerLocation: Side!
-    private var offsetTransform: CGAffineTransform = .identity
-    private var scaleTransform: CGAffineTransform = .identity
+    private var cardTransform: CGAffineTransform = .identity
     
     /// What happens when user drags the card with 1 finger.
     /// - Parameter sender: A discrete gesture recognizer that interprets panning gestures.
@@ -670,10 +665,10 @@ final class HomeVC: UIViewController, APIManagerDelegate {
              Increase the card's rotation degrees as it approaches either side of the screen.
              */
             let t = sender.translation(in: cardView)
-            let transform = CGAffineTransform(translationX: t.x, y: t.y)
+            let translation = CGAffineTransform(translationX: t.x, y: t.y)
             let rotation = CGAffineTransform(rotationAngle: cardRotationRadian)
-            offsetTransform = transform.concatenating(rotation)
-            updateCardTransform(card: card)
+            cardTransform = translation.concatenating(rotation)
+            card.transform = cardTransform
             
             // Determine next card's transform based on current card's travel distance
             let distance = (panDistance <= halfViewWidth) ? (panDistance / halfViewWidth) : 1
@@ -734,20 +729,16 @@ final class HomeVC: UIViewController, APIManagerDelegate {
         guard let card = sender.view as? Card else { return }
         switch sender.state {
         case .changed:
-            // Get the touch position
+            // Card's moved to where the user's fingers are
             let translation = sender.translation(in: cardView)
+            let scaledTranslation = CGPoint(x: translation.x / card.transform.a,
+                                            y: translation.y / card.transform.d)
+            card.transform = cardTransform.translatedBy(x: scaledTranslation.x, y: scaledTranslation.y)
             
-            // Card move to where the user's finger position is
-            card.centerXConstraint.constant = translation.x
-            card.centerYConstraint.constant = translation.y
-            updateLayout()
-        
         case .ended, .cancelled, .failed:
             // Move card back to original position
-            card.centerXConstraint.constant = 0
-            card.centerYConstraint.constant = 0
             UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
-                self.updateLayout()
+                card.transform = .identity
             }
         default:
             break
@@ -776,30 +767,17 @@ final class HomeVC: UIViewController, APIManagerDelegate {
                 x: sender.location(in: card).x - card.bounds.midX,
                 y: sender.location(in: card).y - card.bounds.midY)
             
-            // Card transform behavior
-            
-            // Move the card to the opposite point of the pinch center if the scale delta > 1, vice versa
-            let transform = card.transform.translatedBy(
-                x: pinchCenter.x, y: pinchCenter.y)
-                .scaledBy(x: sender.scale, y: sender.scale)
-                .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
-            
-            // Limit the scale at which a card can be zoom in/out
-            let newWidth = sender.scale * card.frame.width
-            let minWidth = card.bounds.width
-            let maxWidth = minWidth * K.ImageView.maximumScaleFactor
-            if newWidth > minWidth && newWidth < maxWidth {
-                scaleTransform = transform
-                updateCardTransform(card: card)
+            // Card's size can only be scaled up.
+            if card.transform.a >= 1 {
+                // Move the card to the opposite point of the pinch center if the scale delta > 1, vice versa
+                cardTransform = cardTransform.translatedBy(x: pinchCenter.x, y: pinchCenter.y).scaledBy(x: sender.scale, y: sender.scale).translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
+                card.transform = cardTransform
             }
             sender.scale = 1
             
             // Increase opacity of the overlay view as the card is enlarged
-            let cardWidth = card.frame.width
-            let maxOpacity: CGFloat = 0.6 // max opacity of the overlay view
-            let cardWidthDelta = (cardWidth / minWidth) - 1 // Percentage change of width
-            let deltaToMaxOpacity: CGFloat = 0.2 // number of width delta to get maximum opacity
-            shadeLayer.alpha = maxOpacity * min((cardWidthDelta / deltaToMaxOpacity), 1.0)
+            let maxOpacity: CGFloat = 0.7 // max opacity of the shading layer
+            shadeLayer.alpha = min(maxOpacity, card.transform.a - 1.0)
             
         case .ended, .cancelled, .failed:
             // Reset card's size
@@ -853,14 +831,8 @@ final class HomeVC: UIViewController, APIManagerDelegate {
         card.addGestureRecognizer(tapGestureRecognizer)
     }
     
-    private func updateCardTransform(card: Card) {
-        let hybridTransform = offsetTransform.concatenating(scaleTransform)
-        card.transform = hybridTransform
-    }
-    
     private func resetTransform() {
-        offsetTransform = .identity
-        scaleTransform = .identity
+        cardTransform = .identity
     }
     
     //MARK: - Animation Methods
@@ -979,7 +951,7 @@ extension HomeVC: UIGestureRecognizerDelegate {
             gestureRecognizer == twoFingerPanGR && otherGestureRecognizer == panGR,
             gestureRecognizer == tapGR && otherGestureRecognizer == panGR,
             gestureRecognizer == tapGR && otherGestureRecognizer == twoFingerPanGR,
-            gestureRecognizer == tapGR && otherGestureRecognizer == pinchGR,
+            gestureRecognizer == tapGR && otherGestureRecognizer == pinchGR
         ]
         for condition in conditions {
             if condition == true {
