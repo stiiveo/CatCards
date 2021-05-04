@@ -324,23 +324,14 @@ final class HomeVC: UIViewController, APIManagerDelegate {
         }
     }
     
-    /// Activate the constraints which defines the position on where the card would be placed relative to the card view's position.
     /// - Parameter card: The card to which the constraint will be applied.
     private func addCardConstraint(_ card: Card) {
-        let centerXAnchor = card.centerXAnchor.constraint(equalTo: cardView.centerXAnchor)
-        let centerYAnchor = card.centerYAnchor.constraint(equalTo: cardView.centerYAnchor)
-        let heightAnchor = card.heightAnchor.constraint(equalTo: cardView.heightAnchor, multiplier: 0.90)
-        let widthAnchor = card.widthAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: 0.90)
-        
-        // Save constraints to the card's property for manipulation in the future
-        card.centerXConstraint = centerXAnchor
-        card.centerYConstraint = centerYAnchor
-        card.heightConstraint = heightAnchor
-        card.widthConstraint = widthAnchor
-        
         card.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            card.centerXConstraint, card.centerYConstraint, card.heightConstraint, card.widthConstraint
+            card.centerXAnchor.constraint(equalTo: cardView.centerXAnchor),
+            card.centerYAnchor.constraint(equalTo: cardView.centerYAnchor),
+            card.heightAnchor.constraint(equalTo: cardView.heightAnchor, multiplier: 0.90),
+            card.widthAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: 0.90)
         ])
     }
     
@@ -843,11 +834,9 @@ final class HomeVC: UIViewController, APIManagerDelegate {
     ///   - deltaX: X–axis delta applied to the card.
     ///   - deltaY: Y–axis delta applied to the card.
     private func dismissCardWithVelocity(_ card: Card, deltaX: CGFloat, deltaY: CGFloat) {
-        card.centerXConstraint.constant += deltaX
-        card.centerYConstraint.constant += deltaY
         
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
-            self.updateLayout()
+            card.transform = card.transform.translatedBy(x: deltaX, y: deltaY)
             self.currentCard?.transform = .identity
         } completion: { _ in
             card.removeFromSuperview()
