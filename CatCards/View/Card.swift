@@ -12,13 +12,6 @@ enum CardType {
     case onboard, regular
 }
 
-enum GestureRecognizerTag: String {
-    case panGR = "panGR"
-    case twoFingerPanGR = "twoFingerPanGR"
-    case pinchGR = "pinchGR"
-    case tapGR = "tapGR"
-}
-
 final class Card: UIView {
 
     var data: CatData
@@ -30,46 +23,10 @@ final class Card: UIView {
     private var triviaOverlay: TriviaOverlay?
     
     // This class's attached gesture recognizers
-    var panGR: UIPanGestureRecognizer? {
-        if let gestureRecognizers = self.gestureRecognizers {
-            for gr in gestureRecognizers {
-                if gr.name == GestureRecognizerTag.panGR.rawValue {
-                    return gr as? UIPanGestureRecognizer
-                }
-            }
-        }
-        return nil
-    }
-    var twoFingerPanGR: UIPanGestureRecognizer? {
-        if let gestureRecognizers = self.gestureRecognizers {
-            for gr in gestureRecognizers {
-                if gr.name == GestureRecognizerTag.twoFingerPanGR.rawValue {
-                    return gr as? UIPanGestureRecognizer
-                }
-            }
-        }
-        return nil
-    }
-    var pinchGR: UIPinchGestureRecognizer? {
-        if let gestureRecognizers = self.gestureRecognizers {
-            for gr in gestureRecognizers {
-                if gr.name == GestureRecognizerTag.pinchGR.rawValue {
-                    return gr as? UIPinchGestureRecognizer
-                }
-            }
-        }
-        return nil
-    }
-    var tapGR: UITapGestureRecognizer? {
-        if let gestureRecognizers = self.gestureRecognizers {
-            for gr in gestureRecognizers {
-                if gr.name == GestureRecognizerTag.tapGR.rawValue {
-                    return gr as? UITapGestureRecognizer
-                }
-            }
-        }
-        return nil
-    }
+    var panGR: UIPanGestureRecognizer?
+    var twoFingerPanGR: UIPanGestureRecognizer?
+    var pinchGR: UIPinchGestureRecognizer?
+    var tapGR: UITapGestureRecognizer?
     
     //MARK: - Initialization
     

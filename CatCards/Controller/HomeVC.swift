@@ -65,14 +65,12 @@ final class HomeVC: UIViewController, APIManagerDelegate {
         pan.delegate = self
         pan.minimumNumberOfTouches = 1
         pan.maximumNumberOfTouches = 1
-        pan.name = GestureRecognizerTag.panGR.rawValue
         return pan
     }
     
     private var pinchGestureRecognizer: UIPinchGestureRecognizer {
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(pinchHandler))
         pinch.delegate = self
-        pinch.name = GestureRecognizerTag.pinchGR.rawValue
         return pinch
     }
     
@@ -81,14 +79,12 @@ final class HomeVC: UIViewController, APIManagerDelegate {
         pan.delegate = self
         pan.minimumNumberOfTouches = 2
         pan.maximumNumberOfTouches = 2
-        pan.name = GestureRecognizerTag.twoFingerPanGR.rawValue
         return pan
     }
     
     private var tapGestureRecognizer: UITapGestureRecognizer {
         let tap = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
         tap.delegate = self
-        tap.name = GestureRecognizerTag.tapGR.rawValue
         return tap
     }
     
@@ -534,14 +530,13 @@ final class HomeVC: UIViewController, APIManagerDelegate {
     /// What happens when the save button is pressed.
     /// - Parameter sender: A specialized button for placement on a toolbar or tab bar.
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
-        hapticManager.prepareImpactGenerator(style: .soft)
-        
         guard !cardIsBeingPanned, currentCard != nil else { return }
-        let data = currentCard!.data
         
-        // Write the current card's image data to cache images folder named by it's id value.
+        // Write the current card's image data to cache images folder named by its id value.
+        let data = currentCard!.data
         let cacheManager = CacheManager()
         let fileName = data.id + K.File.fileExtension
+        
         do {
             try cacheManager?.cacheImage(data.image, withFileName: fileName)
         } catch CacheError.failedToWriteImageFile(let fileUrl) {
@@ -555,16 +550,15 @@ final class HomeVC: UIViewController, APIManagerDelegate {
             debugPrint("Failed to get the url of the cached image file \(fileName)")
             return
         }
-
+        
+        hapticManager.prepareImpactGenerator(style: .soft)
         let activityVC = UIActivityViewController(activityItems: [imageFileUrl], applicationActivities: nil)
         
         // Set up Popover Presentation Controller's barButtonItem for iPad.
         if UIDevice.current.userInterfaceIdiom == .pad {
             activityVC.popoverPresentationController?.barButtonItem = sender
         }
-        
         self.present(activityVC, animated: true)
-        
         hapticManager.impactHaptic?.impactOccurred()
         
         // Remove the cache image file after the activityVC is dismissed.
@@ -584,8 +578,8 @@ final class HomeVC: UIViewController, APIManagerDelegate {
     /// Update the availability of the toolbar buttons.
     private func refreshButtonState() {
         guard onboardCompleted else { return }
-        collectionButton.isEnabled = true
         
+        collectionButton.isEnabled = true
         if currentCard != nil {
             saveButton.isEnabled = true
             shareButton.isEnabled = true
@@ -593,10 +587,9 @@ final class HomeVC: UIViewController, APIManagerDelegate {
             saveButton.isEnabled = false
             shareButton.isEnabled = false
         }
-        
         undoButton.isEnabled = previousCard != nil ? true : false
         
-        // Toggle the status of save button
+        // Toggle the status of save button.
         if let data = currentCard?.data {
             let isDataSaved = dbManager.isDataSaved(data: data)
             saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
@@ -796,6 +789,7 @@ final class HomeVC: UIViewController, APIManagerDelegate {
     /// - Parameter sender: A discrete gesture recognizer that interprets single or multiple taps.
     @objc private func tapHandler(sender: UITapGestureRecognizer) {
         guard let card = sender.view as? Card else { return }
+        
         if sender.state == .ended {
             // Toggle every regular card's overlay.
             switch card.cardType {
@@ -820,6 +814,12 @@ final class HomeVC: UIViewController, APIManagerDelegate {
         card.addGestureRecognizer(pinchGestureRecognizer)
         card.addGestureRecognizer(twoFingerPanGestureRecognizer)
         card.addGestureRecognizer(tapGestureRecognizer)
+        
+        // Save references
+        card.panGR = panGestureRecognizer
+        card.pinchGR = pinchGestureRecognizer
+        card.twoFingerPanGR = twoFingerPanGestureRecognizer
+        card.tapGR = tapGestureRecognizer
     }
     
     private func resetTransform() {
@@ -930,23 +930,22 @@ extension HomeVC: UIGestureRecognizerDelegate {
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        let panGR = currentCard?.panGR
-        let twoFingerPanGR = currentCard?.twoFingerPanGR
-        let pinchGR = currentCard?.pinchGR
-        let tapGR = currentCard?.tapGR
+        let pan = currentCard?.panGR
+        let twoFingerPan = currentCard?.twoFingerPanGR
+        let pinch = currentCard?.pinchGR
+        let tap = currentCard?.tapGR
         
         let conditions: [Bool] = [
-            gestureRecognizer == pinchGR && otherGestureRecognizer == panGR,
-            gestureRecognizer == twoFingerPanGR && otherGestureRecognizer == panGR,
-            gestureRecognizer == tapGR && otherGestureRecognizer == panGR,
-            gestureRecognizer == tapGR && otherGestureRecognizer == twoFingerPanGR,
-            gestureRecognizer == tapGR && otherGestureRecognizer == pinchGR
+            gestureRecognizer == pinch && otherGestureRecognizer == pan,
+            gestureRecognizer == twoFingerPan && otherGestureRecognizer == pan,
+            gestureRecognizer == tap && otherGestureRecognizer == pan,
+            gestureRecognizer == tap && otherGestureRecognizer == twoFingerPan,
+            gestureRecognizer == tap && otherGestureRecognizer == pinch
         ]
-        for condition in conditions {
-            if condition == true {
-                return true
-            }
+        for condition in conditions where condition == true {
+            return true
         }
+        
         return false
     }
 }
