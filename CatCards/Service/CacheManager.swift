@@ -35,7 +35,7 @@ final class CacheManager {
         print("Cache images folder url path:", cacheImagesFolderUrl!.path)
     }
     
-    //MARK: - Clear Cache
+    // MARK: - Clear Cache
     
     /// Remove cached data matching the specified id name.
     /// - Parameter dataName: Name attribute of the data to be removed.
@@ -81,7 +81,7 @@ final class CacheManager {
         }
     }
     
-    //MARK: - Load Cache
+    // MARK: - Load Cache
     
     /// Return the cached data stored in app's cache directory.
     /// - Returns: Cached data stored in app's cache directory.
@@ -114,7 +114,7 @@ final class CacheManager {
         return cachedData
     }
     
-    //MARK: - Save Cache
+    // MARK: - Save Cache
     
     /// Cache the data's id string value and the date it is saved.
     /// The image data is also saved into the cache image folder with CatData's id as its file name.
@@ -171,7 +171,7 @@ final class CacheManager {
         }
     }
     
-    //MARK: - Support
+    // MARK: - Support
     
     /// Return the URL of the image file saved in cache image folder.
     /// - Parameter fileName: The file name of the image file.

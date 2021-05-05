@@ -28,7 +28,7 @@ final class Card: UIView {
     var pinchGR: UIPinchGestureRecognizer?
     var tapGR: UITapGestureRecognizer?
     
-    //MARK: - Initialization
+    // MARK: - Initialization
     
     init(data: CatData, index: Int, type cardType: CardType) {
         self.data = data
@@ -52,7 +52,7 @@ final class Card: UIView {
         print("Card indexed \(index) is to be deinitialized.")
     }
     
-    //MARK: - Style & Shadow
+    // MARK: - Style & Shadow
     
     // Customize the card's style
     override func layoutSubviews() {
@@ -70,7 +70,7 @@ final class Card: UIView {
         self.layer.rasterizationScale = UIScreen.main.scale
     }
     
-    //MARK: - Size Control
+    // MARK: - Size Control
     
     enum Status {
         case intro, standby, shown
@@ -87,7 +87,7 @@ final class Card: UIView {
         }
     }
     
-    //MARK: - Image & Background
+    // MARK: - Image & Background
     
     /// Insert duplicated imageView with blur effect on top of it as a filter below the primary imageView as the card's background.
     private func setUpBackground() {
@@ -120,7 +120,7 @@ final class Card: UIView {
         imageView.layer.cornerRadius = K.Card.Style.cornerRadius
     }
     
-    //MARK: - Overlay
+    // MARK: - Overlay
     
     private func addOverlay() {
         switch cardType {
@@ -192,7 +192,7 @@ final class Card: UIView {
         }.startAnimation()
     }
     
-    //MARK: - Content Mode Optimization
+    // MARK: - Content Mode Optimization
     
     /// Calculate the difference between the ratio of the superview and the image.
     /// If the ratio difference equals or is less than the pre–set threshold, set the imageView's content mode to `scaleAspectFill`.

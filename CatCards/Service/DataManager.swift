@@ -46,7 +46,7 @@ final class DataManager {
         createFoldersNeeded()
     }
     
-    //MARK: - Data Loading
+    // MARK: - Data Loading
     
     // Load thumbnail images from local folder
     private func savedImageFilesURLs() -> [ImageFileURL] {
@@ -68,7 +68,7 @@ final class DataManager {
         return imageFilesURLs
     }
     
-    //MARK: - Data Saving
+    // MARK: - Data Saving
     
     internal func saveData(_ data: CatData, completion: K.CompletionHandler) {
         guard favoriteArray.count < K.Data.maxSavedImages else {
@@ -134,7 +134,7 @@ final class DataManager {
         }
     }
     
-    //MARK: - Data Deletion
+    // MARK: - Data Deletion
     
     // Delete data matching the ID in database and file system
     internal func deleteData(id: String) {
@@ -175,7 +175,7 @@ final class DataManager {
         }
     }
     
-    //MARK: - Directories Creation
+    // MARK: - Directories Creation
     
     private func createDirectory(withName name: String, at directory: FileManager.SearchPathDirectory) {
         let url = getFolderURL(folderName: name, at: directory)
@@ -200,7 +200,7 @@ final class DataManager {
         createDirectory(withName: previewImageFolderName, at: .cachesDirectory)
     }
     
-    //MARK: - Saved Data Availability & Listing
+    // MARK: - Saved Data Availability & Listing
     
     /// Determine if the provided data already exists in local folder.
     /// - Parameter data: Data to be determined.

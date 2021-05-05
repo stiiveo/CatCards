@@ -46,7 +46,7 @@ final class CollectionVC: UICollectionViewController {
         }
     }
     
-    //MARK: - View Overriding Methods
+    // MARK: - View Overriding Methods
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -96,7 +96,7 @@ final class CollectionVC: UICollectionViewController {
         }
     }
     
-    //MARK: - Collection View Item Size
+    // MARK: - Collection View Item Size
     
     private func updateCollectionViewItemSize() {
         /// Set up cell's size and spacing
@@ -144,7 +144,7 @@ final class CollectionVC: UICollectionViewController {
         return true
     }
     
-    //MARK: - Background View & Color
+    // MARK: - Background View & Color
     
     private func setBackgroundLayerColor() {
         let interfaceStyle = traitCollection.userInterfaceStyle

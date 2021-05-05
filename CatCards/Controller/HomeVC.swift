@@ -59,7 +59,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
     internal var nextCard: Card? { return cardArray[pointer + 1] }
     private var gesturesHandler: GesturesHandler!
     
-    //MARK: - View Overriding Methods
+    // MARK: - Overriding Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -108,7 +108,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         NotificationCenter.default.removeObserver(self, name: UIApplication.willTerminateNotification, object: nil)
     }
     
-    //MARK: - Cache Data Handling
+    // MARK: - Cache Data Handling
     
     /// Cache the established data stored in the local variable cardArray to the standard system Cache directory.
     private func cacheData() {
@@ -201,7 +201,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         
     }
     
-    //MARK: - Data Request & Handling
+    // MARK: - Data Request & Handling
     
     /// Send data request to API Manager.
     /// - Parameter numberOfRequests: Number of request sent to API Manager.
@@ -249,7 +249,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         }
     }
     
-    //MARK: - Card Introduction & Constraint
+    // MARK: - Card Introduction & Constraint
     
     /// Add a Card instance to the card view at assigned position.
     /// - Parameters:
@@ -303,7 +303,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         ])
     }
     
-    //MARK: - Background Layer & Shade Creation
+    // MARK: - Background Layer & Shade Creation
     
     /// Set up the background color of the main view which is realized by a gradient layer consisting two colors.
     /// The light / dark theme of the background is set based on the device's interface style.
@@ -337,7 +337,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         shadingLayer.alpha = 0
     }
     
-    //MARK: - UI Buttons Visibility Control
+    // MARK: - UI Buttons Status Control
     
     /// Disable and hide all button items in nav-bar and toolbar.
     private func hideAndDisableUIButtons() {
@@ -358,7 +358,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         toolbar.alpha = 1
     }
     
-    //MARK: - Support Methods
+    // MARK: - Support Methods
     
     /// Hide navigation bar and toolbar's border line
     private func setUpBarStyle() {
@@ -369,7 +369,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         toolbar.setShadowImage(UIImage(), forToolbarPosition: .bottom)
     }
     
-    //MARK: - User Defaults Handling
+    // MARK: - User Defaults Handling
     
     private func loadStoredParameters() {
         viewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
@@ -412,7 +412,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         defaults.setValue(viewCount, forKey: K.UserDefaultsKeys.viewCount)
     }
     
-    //MARK: - Toolbar Button Method and State Control
+    // MARK: - Toolbar Button Method and State Control
     
     /// What happens when the undo button is pressed.
     /// - Parameter sender: A specialized button for placement on a toolbar or tab bar.
@@ -574,7 +574,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         feedbackView.startAnimation(withDelay: 0, duration: 0.4)
     }
     
-    //MARK: - Error Handling Section
+    // MARK: - Error Handling Section
     
     func APIErrorDidOccur(error: APIError) {
         // Present alert view to the user if any error occurs in the data fetching process.

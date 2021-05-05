@@ -22,7 +22,7 @@ final class TriviaOverlay: UIView {
         addTriviaLabel()
     }
     
-    //MARK: - Background & Label
+    // MARK: - Background & Label
     
     private func addBackgroundView() {
         // Only applies blur effect view on top of this view if the user hadn't disable transparancy effects

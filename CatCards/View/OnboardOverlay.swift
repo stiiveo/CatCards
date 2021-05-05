@@ -12,7 +12,7 @@ final class OnboardOverlay: UIView {
     
     private var cardIndex: Int = 0
     
-    //MARK: - Initialization
+    // MARK: - Initialization
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -29,7 +29,7 @@ final class OnboardOverlay: UIView {
         addContent()
     }
     
-    //MARK: - Stack View
+    // MARK: - Stack View
     
     private func addContent() {
         // Content
@@ -51,7 +51,7 @@ final class OnboardOverlay: UIView {
                 withOffset: AutoLayoutOffset(leading: 10, trailing: 10, top: 15, bottom: 20))
     }
     
-    //MARK: - Background
+    // MARK: - Background
     
     /// Add background view and blur effect to the label view
     private func addBlurredBackground() {
@@ -74,7 +74,7 @@ final class OnboardOverlay: UIView {
     }
 }
 
-//MARK: - Content
+// MARK: - Content
 
 /// The tableView which organizes all the onboard text and image content.
 final class OverlayTableView: UITableView {
@@ -134,7 +134,7 @@ final class OverlayPromptLabel: UILabel {
     }
 }
 
-//MARK: - Data Source
+// MARK: - Data Source
 
 extension OnboardOverlay: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
