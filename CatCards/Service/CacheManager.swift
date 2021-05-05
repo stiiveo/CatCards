@@ -9,27 +9,33 @@
 import UIKit
 import CoreData
 
-class CacheManager {
+final class CacheManager {
     
     static let shared = CacheManager()
-    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    private var context: NSManagedObjectContext!
     private let fileManager = FileManager.default
-    private var cacheImagesFolderUrl: URL? {
-        do {
-            let cacheRootUrl = try fileManager.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-            return cacheRootUrl.appendingPathComponent(K.File.FolderName.cacheImage, isDirectory: true)
-        } catch {
-            debugPrint("Failed to locate nor create standard system Caches directory: \(error)")
-            return nil
-        }
-    }
+    private var cacheImagesFolderUrl: URL!
     private let imageFileExtension = K.File.fileExtension
     
-    init() {
-        print("Cache images folder url path:", cacheImagesFolderUrl?.path ?? "")
+    init?() {
+        if let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext {
+            self.context = context
+            
+            do {
+                let cacheRootUrl = try fileManager.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+                self.cacheImagesFolderUrl = cacheRootUrl.appendingPathComponent(K.File.FolderName.cacheImage, isDirectory: true)
+            } catch {
+                debugPrint("Failed to locate nor create standard system Caches directory: \(error)")
+                return nil
+            }
+        } else {
+            return nil
+        }
+        
+        print("Cache images folder url path:", cacheImagesFolderUrl!.path)
     }
     
-    //MARK: - Clear Cache
+    // MARK: - Clear Cache
     
     /// Remove cached data matching the specified id name.
     /// - Parameter dataName: Name attribute of the data to be removed.
@@ -75,7 +81,7 @@ class CacheManager {
         }
     }
     
-    //MARK: - Load Cache
+    // MARK: - Load Cache
     
     /// Return the cached data stored in app's cache directory.
     /// - Returns: Cached data stored in app's cache directory.
@@ -108,7 +114,7 @@ class CacheManager {
         return cachedData
     }
     
-    //MARK: - Save Cache
+    // MARK: - Save Cache
     
     /// Cache the data's id string value and the date it is saved.
     /// The image data is also saved into the cache image folder with CatData's id as its file name.
@@ -165,7 +171,7 @@ class CacheManager {
         }
     }
     
-    //MARK: - Support
+    // MARK: - Support
     
     /// Return the URL of the image file saved in cache image folder.
     /// - Parameter fileName: The file name of the image file.

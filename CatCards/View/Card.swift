@@ -12,70 +12,23 @@ enum CardType {
     case onboard, regular
 }
 
-enum GestureRecognizerTag: String {
-    case panGR = "panGR"
-    case twoFingerPanGR = "twoFingerPanGR"
-    case pinchGR = "pinchGR"
-    case tapGR = "tapGR"
-}
-
-class Card: UIView {
+final class Card: UIView {
 
     var data: CatData
     var index: Int
     var cardType: CardType
-    var centerXConstraint: NSLayoutConstraint!
-    var centerYConstraint: NSLayoutConstraint!
-    var heightConstraint: NSLayoutConstraint!
-    var widthConstraint: NSLayoutConstraint!
     private let imageView = UIImageView()
     private let bgImageView = UIImageView()
     private var onboardOverlay: OnboardOverlay?
     private var triviaOverlay: TriviaOverlay?
     
     // This class's attached gesture recognizers
-    var panGR: UIPanGestureRecognizer? {
-        if let gestureRecognizers = self.gestureRecognizers {
-            for gr in gestureRecognizers {
-                if gr.name == GestureRecognizerTag.panGR.rawValue {
-                    return gr as? UIPanGestureRecognizer
-                }
-            }
-        }
-        return nil
-    }
-    var twoFingerPanGR: UIPanGestureRecognizer? {
-        if let gestureRecognizers = self.gestureRecognizers {
-            for gr in gestureRecognizers {
-                if gr.name == GestureRecognizerTag.twoFingerPanGR.rawValue {
-                    return gr as? UIPanGestureRecognizer
-                }
-            }
-        }
-        return nil
-    }
-    var pinchGR: UIPinchGestureRecognizer? {
-        if let gestureRecognizers = self.gestureRecognizers {
-            for gr in gestureRecognizers {
-                if gr.name == GestureRecognizerTag.pinchGR.rawValue {
-                    return gr as? UIPinchGestureRecognizer
-                }
-            }
-        }
-        return nil
-    }
-    var tapGR: UITapGestureRecognizer? {
-        if let gestureRecognizers = self.gestureRecognizers {
-            for gr in gestureRecognizers {
-                if gr.name == GestureRecognizerTag.tapGR.rawValue {
-                    return gr as? UITapGestureRecognizer
-                }
-            }
-        }
-        return nil
-    }
+    var panGR: UIPanGestureRecognizer?
+    var twoFingerPanGR: UIPanGestureRecognizer?
+    var pinchGR: UIPinchGestureRecognizer?
+    var tapGR: UITapGestureRecognizer?
     
-    //MARK: - Initialization
+    // MARK: - Initialization
     
     init(data: CatData, index: Int, type cardType: CardType) {
         self.data = data
@@ -96,10 +49,10 @@ class Card: UIView {
     }
     
     deinit {
-        print("Card with index \(index) is been deinitialized.")
+        print("Card indexed \(index) is to be deinitialized.")
     }
     
-    //MARK: - Style & Shadow
+    // MARK: - Style & Shadow
     
     // Customize the card's style
     override func layoutSubviews() {
@@ -117,7 +70,7 @@ class Card: UIView {
         self.layer.rasterizationScale = UIScreen.main.scale
     }
     
-    //MARK: - Size Control
+    // MARK: - Size Control
     
     enum Status {
         case intro, standby, shown
@@ -134,7 +87,7 @@ class Card: UIView {
         }
     }
     
-    //MARK: - Image & Background
+    // MARK: - Image & Background
     
     /// Insert duplicated imageView with blur effect on top of it as a filter below the primary imageView as the card's background.
     private func setUpBackground() {
@@ -167,7 +120,7 @@ class Card: UIView {
         imageView.layer.cornerRadius = K.Card.Style.cornerRadius
     }
     
-    //MARK: - Overlay
+    // MARK: - Overlay
     
     private func addOverlay() {
         switch cardType {
@@ -188,7 +141,7 @@ class Card: UIView {
         
         if index == 1 {
             // Use built–in image for the second onboard card.
-            data = CatData(id: K.OnboardOverlay.zoomImageID, image: K.OnboardOverlay.zoomImage)
+            data = CatData(id: K.OnboardOverlay.zoomImageFileID, image: K.OnboardOverlay.zoomImage)
             imageView.image = data.image
             bgImageView.image = data.image
         }
@@ -239,7 +192,7 @@ class Card: UIView {
         }.startAnimation()
     }
     
-    //MARK: - Content Mode Optimization
+    // MARK: - Content Mode Optimization
     
     /// Calculate the difference between the ratio of the superview and the image.
     /// If the ratio difference equals or is less than the pre–set threshold, set the imageView's content mode to `scaleAspectFill`.

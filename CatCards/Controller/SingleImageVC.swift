@@ -8,14 +8,14 @@
 
 import UIKit
 
-class SingleImageVC: UIViewController, UIScrollViewDelegate {
+final class SingleImageVC: UIViewController, UIScrollViewDelegate {
 
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var stackView: UIStackView!
     @IBOutlet weak var toolbar: UIToolbar!
     
     var selectedCellIndex: Int = 0
-    private let dbManager = DBManager.shared
+    private let dbManager = DataManager.shared
     private let backgroundLayer = CAGradientLayer()
     private var bufferImageArray: [ImageScrollView] = []
     private let bufferImageNumber: Int = K.Data.prefetchNumberOfImageAtEachSide
@@ -37,7 +37,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         case forward, backward
     }
     
-    //MARK: - View Overriding Methods
+    // MARK: - View Overriding Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -89,7 +89,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         return true
     }
     
-    //MARK: - Image Loading & Zoom Scale Control
+    // MARK: - Image Loading & Zoom Scale Control
     
     private func loadImagesToStackView(atIndex index: Int) {
         // Load images to selected imageView and nearby ones.
@@ -122,7 +122,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         
     }
     
-    //MARK: - StackView Image Loading
+    // MARK: - StackView Image Loading
     
     /// Load image from disk and reset buffered image.
     ///
@@ -186,7 +186,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    //MARK: - ScrollView Behavior Setting
+    // MARK: - ScrollView Behavior Setting
     
     private func setScrollViewOffset(toIndex index: Int) {
         DispatchQueue.main.async {
@@ -202,7 +202,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         self.scrollView.addGestureRecognizer(twoFingerPan)
     }
     
-    //MARK: - ImageView Deletion Methods
+    // MARK: - ImageView Deletion Methods
     
     /// Stack view scrolls to right (next page) if the deleted view is not the last one in the stackView.
     private func scrollAndRemoveImageView() {
@@ -249,7 +249,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         viewToDelete.removeFromSuperview()
     }
     
-    //MARK: - Toolbar Button Methods
+    // MARK: - Toolbar Button Methods
     
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
         let imageFileURLs = dbManager.imageFileURLs
@@ -275,7 +275,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let alert = UIAlertController(title: Z.AlertMessage.DeleteWarning.alertTitle, message: nil, preferredStyle: .actionSheet)
         let deleteAction = UIAlertAction(title: Z.AlertMessage.DeleteWarning.actionTitle, style: .destructive) { (action) in
             
-            let databaseManager = DBManager.shared
+            let databaseManager = DataManager.shared
             let savedDataList = databaseManager.listOfSavedFileNames()
             let dataID = savedDataList[self.currentPage]
             
@@ -303,7 +303,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         self.present(alert, animated: true, completion: nil)
     }
     
-    //MARK: - Stack View & Toolbar Preparation
+    // MARK: - Stack View & Toolbar Preparation
     
     private func setToolbarStyle() {
         // Make toolbar's background transparent
@@ -311,7 +311,7 @@ class SingleImageVC: UIViewController, UIScrollViewDelegate {
         toolbar.setShadowImage(UIImage(), forToolbarPosition: .any)
     }
     
-    //MARK: - Background Color
+    // MARK: - Background Color
     
     private func setBackgroundColor() {
         let interfaceStyle = traitCollection.userInterfaceStyle

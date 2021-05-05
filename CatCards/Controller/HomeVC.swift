@@ -7,149 +7,81 @@
 //
 
 import UIKit
-import UserNotifications
 
-class HomeVC: UIViewController, APIManagerDelegate {
+final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
     
-    //MARK: - IBOutlet
+    // MARK: - IBOutlet
     
-    // Access point to this view's built–in toolbar.
     @IBOutlet weak var toolbar: UIToolbar!
-    
-    // A button which saves the current card's image to the device's app folder with attribute info being saved to database via CoreData.
     @IBOutlet weak var saveButton: UIBarButtonItem!
-    
-    // A button which allows user to share current card's image.
     @IBOutlet weak var shareButton: UIBarButtonItem!
-    
-    // A button which retrieves previously dismissed card back to the top layer of the card view.
     @IBOutlet weak var undoButton: UIBarButtonItem!
-    
-    // A button which triggers segue from HomeVC to CollectionVC.
     @IBOutlet weak var collectionButton: UIBarButtonItem!
-    
-    // Super view to which all cards being added.
+    // Superview to which all cards being added.
     @IBOutlet weak var cardView: UIView!
     
-    //MARK: - Local Properties
+    // MARK: - Local Properties
     
     static let shared = HomeVC()
     private let defaults = UserDefaults.standard
-    private let dbManager = DBManager.shared
+    private let dbManager = DataManager.shared
     private let cacheManager = CacheManager.shared
     private let apiManager = APIManager.shared
-    
     // Cache of all Card objects used to display to the user.
-    private var cardArray: [Int: Card] = [:]
-    
+    internal var cardArray = [Int: Card]()
     // Array of string data used as the content of the onboard info.
     private let onboardData = K.OnboardOverlay.content
-    
-    // Navigational bar this view controller provides.
     private var navBar: UINavigationBar!
-    
-    // The pointer to which card being added to the top layer of the cardView.
-    private var pointer: Int = 0 {
+    private var backgroundLayer: CAGradientLayer!
+    // A shading layer displayed behind the current card when the current card is zoomed–in by the user.
+    internal var shadingLayer: UIView!
+    // The pointer to which card being added to the top layer of cardView.
+    internal var pointer: Int = 0 {
         didSet {
             if !onboardCompleted && pointer >= K.OnboardOverlay.content.count {
                 onboardCompleted = true
             }
         }
     }
-    
     // Maximum number of cards with different data shown to the user.
-    private var maxPointerReached: Int = 0
-    
-    private let numberOfPrefetchData = K.Data.numberOfPrefetchedData
-    
-    // Background view behind the main imageView.
-    private var backgroundLayer: CAGradientLayer!
-    
-    // A shading layer displayed behind the current card when the current card is zoomed–in by the user.
-    private var shadeLayer: UIView!
-    
-    // Indicator on whether the current card is being panned.
-    private var cardIsBeingPanned = false
-    
-    // Haptic manager which manages customized operation of the device's haptic engine.
+    internal var maxPointerReached: Int = 0
+    internal var cardIsBeingPanned = false
     private let hapticManager = HapticManager()
     
     // Status on whether to show card info on all cards.
     static var showOverlay = true
-    
     // Number of cards with cat images the user has seen.
-    private var viewCount: Int = 0
-    
+    internal var viewCount: Int = 0
     // Status on if the onboard sessions were completed by the user.
-    private var onboardCompleted = false
+    internal var onboardCompleted = false
+    internal var currentCard: Card? { return cardArray[pointer] }
+    private var previousCard: Card? { return cardArray[pointer - 1] }
+    internal var nextCard: Card? { return cardArray[pointer + 1] }
+    private var gesturesHandler: GesturesHandler!
     
-    private var currentCard: Card? {
-        return cardArray[pointer]
-    }
-    
-    private var previousCard: Card? {
-        return cardArray[pointer - 1]
-    }
-    
-    private var nextCard: Card? {
-        return cardArray[pointer + 1]
-    }
-    
-    private var panGestureRecognizer: UIPanGestureRecognizer {
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(panHandler))
-        pan.delegate = self
-        pan.minimumNumberOfTouches = 1
-        pan.maximumNumberOfTouches = 1
-        pan.name = GestureRecognizerTag.panGR.rawValue
-        return pan
-    }
-    
-    private var pinchGestureRecognizer: UIPinchGestureRecognizer {
-        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(pinchHandler))
-        pinch.delegate = self
-        pinch.name = GestureRecognizerTag.pinchGR.rawValue
-        return pinch
-    }
-    
-    private var twoFingerPanGestureRecognizer: UIPanGestureRecognizer {
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(twoFingerPanHandler))
-        pan.delegate = self
-        pan.minimumNumberOfTouches = 2
-        pan.maximumNumberOfTouches = 2
-        pan.name = GestureRecognizerTag.twoFingerPanGR.rawValue
-        return pan
-    }
-    
-    private var tapGestureRecognizer: UITapGestureRecognizer {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
-        tap.delegate = self
-        tap.name = GestureRecognizerTag.tapGR.rawValue
-        return tap
-    }
-    
-    //MARK: - View Overriding Methods
+    // MARK: - Overriding Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
         navBar = self.navigationController?.navigationBar
+        gesturesHandler = GesturesHandler(delegate: self, superview: cardView)
         addBackgroundLayer()
+        addShadeOverlay()
         dbManager.delegate = self
         apiManager.delegate = self
-        disableToolbarButtons()
         loadStoredParameters()
         loadCachedData()
+        requestNewDataIfNeeded()
         
+        disableToolbarButtons()
         if !onboardCompleted {
             hideAndDisableUIButtons()
         }
         
-        requestNewDataIfNeeded()
-        addShadeOverlay()
-        
         // Notify this VC that if the app enters the background, save the cached view count value to the db.
         NotificationCenter.default.addObserver(self, selector: #selector(takeActionsBeforeTermination), name: UIApplication.willTerminateNotification, object: nil)
         
-        // For UI Testing
+        // UI testing references
         setUpUIReference()
     }
     
@@ -167,7 +99,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
         }
     }
     
-    /// Auto hidden the home indicator.
     override var prefersHomeIndicatorAutoHidden: Bool {
         return true
     }
@@ -177,7 +108,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         NotificationCenter.default.removeObserver(self, name: UIApplication.willTerminateNotification, object: nil)
     }
     
-    //MARK: - Cache Data Handling
+    // MARK: - Cache Data Handling
     
     /// Cache the established data stored in the local variable cardArray to the standard system Cache directory.
     private func cacheData() {
@@ -190,7 +121,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         let sortedCardArrayKeys = cardArray.keys.sorted()
         let sortedData = sortedCardArrayKeys.map { cardArray[$0]!.data }
         do {
-            try cacheManager.cacheData(sortedData)
+            try cacheManager?.cacheData(sortedData)
         } catch CacheError.failedToCommitChangesToPersistentContainer {
             debugPrint("Failed to commit objects changes to Cache entity")
         } catch CacheError.failedToConvertImageToJpegData(let image) {
@@ -203,7 +134,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     private func loadCachedData() {
-        let cachedData = cacheManager.fetchCachedData()
+        guard let cachedData = cacheManager?.fetchCachedData() else { return }
         guard !cachedData.isEmpty else {
             pointer = 0
             debugPrint("No cached data saved.")
@@ -243,6 +174,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     /// Request new data to make the number of prefetched data meets the pre–set target.
     private func requestNewDataIfNeeded() {
         let numberOfNonUndoCard = cardArray.count - pointer
+        let numberOfPrefetchData = K.Data.numberOfPrefetchedData
         if numberOfNonUndoCard < numberOfPrefetchData {
             let numberOfNewDataShort = numberOfPrefetchData - numberOfNonUndoCard
             sendAPIRequest(numberOfRequests: numberOfNewDataShort)
@@ -250,7 +182,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     /// Clear the card's cache data if its index position is beyond the bound of the undo–able range.
-    private func clearCacheData() {
+    internal func clearCacheData() {
         let maxUndoNumber = K.Data.numberOfUndoCard
         let oldCardIndex = pointer - (maxUndoNumber + 1)
         if let oldCard = cardArray[oldCardIndex] {
@@ -259,7 +191,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
                 defer {
                     cardArray[oldCardIndex] = nil
                 }
-                try cacheManager.clearCache(dataId: oldCard.data.id)
+                try cacheManager?.clearCache(dataId: oldCard.data.id)
             } catch CacheError.fileNotFound(let fileName) {
                 debugPrint("Cache file '\(fileName)' cannot be removed because it's absent.")
             } catch {
@@ -269,11 +201,11 @@ class HomeVC: UIViewController, APIManagerDelegate {
         
     }
     
-    //MARK: - Data Request & Handling
+    // MARK: - Data Request & Handling
     
     /// Send data request to API Manager.
     /// - Parameter numberOfRequests: Number of request sent to API Manager.
-    private func sendAPIRequest(numberOfRequests: Int) {
+    internal func sendAPIRequest(numberOfRequests: Int) {
         let validatedRequestNumber = numberOfRequests > 0 ? numberOfRequests : 1
         for _ in 0..<validatedRequestNumber {
             apiManager.fetchData()
@@ -317,20 +249,20 @@ class HomeVC: UIViewController, APIManagerDelegate {
         }
     }
     
-    //MARK: - Card Introduction & Constraint
+    // MARK: - Card Introduction & Constraint
     
     /// Add a Card instance to the card view at assigned position.
     /// - Parameters:
     ///   - card: The card to be added to the view.
     ///   - atBottom: A boolean on whether the card would be added at the top or the bottom of the card view.
-    private func addCardToView(_ card: Card, atBottom: Bool) {
+    internal func addCardToView(_ card: Card, atBottom: Bool) {
         cardView.addSubview(card)
         addCardConstraint(card)
         card.optimizeContentMode()
         
         // Add gesture recognizers if there's none.
         if card.gestureRecognizers == nil {
-            addGestureRecognizers(to: card)
+            gesturesHandler.addGestureRecognizers(to: card)
         }
         
         if atBottom {
@@ -360,27 +292,18 @@ class HomeVC: UIViewController, APIManagerDelegate {
         }
     }
     
-    /// Activate the constraints which defines the position on where the card would be placed relative to the card view's position.
     /// - Parameter card: The card to which the constraint will be applied.
     private func addCardConstraint(_ card: Card) {
-        let centerXAnchor = card.centerXAnchor.constraint(equalTo: cardView.centerXAnchor)
-        let centerYAnchor = card.centerYAnchor.constraint(equalTo: cardView.centerYAnchor)
-        let heightAnchor = card.heightAnchor.constraint(equalTo: cardView.heightAnchor, multiplier: 0.90)
-        let widthAnchor = card.widthAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: 0.90)
-        
-        // Save constraints to the card's property for manipulation in the future
-        card.centerXConstraint = centerXAnchor
-        card.centerYConstraint = centerYAnchor
-        card.heightConstraint = heightAnchor
-        card.widthConstraint = widthAnchor
-        
         card.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            card.centerXConstraint, card.centerYConstraint, card.heightConstraint, card.widthConstraint
+            card.centerXAnchor.constraint(equalTo: cardView.centerXAnchor),
+            card.centerYAnchor.constraint(equalTo: cardView.centerYAnchor),
+            card.heightAnchor.constraint(equalTo: cardView.heightAnchor, multiplier: 0.90),
+            card.widthAnchor.constraint(equalTo: cardView.widthAnchor, multiplier: 0.90)
         ])
     }
     
-    //MARK: - Background Layer & Shade Creation
+    // MARK: - Background Layer & Shade Creation
     
     /// Set up the background color of the main view which is realized by a gradient layer consisting two colors.
     /// The light / dark theme of the background is set based on the device's interface style.
@@ -408,13 +331,13 @@ class HomeVC: UIViewController, APIManagerDelegate {
     
     /// Insert a black view below the card view with 0 opacity which is used to create shading effect when the card is being zoomed–in.
     private func addShadeOverlay() {
-        shadeLayer = UIView(frame: view.bounds)
-        shadeLayer.backgroundColor = .black
-        shadeLayer.alpha = 0
-        view.insertSubview(shadeLayer, belowSubview: cardView)
+        shadingLayer = UIView(frame: view.bounds)
+        view.insertSubview(shadingLayer, belowSubview: cardView)
+        shadingLayer.backgroundColor = .black
+        shadingLayer.alpha = 0
     }
     
-    //MARK: - UI Buttons Visibility Control
+    // MARK: - UI Buttons Status Control
     
     /// Disable and hide all button items in nav-bar and toolbar.
     private func hideAndDisableUIButtons() {
@@ -435,7 +358,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         toolbar.alpha = 1
     }
     
-    //MARK: - Support Methods
+    // MARK: - Support Methods
     
     /// Hide navigation bar and toolbar's border line
     private func setUpBarStyle() {
@@ -446,7 +369,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         toolbar.setShadowImage(UIImage(), forToolbarPosition: .bottom)
     }
     
-    //MARK: - User Defaults Handling
+    // MARK: - User Defaults Handling
     
     private func loadStoredParameters() {
         viewCount = defaults.integer(forKey: K.UserDefaultsKeys.viewCount)
@@ -489,7 +412,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         defaults.setValue(viewCount, forKey: K.UserDefaultsKeys.viewCount)
     }
     
-    //MARK: - Toolbar Button Method and State Control
+    // MARK: - Toolbar Button Method and State Control
     
     /// What happens when the undo button is pressed.
     /// - Parameter sender: A specialized button for placement on a toolbar or tab bar.
@@ -502,7 +425,6 @@ class HomeVC: UIViewController, APIManagerDelegate {
         undoButton.isEnabled = false
         hapticManager.impactHaptic?.impactOccurred()
         nextCard?.removeFromSuperview()
-        
         addCardToView(undoCard, atBottom: false)
         
         /*
@@ -512,25 +434,21 @@ class HomeVC: UIViewController, APIManagerDelegate {
          */
         if undoCard.frame.size == .zero {
             // Place the card randomly to one of the corners of the view.
-            var randomMultiplier: CGFloat {
+            var randomTranslation: CGFloat {
+                let offset = cardView.frame.height * 2
                 if Bool.random() {
-                    return 1
+                    return 1 * offset
                 } else {
-                    return -1
+                    return -1 * offset
                 }
             }
-            undoCard.centerXConstraint.constant = cardView.frame.height * 3 * randomMultiplier
-            undoCard.centerYConstraint.constant = cardView.frame.height * 3 * randomMultiplier
-            updateLayout()
-            
-            undoCard.centerXConstraint.constant = 0
-            undoCard.centerYConstraint.constant = 0
+            let transform = CGAffineTransform(translationX: randomTranslation, y: randomTranslation)
+            undoCard.transform = transform
         }
         
         
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: [.curveEaseOut]) {
             self.currentCard?.setSize(status: .standby)
-            self.updateLayout()
             undoCard.transform = .identity
         } completion: { _ in
             self.pointer -= 1
@@ -555,23 +473,25 @@ class HomeVC: UIViewController, APIManagerDelegate {
             
             switch isSaved {
             case false:
+                // Save data
                 dbManager.saveData(data) { success in
-                    if success {
-                        // Data is saved successfully
-                        DispatchQueue.main.async {
-                            self.showConfirmIcon()
-                        }
-                        hapticManager.notificationHaptic?.notificationOccurred(.success)
-                    } else {
+                    guard success else {
                         // Data is not saved successfully
+                        debugPrint("Current image cannot be saved. Image ID: \(currentCard!.data.id)")
                         hapticManager.notificationHaptic?.notificationOccurred(.error)
+                        return
                     }
+                    // Data is saved successfully
+                    DispatchQueue.main.async {
+                        self.showConfirmIcon()
+                    }
+                    hapticManager.notificationHaptic?.notificationOccurred(.success)
                 }
             case true:
+                // Delete data
                 dbManager.deleteData(id: data.id)
                 hapticManager.impactHaptic?.impactOccurred()
             }
-            
             refreshButtonState()
             hapticManager.releaseImpactGenerator()
             hapticManager.releaseNotificationGenerator()
@@ -581,16 +501,15 @@ class HomeVC: UIViewController, APIManagerDelegate {
     /// What happens when the save button is pressed.
     /// - Parameter sender: A specialized button for placement on a toolbar or tab bar.
     @IBAction func shareButtonPressed(_ sender: UIBarButtonItem) {
-        hapticManager.prepareImpactGenerator(style: .soft)
-        
         guard !cardIsBeingPanned, currentCard != nil else { return }
-        let data = currentCard!.data
         
-        // Write the current card's image data to cache images folder named by it's id value.
+        // Write the current card's image data to cache images folder named by its id value.
+        let data = currentCard!.data
         let cacheManager = CacheManager()
         let fileName = data.id + K.File.fileExtension
+        
         do {
-            try cacheManager.cacheImage(data.image, withFileName: fileName)
+            try cacheManager?.cacheImage(data.image, withFileName: fileName)
         } catch CacheError.failedToWriteImageFile(let fileUrl) {
             debugPrint("Failed to cache file \(fileName) to path: \(fileUrl.path)")
             return
@@ -598,20 +517,19 @@ class HomeVC: UIViewController, APIManagerDelegate {
             debugPrint("Unknown error occured when caching image data with ID \(data.id)")
         }
         // Get the url of the cached image file.
-        guard let imageFileUrl = cacheManager.urlOfImageFile(fileName: fileName) else {
+        guard let imageFileUrl = cacheManager?.urlOfImageFile(fileName: fileName) else {
             debugPrint("Failed to get the url of the cached image file \(fileName)")
             return
         }
-
+        
+        hapticManager.prepareImpactGenerator(style: .soft)
         let activityVC = UIActivityViewController(activityItems: [imageFileUrl], applicationActivities: nil)
         
         // Set up Popover Presentation Controller's barButtonItem for iPad.
         if UIDevice.current.userInterfaceIdiom == .pad {
             activityVC.popoverPresentationController?.barButtonItem = sender
         }
-        
         self.present(activityVC, animated: true)
-        
         hapticManager.impactHaptic?.impactOccurred()
         
         // Remove the cache image file after the activityVC is dismissed.
@@ -629,10 +547,10 @@ class HomeVC: UIViewController, APIManagerDelegate {
     }
     
     /// Update the availability of the toolbar buttons.
-    private func refreshButtonState() {
+    internal func refreshButtonState() {
         guard onboardCompleted else { return }
-        collectionButton.isEnabled = true
         
+        collectionButton.isEnabled = true
         if currentCard != nil {
             saveButton.isEnabled = true
             shareButton.isEnabled = true
@@ -640,10 +558,9 @@ class HomeVC: UIViewController, APIManagerDelegate {
             saveButton.isEnabled = false
             shareButton.isEnabled = false
         }
-        
         undoButton.isEnabled = previousCard != nil ? true : false
         
-        // Toggle the status of save button
+        // Toggle the status of save button.
         if let data = currentCard?.data {
             let isDataSaved = dbManager.isDataSaved(data: data)
             saveButton.image = isDataSaved ? K.ButtonImage.filledHeart : K.ButtonImage.heart
@@ -654,312 +571,32 @@ class HomeVC: UIViewController, APIManagerDelegate {
     private func showConfirmIcon() {
         guard let card = currentCard else { return }
         let feedbackView = FeedbackView(parentView: card, image: K.Image.feedbackImage)
-        feedbackView.startAnimation(withDelay: nil, duration: 0.4)
+        feedbackView.startAnimation(withDelay: 0, duration: 0.4)
     }
     
-    //MARK: - Gesture Recognizers
+    // MARK: - Error Handling Section
     
-    /// Which part of the card the user's finger is placed onto.
-    private enum Side {
-        case upper, lower
-    }
-    
-    private var firstFingerLocation: Side!
-    private var offsetTransform: CGAffineTransform = .identity
-    private var scaleTransform: CGAffineTransform = .identity
-    
-    /// What happens when user drags the card with 1 finger.
-    /// - Parameter sender: A discrete gesture recognizer that interprets panning gestures.
-    @objc private func panHandler(_ sender: UIPanGestureRecognizer) {
-        guard let card = sender.view as? Card else { return }
-        let halfViewWidth = view.frame.width / 2
-        
-        // Detect onto which side (upper or lower) of the card is the user's finger placed.
-        let fingerPosition = sender.location(in: sender.view)
-        let side: Side = fingerPosition.y < card.frame.midY ? .upper : .lower
-        firstFingerLocation = (firstFingerLocation == nil) ? side : firstFingerLocation
-        
-        // Amount of x-axis offset the card moved from its original position
-        let xAxisOffset = card.transform.tx
-        let yAxisOffset = card.transform.ty
-        let maxRotation: CGFloat = 1.0 / 6 // 1.0 Radian = 180º | 180° / 6 = 30°
-        // Card reaches its maximum rotation degree when its y–axis reaches the edge of the view.
-        let rotationDegree = maxRotation * (xAxisOffset / halfViewWidth)
-        
-        // Card's rotation direction is based on the finger position on the card
-        let cardRotationRadian = (firstFingerLocation == .upper) ? rotationDegree : -rotationDegree
-        let velocity = sender.velocity(in: self.view) // points per second
-        
-        // Card's offset of x and y position
-        let cardOffset = CGPoint(x: xAxisOffset, y: yAxisOffset)
-        // Distance by which the card is offset by the user.
-        let panDistance = hypot(cardOffset.x, cardOffset.y)
-        
-        switch sender.state {
-        case .began:
-            cardIsBeingPanned = true
-        case .changed:
-            /*
-             Sync the card position's offset with the offset amount applied by the user.
-             Increase the card's rotation degrees as it approaches either side of the screen.
-             */
-            let t = sender.translation(in: cardView)
-            let transform = CGAffineTransform(translationX: t.x, y: t.y)
-            let rotation = CGAffineTransform(rotationAngle: cardRotationRadian)
-            offsetTransform = transform.concatenating(rotation)
-            updateCardTransform(card: card)
-            
-            // Determine next card's transform based on current card's travel distance
-            let distance = (panDistance <= halfViewWidth) ? (panDistance / halfViewWidth) : 1
-            let defaultScale = K.Card.SizeScale.standby
-            nextCard?.transform = CGAffineTransform(
-                scaleX: defaultScale + (distance * (1 - defaultScale)),
-                y: defaultScale + (distance * (1 - defaultScale))
-            )
-            
-        // When user's finger left the screen.
-        case .ended, .cancelled, .failed:
-            firstFingerLocation = nil // Reset first finger location
-            let minTravelDistance = view.frame.height // minimum travel distance of the card
-            let minDragDistance = halfViewWidth // minimum dragging distance of the card
-            let vector = CGPoint(x: velocity.x / 2, y: velocity.y / 2)
-            let vectorDistance = hypot(vector.x, vector.y)
-            /*
-             Card dismissing threshold A:
-             The projected travel distance is greater than or equals minimum distance.
-             */
-            if vectorDistance >= minTravelDistance {
-                pointer += 1
-                dismissCardWithVelocity(card, deltaX: vector.x, deltaY: vector.y)
-                self.resetTransform()
-            }
-            /*
-             Card dismissing threshold B:
-             The projected travel distance is less than the minimum travel distance
-             BUT the distance of card being dragged is greater than distance threshold.
-             */
-            else if vectorDistance < minTravelDistance && panDistance >= minDragDistance {
-                let distanceDelta = minTravelDistance / panDistance
-                let minimumDelta = CGPoint(x: cardOffset.x * distanceDelta,
-                                           y: cardOffset.y * distanceDelta)
-                pointer += 1
-                dismissCardWithVelocity(card, deltaX: minimumDelta.x, deltaY: minimumDelta.y)
-                self.resetTransform()
-            }
-            
-            // Reset card's position and rotation.
-            else {
-                UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
-                    card.transform = .identity
-                    self.nextCard?.setSize(status: .standby)
-                } completion: { _ in
-                    self.resetTransform()
-                    self.cardIsBeingPanned = false
-                }
-            }
-        default:
-            break
-        }
-    }
-    
-    /// What happens when user uses two finger to pan the card.
-    /// - Parameter sender: A discrete gesture recognizer that interprets panning gestures.
-    @objc private func twoFingerPanHandler(sender: UIPanGestureRecognizer) {
-        guard let card = sender.view as? Card else { return }
-        switch sender.state {
-        case .changed:
-            // Get the touch position
-            let translation = sender.translation(in: cardView)
-            
-            // Card move to where the user's finger position is
-            card.centerXConstraint.constant = translation.x
-            card.centerYConstraint.constant = translation.y
-            updateLayout()
-        
-        case .ended, .cancelled, .failed:
-            // Move card back to original position
-            card.centerXConstraint.constant = 0
-            card.centerYConstraint.constant = 0
-            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
-                self.updateLayout()
-            }
-        default:
-            break
-        }
-    }
-    
-    /// What happens when user pinches the card with 2 fingers.
-    /// - Parameter sender: A discrete gesture recognizer that interprets pinching gestures involving two touches.
-    @objc private func pinchHandler(sender: UIPinchGestureRecognizer) {
-        guard let card = sender.view as? Card else { return }
-        switch sender.state {
-        case .began:
-            // Hide navBar button
-            if self.onboardCompleted {
-                self.collectionButton.tintColor = .clear
-            }
-            
-            // Hide card's trivia overlay
-            if HomeVC.showOverlay {
-                card.hideTriviaOverlay()
-            }
-            
-        case .changed:
-            // Coordinate of the pinch center where the view's center is (0, 0)
-            let pinchCenter = CGPoint(
-                x: sender.location(in: card).x - card.bounds.midX,
-                y: sender.location(in: card).y - card.bounds.midY)
-            
-            // Card transform behavior
-            
-            // Move the card to the opposite point of the pinch center if the scale delta > 1, vice versa
-            let transform = card.transform.translatedBy(
-                x: pinchCenter.x, y: pinchCenter.y)
-                .scaledBy(x: sender.scale, y: sender.scale)
-                .translatedBy(x: -pinchCenter.x, y: -pinchCenter.y)
-            
-            // Limit the scale at which a card can be zoom in/out
-            let newWidth = sender.scale * card.frame.width
-            let minWidth = card.bounds.width
-            let maxWidth = minWidth * K.ImageView.maximumScaleFactor
-            if newWidth > minWidth && newWidth < maxWidth {
-                scaleTransform = transform
-                updateCardTransform(card: card)
-            }
-            sender.scale = 1
-            
-            // Increase opacity of the overlay view as the card is enlarged
-            let cardWidth = card.frame.width
-            let maxOpacity: CGFloat = 0.6 // max opacity of the overlay view
-            let cardWidthDelta = (cardWidth / minWidth) - 1 // Percentage change of width
-            let deltaToMaxOpacity: CGFloat = 0.2 // number of width delta to get maximum opacity
-            shadeLayer.alpha = maxOpacity * min((cardWidthDelta / deltaToMaxOpacity), 1.0)
-            
-        case .ended, .cancelled, .failed:
-            // Reset card's size
-            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
-                card.transform = .identity
-                self.shadeLayer.alpha = 0
-            } completion: { _ in
-                self.resetTransform()
-                if self.onboardCompleted {
-                    self.collectionButton.tintColor = K.Color.tintColor
-                }
-            }
-            
-            // Re-show trivia overlay if showOverlay is true
-            if HomeVC.showOverlay == true {
-                card.showTriviaOverlay()
-            }
-        default:
-            break
-        }
-        
-    }
-    
-    /// What happens when user taps on the card.
-    /// - Parameter sender: A discrete gesture recognizer that interprets single or multiple taps.
-    @objc private func tapHandler(sender: UITapGestureRecognizer) {
-        guard let card = sender.view as? Card else { return }
-        if sender.state == .ended {
-            // Toggle every regular card's overlay.
-            switch card.cardType {
-            case .regular:
-                HomeVC.showOverlay = !HomeVC.showOverlay
-                for card in cardArray.values {
-                    card.toggleOverlay()
-                }
-            case .onboard:
-                // Only the third onboard card's overlay can be toggled.
-                if card.index == 2 {
-                    card.toggleOverlay()
-                }
-            }
-        }
-    }
-    
-    /// Attach all gesturn recognizers to the designated card.
-    /// - Parameter card: The card to which the gesture recognizers are attached.
-    private func addGestureRecognizers(to card: Card) {
-        card.addGestureRecognizer(panGestureRecognizer)
-        card.addGestureRecognizer(pinchGestureRecognizer)
-        card.addGestureRecognizer(twoFingerPanGestureRecognizer)
-        card.addGestureRecognizer(tapGestureRecognizer)
-    }
-    
-    private func updateCardTransform(card: Card) {
-        let hybridTransform = offsetTransform.concatenating(scaleTransform)
-        card.transform = hybridTransform
-    }
-    
-    private func resetTransform() {
-        offsetTransform = .identity
-        scaleTransform = .identity
-    }
-    
-    //MARK: - Animation Methods
-    
-    /// Dismiss the card and reset the current card's size if there's any.
-    /// - Parameters:
-    ///   - card: The card to be dismissed.
-    ///   - deltaX: X–axis delta applied to the card.
-    ///   - deltaY: Y–axis delta applied to the card.
-    private func dismissCardWithVelocity(_ card: Card, deltaX: CGFloat, deltaY: CGFloat) {
-        card.centerXConstraint.constant += deltaX
-        card.centerYConstraint.constant += deltaY
-        
-        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
-            self.updateLayout()
-            self.currentCard?.transform = .identity
-        } completion: { _ in
-            card.removeFromSuperview()
-            self.cardIsBeingPanned = false
-            
-            // Add the next card to the view if it's not nil.
-            if self.nextCard != nil {
-                self.addCardToView(self.nextCard!, atBottom: true)
-            }
-            
-            // Fetch new data if the next card has not being displayed before.
-            if self.pointer > self.maxPointerReached {
-                self.sendAPIRequest(numberOfRequests: 1)
-            }
-            
-            // Update the number of cards viewed by the user if onboard session is completed
-            // and the current card has not been seen by the user before.
-            if self.onboardCompleted && self.pointer > self.maxPointerReached {
-                self.viewCount += 1
-            }
-            
-            // Refresh the status of the toolbar's buttons.
-            DispatchQueue.main.async {
-                self.refreshButtonState()
-            }
-            
-            // Clear the old card's cache data.
-            self.clearCacheData()
-        }
-    }
-    
-    /// Lay out this view's subviews immediately, if layout updates are pending.
-    private func updateLayout() {
-        self.view.layoutIfNeeded()
-    }
-    
-    //MARK: - Error Handling Section
-    
-    /// An error occured in the data fetching process.
     func APIErrorDidOccur(error: APIError) {
         // Present alert view to the user if any error occurs in the data fetching process.
-        
-        // Make sure no existing alert controller being presented already.
-        guard self.presentedViewController == nil else { return }
-        
         hapticManager.prepareNotificationGenerator()
         DispatchQueue.main.async {
+            // Make sure no existing alert controller being presented already.
+            guard self.presentedViewController == nil else { return }
+            
+            var alertTitle: String
+            var alertMessage: String
+            switch error {
+            case .network:
+                alertTitle = Z.AlertMessage.NetworkError.alertTitle
+                alertMessage = Z.AlertMessage.NetworkError.alertMessage
+            case .server:
+                alertTitle = Z.AlertMessage.APIError.alertTitle
+                alertMessage = Z.AlertMessage.APIError.alertMessage
+            }
+        
             let alert = UIAlertController(
-                title: Z.AlertMessage.APIError.alertTitle,
-                message: Z.AlertMessage.APIError.alertMessage,
+                title: alertTitle,
+                message: alertMessage,
                 preferredStyle: .alert)
             
             // An button which send network request to the network manager
@@ -976,7 +613,7 @@ class HomeVC: UIViewController, APIManagerDelegate {
         }
     }
     
-    //MARK: - Testing
+    // MARK: - UI Testing
     
     private func setUpUIReference() {
         toolbar.accessibilityIdentifier = "toolbar"
@@ -994,28 +631,27 @@ extension HomeVC: UIGestureRecognizerDelegate {
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        let panGR = currentCard?.panGR
-        let twoFingerPanGR = currentCard?.twoFingerPanGR
-        let pinchGR = currentCard?.pinchGR
-        let tapGR = currentCard?.tapGR
+        let pan = currentCard?.panGR
+        let twoFingerPan = currentCard?.twoFingerPanGR
+        let pinch = currentCard?.pinchGR
+        let tap = currentCard?.tapGR
         
         let conditions: [Bool] = [
-            gestureRecognizer == pinchGR && otherGestureRecognizer == panGR,
-            gestureRecognizer == twoFingerPanGR && otherGestureRecognizer == panGR,
-            gestureRecognizer == tapGR && otherGestureRecognizer == panGR,
-            gestureRecognizer == tapGR && otherGestureRecognizer == twoFingerPanGR,
-            gestureRecognizer == tapGR && otherGestureRecognizer == pinchGR,
+            gestureRecognizer == pinch && otherGestureRecognizer == pan,
+            gestureRecognizer == twoFingerPan && otherGestureRecognizer == pan,
+            gestureRecognizer == tap && otherGestureRecognizer == pan,
+            gestureRecognizer == tap && otherGestureRecognizer == twoFingerPan,
+            gestureRecognizer == tap && otherGestureRecognizer == pinch
         ]
-        for condition in conditions {
-            if condition == true {
-                return true
-            }
+        for condition in conditions where condition == true {
+            return true
         }
+        
         return false
     }
 }
 
-extension HomeVC: DBManagerDelegate {
+extension HomeVC: DataManagerDelegate {
     /// Number of saved images has reached the limit.
     func savedImagesMaxReached() {
         // Show alert to the user

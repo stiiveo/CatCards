@@ -8,11 +8,9 @@
 
 import UIKit
 
-class TriviaOverlay: UIView {
+final class TriviaOverlay: UIView {
     
     private var blurEffectView = UIVisualEffectView()
-    
-    //MARK: - Init
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -24,7 +22,7 @@ class TriviaOverlay: UIView {
         addTriviaLabel()
     }
     
-    //MARK: - Background & Label
+    // MARK: - Background & Label
     
     private func addBackgroundView() {
         // Only applies blur effect view on top of this view if the user hadn't disable transparancy effects
@@ -47,14 +45,9 @@ class TriviaOverlay: UIView {
     
     private func addTriviaLabel() {
         let label = UILabel()
-        blurEffectView.contentView.addSubview(label)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: blurEffectView.leadingAnchor, constant: 15),
-            label.trailingAnchor.constraint(equalTo: blurEffectView.trailingAnchor, constant: -15),
-            label.topAnchor.constraint(equalTo: blurEffectView.topAnchor, constant: 10),
-            label.bottomAnchor.constraint(equalTo: blurEffectView.bottomAnchor, constant: -15)
-        ])
+        addView(label,
+                to: blurEffectView.contentView,
+                withOffset: AutoLayoutOffset(leading: 15, trailing: 15, top: 10, bottom: 15))
         
         // Label text and style
         label.text = OverlayContentPicker.shared.randomContent(contentTypes: [.trivia, .quote])

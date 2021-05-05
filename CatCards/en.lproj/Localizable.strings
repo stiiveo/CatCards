@@ -25,12 +25,19 @@
 "OVERLAY_TITLE" = "Toggle the Info Overlay";
 "OVERLAY_HOW_TO_TOGGLE" = "Tap the card once to toggle the overlay over the card.";
 
-// Network Error Alert
-"API_ERROR_ALERT_TITLE" = "🙀 Something went wrong";
-"API_ERROR_ALERT_MESSAGE" = "The server is not responsive.";
+/// Error Alert Messages
+
+// API Error
+"API_ERROR_ALERT_TITLE" = "Server did not respond";
+"API_ERROR_ALERT_MESSAGE" = "Service provider TheCatAPI did not respond";
 "API_ERROR_ALERT_ACTION" = "Try Again";
 
-// Databse Error Alert
+// Network Error
+"NETWORK_ERROR_ALERT_TITLE" = "Network error occured";
+"NETWORK_ERROR_ALERT_MESSAGE" = "Cannot reach the network service.\n Please check your internet connection.";
+"NETWORK_ERROR_ALERT_ACTION" = "Try Again";
+
+// Database Error
 "DATABASE_ERROR_ALERT_TITLE" = "Storage is full.";
 "DATABASE_ERROR_ALERT_MESSAGE" = "Currently you can save up to 36 images";
 "DATABASE_ERROR_ALERT_ACTION" = "OK";

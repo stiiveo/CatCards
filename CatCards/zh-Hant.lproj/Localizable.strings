@@ -25,12 +25,17 @@
 "OVERLAY_TITLE" = "顯示／隱藏貓咪資訊";
 "OVERLAY_HOW_TO_TOGGLE" = "單擊卡片以顯示／隱藏在卡片上與貓有關的知識";
 
-// Network Error Alert
-"API_ERROR_ALERT_TITLE" = "🙀 出了點差錯";
-"API_ERROR_ALERT_MESSAGE" = "伺服器無回應。";
+// API Error
+"API_ERROR_ALERT_TITLE" = "伺服器無回應";
+"API_ERROR_ALERT_MESSAGE" = "貓咪服務伺服器 TheCatAPI 無回應";
 "API_ERROR_ALERT_ACTION" = "再試一次";
 
-// Databse Error Alert
+// Network Error
+"NETWORK_ERROR_ALERT_TITLE" = "網路出現問題";
+"NETWORK_ERROR_ALERT_MESSAGE" = "無法連接網路服務\n 請檢查您的網路連線";
+"NETWORK_ERROR_ALERT_ACTION" = "再試一次";
+
+// Database Error
 "DATABASE_ERROR_ALERT_TITLE" = "儲存數量已達上限";
 "DATABASE_ERROR_ALERT_MESSAGE" = "目前你可以最多儲存36張圖片";
 "DATABASE_ERROR_ALERT_ACTION" = "了解";

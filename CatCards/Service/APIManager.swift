@@ -9,7 +9,7 @@
 import UIKit
 
 enum APIError {
-    case server
+    case server, network
 }
 
 protocol APIManagerDelegate {
@@ -26,28 +26,31 @@ final class APIManager {
     
     /// Fetch the data from the URL object and decode the data.
     /// - Parameter url: The URL object used to fetch the data from.
-    func fetchData() {
+    internal func fetchData() {
         // Retry API request if URL init failed.
         guard let url = URL(string: urlString) else {
             debugPrint("Failed to initialize an valid URL object using the provided url string: \(urlString).")
             return
         }
         
+        // Send data request to API.
         URLSession.shared.dataTask(with: url) { (data, response, error) in
             // Transport error occured
             if let error = error {
                 // Make the delegate awared that an error occured in the data retrieving process.
-                self.delegate?.APIErrorDidOccur(error: .server)
-                debugPrint("Error sending URLSession request to the server or getting response from the server. Error: \(error)")
+                self.delegate?.APIErrorDidOccur(error: .network)
+                debugPrint("Error sending data request to the server or getting response from the server: \(error)")
                 return
             }
             
             // Server-side error occured
-            let response = response as! HTTPURLResponse
-            let status = response.statusCode
-            guard (200...299).contains(status) else {
-                debugPrint("Server-side error response is received from API's server. (HTTP status code: \(status))")
-                return
+            if let response = response as? HTTPURLResponse {
+                let status = response.statusCode
+                guard (200...299).contains(status) else {
+                    self.delegate?.APIErrorDidOccur(error: .server)
+                    debugPrint("Server-side error response is received from API's server. (HTTP status code: \(status))")
+                    return
+                }
             }
             
             // Data is retrieved successfully

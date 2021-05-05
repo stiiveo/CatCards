@@ -95,3 +95,23 @@ extension UIColor {
         }
     }
 }
+
+extension UIView {
+    struct AutoLayoutOffset {
+        let leading: CGFloat
+        let trailing: CGFloat
+        let top: CGFloat
+        let bottom: CGFloat
+    }
+    
+    func addView(_ view: UIView, to superview: UIView, withOffset offset: AutoLayoutOffset) {
+        view.translatesAutoresizingMaskIntoConstraints = false
+        superview.addSubview(view)
+        NSLayoutConstraint.activate([
+            view.leadingAnchor.constraint(equalTo: superview.leadingAnchor, constant: offset.leading),
+            view.trailingAnchor.constraint(equalTo: superview.trailingAnchor, constant: offset.trailing * -1),
+            view.topAnchor.constraint(equalTo: superview.topAnchor, constant: offset.top),
+            view.bottomAnchor.constraint(equalTo: superview.bottomAnchor, constant: offset.bottom * -1)
+        ])
+    }
+}
