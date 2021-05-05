@@ -12,8 +12,6 @@ final class TriviaOverlay: UIView {
     
     private var blurEffectView = UIVisualEffectView()
     
-    //MARK: - Init
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -47,7 +45,9 @@ final class TriviaOverlay: UIView {
     
     private func addTriviaLabel() {
         let label = UILabel()
-        addView(label, to: blurEffectView.contentView, withOffset: AutoLayoutOffset(leading: 15, trailing: 15, top: 10, bottom: 15))
+        addView(label,
+                to: blurEffectView.contentView,
+                withOffset: AutoLayoutOffset(leading: 15, trailing: 15, top: 10, bottom: 15))
         
         // Label text and style
         label.text = OverlayContentPicker.shared.randomContent(contentTypes: [.trivia, .quote])

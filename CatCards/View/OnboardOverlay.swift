@@ -10,9 +10,7 @@ import UIKit
 
 final class OnboardOverlay: UIView {
     
-    var cardIndex: Int = 0
-    private let content = K.OnboardOverlay.content
-    private lazy var blurEffectView = UIVisualEffectView()
+    private var cardIndex: Int = 0
     
     //MARK: - Initialization
     
@@ -27,7 +25,7 @@ final class OnboardOverlay: UIView {
     }
     
     private func overlayDidInit() {
-        addBlurBackground()
+        addBlurredBackground()
         addContent()
     }
     
@@ -48,13 +46,15 @@ final class OnboardOverlay: UIView {
             imageView.contentMode = .scaleAspectFit
             stackView.insertArrangedSubview(imageView, at: 1)
         }
-        addView(stackView, to: self, withOffset: AutoLayoutOffset(leading: 10, trailing: 10, top: 15, bottom: 20))
+        addView(stackView,
+                to: self,
+                withOffset: AutoLayoutOffset(leading: 10, trailing: 10, top: 15, bottom: 20))
     }
     
     //MARK: - Background
     
     /// Add background view and blur effect to the label view
-    private func addBlurBackground() {
+    private func addBlurredBackground() {
         guard cardIndex != 1 else { return }
         
         // Only applies blur effect view on top of this view if the user hadn't disable transparancy effects
@@ -63,9 +63,7 @@ final class OnboardOverlay: UIView {
             
             // Blur effect setting
             let blurEffect = UIBlurEffect(style: .systemMaterial)
-            blurEffectView = UIVisualEffectView(effect: blurEffect)
-            
-            // Always fill the view
+            let blurEffectView = UIVisualEffectView(effect: blurEffect)
             blurEffectView.frame = self.frame
             blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             
@@ -79,7 +77,7 @@ final class OnboardOverlay: UIView {
 //MARK: - Content
 
 /// The tableView which organizes all the onboard text and image content.
-class OverlayTableView: UITableView {
+final class OverlayTableView: UITableView {
     override init(frame: CGRect, style: UITableView.Style) {
         super.init(frame: frame, style: style)
     }
@@ -106,15 +104,12 @@ class OverlayTableView: UITableView {
 }
 
 /// The label placed at the bottom position of the card as a hint prompt.
-class OverlayPromptLabel: UILabel {
-    var cardIndex: Int!
+final class OverlayPromptLabel: UILabel {
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-    }
+    private var cardIndex: Int!
     
-    convenience init(cardIndex: Int) {
-        self.init()
+    init(cardIndex: Int) {
+        super.init(frame: .zero)
         self.cardIndex = cardIndex
         labelDidLoad()
     }
@@ -123,7 +118,7 @@ class OverlayPromptLabel: UILabel {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func labelDidLoad() {
+    private func labelDidLoad() {
         self.textColor = .label
         self.font = .preferredFont(forTextStyle: .caption1)
         self.adjustsFontForContentSizeCategory = true
@@ -139,11 +134,12 @@ class OverlayPromptLabel: UILabel {
     }
 }
 
-//MARK: - TableView Data Source
+//MARK: - Data Source
 
 extension OnboardOverlay: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return content[cardIndex].content.count + 1
+        let onboardContent = K.OnboardOverlay.content
+        return onboardContent[cardIndex].content.count + 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -151,14 +147,15 @@ extension OnboardOverlay: UITableViewDataSource {
         cell.backgroundColor = .clear
         
         // Label content
+        let onboardContent = K.OnboardOverlay.content
         if indexPath.row == 0 {
             // Title
-            cell.textLabel?.text = content[cardIndex].title
+            cell.textLabel?.text = onboardContent[cardIndex].title
             cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .title1)
         } else {
             // Body
-            cell.textLabel?.text = content[cardIndex].content[indexPath.row - 1].text
-            cell.imageView?.image = content[cardIndex].content[indexPath.row - 1].image
+            cell.textLabel?.text = onboardContent[cardIndex].content[indexPath.row - 1].text
+            cell.imageView?.image = onboardContent[cardIndex].content[indexPath.row - 1].image
             cell.textLabel?.font = UIFont.preferredFont(forTextStyle: .body)
         }
         

@@ -262,7 +262,6 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         
         // Add gesture recognizers if there's none.
         if card.gestureRecognizers == nil {
-//            addGestureRecognizers(to: card)
             gesturesHandler.addGestureRecognizers(to: card)
         }
         
@@ -572,7 +571,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
     private func showConfirmIcon() {
         guard let card = currentCard else { return }
         let feedbackView = FeedbackView(parentView: card, image: K.Image.feedbackImage)
-        feedbackView.startAnimation(withDelay: nil, duration: 0.4)
+        feedbackView.startAnimation(withDelay: 0, duration: 0.4)
     }
     
     //MARK: - Error Handling Section

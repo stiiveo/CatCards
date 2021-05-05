@@ -10,12 +10,13 @@
 import UIKit
 
 final class FeedbackView {
-    private let parentView: UIView
+    
+    private let superview: UIView
     private let image: UIImage
     private let feedbackView: UIImageView
     
     init(parentView: UIView, image: UIImage) {
-        self.parentView = parentView
+        self.superview = parentView
         self.image = image
         feedbackView = UIImageView(image: image)
         
@@ -24,7 +25,7 @@ final class FeedbackView {
     
     /// Add feedback view to the parent view, set up its size and position it to the center of the parent view.
     private func addViewToParentView() {
-        parentView.addSubview(feedbackView)
+        superview.addSubview(feedbackView)
         feedbackView.translatesAutoresizingMaskIntoConstraints = false
         
         /*
@@ -33,12 +34,12 @@ final class FeedbackView {
          Maximum size is 100 by 100.
          */
         let confirmViewSize = CGSize(
-            width: min(100, parentView.frame.width * 0.3),
-            height: min(100, parentView.frame.width * 0.3))
+            width: min(100, superview.frame.width * 0.3),
+            height: min(100, superview.frame.width * 0.3))
         
         NSLayoutConstraint.activate([
-            feedbackView.centerXAnchor.constraint(equalTo: parentView.centerXAnchor),
-            feedbackView.centerYAnchor.constraint(equalTo: parentView.centerYAnchor),
+            feedbackView.centerXAnchor.constraint(equalTo: superview.centerXAnchor),
+            feedbackView.centerYAnchor.constraint(equalTo: superview.centerYAnchor),
             feedbackView.widthAnchor.constraint(equalToConstant: confirmViewSize.width),
             feedbackView.heightAnchor.constraint(equalToConstant: confirmViewSize.height)
         ])
@@ -46,26 +47,28 @@ final class FeedbackView {
     
     /// Show the feedback image to the designated parent view with customizable delay and duration.
     ///
-    /// It's suggested to use this method when a visual message displaying to the user is appropriate, e.g. the image is downloaded successfully.
+    /// Use this method when a visual message displaying to the user is appropriate,
+    /// e.g. the image is downloaded successfully.
     ///
     /// - Parameters:
     ///   - delayDuration: How long the animation is delayed before being started.
     ///   - duration: The duration of the animation, from the appearence to dismissal of the confirmation view.
-    func startAnimation(withDelay delayDuration: Double?, duration: Double) {
-        let f = self.feedbackView
+    func startAnimation(withDelay delayDuration: Double, duration: Double) {
+        
+        let feedbackView = self.feedbackView
         
         // Initiate animations
         let totalDuration = duration
         let introAnimator = UIViewPropertyAnimator(duration: totalDuration / 4, curve: .linear) {
-            f.alpha = 1.0
-            f.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
+            feedbackView.alpha = 1.0
+            feedbackView.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
         }
         let normalStateAnimator = UIViewPropertyAnimator(duration: totalDuration / 4, curve: .linear) {
-            f.transform = .identity
+            feedbackView.transform = .identity
         }
         let dismissAnimator = UIViewPropertyAnimator(duration: totalDuration / 2, curve: .linear) {
-            f.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
-            f.alpha = 0
+            feedbackView.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
+            feedbackView.alpha = 0
         }
         
         // Sequence of animations
@@ -76,9 +79,9 @@ final class FeedbackView {
             dismissAnimator.startAnimation(afterDelay: 0.5)
         }
         dismissAnimator.addCompletion { _ in
-            f.removeFromSuperview()
+            feedbackView.removeFromSuperview()
         }
         
-        introAnimator.startAnimation(afterDelay: delayDuration == nil ? 0 : delayDuration!)
+        introAnimator.startAnimation(afterDelay: delayDuration)
     }
 }
