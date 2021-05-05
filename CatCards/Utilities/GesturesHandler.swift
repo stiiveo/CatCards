@@ -8,15 +8,14 @@
 
 import UIKit
 
-protocol CustomViewController: UIGestureRecognizerDelegate {
-    var view: UIView { get set }
+protocol HomeVCDelegate: UIViewController, UIGestureRecognizerDelegate {
     var currentCard: Card? { get }
     var nextCard: Card? { get }
     var pointer: Int { get set }
     var cardIsBeingPanned: Bool { get set }
     var onboardCompleted: Bool { get set }
-    var collectionButton: UIBarButtonItem { get set }
-    var shadeLayer: UIView { get set }
+    var collectionButton: UIBarButtonItem! { get set }
+    var shadingLayer: UIView! { get set }
     var cardArray: [Int: Card] { get set }
     var maxPointerReached: Int { get set }
     var viewCount: Int { get set }
@@ -28,48 +27,48 @@ protocol CustomViewController: UIGestureRecognizerDelegate {
 
 class GesturesHandler {
     
-    var delegate: CustomViewController
-    var superview: UIView
+    unowned var delegate: HomeVCDelegate
+    unowned var superview: UIView
     
-    private enum Side {
-        case upper, lower
+    init(delegate: HomeVCDelegate, superview: UIView) {
+        self.delegate = delegate
+        self.superview = superview
     }
     
-    private var firstFingerLocation: Side!
-    private var cardTransform: CGAffineTransform = .identity
-    
-    @objc var panHandler: UIPanGestureRecognizer {
-        let pan = UIPanGestureRecognizer(target: delegate, action: #selector(getter: self.panHandler))
+    private var panGestureRecognizer: UIPanGestureRecognizer {
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(panHandler))
         pan.delegate = delegate
         pan.minimumNumberOfTouches = 1
         pan.maximumNumberOfTouches = 1
         return pan
     }
     
-    @objc var pinchHandler: UIPinchGestureRecognizer {
-        let pinch = UIPinchGestureRecognizer(target: delegate, action: #selector(getter: self.pinchHandler))
+    private var pinchGestureRecognizer: UIPinchGestureRecognizer {
+        let pinch = UIPinchGestureRecognizer(target: self, action: #selector(pinchHandler))
         pinch.delegate = delegate
         return pinch
     }
     
-    @objc var twoFingerPanHandler: UIPanGestureRecognizer {
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(getter: self.twoFingerPanHandler))
+    private var twoFingerPanGestureRecognizer: UIPanGestureRecognizer {
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(twoFingerPanHandler))
         pan.delegate = delegate
         pan.minimumNumberOfTouches = 2
         pan.maximumNumberOfTouches = 2
         return pan
     }
     
-    @objc var tapHandler: UITapGestureRecognizer {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(getter: self.tapHandler))
+    private var tapGestureRecognizer: UITapGestureRecognizer {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
         tap.delegate = delegate
         return tap
     }
     
-    init(delegate: CustomViewController, superview: UIView) {
-        self.delegate = delegate
-        self.superview = superview
+    private enum TouchSide {
+        case upper, lower
     }
+    
+    private var firstFingerLocation: TouchSide?
+    private var cardTransform: CGAffineTransform = .identity
     
 }
 
@@ -77,13 +76,15 @@ class GesturesHandler {
 
 extension GesturesHandler {
     
+    // Pan Gesture Handler
+    
     @objc private func panHandler(_ sender: UIPanGestureRecognizer) {
         guard let card = sender.view as? Card else { return }
         let viewHalfWidth = card.frame.width / 2
         
         // Detect onto which side (upper or lower) of the card is the user's finger placed.
         let fingerPosition = sender.location(in: sender.view)
-        let side: Side = fingerPosition.y < card.frame.midY ? .upper : .lower
+        let side: TouchSide = fingerPosition.y < card.frame.midY ? .upper : .lower
         firstFingerLocation = (firstFingerLocation == nil) ? side : firstFingerLocation
         
         // Amount of x-axis offset the card moved from its original position
@@ -169,7 +170,8 @@ extension GesturesHandler {
         }
     }
     
-    /// What happens when user uses two finger to pan the card.
+    // Two–finger Pan Gesture Handler
+    
     /// - Parameter sender: A discrete gesture recognizer that interprets panning gestures.
     @objc private func twoFingerPanHandler(sender: UIPanGestureRecognizer) {
         guard let card = sender.view as? Card else { return }
@@ -191,7 +193,8 @@ extension GesturesHandler {
         }
     }
     
-    /// What happens when user pinches the card with 2 fingers.
+    // Pinch Gesture Handler
+    
     /// - Parameter sender: A discrete gesture recognizer that interprets pinching gestures involving two touches.
     @objc private func pinchHandler(sender: UIPinchGestureRecognizer) {
         guard let card = sender.view as? Card else { return }
@@ -223,13 +226,13 @@ extension GesturesHandler {
             
             // Increase opacity of the overlay view as the card is enlarged
             let maxOpacity: CGFloat = 0.7 // max opacity of the shading layer
-            delegate.shadeLayer.alpha = min(maxOpacity, card.transform.a - 1.0)
+            delegate.shadingLayer.alpha = min(maxOpacity, card.transform.a - 1.0)
             
         case .ended, .cancelled, .failed:
             // Reset card's size
-            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: [.curveEaseOut, .allowUserInteraction]) {
+            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: [.curveEaseOut]) {
                 card.transform = .identity
-                self.delegate.shadeLayer.alpha = 0
+                self.delegate.shadingLayer.alpha = 0
             } completion: { _ in
                 self.resetTransform()
                 if self.delegate.onboardCompleted {
@@ -247,7 +250,8 @@ extension GesturesHandler {
         
     }
     
-    /// What happens when user taps on the card.
+    // Tap Gesture Handler
+    
     /// - Parameter sender: A discrete gesture recognizer that interprets single or multiple taps.
     @objc private func tapHandler(sender: UITapGestureRecognizer) {
         guard let card = sender.view as? Card else { return }
@@ -269,42 +273,39 @@ extension GesturesHandler {
         }
     }
     
-    
 }
 
-
-
-// MARK: - Auxiliary Methods
+// MARK: - Attaching & Animation
 
 extension GesturesHandler {
     
     /// Attach all gesturn recognizers to the designated card.
     /// - Parameter card: The card to which the gesture recognizers are attached.
-    private func addGestureRecognizers(to view: Card) {
-        view.addGestureRecognizer(panHandler)
-        view.addGestureRecognizer(pinchHandler)
-        view.addGestureRecognizer(twoFingerPanHandler)
-        view.addGestureRecognizer(tapHandler)
+    func addGestureRecognizers(to card: Card) {
+        card.addGestureRecognizer(panGestureRecognizer)
+        card.addGestureRecognizer(pinchGestureRecognizer)
+        card.addGestureRecognizer(twoFingerPanGestureRecognizer)
+        card.addGestureRecognizer(tapGestureRecognizer)
         
         // Save references
-        view.panGR = panHandler
-        view.pinchGR = pinchHandler
-        view.twoFingerPanGR = twoFingerPanHandler
-        view.tapGR = tapHandler
+        card.panGR = panGestureRecognizer
+        card.pinchGR = pinchGestureRecognizer
+        card.twoFingerPanGR = twoFingerPanGestureRecognizer
+        card.tapGR = tapGestureRecognizer
     }
     
-    private func resetTransform() {
+    func resetTransform() {
         cardTransform = .identity
     }
     
-    //MARK: - Animation Methods
+    // Animation Methods
     
     /// Dismiss the card and reset the current card's size if there's any.
     /// - Parameters:
     ///   - card: The card to be dismissed.
     ///   - deltaX: X–axis delta applied to the card.
     ///   - deltaY: Y–axis delta applied to the card.
-    private func dismissCardWithVelocity(_ card: Card, deltaX: CGFloat, deltaY: CGFloat) {
+    func dismissCardWithVelocity(_ card: Card, deltaX: CGFloat, deltaY: CGFloat) {
         
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
             card.transform = card.transform.translatedBy(x: deltaX, y: deltaY)
@@ -339,8 +340,4 @@ extension GesturesHandler {
         }
     }
     
-    /// Lay out this view's subviews immediately, if layout updates are pending.
-    private func updateLayout() {
-        delegate.view.layoutIfNeeded()
-    }
 }

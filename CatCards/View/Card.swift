@@ -49,7 +49,7 @@ final class Card: UIView {
     }
     
     deinit {
-        print("Card with index \(index) is been deinitialized.")
+        print("Card indexed \(index) is to be deinitialized.")
     }
     
     //MARK: - Style & Shadow
