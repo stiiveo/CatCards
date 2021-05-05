@@ -128,7 +128,7 @@ extension GesturesHandler {
         // When user's finger left the screen.
         case .ended, .cancelled, .failed:
             firstFingerLocation = nil // Reset first finger location
-            let minTravelDistance = card.frame.height // minimum travel distance of the card
+            let minTravelDistance = card.frame.width // minimum travel distance of the card
             let minDragDistance = viewHalfWidth // minimum dragging distance of the card
             let vector = CGPoint(x: velocity.x / 2, y: velocity.y / 2)
             let vectorDistance = hypot(vector.x, vector.y)

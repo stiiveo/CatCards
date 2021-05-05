@@ -6,6 +6,11 @@
 //  Copyright © 2021 Jason Ou Yang. All rights reserved.
 //
 
+/*
+ Important: Make sure the onboard session is completed
+ and no image is saved yet before conducting full test.
+ */
+
 import XCTest
 
 class UITests: XCTestCase {
@@ -38,13 +43,20 @@ class UITests: XCTestCase {
         sleep(1)
         currentCard.tap()
         sleep(1)
+        
+        currentCard.pinch(withScale: 2.0, velocity: 10)
+        sleep(1)
                 
         let swipeTime = numberOfSavedImages
         
         for _ in 0..<swipeTime {
-            currentCard.swipeToRandomSide(velocity: 150)
+            currentCard.swipeToRandomDirection()
+            sleep(1)
             saveButton.tap()
         }
+        
+        sleep(1)
+        
         for _ in 0..<swipeTime {
             undoButton.tap()
         }
@@ -98,16 +110,17 @@ class UITests: XCTestCase {
         app/*@START_MENU_TOKEN@*/.navigationBars["UIActivityContentView"]/*[[".otherElements[\"ActivityListView\"].navigationBars[\"UIActivityContentView\"]",".navigationBars[\"UIActivityContentView\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.buttons["Close"].tap()
         toolbar.buttons["Delete"].tap()
         app.sheets["This action can not be reverted."].scrollViews.otherElements.buttons["Delete Picture"].tap()
+        sleep(2)
     }
 
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
-            }
-        }
-    }
+//    func testLaunchPerformance() throws {
+//        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
+//            // This measures how long it takes to launch your application.
+//            measure(metrics: [XCTApplicationLaunchMetric()]) {
+//                XCUIApplication().launch()
+//            }
+//        }
+//    }
     
 }
 
@@ -116,17 +129,17 @@ extension XCUIElement {
         case right, left, up, down
     }
     
-    func swipeToRandomSide(velocity: XCUIGestureVelocity) {
+    func swipeToRandomDirection() {
         let randomSide = SwipeSide.allCases.randomElement()!
         switch randomSide {
         case .right:
-            self.swipeRight(velocity: velocity)
+            self.swipeRight()
         case .left:
-            self.swipeLeft(velocity: velocity)
+            self.swipeLeft()
         case .up:
-            self.swipeUp(velocity: velocity)
+            self.swipeUp()
         case .down:
-            self.swipeDown(velocity: velocity)
+            self.swipeDown()
         }
     }
 }
