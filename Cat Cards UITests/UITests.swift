@@ -15,7 +15,6 @@ import XCTest
 
 class UITests: XCTestCase {
     
-    private let numberOfSavedImages = 5
     var toolbar: XCUIElement!
     var saveButton: XCUIElement!
     var undoButton: XCUIElement!
@@ -25,121 +24,137 @@ class UITests: XCTestCase {
     override func setUp() {
         super.setUp()
         continueAfterFailure = false
-        
         toolbar = XCUIApplication().toolbars["toolbar"]
         saveButton = toolbar/*@START_MENU_TOKEN@*/.buttons["saveButton"]/*[[".buttons[\"Save\"]",".buttons[\"saveButton\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
         undoButton = toolbar/*@START_MENU_TOKEN@*/.buttons["undoButton"]/*[[".buttons[\"Undo\"]",".buttons[\"undoButton\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
         shareButton = toolbar/*@START_MENU_TOKEN@*/.buttons["shareButton"]/*[[".buttons[\"Share\"]",".buttons[\"shareButton\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
         goToCollectionBtn = XCUIApplication().buttons["collectionButton"]
+        
+        let app = XCUIApplication()
+        app.launchArguments = ["enable-testing"]
+        app.launch()
+    }
+    
+    override func tearDown() {
+        toolbar = nil
+        saveButton = nil
+        undoButton = nil
+        shareButton = nil
+        goToCollectionBtn = nil
+        super.tearDown()
+    }
+    
+    func testTapToToggleOverlay() {
+        let app = XCUIApplication()
+        app.launchArguments = ["enable-overlay"]
+        let currentCardImageView = app.images.element(boundBy: 1)
+        
+        XCTAssertTrue(currentCardImageView.descendants(matching: .other).firstMatch.exists)
+        
+        currentCardImageView.tap()
+        XCTAssertFalse(currentCardImageView.descendants(matching: .other).firstMatch.exists)
+        
+        currentCardImageView.tap()
+        XCTAssertTrue(currentCardImageView.descendants(matching: .other).firstMatch.exists)
+    }
+    
+    func testPinchToZoomIn() {
+        let app = XCUIApplication()
+        let currentCard = app.otherElements.element(boundBy: 1)
+        currentCard.pinch(withScale: 2.0, velocity: 5)
     }
 
-    func testHomeVC() {
+    func testSwipeToDismiss() {
         let app = XCUIApplication()
-        app.launch()
+        var topCard: XCUIElement { return app.otherElements.element(boundBy: 1) }
         
-        let currentCard = app.children(matching: .window).element(boundBy: 0).children(matching: .other).element.children(matching: .other).element.children(matching: .other).element.children(matching: .other).element.children(matching: .other).element.children(matching: .other).element.children(matching: .other).element(boundBy: 0).children(matching: .other).element(boundBy: 0).children(matching: .image).element(boundBy: 1)
-        
-        currentCard.tap()
+        // Test swiping gesture to each side of the screen
+        let card0 = topCard
+        card0.swipeRight()
         sleep(1)
-        currentCard.tap()
+        XCTAssertNotEqual(topCard, card0)
+        
+        let card1 = topCard
+        card1.swipeLeft()
         sleep(1)
+        XCTAssertNotEqual(topCard, card1)
         
-        currentCard.pinch(withScale: 2.0, velocity: 10)
+        let card2 = topCard
+        card2.swipeUp()
         sleep(1)
-                
-        let swipeTime = numberOfSavedImages
+        XCTAssertNotEqual(topCard, card2)
         
-        for _ in 0..<swipeTime {
-            currentCard.swipeToRandomDirection()
-            sleep(1)
-            saveButton.tap()
-        }
-        
+        let card3 = topCard
+        card3.swipeDown()
         sleep(1)
-        
-        for _ in 0..<swipeTime {
-            undoButton.tap()
-        }
-        
+        XCTAssertNotEqual(topCard, card3)
+    }
+    
+    func testToolBarButtons() {
+        let app = XCUIApplication()
+        let currentCard = app.otherElements.element(boundBy: 1)
+        currentCard.swipeLeft()
+        undoButton.tap()
         shareButton.tap()
-        app/*@START_MENU_TOKEN@*/.navigationBars["UIActivityContentView"]/*[[".otherElements[\"ActivityListView\"].navigationBars[\"UIActivityContentView\"]",".navigationBars[\"UIActivityContentView\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.buttons["Close"].tap()
+        app.buttons["Close"].tap()
         saveButton.tap()
     }
     
     func testSegue() {
         let app = XCUIApplication()
-        app.activate()
-        
         saveButton.tap()
         if app.alerts.count != 0 {
-            app.alerts["Storage is full."].scrollViews.otherElements.buttons["OK"].tap()
+            app.buttons["OK"].tap()
         }
         
         goToCollectionBtn.tap()
+        XCTAssertTrue(app.navigationBars["CatCards.CollectionVC"].exists)
+        
         app.collectionViews.cells.images.firstMatch.tap()
-        app.navigationBars["CatCards.SingleImageVC"].buttons["Back"].tap()
-        app.navigationBars["CatCards.CollectionVC"].buttons["Back"].tap()
+        XCTAssertTrue(app.navigationBars["CatCards.SingleImageVC"].exists)
+        
+        app.buttons["Back"].tap()
+        XCTAssertTrue(app.navigationBars["CatCards.CollectionVC"].exists)
+        
+        app.buttons["Back"].tap()
+        XCTAssertTrue(app.navigationBars["CatCards.HomeVC"].exists)
     }
     
     func testSingleImageVC() {
         let app = XCUIApplication()
-        app.activate()
-        
+        saveButton.tap()
         // Navigate to SingleImageVC.
         goToCollectionBtn.tap()
-        app.collectionViews.cells.images.firstMatch.tap()
         
-        // Test tap and pinch gesture recognizers.
-        let firstImage = app.scrollViews.images.firstMatch
-        firstImage.doubleTap()
-        firstImage.pinch(withScale: 2.0, velocity: 30)
-        firstImage.doubleTap()
+        let savedImage = app.collectionViews.cells.images.firstMatch
+        savedImage.tap()
+        
+        // Test tap, pinch and pan gestures
+        let image = app.scrollViews.images.firstMatch
+        image.doubleTap()
+        image.pinch(withScale: 1.2, velocity: 5)
+        image.press(forDuration: 1.0, thenDragTo: app.buttons["Back"])
+        image.doubleTap()
         
         // Test scrollView
-        for i in 0..<numberOfSavedImages {
-            app.scrollViews.images.allElementsBoundByIndex[i].swipeLeft()
+        for _ in 0..<5 {
+            app.scrollViews.firstMatch.swipeLeft()
+        }
+
+        for _ in 0..<5 {
+            app.scrollViews.firstMatch.swipeRight()
         }
         
-        for j in 0..<numberOfSavedImages {
-            app.scrollViews.images.allElementsBoundByIndex[numberOfSavedImages - j].swipeRight()
-        }
-        
-        // Test share sheet and image deletion.
+        // Test functionalities of the toolbar's buttons
         let toolbar = app.toolbars["Toolbar"]
         toolbar.buttons["Share"].tap()
-        app/*@START_MENU_TOKEN@*/.navigationBars["UIActivityContentView"]/*[[".otherElements[\"ActivityListView\"].navigationBars[\"UIActivityContentView\"]",".navigationBars[\"UIActivityContentView\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.buttons["Close"].tap()
+        app.buttons["Close"].tap()
         toolbar.buttons["Delete"].tap()
-        app.sheets["This action can not be reverted."].scrollViews.otherElements.buttons["Delete Picture"].tap()
-        sleep(2)
-    }
-
-//    func testLaunchPerformance() throws {
-//        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
-//            // This measures how long it takes to launch your application.
-//            measure(metrics: [XCTApplicationLaunchMetric()]) {
-//                XCUIApplication().launch()
-//            }
-//        }
-//    }
-    
-}
-
-extension XCUIElement {
-    enum SwipeSide: CaseIterable {
-        case right, left, up, down
+        app.buttons["Delete Picture"].tap()
+        app.buttons["Back"].tap()
+        
+        // Test the image is deleted
+        XCTAssertFalse(app.collectionViews.cells.images.firstMatch == savedImage)
     }
     
-    func swipeToRandomDirection() {
-        let randomSide = SwipeSide.allCases.randomElement()!
-        switch randomSide {
-        case .right:
-            self.swipeRight()
-        case .left:
-            self.swipeLeft()
-        case .up:
-            self.swipeUp()
-        case .down:
-            self.swipeDown()
-        }
-    }
 }
