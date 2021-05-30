@@ -18,7 +18,7 @@ final class Card: UIView {
     var index: Int
     var cardType: CardType
     private let imageView = UIImageView()
-    private let bgImageView = UIImageView()
+    private let backgroundImageView = UIImageView()
     private var onboardOverlay: OnboardOverlay?
     private var triviaOverlay: TriviaOverlay?
     
@@ -91,21 +91,21 @@ final class Card: UIView {
     
     /// Insert duplicated imageView with blur effect on top of it as a filter below the primary imageView as the card's background.
     private func setUpBackground() {
-        self.addSubview(bgImageView)
-        bgImageView.frame = self.bounds
-        bgImageView.contentMode = .scaleAspectFill
-        bgImageView.clipsToBounds = true
-        bgImageView.layer.cornerRadius = K.Card.Style.cornerRadius
-        bgImageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        bgImageView.image = data.image
+        self.addSubview(backgroundImageView)
+        backgroundImageView.frame = self.bounds
+        backgroundImageView.contentMode = .scaleAspectFill
+        backgroundImageView.clipsToBounds = true
+        backgroundImageView.layer.cornerRadius = K.Card.Style.cornerRadius
+        backgroundImageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        backgroundImageView.image = data.image
         
         // Place blur effect onto it.
         let blurEffect = UIBlurEffect(style: .systemChromeMaterial)
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
-        blurEffectView.frame = bgImageView.frame
+        blurEffectView.frame = backgroundImageView.frame
         blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         
-        bgImageView.addSubview(blurEffectView)
+        backgroundImageView.addSubview(blurEffectView)
     }
     
     private func setUpImageView() {
@@ -143,7 +143,7 @@ final class Card: UIView {
             // Use built–in image for the second onboard card.
             data = CatData(id: K.OnboardOverlay.zoomImageFileID, image: K.OnboardOverlay.zoomImage)
             imageView.image = data.image
-            bgImageView.image = data.image
+            backgroundImageView.image = data.image
         }
         
         // Create an onboard overlay instance and add it to Card.

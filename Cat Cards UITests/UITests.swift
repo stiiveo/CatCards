@@ -44,52 +44,57 @@ class UITests: XCTestCase {
         super.tearDown()
     }
     
+    /// Test tap gesture of the card.
     func testTapToToggleOverlay() {
         let app = XCUIApplication()
         app.launchArguments = ["enable-overlay"]
         let currentCardImageView = app.images.element(boundBy: 1)
+        let triviaOverlay = currentCardImageView.children(matching: .other).element
         
-        XCTAssertTrue(currentCardImageView.descendants(matching: .other).firstMatch.exists)
-        
-        currentCardImageView.tap()
-        XCTAssertFalse(currentCardImageView.descendants(matching: .other).firstMatch.exists)
+        XCTAssert(triviaOverlay.exists, "Trivia overlay does not exist.")
         
         currentCardImageView.tap()
-        XCTAssertTrue(currentCardImageView.descendants(matching: .other).firstMatch.exists)
+        XCTAssertFalse(triviaOverlay.exists, "Trivia overlay does exist.")
+        
+        currentCardImageView.tap()
+        XCTAssert(triviaOverlay.exists, "Trivia overlay does not exist.")
     }
     
+    /// Test the pinching gesture.
     func testPinchToZoomIn() {
         let app = XCUIApplication()
         let currentCard = app.otherElements.element(boundBy: 1)
         currentCard.pinch(withScale: 2.0, velocity: 5)
     }
-
+    
+    /// Test the swiping gesture does dismiss the card.
     func testSwipeToDismiss() {
         let app = XCUIApplication()
         var topCard: XCUIElement { return app.otherElements.element(boundBy: 1) }
         
-        // Test swiping gesture to each side of the screen
+        // Swipe each card to one of the four directions.
         let card0 = topCard
         card0.swipeRight()
         sleep(1)
-        XCTAssertNotEqual(topCard, card0)
+        XCTAssertNotEqual(topCard, card0, "The card was not dismissed.")
         
         let card1 = topCard
         card1.swipeLeft()
         sleep(1)
-        XCTAssertNotEqual(topCard, card1)
+        XCTAssertNotEqual(topCard, card1, "The card was not dismissed.")
         
         let card2 = topCard
         card2.swipeUp()
         sleep(1)
-        XCTAssertNotEqual(topCard, card2)
+        XCTAssertNotEqual(topCard, card2, "The card was not dismissed.")
         
         let card3 = topCard
         card3.swipeDown()
         sleep(1)
-        XCTAssertNotEqual(topCard, card3)
+        XCTAssertNotEqual(topCard, card3, "The card was not dismissed.")
     }
     
+    /// Test the functionalities of the toolbar buttons.
     func testToolBarButtons() {
         let app = XCUIApplication()
         let currentCard = app.otherElements.element(boundBy: 1)
@@ -100,6 +105,7 @@ class UITests: XCTestCase {
         saveButton.tap()
     }
     
+    /// Test the segues bridging each view controller.
     func testSegue() {
         let app = XCUIApplication()
         saveButton.tap()
@@ -108,28 +114,29 @@ class UITests: XCTestCase {
         }
         
         goToCollectionButton.tap()
-        XCTAssert(app.navigationBars["CatCards.CollectionVC"].exists)
+        XCTAssert(app.navigationBars["CatCards.CollectionVC"].exists, "Current view is not collection view.")
         
         app.collectionViews.cells.images.firstMatch.tap()
-        XCTAssert(app.navigationBars["CatCards.SingleImageVC"].exists)
+        XCTAssert(app.navigationBars["CatCards.SingleImageVC"].exists, "Current view is not single image view.")
         
         app.buttons["Back"].tap()
-        XCTAssert(app.navigationBars["CatCards.CollectionVC"].exists)
+        XCTAssert(app.navigationBars["CatCards.CollectionVC"].exists, "Current view is not collection view.")
         
         app.buttons["Back"].tap()
-        XCTAssert(app.navigationBars["CatCards.HomeVC"].exists)
+        XCTAssert(app.navigationBars["CatCards.HomeVC"].exists, "Current view is not home view.")
     }
     
+    /// Test gestures in single image view controller.
     func testSingleImageVC() {
         let app = XCUIApplication()
         saveButton.tap()
+        
         // Navigate to SingleImageVC.
         goToCollectionButton.tap()
+        let imageToTest = app.collectionViews.cells.images.firstMatch
+        imageToTest.tap()
         
-        let savedImage = app.collectionViews.cells.images.firstMatch
-        savedImage.tap()
-        
-        // Test tap, pinch and pan gestures
+        // Test tap, pinch and pan gestures.
         let image = app.scrollViews.images.firstMatch
         image.doubleTap()
         image.pinch(withScale: 1.2, velocity: 5)
@@ -145,7 +152,7 @@ class UITests: XCTestCase {
             app.scrollViews.firstMatch.swipeRight()
         }
         
-        // Test functionalities of the toolbar's buttons
+        // Test functionalities of each toolbar button.
         let toolbar = app.toolbars["Toolbar"]
         toolbar.buttons["Share"].tap()
         app.buttons["Close"].tap()
@@ -153,8 +160,9 @@ class UITests: XCTestCase {
         app.buttons["Delete Picture"].tap()
         app.buttons["Back"].tap()
         
-        // Test the image is deleted
-        XCTAssertFalse(app.collectionViews.cells.images.firstMatch == savedImage)
+        // Test if the test image is deleted.
+        let firstImageInCollection = app.collectionViews.cells.images.firstMatch
+        XCTAssertFalse(firstImageInCollection == imageToTest, "Image was not deleted.")
     }
     
 }
