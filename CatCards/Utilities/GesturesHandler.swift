@@ -279,7 +279,7 @@ extension GesturesHandler {
 
 extension GesturesHandler {
     
-    /// Attach all gesturn recognizers to the designated card.
+    /// Attach all gesture recognizers to the designated card.
     /// - Parameter card: The card to which the gesture recognizers are attached.
     func addGestureRecognizers(to card: Card) {
         card.addGestureRecognizer(panGestureRecognizer)

@@ -19,7 +19,7 @@ class UITests: XCTestCase {
     var saveButton: XCUIElement!
     var undoButton: XCUIElement!
     var shareButton: XCUIElement!
-    var goToCollectionBtn: XCUIElement!
+    var goToCollectionButton: XCUIElement!
     
     override func setUp() {
         super.setUp()
@@ -28,7 +28,7 @@ class UITests: XCTestCase {
         saveButton = toolbar/*@START_MENU_TOKEN@*/.buttons["saveButton"]/*[[".buttons[\"Save\"]",".buttons[\"saveButton\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
         undoButton = toolbar/*@START_MENU_TOKEN@*/.buttons["undoButton"]/*[[".buttons[\"Undo\"]",".buttons[\"undoButton\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
         shareButton = toolbar/*@START_MENU_TOKEN@*/.buttons["shareButton"]/*[[".buttons[\"Share\"]",".buttons[\"shareButton\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-        goToCollectionBtn = XCUIApplication().buttons["collectionButton"]
+        goToCollectionButton = XCUIApplication().buttons["collectionButton"]
         
         let app = XCUIApplication()
         app.launchArguments = ["enable-testing"]
@@ -40,7 +40,7 @@ class UITests: XCTestCase {
         saveButton = nil
         undoButton = nil
         shareButton = nil
-        goToCollectionBtn = nil
+        goToCollectionButton = nil
         super.tearDown()
     }
     
@@ -107,24 +107,24 @@ class UITests: XCTestCase {
             app.buttons["OK"].tap()
         }
         
-        goToCollectionBtn.tap()
-        XCTAssertTrue(app.navigationBars["CatCards.CollectionVC"].exists)
+        goToCollectionButton.tap()
+        XCTAssert(app.navigationBars["CatCards.CollectionVC"].exists)
         
         app.collectionViews.cells.images.firstMatch.tap()
-        XCTAssertTrue(app.navigationBars["CatCards.SingleImageVC"].exists)
+        XCTAssert(app.navigationBars["CatCards.SingleImageVC"].exists)
         
         app.buttons["Back"].tap()
-        XCTAssertTrue(app.navigationBars["CatCards.CollectionVC"].exists)
+        XCTAssert(app.navigationBars["CatCards.CollectionVC"].exists)
         
         app.buttons["Back"].tap()
-        XCTAssertTrue(app.navigationBars["CatCards.HomeVC"].exists)
+        XCTAssert(app.navigationBars["CatCards.HomeVC"].exists)
     }
     
     func testSingleImageVC() {
         let app = XCUIApplication()
         saveButton.tap()
         // Navigate to SingleImageVC.
-        goToCollectionBtn.tap()
+        goToCollectionButton.tap()
         
         let savedImage = app.collectionViews.cells.images.firstMatch
         savedImage.tap()

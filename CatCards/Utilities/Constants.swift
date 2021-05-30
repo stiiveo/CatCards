@@ -19,7 +19,7 @@ struct K {
     
     struct API {
         static let urlString = "https://api.thecatapi.com/v1/images/search?mime_types=\(imageType)"
-        static let imageType: String = "jpg" // Input option: 'gif', 'jpg', 'png', 'jpg,gif,png'
+        static let imageType: String = "jpg" // Input option: 'gif', 'jpg', 'png', 'jpg, gif, png'
     }
     
     struct Color {
