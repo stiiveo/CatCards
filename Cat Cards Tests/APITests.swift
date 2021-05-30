@@ -12,27 +12,35 @@ import XCTest
 class APITests: XCTestCase {
     
     var urlSession: URLSession!
-    let urlString = K.API.urlString
+    var urlString: String!
 
     override func setUp() {
         super.setUp()
         urlSession = URLSession(configuration: .default)
+        urlString = K.API.urlString
     }
 
     override func tearDown() {
         urlSession = nil
+        urlString = nil
         super.tearDown()
     }
     
-    func sendRequestTo(urlString: String) {
-        // given
+    /// Test the response of the Cat API.
+    func testResponseOfAPI() {
+        sendRequestTo(urlString: K.API.urlString)
+    }
+    
+    /// Send data request to provided provided API address.
+    /// - Parameter urlString: The string HTML address of the API.
+    private func sendRequestTo(urlString: String) {
         let url = URL(string: urlString)
         let promise = expectation(description: "Completion handler invoked")
         var receivedData: Data?
         var statusCode: Int?
         var responseError: Error?
         
-        // when
+        // Send a data request to the API.
         urlSession.dataTask(with: url!) { (data, response, error) in
             receivedData = data
             statusCode = (response as? HTTPURLResponse)?.statusCode
@@ -47,10 +55,6 @@ class APITests: XCTestCase {
         XCTAssertNotNil(receivedData, "Received data is nil.")
         XCTAssertEqual(statusCode, 200, "API response code is not 200.")
         XCTAssertNil(responseError, "Failed to send request/receive response to/from API.")
-    }
-    
-    func testResponseOfAPI() {
-        sendRequestTo(urlString: K.API.urlString)
     }
 
 }
