@@ -1,40 +1,36 @@
-## CatCards: Tinder–like Cat Pictures Browser App
-#### Enjoy cat pictures with 2 fingers 🤞
+# CatCards: Cat Pictures Browser w/ Tinder Experience
+用兩根手指欣賞貓咪圖片 🤞
 
-![Screenshot](./Docs/Screenshots/dark_mode.jpeg)
+![Screenshot](./Docs/Screenshots/screenshot.png)
 
-###### Demonstration Video: https://youtu.be/Y7D-Lp_HVNc
+###### 示範影片：https://youtu.be/20rWJ_Ow0C0
 
-### Features
-* Browse countless cat pictures
-* Save pictures and browse saved pictures in the gallery
-* Share currently viewed picture or saved one
-* Cache: Pictures that were retrieved via the API will be reserved in local cache folder until the maximum cache number is reached
-* iPad support
-* Dark mode with gradient background
-* Language: English, Traditional Chinese
-* Onboard session
+### 功能
+* 瀏覽數千張貓咪圖片
+* 單擊儲存喜歡的圖片，並在畫廊中欣賞
+* 單擊分享圖片
+* 快取：已下載的圖片會暫存在快取資料夾，加速App啟動的速度
+* 新用戶教學流程
+* 可調的漸層背景
+* 支援深色外觀
+* 支援iPad
+* 支援語言：英文、正體中文
 
----
-### Specs Overview
-
-* MVC structure
+### 技術總覽
+* Mixed Design Pattern: MVC, Delegate, Singleton, Notification
 * Restful API
-* URLSession
 * JSON decoding and parsing
 * UserDefaults, Core Data, File Manager
-* Cache realized by using File Manager
+* Cache
 * UIKit
 * AutoLayout
 * NSLocalisedString
 * Source Version Control: Git
-* Unit & UI Test (Currently 71% coverage)
+* Automated Unit & UI Test w/ 74% coverage and increasing...
 
 ---
-### Footnote  
-This is the first moderate scale project I've ever built.
-
-All cat images seen in this App are provided by **TheCatAPI**.
+### Footnote
+All cat images used in this App are provided by **TheCatAPI**.
 Please refer to https://thecatapi.com/ for more info.
 
 If any issue was spotted within this project, feel free to raise an issue ticket and I'll look into it when I get spared time.
