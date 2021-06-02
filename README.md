@@ -1,4 +1,4 @@
-# CatCards: Cat Pictures Browser w/ Tinder Experience
+# 貓咪卡片 CatCards
 用兩根手指欣賞貓咪圖片 🤞
 
 ![Screenshot](./Docs/Screenshots/screenshot.png)
