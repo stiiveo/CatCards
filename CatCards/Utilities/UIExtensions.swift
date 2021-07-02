@@ -46,26 +46,26 @@ extension UIImage {
     /// - Parameter size: Size the image to be downsized to.
     /// - Returns: The downsized image.
     func downsampled(toSize size: CGSize) -> UIImage {
-        guard let imageData = self.pngData() else {
-            debugPrint("Unable to convert UIImage object to PNG data.")
+        guard let imageData = self.jpegData(compressionQuality: K.Data.jpegDataCompressionQuality) else {
+            debugPrint("Unable to create jpeg data for downsampling operation.")
             return self
         }
         
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
         let imageSource = CGImageSourceCreateWithData(imageData as CFData, imageSourceOptions)!
-        let screenScale = UIScreen.main.scale
+        let scale = UIScreen.main.scale
+        let maxPixelSize = size.applying(CGAffineTransform(scaleX: scale, y: scale))
         
-        let maxDimensionInPixels = max(size.width, size.height) * screenScale
-        let downsampleOptions =
+        let options: [CFString : Any] =
             [kCGImageSourceCreateThumbnailFromImageAlways: true,
              kCGImageSourceShouldCacheImmediately: true,
              kCGImageSourceCreateThumbnailWithTransform: true,
-             kCGImageSourceThumbnailMaxPixelSize: maxDimensionInPixels] as CFDictionary
+             kCGImageSourceThumbnailMaxPixelSize: max(maxPixelSize.width, maxPixelSize.height)]
         
-        if let downsampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, downsampleOptions) {
+        if let downsampledImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary) {
             return UIImage(cgImage: downsampledImage)
         } else {
-            debugPrint("Error: Unable to downsample image source to thumbnail image data.")
+            debugPrint("Failed to downsample image.")
             return self
         }
         

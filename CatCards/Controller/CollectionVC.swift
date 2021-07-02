@@ -28,9 +28,7 @@ final class CollectionVC: UICollectionViewController {
         return label
     }()
     
-    private var screenWidth: CGFloat {
-        return UIScreen.main.bounds.width
-    }
+    private var screenWidth: CGFloat { return UIScreen.main.bounds.width }
     
     // To maximize the usage of screen real estate, the wider the screen width, the more cell numbers per row of the collection view
     private var numberOfCellsPerRow: CGFloat {
@@ -104,7 +102,7 @@ final class CollectionVC: UICollectionViewController {
         let width = (screenWidth - (interCellSpacing * (numberOfCellsPerRow - 1))) / numberOfCellsPerRow
         let height = width
         
-        // Set up width and spacing of each cell
+        // Set up size and spacing between each cell.
         
         // Remove auto layout constraint
         flowLayout.estimatedItemSize = .zero
