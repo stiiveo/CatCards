@@ -20,35 +20,26 @@ extension UIImage {
         return self
     }
     
-    /// Resize the image to be within the designated bounds.
-    /// Provided image is returned if its size is within the specified size.
-    func scaledToAspectFit(size: CGSize) -> UIImage {
-        let imageSize = self.size
-        let imageAspectRatio = imageSize.width / imageSize.height
-        let canvasAspectRatio = size.width / size.height
+    /// Resize the image so the size is within the provided size.
+    /// The original image is returned if its size is within the target size.
+    func resize(within targetSize: CGSize) -> UIImage {
+        let ratio = size.width / size.height
+        let targetRatio = targetSize.width / targetSize.height
+        var scale: CGFloat
         
-        var resizeVector: CGFloat
-        
-        if imageAspectRatio > canvasAspectRatio {
-            resizeVector = size.width / imageSize.width
-        } else {
-            resizeVector = size.height / imageSize.height
+        scale = ratio > targetRatio ?
+            targetSize.width / size.width : targetSize.height / size.height
+        if scale >= 1 { return self }
+
+        let scaledSize = CGSize(width: size.width * scale,
+                                height: size.height * scale)
+
+        // Render the image in the scaled size.
+        let renderer = UIGraphicsImageRenderer(size: scaledSize)
+        let resizedImage = renderer.image { context in
+            draw(in: CGRect(origin: .zero, size: scaledSize))
         }
-        
-        if resizeVector >= 1 {
-            return self
-        }
-        
-        let scaledSize = CGSize(width: imageSize.width * resizeVector, height: imageSize.height * resizeVector)
-        
-        // Re–draw the image with calculated scaled size.
-        UIGraphicsBeginImageContextWithOptions(scaledSize, false, 0)
-        draw(in: CGRect(origin: .zero, size: scaledSize))
-        
-        let scaledImage = UIGraphicsGetImageFromCurrentImageContext() ?? self
-        UIGraphicsEndImageContext()
-        
-        return scaledImage
+        return resizedImage
     }
     
     /// The provided image is returned if process of data initialization or downsizing failed.

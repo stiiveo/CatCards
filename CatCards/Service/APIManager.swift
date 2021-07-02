@@ -103,11 +103,11 @@ final class APIManager {
         guard let imageURL = URL(string: parsedData.url) else { return nil }
         
         let image = imageFromURL(url: imageURL)
-        let screenSize = UIScreen.main.nativeBounds.size
+        let targetSize = UIScreen.main.bounds.size
         
         if let filteredImage = image.filteredBySpecifiedSize {
-            let downsizedImage = filteredImage.scaledToAspectFit(size: screenSize)
-            return CatData(id: parsedData.id, image: downsizedImage)
+            let resizedImage = filteredImage.resize(within: targetSize)
+            return CatData(id: parsedData.id, image: resizedImage)
         } else {
             return nil
         }

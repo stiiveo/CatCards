@@ -48,10 +48,6 @@ final class Card: UIView {
         addOverlay()
     }
     
-    deinit {
-        print("Card indexed \(index) is to be deinitialized.")
-    }
-    
     // MARK: - Style & Shadow
     
     // Customize the card's style
