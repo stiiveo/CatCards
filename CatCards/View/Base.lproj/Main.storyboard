@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="jeA-7F-Qie">
-    <device id="retina4_7" orientation="portrait" appearance="light"/>
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
@@ -15,14 +15,14 @@
             <objects>
                 <viewController id="jpg-gr-ShF" customClass="HomeVC" customModule="CatCards" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="cSQ-ii-ZYK">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="o9H-d8-u3v">
-                                <rect key="frame" x="169" y="315" width="37" height="37"/>
+                                <rect key="frame" x="176.66666666666666" y="403.66666666666669" width="37" height="37"/>
                             </activityIndicatorView>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZI0-C0-QUe">
-                                <rect key="frame" x="0.0" y="613" width="375" height="44"/>
+                                <rect key="frame" x="0.0" y="756" width="390" height="44"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="44" id="7qg-j3-968"/>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="gQD-1g-FFx"/>
@@ -52,7 +52,7 @@
                                 </items>
                             </toolbar>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bts-7g-pnA" userLabel="CardView">
-                                <rect key="frame" x="0.0" y="44" width="375" height="559"/>
+                                <rect key="frame" x="0.0" y="88" width="390" height="658"/>
                             </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="E8D-Zx-PRV"/>
@@ -94,7 +94,7 @@
             <objects>
                 <collectionViewController id="nfh-xn-jhC" customClass="CollectionVC" customModule="CatCards" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="s03-pl-d20">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" name="backgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="q4y-nE-Wkn">
@@ -146,17 +146,17 @@
             <objects>
                 <viewController id="qlD-G6-Afc" customClass="SingleImageVC" customModule="CatCards" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="qn6-hw-Gab">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" directionalLockEnabled="YES" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Ze-wL-vlY">
-                                <rect key="frame" x="0.0" y="44" width="375" height="559"/>
+                                <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="eiQ-d0-gPU">
-                                        <rect key="frame" x="0.0" y="0.0" width="375" height="559"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="default_image" translatesAutoresizingMaskIntoConstraints="NO" id="Tno-z9-hkl">
-                                                <rect key="frame" x="0.0" y="0.0" width="375" height="559"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                                             </imageView>
                                         </subviews>
                                     </stackView>
@@ -172,47 +172,33 @@
                                 <viewLayoutGuide key="contentLayoutGuide" id="Zs3-8E-Dxx"/>
                                 <viewLayoutGuide key="frameLayoutGuide" id="S4A-Fj-ePw"/>
                             </scrollView>
-                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="naK-xz-Kcm">
-                                <rect key="frame" x="0.0" y="613" width="375" height="44"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="PRy-aC-7Jr"/>
-                                </constraints>
-                                <items>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="ikV-2A-UAn"/>
-                                    <barButtonItem title="Share" image="square.and.arrow.up" catalog="system" id="6Ck-bA-J7B">
-                                        <connections>
-                                            <action selector="shareButtonPressed:" destination="qlD-G6-Afc" id="S8V-oG-6zS"/>
-                                        </connections>
-                                    </barButtonItem>
-                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="00h-JF-pss"/>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="xf7-8S-kW2"/>
-                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="ccR-Ny-csb"/>
-                                    <barButtonItem title="Delete" image="trash" catalog="system" id="QaQ-75-ktH">
-                                        <connections>
-                                            <action selector="deleteButtonPressed:" destination="qlD-G6-Afc" id="Nq8-41-7j3"/>
-                                        </connections>
-                                    </barButtonItem>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="LoU-vL-GaG"/>
-                                </items>
-                            </toolbar>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="PSN-rc-vX0"/>
                         <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="1Ze-wL-vlY" firstAttribute="leading" secondItem="PSN-rc-vX0" secondAttribute="leading" id="5cz-og-Tc6"/>
-                            <constraint firstItem="naK-xz-Kcm" firstAttribute="leading" secondItem="PSN-rc-vX0" secondAttribute="leading" id="GIz-98-mhy"/>
-                            <constraint firstItem="naK-xz-Kcm" firstAttribute="top" secondItem="1Ze-wL-vlY" secondAttribute="bottom" constant="10" id="O1L-R6-qth"/>
-                            <constraint firstItem="naK-xz-Kcm" firstAttribute="trailing" secondItem="PSN-rc-vX0" secondAttribute="trailing" id="ssh-lQ-GhZ"/>
-                            <constraint firstItem="naK-xz-Kcm" firstAttribute="bottom" secondItem="PSN-rc-vX0" secondAttribute="bottom" constant="-10" id="vdh-Du-unN"/>
+                            <constraint firstAttribute="bottom" secondItem="1Ze-wL-vlY" secondAttribute="bottom" id="Tbp-qJ-iPN"/>
                             <constraint firstItem="PSN-rc-vX0" firstAttribute="trailing" secondItem="1Ze-wL-vlY" secondAttribute="trailing" id="yd3-3l-Sh2"/>
-                            <constraint firstItem="1Ze-wL-vlY" firstAttribute="top" secondItem="PSN-rc-vX0" secondAttribute="top" id="zfI-F2-04S"/>
+                            <constraint firstItem="1Ze-wL-vlY" firstAttribute="top" secondItem="qn6-hw-Gab" secondAttribute="top" id="zfI-F2-04S"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="afj-fq-RhJ"/>
+                    <navigationItem key="navigationItem" id="afj-fq-RhJ">
+                        <rightBarButtonItems>
+                            <barButtonItem title="Item" image="trash" catalog="system" id="WMj-qC-CUE">
+                                <connections>
+                                    <action selector="deleteButtonPressed:" destination="qlD-G6-Afc" id="rx3-hM-oxw"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Item" image="square.and.arrow.up" catalog="system" id="A3b-9t-EVC">
+                                <connections>
+                                    <action selector="shareButtonPressed:" destination="qlD-G6-Afc" id="Ole-XG-3lA"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
+                    </navigationItem>
                     <connections>
                         <outlet property="scrollView" destination="1Ze-wL-vlY" id="3Jb-52-g00"/>
                         <outlet property="stackView" destination="eiQ-d0-gPU" id="iCu-Re-zCs"/>
-                        <outlet property="toolbar" destination="naK-xz-Kcm" id="xVA-YC-hFy"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="OOC-I2-fFc" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -225,7 +211,7 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="jeA-7F-Qie" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="YCN-F7-b1W">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="44" width="390" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>

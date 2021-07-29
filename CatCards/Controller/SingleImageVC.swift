@@ -12,7 +12,6 @@ final class SingleImageVC: UIViewController, UIScrollViewDelegate {
 
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var stackView: UIStackView!
-    @IBOutlet weak var toolbar: UIToolbar!
     
     var selectedCellIndex: Int = 0
     private let dbManager = DataManager.shared
@@ -56,8 +55,6 @@ final class SingleImageVC: UIViewController, UIScrollViewDelegate {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        setToolbarStyle()
-        
         // Create imageView cache.
         initiateImageBufferArray()
         
@@ -301,14 +298,6 @@ final class SingleImageVC: UIViewController, UIScrollViewDelegate {
         }
         
         self.present(alert, animated: true, completion: nil)
-    }
-    
-    // MARK: - Stack View & Toolbar Preparation
-    
-    private func setToolbarStyle() {
-        // Make toolbar's background transparent
-        toolbar.setBackgroundImage(UIImage(), forToolbarPosition: .any, barMetrics: .default)
-        toolbar.setShadowImage(UIImage(), forToolbarPosition: .any)
     }
     
     // MARK: - Background Color

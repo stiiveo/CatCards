@@ -16,7 +16,8 @@ final class CollectionVC: UICollectionViewController {
     private var backgroundView: UIView!
     private var navBar: UINavigationBar!
     private var flowLayout: UICollectionViewFlowLayout!
-    private lazy var noSavedPicturesHint: UILabel = {
+    
+    private let noSavedPicturesHint: UILabel = {
         let label = UILabel()
         label.text = Z.BackgroundView.noDataLabel
         label.font = .boldSystemFont(ofSize: 18)
@@ -24,11 +25,10 @@ final class CollectionVC: UICollectionViewController {
         label.minimumScaleFactor = 0.5
         label.textColor = UIColor.secondaryLabel
         label.textAlignment = .center
-        
         return label
     }()
     
-    private var screenWidth: CGFloat { return UIScreen.main.bounds.width }
+    private var screenWidth: CGFloat { UIScreen.main.bounds.width }
     
     // To maximize the usage of screen real estate, the wider the screen width, the more cell numbers per row of the collection view
     private var numberOfCellsPerRow: CGFloat {
