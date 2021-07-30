@@ -46,7 +46,6 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
     // Maximum number of cards with different data shown to the user.
     internal var maxPointerReached: Int = 0
     internal var cardIsBeingPanned = false
-    private let hapticManager = HapticManager()
     
     // Status on whether to show card info on all cards.
     static var showOverlay = true
@@ -420,10 +419,9 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         guard !cardIsBeingPanned else { return }
         guard let undoCard = previousCard else { return }
         
-        hapticManager.prepareImpactGenerator(style: .medium)
         maxPointerReached = pointer > maxPointerReached ? pointer : maxPointerReached
         undoButton.isEnabled = false
-        hapticManager.impactHaptic?.impactOccurred()
+        HapticManager.shared.vibrateForSelection()
         nextCard?.removeFromSuperview()
         addCardToView(undoCard, atBottom: false)
         
@@ -455,7 +453,6 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
             DispatchQueue.main.async {
                 self.refreshButtonState()
             }
-            self.hapticManager.releaseImpactGenerator()
         }
     }
     
@@ -465,36 +462,31 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         guard !cardIsBeingPanned else { return }
         
         if let data = currentCard?.data {
-            hapticManager.prepareImpactGenerator(style: .soft)
-            hapticManager.prepareNotificationGenerator()
-            
             // Save data if it's absent in database, otherwise delete it.
             let isSaved = dbManager.isDataSaved(data: data)
             
             switch isSaved {
             case false:
-                // Save data
+                // Current card's data is not saved yet.
                 dbManager.saveData(data) { success in
                     guard success else {
                         // Data is not saved successfully
                         debugPrint("Current image cannot be saved. Image ID: \(currentCard!.data.id)")
-                        hapticManager.notificationHaptic?.notificationOccurred(.error)
+                        HapticManager.shared.vibrate(for: .error)
                         return
                     }
                     // Data is saved successfully
                     DispatchQueue.main.async {
                         self.showConfirmIcon()
                     }
-                    hapticManager.notificationHaptic?.notificationOccurred(.success)
+                    HapticManager.shared.vibrate(for: .success)
                 }
             case true:
-                // Delete data
+                // Current card's data is already saved.
                 dbManager.deleteData(id: data.id)
-                hapticManager.impactHaptic?.impactOccurred()
+                HapticManager.shared.vibrate(for: .success)
             }
             refreshButtonState()
-            hapticManager.releaseImpactGenerator()
-            hapticManager.releaseNotificationGenerator()
         }
     }
     
@@ -514,7 +506,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
             debugPrint("Failed to cache file \(fileName) to path: \(fileUrl.path)")
             return
         } catch {
-            debugPrint("Unknown error occured when caching image data with ID \(data.id)")
+            debugPrint("Unknown error occurred when caching image data with ID \(data.id)")
         }
         // Get the url of the cached image file.
         guard let imageFileUrl = cacheManager?.urlOfImageFile(fileName: fileName) else {
@@ -522,7 +514,6 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
             return
         }
         
-        hapticManager.prepareImpactGenerator(style: .soft)
         let activityVC = UIActivityViewController(activityItems: [imageFileUrl], applicationActivities: nil)
         
         // Set up Popover Presentation Controller's barButtonItem for iPad.
@@ -530,13 +521,11 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
             activityVC.popoverPresentationController?.barButtonItem = sender
         }
         self.present(activityVC, animated: true)
-        hapticManager.impactHaptic?.impactOccurred()
+        HapticManager.shared.vibrateForSelection()
         
         // Remove the cache image file after the activityVC is dismissed.
         activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
             self.dbManager.removeFile(fromDirectory: .cachesDirectory, inFolder: K.File.FolderName.cacheImage, fileName: data.id)
-            
-            self.hapticManager.releaseImpactGenerator()
         }
     }
     
@@ -578,10 +567,9 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
     
     func APIErrorDidOccur(error: APIError) {
         // Present alert view to the user if any error occurs in the data fetching process.
-        hapticManager.prepareNotificationGenerator()
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
             // Make sure no existing alert controller being presented already.
-            guard self.presentedViewController == nil else { return }
+            guard self?.presentedViewController == nil else { return }
             
             var alertTitle: String
             var alertMessage: String
@@ -602,14 +590,13 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
             // An button which send network request to the network manager
             let retryAction = UIAlertAction(title: Z.AlertMessage.APIError.actionTitle, style: .default) { _ in
                 // Request enough number of new data to satisfy the ideal cache data number.
-                let requestNumber = K.Data.numberOfPrefetchedData - self.cardArray.count
-                self.sendAPIRequest(numberOfRequests: requestNumber)
+                let requestNumber = K.Data.numberOfPrefetchedData - (self?.cardArray.count ?? 0)
+                self?.sendAPIRequest(numberOfRequests: requestNumber)
             }
             
             alert.addAction(retryAction)
-            self.present(alert, animated: true, completion: nil)
-            self.hapticManager.notificationHaptic?.notificationOccurred(.error)
-            self.hapticManager.releaseNotificationGenerator()
+            self?.present(alert, animated: true, completion: nil)
+            HapticManager.shared.vibrate(for: .error)
         }
     }
     

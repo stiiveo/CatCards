@@ -9,24 +9,23 @@
 import UIKit
 
 final class HapticManager {
-    var impactHaptic: UIImpactFeedbackGenerator? = nil
-    var notificationHaptic: UINotificationFeedbackGenerator? = nil
     
-    func prepareImpactGenerator(style: UIImpactFeedbackGenerator.FeedbackStyle) {
-        impactHaptic = UIImpactFeedbackGenerator(style: style)
-        impactHaptic?.prepare()
+    static let shared = HapticManager()
+    
+    private init() {}
+    
+    // MARK: - Public
+    
+    func vibrateForSelection() {
+        let generator = UISelectionFeedbackGenerator()
+        generator.prepareForInterfaceBuilder()
+        generator.selectionChanged()
     }
     
-    func prepareNotificationGenerator() {
-        notificationHaptic = UINotificationFeedbackGenerator()
-        notificationHaptic?.prepare()
+    func vibrate(for type: UINotificationFeedbackGenerator.FeedbackType) {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(type)
     }
     
-    func releaseImpactGenerator() {
-        impactHaptic = nil
-    }
-    
-    func releaseNotificationGenerator() {
-        notificationHaptic = nil
-    }
 }
