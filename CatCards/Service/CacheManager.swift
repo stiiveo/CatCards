@@ -10,29 +10,30 @@ import UIKit
 import CoreData
 
 final class CacheManager {
-    
     static let shared = CacheManager()
     private var context: NSManagedObjectContext!
     private let fileManager = FileManager.default
     private var cacheImagesFolderUrl: URL!
-    private let imageFileExtension = K.File.fileExtension
+    private let imageFileExtension = K.File.imageFileExtension
     
-    init?() {
-        if let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext {
-            self.context = context
-            
-            do {
-                let cacheRootUrl = try fileManager.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-                self.cacheImagesFolderUrl = cacheRootUrl.appendingPathComponent(K.File.FolderName.cacheImage, isDirectory: true)
-            } catch {
-                debugPrint("Failed to locate nor create standard system Caches directory: \(error)")
-                return nil
-            }
-        } else {
+    private init?() {
+        guard let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext else {
             return nil
         }
+        self.context = context
         
-        print("Cache images folder url path:", cacheImagesFolderUrl!.path)
+        do {
+            let cacheRootUrl = try fileManager.url(
+                for: .cachesDirectory,
+                in: .userDomainMask,
+                appropriateFor: nil,
+                create: true
+            )
+            self.cacheImagesFolderUrl = cacheRootUrl.appendingPathComponent(K.File.FolderName.cacheImage, isDirectory: true)
+        } catch {
+            debugPrint("Failed to locate nor create standard system Caches directory: \(error)")
+            return nil
+        }
     }
     
     // MARK: - Clear Cache
@@ -51,11 +52,11 @@ final class CacheManager {
         // Remove specified attributes in the Cache entity
         for cacheObject in fetchResult {
             if cacheObject.name == dataName {
-                context.delete(cacheObject)
+                context?.delete(cacheObject)
                 if cacheObject.isDeleted {
                     if let fileId = cacheObject.name {
                         // Remove cached file matching the specified file name.
-                        try removeCacheFile(fileName: fileId + imageFileExtension)
+                        try removeCacheFile(fileName: fileId, fileType: imageFileExtension)
                     }
                 } else {
                     debugPrint("Unknown error: The specified attribute '\(dataName)' cannot be removed from Cache database.")
@@ -68,8 +69,11 @@ final class CacheManager {
     /// Remove cache file from local file system with specified file name.
     /// - Parameter fileName: Name of file to be removed from local cache folder.
     /// - Throws: An error could be thrown if the specified file cannot be found in the cache directory.
-    private func removeCacheFile(fileName: String) throws {
-        guard let fileURL = cacheImagesFolderUrl?.appendingPathComponent(fileName) else {
+    private func removeCacheFile(fileName: String, fileType: String) throws {
+        guard let fileURL =
+                cacheImagesFolderUrl?
+                .appendingPathComponent(fileName)
+                .appendingPathExtension(fileType) else {
             debugPrint("Failed to remove cache file \(fileName) since the valid url of cache images folder cannot be obtained.")
             return
         }
@@ -101,7 +105,7 @@ final class CacheManager {
         var cachedData: [CatData] = []
         for object in objects {
             let dataKey = object.name!
-            if let imageUrl = urlOfImageFile(fileName: dataKey + imageFileExtension) {
+            if let imageUrl = urlOfImageFile(fileName: dataKey, fileExtension: imageFileExtension) {
                 guard let image = UIImage(contentsOfFile: imageUrl.path) else {
                     debugPrint("Failed to initialize an image object with the contents of file located at \(imageUrl.path)")
                     continue
@@ -136,8 +140,8 @@ final class CacheManager {
                     throw CacheError.failedToCommitChangesToPersistentContainer
                 }
                 
-                let fileName = data.id + imageFileExtension
-                try cacheImage(data.image, withFileName: fileName)
+                let fileName = data.id
+                try cacheImage(data.image, fileName: fileName, extensionName: imageFileExtension)
             }
         }
     }
@@ -146,17 +150,19 @@ final class CacheManager {
     /// - Parameter image: Image data to be saved.
     /// - Parameter fileName: File name with which the image file to be saved.
     /// - Throws: This attempt could fail and return one or more cases of CacheError.
-    func cacheImage(_ image: UIImage, withFileName fileName: String) throws {
+    func cacheImage(_ image: UIImage, fileName: String, extensionName: String) throws {
         guard let imageData = image.jpegData(compressionQuality: K.Data.jpegDataCompressionQuality) else {
             throw CacheError.failedToConvertImageToJpegData(image: image)
         }
         
-        if let fileURL = cacheImagesFolderUrl?.appendingPathComponent(fileName) {
+        if let fileURL = cacheImagesFolderUrl?.appendingPathComponent(fileName).appendingPathExtension(extensionName) {
             do {
                 try imageData.write(to: fileURL)
             } catch {
                 throw CacheError.failedToWriteImageFile(url: fileURL)
             }
+        } else {
+            print("Unable to create valid file URL.")
         }
     }
     
@@ -165,7 +171,7 @@ final class CacheManager {
     private func saveContext() throws {
         guard self.context.hasChanges else { return }
         do {
-            try self.context.save()
+            try self.context?.save()
         } catch {
             throw CacheError.failedToCommitChangesToPersistentContainer
         }
@@ -177,8 +183,8 @@ final class CacheManager {
     /// - Parameter fileName: The file name of the image file.
     /// - Throws: An error could be thrown if the file with provided file name does not exist.
     /// - Returns: The URL of the image file saved in cache image folder.
-    func urlOfImageFile(fileName: String) -> URL? {
-        return cacheImagesFolderUrl?.appendingPathComponent(fileName)
+    func urlOfImageFile(fileName: String, fileExtension: String) -> URL? {
+        return cacheImagesFolderUrl?.appendingPathComponent(fileName).appendingPathExtension(fileExtension)
     }
 }
 

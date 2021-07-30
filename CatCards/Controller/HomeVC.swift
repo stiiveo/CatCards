@@ -459,35 +459,37 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
     /// What happens when the save button is pressed.
     /// - Parameter sender: A specialized button for placement on a toolbar or tab bar.
     @IBAction func saveButtonPressed(_ sender: UIBarButtonItem) {
-        guard !cardIsBeingPanned else { return }
+        guard !cardIsBeingPanned, let data = currentCard?.data else {
+            if currentCard?.data == nil {
+                print("Current card's data is invalid.")
+            }
+            return
+        }
         
-        if let data = currentCard?.data {
-            // Save data if it's absent in database, otherwise delete it.
-            let isSaved = dbManager.isDataSaved(data: data)
-            
-            switch isSaved {
-            case false:
-                // Current card's data is not saved yet.
-                dbManager.saveData(data) { success in
-                    guard success else {
-                        // Data is not saved successfully
-                        debugPrint("Current image cannot be saved. Image ID: \(currentCard!.data.id)")
-                        HapticManager.shared.vibrate(for: .error)
-                        return
-                    }
-                    // Data is saved successfully
-                    DispatchQueue.main.async {
-                        self.showConfirmIcon()
-                    }
-                    HapticManager.shared.vibrate(for: .success)
+        // Save data if it's absent in database, otherwise delete it.
+        switch dbManager.isDataSaved(data: data) {
+        case false:
+            // Current card's data is not saved yet.
+            dbManager.saveData(data) { success in
+                guard success else {
+                    // Data is not saved successfully
+                    presentSimpleAlert(withTitle: "Error", message: "Image cannot be saved.", actionTitle: "Dismiss")
+                    HapticManager.shared.vibrate(for: .error)
+                    debugPrint("Current image cannot be saved. Image ID: \(self.currentCard!.data.id)")
+                    return
                 }
-            case true:
-                // Current card's data is already saved.
-                dbManager.deleteData(id: data.id)
+                // Data is saved successfully
+                showConfirmIcon()
                 HapticManager.shared.vibrate(for: .success)
             }
-            refreshButtonState()
+            
+        case true:
+            // Current card's data is already saved.
+            dbManager.deleteData(id: data.id)
+            HapticManager.shared.vibrateForSelection()
         }
+        
+        refreshButtonState()
     }
     
     /// What happens when the save button is pressed.
@@ -497,11 +499,10 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         
         // Write the current card's image data to cache images folder named by its id value.
         let data = currentCard!.data
-        let cacheManager = CacheManager()
-        let fileName = data.id + K.File.fileExtension
+        let fileName = data.id
         
         do {
-            try cacheManager?.cacheImage(data.image, withFileName: fileName)
+            try cacheManager?.cacheImage(data.image, fileName: fileName, extensionName: K.File.imageFileExtension)
         } catch CacheError.failedToWriteImageFile(let fileUrl) {
             debugPrint("Failed to cache file \(fileName) to path: \(fileUrl.path)")
             return
@@ -509,7 +510,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
             debugPrint("Unknown error occurred when caching image data with ID \(data.id)")
         }
         // Get the url of the cached image file.
-        guard let imageFileUrl = cacheManager?.urlOfImageFile(fileName: fileName) else {
+        guard let imageFileUrl = cacheManager?.urlOfImageFile(fileName: fileName, fileExtension: K.File.imageFileExtension) else {
             debugPrint("Failed to get the url of the cached image file \(fileName)")
             return
         }
@@ -520,12 +521,13 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         if UIDevice.current.userInterfaceIdiom == .pad {
             activityVC.popoverPresentationController?.barButtonItem = sender
         }
+        
         self.present(activityVC, animated: true)
         HapticManager.shared.vibrateForSelection()
         
         // Remove the cache image file after the activityVC is dismissed.
         activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
-            self.dbManager.removeFile(fromDirectory: .cachesDirectory, inFolder: K.File.FolderName.cacheImage, fileName: data.id)
+            self.dbManager.removeImageFile(fileName: data.id, fileType: .jpg, fromFolder: .cacheImage, directory: .cachesDirectory)
         }
     }
     
@@ -588,7 +590,10 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
                 preferredStyle: .alert)
             
             // An button which send network request to the network manager
-            let retryAction = UIAlertAction(title: Z.AlertMessage.APIError.actionTitle, style: .default) { _ in
+            let retryAction = UIAlertAction(
+                title: Z.AlertMessage.APIError.actionTitle,
+                style: .default
+            ) { _ in
                 // Request enough number of new data to satisfy the ideal cache data number.
                 let requestNumber = K.Data.numberOfPrefetchedData - (self?.cardArray.count ?? 0)
                 self?.sendAPIRequest(numberOfRequests: requestNumber)

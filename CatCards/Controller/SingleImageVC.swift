@@ -268,7 +268,7 @@ final class SingleImageVC: UIViewController, UIScrollViewDelegate {
         let deleteAction = UIAlertAction(title: Z.AlertMessage.DeleteWarning.actionTitle, style: .destructive) { (action) in
             
             let databaseManager = DataManager.shared
-            let savedDataList = databaseManager.listOfSavedFileNames()
+            let savedDataList = databaseManager.savedFilesList()
             let dataID = savedDataList[self.currentPage]
             
             // Delete data in file system, database and refresh the imageArray

@@ -106,3 +106,12 @@ extension UIView {
         ])
     }
 }
+
+extension UIViewController {
+    func presentSimpleAlert(withTitle title: String?, message: String?, actionTitle: String?) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let action = UIAlertAction(title: actionTitle, style: .default)
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
+    }
+}

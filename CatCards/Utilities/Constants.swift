@@ -66,7 +66,7 @@ struct K {
     }
     
     struct File {
-        static let fileExtension = "." + K.API.imageType
+        static let imageFileExtension = K.API.imageType
         
         struct FolderName {
             static let fullImage = "Cat_Pictures"
