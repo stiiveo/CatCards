@@ -12,17 +12,19 @@ enum APIError {
     case server, network
 }
 
-protocol APIManagerDelegate {
+protocol APIManagerDelegate: AnyObject {
     func dataDidFetch(data: CatData, dataIndex: Int)
     func APIErrorDidOccur(error: APIError)
 }
 
 final class APIManager {
     
-    var delegate: APIManagerDelegate?
     static let shared = APIManager()
-    var dataIndex: Int = 0
+    unowned var delegate: APIManagerDelegate?
     private let urlString = K.API.urlString
+    var dataIndex: Int = 0
+    
+    // MARK: - Public Methods
     
     /// Fetch the data from the URL object and decode the data.
     /// - Parameter url: The URL object used to fetch the data from.
@@ -35,15 +37,15 @@ final class APIManager {
         
         // Send data request to API.
         URLSession.shared.dataTask(with: url) { (data, response, error) in
-            // Transport error occured
+            // Transport error occurred
             if let error = error {
-                // Make the delegate awared that an error occured in the data retrieving process.
+                // Make the delegate aware that an error occurred in the data retrieving process.
                 self.delegate?.APIErrorDidOccur(error: .network)
                 debugPrint("Error sending data request to the server or getting response from the server: \(error)")
                 return
             }
             
-            // Server-side error occured
+            // Server-side error occurred
             if let response = response as? HTTPURLResponse {
                 let status = response.statusCode
                 guard (200...299).contains(status) else {
@@ -62,6 +64,8 @@ final class APIManager {
             }
         }.resume() // Start the newly-initialized task
     }
+    
+    // MARK: - Private Methods
     
     private func sendProcessedDataToDelegate(usingData data: Data) {
         if let parsedData = parsedJSONData(from: data),
@@ -127,7 +131,7 @@ final class APIManager {
         } catch {
             debugPrint("Failed to initialize new image data from fetched URL object. Error: \(error)")
         }
-        return K.Image.defaultImage // Return default image if any error occured.
+        return K.Image.defaultImage // Return default image if any error occurred.
     }
 }
 

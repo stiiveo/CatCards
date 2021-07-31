@@ -15,7 +15,7 @@ class OverlayContentPickerTest: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        picker = OverlayContentPicker()
+        picker = OverlayContentPicker.shared
     }
     
     override func tearDown() {
@@ -23,7 +23,7 @@ class OverlayContentPickerTest: XCTestCase {
         super.tearDown()
     }
     
-    func testValidationOfReturnedString() {
+    func testCorrectReturnedContentType() {
         for _ in 0..<500 {
             XCTAssertFalse(picker.randomContent(contentTypes: [.trivia]).contains("TRIVIA_"))
             
@@ -35,13 +35,7 @@ class OverlayContentPickerTest: XCTestCase {
         for i in 0..<500 {
             let pickedString = picker.randomContent(contentTypes: [.trivia, .quote])
             let subsequentString = picker.randomContent(contentTypes: [.trivia, .quote])
-            XCTAssertNotEqual(pickedString, subsequentString, "Same overlay content is picked in a row after retrieving it for \(i) time(s).")
-        }
-    }
-    
-    func testPerformanceOfRandomContentRetrieving() {
-        measure {
-            _ = picker.randomContent(contentTypes: [.trivia, .quote])
+            XCTAssertNotEqual(pickedString, subsequentString, "Same overlay content is picked in a row when retrieved for number \(i) time.")
         }
     }
 

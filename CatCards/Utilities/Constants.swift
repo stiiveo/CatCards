@@ -135,8 +135,8 @@ struct K {
     }
     
     /*
-     Important: Sync this value to the real number of trivia content,
-     otherwise the string value will not be fetched and shown.
+     Important: Sync these values to the number of all overlay text content,
+     otherwise the string value will not be fetched.
      */
     static let numberOfTrivia: Int = 34
     static let numberOfQuotes: Int = 39
