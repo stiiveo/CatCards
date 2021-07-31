@@ -10,33 +10,30 @@ import UIKit
 
 final class TriviaOverlay: UIView {
     
-    private var blurEffectView = UIVisualEffectView()
+    private var blurEffectView: UIVisualEffectView!
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addBackgroundView()
+        addTriviaLabel()
+    }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    init() {
-        super.init(frame: .zero)
-        addBackgroundView()
-        addTriviaLabel()
-    }
-    
-    // MARK: - Background & Label
+    // MARK: - Background & Label Set Up
     
     private func addBackgroundView() {
-        // Only applies blur effect view on top of this view if the user hadn't disable transparancy effects
+        // Only applies blur effect view on top of this view if the user hadn't disable transparency effects
         if !UIAccessibility.isReduceTransparencyEnabled {
             self.backgroundColor = .clear
             
             // Blur effect setting
             let blurEffect = UIBlurEffect(style: .systemMaterial)
             blurEffectView = UIVisualEffectView(effect: blurEffect)
-            
-            // Always fill the view
-            blurEffectView.frame = self.frame
-            blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            
+            blurEffectView?.frame = bounds
+            blurEffectView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             self.addSubview(blurEffectView)
         } else {
             self.backgroundColor = K.Color.onboardBackground
@@ -46,10 +43,9 @@ final class TriviaOverlay: UIView {
     private func addTriviaLabel() {
         let label = UILabel()
         addView(label,
-                to: blurEffectView.contentView,
+                to: blurEffectView?.contentView ?? self,
                 withOffset: AutoLayoutOffset(leading: 15, trailing: 15, top: 10, bottom: 15))
         
-        // Label text and style
         label.text = OverlayContentPicker.shared.randomContent(contentTypes: [.trivia, .quote])
         label.font = UIFont.preferredFont(forTextStyle: .callout)
         label.adjustsFontForContentSizeCategory = true

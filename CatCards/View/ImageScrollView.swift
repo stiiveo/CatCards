@@ -9,6 +9,8 @@
 import UIKit
 
 final class ImageScrollView: UIScrollView {
+    
+    // MARK: - Properties
 
     private var imageView: UIImageView!
     private lazy var zoomingTap: UITapGestureRecognizer = {
@@ -17,7 +19,7 @@ final class ImageScrollView: UIScrollView {
         return zoomingTap
     }()
     
-    //MARK: - Overriding Methods
+    //MARK: - Init
     
     override init(frame: CGRect) {
         super.init(frame: frame)

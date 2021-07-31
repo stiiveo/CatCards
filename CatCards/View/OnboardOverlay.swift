@@ -10,23 +10,19 @@ import UIKit
 
 final class OnboardOverlay: UIView {
     
-    private var cardIndex: Int = 0
+    private lazy var cardIndex: Int = 0
     
     // MARK: - Initialization
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
     
     init(cardIndex: Int) {
         super.init(frame: .zero)
         self.cardIndex = cardIndex
-        overlayDidInit()
-    }
-    
-    private func overlayDidInit() {
         addBlurredBackground()
         addContent()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: - Stack View

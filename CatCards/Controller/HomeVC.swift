@@ -27,6 +27,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
     private let dbManager = DataManager.shared
     private let cacheManager = CacheManager.shared
     private let apiManager = APIManager.shared
+    private var gesturesHandler: GesturesHandler!
     // Cache of all Card objects used to display to the user.
     internal var cardArray = [Int: Card]()
     // Array of string data used as the content of the onboard info.
@@ -56,9 +57,8 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
     internal var currentCard: Card? { return cardArray[pointer] }
     private var previousCard: Card? { return cardArray[pointer - 1] }
     internal var nextCard: Card? { return cardArray[pointer + 1] }
-    private var gesturesHandler: GesturesHandler!
     
-    // MARK: - Overriding Methods
+    // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -101,6 +101,8 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
     override var prefersHomeIndicatorAutoHidden: Bool {
         return true
     }
+    
+    // MARK: - Init
     
     // Remove notif. observer to avoid sending notification to invalid obj.
     deinit {
@@ -395,8 +397,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         }
         /*
          Since the index of cards created using the cached data will be reset
-         and starting from 0, save the value of pointer which is the relative position of the cardArray,
-         with the first card's index being 0.
+         and starting from 0, save the value of pointer which is the relative position of the cardArray, with the first card's index being 0.
          E.g. If the pointer was 105 and the first card's index in the array was 100,
          the first card's index will be reset to 0, thus the pointer will be 5, which
          is also the relative position to the first card's index.
@@ -428,7 +429,7 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         /*
          Card created from cached data has no position offset at default.
          To create animation and improve user experience,
-         add arbitrary position offset to the undoCard and reset its position with animation.
+         add arbitrary position offset to the undoCard and animate it's reset of position.
          */
         if undoCard.frame.size == .zero {
             // Place the card randomly to one of the corners of the view.
@@ -443,7 +444,6 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
             let transform = CGAffineTransform(translationX: randomTranslation, y: randomTranslation)
             undoCard.transform = transform
         }
-        
         
         UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.1, options: [.curveEaseOut]) {
             self.currentCard?.setSize(status: .standby)
@@ -527,7 +527,12 @@ final class HomeVC: UIViewController, APIManagerDelegate, HomeVCDelegate {
         
         // Remove the cache image file after the activityVC is dismissed.
         activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
-            self.dbManager.removeImageFile(fileName: data.id, fileType: .jpg, fromFolder: .cacheImage, directory: .cachesDirectory)
+            self.dbManager.removeImageFile(
+                fileName: data.id,
+                fileType: .jpg,
+                fromFolder: .cacheImage,
+                directory: .cachesDirectory
+            )
         }
     }
     

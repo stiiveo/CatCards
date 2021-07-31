@@ -116,7 +116,7 @@ final class Card: UIView {
         imageView.layer.cornerRadius = K.Card.Style.cornerRadius
     }
     
-    // MARK: - Overlay
+    // MARK: - Overlay Set Up
     
     private func addOverlay() {
         switch cardType {
@@ -161,7 +161,7 @@ final class Card: UIView {
         ])
         
         // Show / Hidden the overlay depends on the value of `showOverlay` in HomeVC.
-        triviaOverlay?.alpha = HomeVC.showOverlay ? 1 : 0
+        triviaOverlay!.alpha = HomeVC.showOverlay ? 1 : 0
     }
     
     func toggleOverlay() {

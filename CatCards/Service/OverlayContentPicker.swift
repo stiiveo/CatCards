@@ -21,12 +21,12 @@ final class OverlayContentPicker {
     
     // Shuffled trivia picking order.
     private var triviaPickingOrder: [Int] = {
-        return (0..<K.numberOfTrivia).map { $0 }.shuffled()
+        return (0..<K.numberOfTrivia).map{$0}.shuffled()
     }()
     
     // Shuffled quote picking order.
     private var quotePickingOrder: [Int] = {
-        return (0..<K.numberOfQuotes).map { $0 }.shuffled()
+        return (0..<K.numberOfQuotes).map{$0}.shuffled()
     }()
     
     private var triviaPickingCounter: Int = 0 {

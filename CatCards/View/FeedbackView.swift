@@ -11,17 +11,22 @@ import UIKit
 
 final class FeedbackView {
     
+    // MARK: - Properties
+    
     private let superview: UIView
     private let image: UIImage
     private let feedbackView: UIImageView
+    
+    // MARK: - Init
     
     init(parentView: UIView, image: UIImage) {
         self.superview = parentView
         self.image = image
         feedbackView = UIImageView(image: image)
-        
         addViewToParentView()
     }
+    
+    // MARK: - Private Methods
     
     /// Add feedback view to the parent view, set up its size and position it to the center of the parent view.
     private func addViewToParentView() {
@@ -45,6 +50,8 @@ final class FeedbackView {
         ])
     }
     
+    // MARK: - Public Methods
+    
     /// Show the feedback image to the designated parent view with customizable delay and duration.
     ///
     /// Use this method when a visual message displaying to the user is appropriate,
@@ -52,12 +59,11 @@ final class FeedbackView {
     ///
     /// - Parameters:
     ///   - delayDuration: How long the animation is delayed before being started.
-    ///   - duration: The duration of the animation, from the appearence to dismissal of the confirmation view.
+    ///   - duration: The duration of the animation, from the appearance to dismissal of the confirmation view.
     func startAnimation(withDelay delayDuration: Double, duration: Double) {
-        
         let feedbackView = self.feedbackView
         
-        // Initiate animations
+        // Create animations
         let totalDuration = duration
         let introAnimator = UIViewPropertyAnimator(duration: totalDuration / 4, curve: .linear) {
             feedbackView.alpha = 1.0
