@@ -105,6 +105,17 @@ extension UIView {
             view.bottomAnchor.constraint(equalTo: superview.bottomAnchor, constant: offset.bottom * -1)
         ])
     }
+    
+    var width: CGFloat { frame.width }
+    var height: CGFloat { frame.height }
+    var left: CGFloat {
+        get { frame.origin.x }
+        set { frame.origin.x = newValue }
+    }
+    var top: CGFloat {
+        get { frame.origin.y }
+        set { frame.origin.y = newValue }
+    }
 }
 
 extension UIViewController {

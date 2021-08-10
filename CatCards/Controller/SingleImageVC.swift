@@ -134,8 +134,8 @@ final class SingleImageVC: UIViewController, UIScrollViewDelegate {
             // Reset image out of the buffer range
             let bufferToRemoveIndex = currentPage - bufferImageNumber - 1
             guard bufferToRemoveIndex >= 0 && bufferToRemoveIndex < bufferImageArray.count else { return }
-            if let imageToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
-                imageToReset.updateImageView(image: defaultCacheImage)
+            if let viewToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
+                viewToReset.updateImage(defaultCacheImage)
             }
         case .backward:
             // Update imageView before the current page
@@ -144,8 +144,8 @@ final class SingleImageVC: UIViewController, UIScrollViewDelegate {
             // Reset image out of the buffer range
             let bufferToRemoveIndex = currentPage + bufferImageNumber + 1
             guard bufferToRemoveIndex >= 0 && bufferToRemoveIndex < bufferImageArray.count else { return }
-            if let imageToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
-                imageToReset.updateImageView(image: defaultCacheImage)
+            if let viewToReset = stackView.arrangedSubviews[bufferToRemoveIndex] as? ImageScrollView {
+                viewToReset.updateImage(defaultCacheImage)
             }
         }
     }
@@ -158,7 +158,7 @@ final class SingleImageVC: UIViewController, UIScrollViewDelegate {
         
         let imageFileURL = dbManager.imageFileURLs[index].image
         guard let imageAtDisk = UIImage(contentsOfFile: imageFileURL.path) else { return }
-        bufferImageArray[index].updateImageView(image: imageAtDisk)
+        bufferImageArray[index].updateImage(imageAtDisk)
     }
     
     /*
@@ -168,7 +168,7 @@ final class SingleImageVC: UIViewController, UIScrollViewDelegate {
     private func initiateImageBufferArray() {
         bufferImageArray = (1...dbManager.imageFileURLs.count).map { _ in
             let imageView = ImageScrollView(frame: view.bounds)
-            imageView.updateImageView(image: defaultCacheImage)
+            imageView.updateImage(defaultCacheImage)
             return imageView
         }
     }
@@ -176,9 +176,10 @@ final class SingleImageVC: UIViewController, UIScrollViewDelegate {
     /// Load ImageScrollView objects from cached array of 'imageViews' into stackView
     private func loadDefaultImageView() {
         for index in 0...(dbManager.imageFileURLs.count - 1) {
-            stackView.addArrangedSubview(bufferImageArray[index])
-            bufferImageArray[index].widthAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.widthAnchor).isActive = true
-            bufferImageArray[index].heightAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.heightAnchor).isActive = true
+            let imageScrollView = bufferImageArray[index]
+            stackView.addArrangedSubview(imageScrollView)
+            imageScrollView.widthAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.widthAnchor).isActive = true
+            imageScrollView.heightAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.heightAnchor).isActive = true
         }
     }
     
